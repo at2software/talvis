@@ -7,14 +7,13 @@ import { dayjs } from '@constants/date/dates';
 import { InvoicesStandingComponent } from '@app/invoices/-/invoices-standing/invoices-standing.component';
 import { CustomerDetailGuard } from '../../customers.details.guard';
 import { ToolbarComponent } from '@app/app/toolbar/toolbar.component';
-import { EmptyStateComponent } from '@shards/empty-state/empty-state.component';
 import { NgbDropdownModule } from '@ng-bootstrap/ng-bootstrap';
 import { ModalBaseService } from '@app/_modals/modal-base-service';
 
 @Component({
     selector: 'customer-standing-orders',
     templateUrl: './customer-standing-orders.component.html',
-    imports: [ToolbarComponent, InvoicesStandingComponent, EmptyStateComponent, NgbDropdownModule],
+    imports: [ToolbarComponent, InvoicesStandingComponent, NgbDropdownModule],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CustomerStandingOrdersComponent {

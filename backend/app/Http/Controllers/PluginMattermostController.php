@@ -40,7 +40,7 @@ class PluginMattermostController extends PluginChatController {
             }
         }
     }
-    public static function buildWebhookProps(string $username = 'NEXUS', ?string $icon = null): array {
+    public static function buildWebhookProps(string $username = 'TALVIS', ?string $icon = null): array {
         $icon = $icon ?? config('app.url').'/icons/project.jpg';
         return [
             'from_webhook'         => 'true',
@@ -106,8 +106,8 @@ class PluginMattermostController extends PluginChatController {
         } else {
             $payload['props'] = [
                 'from_webhook'         => 'true',
-                'webhook_display_name' => 'NEXUS',
-                'override_username'    => 'NEXUS',
+                'webhook_display_name' => 'TALVIS',
+                'override_username'    => 'TALVIS',
                 'override_icon_url'    => config('app.url').'/assets/modules/logo.svg',
             ];
         }

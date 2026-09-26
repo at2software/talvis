@@ -3,7 +3,7 @@
 namespace App\Helpers;
 
 /**
- * Nexus Log Helper - Enhanced logging with calling context
+ * TALVIS Log Helper - Enhanced logging with calling context
  *
  * Usage:
  * NLog::info('User logged in', ['user_id' => 123]);

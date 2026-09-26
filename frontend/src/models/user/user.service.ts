@@ -1,14 +1,14 @@
 import { inject, Service } from '@angular/core';
 import { User } from '@models/user/user.model';
 import { GlobalService } from '../global.service';
-import { NexusHttpService } from '../http/http.nexus';
+import { TalvisHttpService } from '../http/http.talvis';
 import { VacationGrant } from '../vacation/vacation-grant.model';
 import { Focus } from '../focus/focus.model';
 import { Dictionary } from '@constants/constants';
 import { LoginDto, TimeBasedEmploymentInfoDto, WorkloadDataDto } from '@models/_core/api-response';
 
 @Service()
-export class UserService extends NexusHttpService<User> {
+export class UserService extends TalvisHttpService<User> {
     override apiPath = 'users';
     override readonly model = User;
 

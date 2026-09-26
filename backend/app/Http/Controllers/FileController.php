@@ -26,8 +26,8 @@ class FileController extends Controller {
     public function destroy(File $file) {
         return $file->delete();
     }
-    public function uploadAvatar(UploadAvatarRequest $request, Company|User $obj) {
-        return $obj->setPhoto($request->file('file')->path());
+    public function uploadAvatar(Company|User $obj) {
+        return $obj->setPhoto(request()->file('file')->path());
     }
     public function uploadTravelExpenses() {
         $request = request();
@@ -82,10 +82,10 @@ class FileController extends Controller {
         }
         return response($pdf->stream()->getContent())->withHeaders(File::headers($filename, 'application/pdf'));
     }
-    public function storeCompanyAvatar(Company $_) {
+    public function storeCompanyAvatar(UploadAvatarRequest $request, Company $_) {
         return $this->uploadAvatar($_);
     }
-    public function storeUserAvatar(User $_) {
+    public function storeUserAvatar(UploadAvatarRequest $request, User $_) {
         return $this->uploadAvatar($_);
     }
     public static function uploadMedia(Company|Project $obj) {

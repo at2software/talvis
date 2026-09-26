@@ -3,12 +3,20 @@
 namespace App\Traits;
 
 use App\Enums\InvoiceItemType;
+use App\Models\DeletionLog;
 use App\Models\InvoiceItem;
 
 trait HasInvoiceItemsTrait {
     protected static function bootHasInvoiceItemsTrait(): void {
-        static::deleting(function ($_) {
-            $_->invoiceItems()->delete();
+        static::deleted(function ($_) {
+            DeletionLog::withoutLogging(fn () => $_->invoiceItems()->get()->each->delete());
+        });
+        static::restoring(function ($_) {
+            $_->invoiceItems()
+                ->onlyTrashed()
+                ->where('deleted_at', '>=', $_->deleted_at)
+                ->get()
+                ->each->restore();
         });
     }
     public function invoiceItems() {

@@ -1,0 +1,81 @@
+<div class="card">
+    <div class="card-header d-flex align-items-center gap-2">
+        <span class="flex-fill" i18n="@@i18n.settings.deletionLog">deletion log</span>
+        <input
+            type="search"
+            class="form-control form-control-sm w-auto"
+            [ngModel]="search()"
+            (ngModelChange)="setSearch($event)"
+            placeholder="search"
+            i18n-placeholder="@@i18n.common.search"
+        />
+        <select class="form-select form-select-sm w-auto" [ngModel]="modelType()" (ngModelChange)="setModelType($event)">
+            <option value="" i18n="@@i18n.common.all">all</option>
+            @for (type of modelTypes(); track type) {
+                <option [value]="type">{{ type }}</option>
+            }
+        </select>
+    </div>
+
+    @if (loading()) {
+        <spinner></spinner>
+    } @else {
+        <table stackedTable class="table table-hover mb-0 align-middle">
+            <thead>
+                <tr>
+                    <th i18n="@@i18n.common.date">date</th>
+                    <th i18n="@@i18n.deletionLog.deletedBy">deleted by</th>
+                    <th i18n="@@i18n.common.type">type</th>
+                    <th i18n="@@i18n.deletionLog.entry">entry</th>
+                    <th i18n="@@i18n.deletionLog.context">context</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (log of logs(); track log.id) {
+                    <tr>
+                        <td class="text-nowrap">{{ log.created_at | date: 'dd.MM.yy HH:mm' }}</td>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <avatar [object]="log.user"></avatar>
+                                <span>{{ log.user?.getName() }}</span>
+                            </div>
+                        </td>
+                        <td><span class="badge bg-dark">{{ log.targetClass() }}</span></td>
+                        <td>
+                            <div>{{ log.label }}</div>
+                            <small class="text-muted">
+                                @for (chip of metaChips(log); track chip.key) {
+                                    <span class="me-2">{{ chip.key }}: {{ chip.value }}</span>
+                                }
+                            </small>
+                        </td>
+                        <td>{{ contextLabel(log) }}</td>
+                        <td class="text-end text-nowrap">
+                            @if (log.isRestored()) {
+                                <span class="text-muted" [ngbTooltip]="log.restored_by?.getName() ?? ''">
+                                    <i>undo</i> {{ log.restored_at | date: 'dd.MM.yy' }}
+                                </span>
+                            } @else if (log.canRestore()) {
+                                <i class="text-primary pointer" tabindex="0" (click)="restore(log)" (keyup.enter)="restore(log)" ngbTooltip="restore" i18n-ngbTooltip="@@i18n.deletionLog.restore">undo</i>
+                            }
+                        </td>
+                    </tr>
+                } @empty {
+                    <tr>
+                        <td colspan="6" class="text-muted" i18n="@@i18n.deletionLog.empty">nothing was deleted yet</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        @if (lastPage() > 1) {
+            <div class="card-footer d-flex align-items-center gap-2">
+                <span class="flex-fill text-muted">{{ total() }}</span>
+                <button type="button" class="btn btn-sm btn-secondary" [disabled]="page() <= 1" (click)="turnPage(-1)" i18n="@@i18n.common.back">back</button>
+                <span>{{ page() }} / {{ lastPage() }}</span>
+                <button type="button" class="btn btn-sm btn-secondary" [disabled]="page() >= lastPage()" (click)="turnPage(1)" i18n="@@i18n.common.next">next</button>
+            </div>
+        }
+    }
+</div>

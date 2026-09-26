@@ -20,7 +20,7 @@ return [
     |
     */
 
-    'name' => env('APP_NAME', 'NEXUS'),
+    'name' => env('APP_NAME', 'TALVIS'),
 
     /*
     |--------------------------------------------------------------------------
@@ -139,7 +139,7 @@ return [
     // No fallback on purpose: a wrong key looks identical to a working one until the socket
     // is already open and Reverb answers 4001 "Application does not exist".
     'reverb_key'  => env('PUSHER_APP_KEY', env('REVERB_APP_KEY')),
-    'nexus_debug' => (bool)env('NEXUS_DEBUG', false),
+    'talvis_debug' => (bool)env('TALVIS_DEBUG', false),
 
     'cipher' => 'AES-256-CBC',
 

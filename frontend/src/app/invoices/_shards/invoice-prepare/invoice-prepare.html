@@ -96,8 +96,16 @@
             </tr>
             }
             <tr class="sticky-footer selection-row" [class.d-none]="selection().length === 0">
-                <td colspan="1"></td>
-                <td colspan="3" i18n="@@i18n.common.selection">selection</td>
+                <td colspan="2"></td>
+                <td>
+                    <span i18n="@@i18n.common.selection">selection</span>
+                    @if (selectionNotTimeBasedCount()) {
+                    <span class="text-muted small ms-2" i18n-ngbTooltip="@@i18n.invoices.notTimeBasedSelection" ngbTooltip="items whose unit could not be mapped to a time-based quantity">
+                        {{selectionNotTimeBasedCount()}} n/a ({{selectionNotTimeBasedNet() | money}})
+                    </span>
+                    }
+                </td>
+                <td class="text-end">{{selectionHours() | number:'1.0-2'}} h</td>
                 <td class="text-end">{{selectionQty() | number:'1.0-2'}} PT</td>
                 <td class="text-end">{{selectionNet() | money}}</td>
             </tr>

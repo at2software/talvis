@@ -138,6 +138,31 @@ trait GitWebhookTrait {
             default              => '🟢',
         };
     }
+
+    /**
+     * @param array<int, array{id: int, name: string, status: string, stage?: string}> $builds
+     */
+    private function pipelineJobList(array $builds, string $projectUrl): string {
+        $stages = [];
+        foreach ($builds as $build) {
+            $stages[$build['stage'] ?? ''][] = $build;
+        }
+
+        foreach ($stages as &$group) {
+            usort($group, fn ($a, $b) => $a['id'] <=> $b['id']);
+        }
+        unset($group);
+
+        uasort($stages, fn ($a, $b) => $a[0]['id'] <=> $b[0]['id']);
+
+        $rendered = array_map(fn ($group) => implode(' ', array_map(function (array $build) use ($projectUrl) {
+            $emoji = $this->emojiForStatus($build['status']);
+            return "[`$emoji {$build['name']}`]({$projectUrl}/-/jobs/{$build['id']})";
+        }, $group)), $stages);
+
+        return implode(' · ', $rendered);
+    }
+
     private function emojiForStatus(string $status): string {
         return match ($status) {
             'manual', 'skipped' => '⚫',

@@ -14,6 +14,12 @@ import { ProjectDetailGuard } from '@app/projects/project-details.guard';
 import { PluginInstanceFactory } from '@models/http/plugins/plugin.instance.factory';
 import { ModalBaseService } from '@app/_modals/modal-base-service';
 import { ModalImportExtIssuesComponent, ExtIssueImportTracker } from '@app/_modals/modal-import-ext-issues/modal-import-ext-issues.component';
+import { ModalImportPlanningComponent } from '@app/_modals/modal-import-planning/modal-import-planning.component';
+import { PLANNING_SAMPLE_FILENAME, PLANNING_SAMPLE_MARKDOWN, parsePlanningMarkdown, type PlanningRow } from './planning-markdown';
+import { InvoiceItemType } from '@enums/invoice-item.type';
+import { Toast } from '@shards/toast/toast';
+import { concat, tap, toArray } from 'rxjs';
+import { DndDirective } from '@directives/dnd.directive';
 import { PluginInstance } from '@models/http/plugins/plugin.instance';
 import { ITaskPlugin } from '@models/task/task.plugin.interface';
 import { Task } from '@models/task/task.model';
@@ -43,7 +49,7 @@ type DisplayFieldType = 'qty' | 'my_prediction';
     selector: 'project-planning',
     templateUrl: './project-planning.component.html',
     styleUrls: ['./project-planning.component.scss'],
-    imports: [StackedTableDirective, AvatarComponent, DecimalPipe, PercentPipe, CdkTableModule, AutosaveDirective, ToolbarComponent, MediaPreviewComponent, EmptyStateComponent, SpinnerComponent, ProjectInfoComponent, ChartProgressComponent, Nx, NComponent, NgbTooltipModule, CdkTableModule, CdkDropList, CdkDrag, PermissionsDirective, NgbDropdownModule, SafePipe],
+    imports: [DndDirective, StackedTableDirective, AvatarComponent, DecimalPipe, PercentPipe, CdkTableModule, AutosaveDirective, ToolbarComponent, MediaPreviewComponent, EmptyStateComponent, SpinnerComponent, ProjectInfoComponent, ChartProgressComponent, Nx, NComponent, NgbTooltipModule, CdkTableModule, CdkDropList, CdkDrag, PermissionsDirective, NgbDropdownModule, SafePipe],
 })
 export class ProjectPlanningComponent {
     #invoiceItemService = inject(InvoiceItemService);
@@ -142,6 +148,35 @@ export class ProjectPlanningComponent {
             if (tasks?.length) this.#importTasks(tracker, tasks);
         });
     }
+    onSampleDownload = () => {
+        const blob = new Blob([PLANNING_SAMPLE_MARKDOWN], { type: 'text/markdown;charset=utf-8;' });
+        const link = Object.assign(document.createElement('a'), { href: URL.createObjectURL(blob), download: PLANNING_SAMPLE_FILENAME });
+        link.click();
+        URL.revokeObjectURL(link.href);
+    };
+
+    onPlanningFileDropped = (files: File[]) => {
+        const file = files.find((_) => /\.(md|markdown|txt)$/i.test(_.name));
+        if (!file) {
+            Toast.error($localize`:@@i18n.projects.planningDropUnsupported:only markdown files can be dropped here`);
+            return;
+        }
+        if (!this.product()) {
+            Toast.error($localize`:@@i18n.projects.specifyDefaultProductToAddItems:you need to specify a default product first to add new items`);
+            return;
+        }
+        file.text().then((text) => {
+            const rows = parsePlanningMarkdown(text);
+            if (!rows.length) {
+                Toast.error($localize`:@@i18n.projects.planningDropEmpty:no planning items found in the dropped file`);
+                return;
+            }
+            this.#modal.open(ModalImportPlanningComponent, rows, file.name).then((selected) => {
+                if (selected?.length) this.#importPlanningRows(selected);
+            });
+        });
+    };
+
     onDrop = (e: import('@angular/cdk/drag-drop').CdkDragDrop<InvoiceItem[]>) => {
         const current = this.items();
         const order = moveInvoiceItems(current, e.previousIndex, e.currentIndex);
@@ -162,6 +197,47 @@ export class ProjectPlanningComponent {
         });
     }
 
+    /**
+     * Creates one invoice item per parsed row through the regular single-create endpoint.
+     * The requests run sequentially so the backend sees them in file order, and the
+     * resource is reloaded afterwards so the table reflects the stored positions.
+     */
+    #importPlanningRows = (rows: PlanningRow[]) => {
+        const product = this.product();
+        if (!product) return;
+        const current = this.items();
+        let pos = current.length ? Math.max(...current.map((_) => _.position)) + 1 : 0;
+        const items = rows
+            .map((row) => {
+                // Headers carry no product, quantity or unit — same shape onNewHeader() creates.
+                if (row.type === InvoiceItemType.Header) return this.#buildItem({ text: row.text, type: row.type, position: pos++ });
+                return this.#buildItem({ text: row.text, type: row.type, qty: row.qty, position: pos++, product_source_id: product.id, ...(row.unit ? { unit_name: row.unit } : {}) });
+            })
+            .filter((_): _ is InvoiceItem => !!_);
+        if (!items.length) return;
+
+        const progressToast = Toast.show($localize`:@@i18n.projects.planningImporting:creating planning items…`, { classname: 'bg-info bg-gradient text-dark', icon: 'upload_file', progress: 0, autohide: false });
+        let done = 0;
+        concat(...items.map((item) => item.store(item.toPayload(['my_prediction']), true)))
+            .pipe(
+                tap(() => (progressToast.progress = Math.round((100 * ++done) / items.length))),
+                toArray(),
+            )
+            .subscribe({
+                next: () => {
+                    Toast.remove(progressToast);
+                    Toast.success(`${items.length} ${$localize`:@@i18n.projects.planningImported:planning items created`}`);
+                    this.#items.reload();
+                    this.updatePredictions();
+                },
+                error: (err: { error?: { message?: string }; statusText?: string }) => {
+                    Toast.remove(progressToast);
+                    Toast.error(err?.error?.message ?? err?.statusText ?? $localize`:@@i18n.projects.planningImportFailed:could not create the planning items`);
+                    this.#items.reload();
+                },
+            });
+    };
+
     #importTasks = (tracker: ExtIssueImportTracker, tasks: Task[]) => {
         const current = this.items();
         let pos = current.length ? Math.max(...current.map((_) => _.position)) + 1 : 0;
@@ -171,39 +247,42 @@ export class ProjectPlanningComponent {
     };
 
     #newItem = (additional: Dictionary) => {
+        const item = this.#buildItem(additional);
+        if (!item) return;
+        item.store(item.toPayload(['my_prediction'])).subscribe(() => {
+            this.items.update(arr => [...arr, item]);
+        });
+    };
+
+    /** Builds an unsaved item from the default product, the global wage settings and the company's terms. */
+    #buildItem = (additional: Dictionary): InvoiceItem | undefined => {
         const hUnit = this.#global.setting('INVOICE_HOUR_UNIT');
         const dUnit = this.#global.setting('INVOICE_DAY_UNIT');
         const wage: number = parseFloat(this.#global.setting('INVOICE_HOURLY_WAGE') ?? '0');
         const hpd: number = parseFloat(this.#global.setting('INVOICE_HPD') ?? '0');
         const product = this.product();
-        if (product) {
-            const item = product?.getInvoiceItem() ?? {};
-            if (item) {
-                const current = this.items();
-                const pos = current.length ? Math.max(...current.map((_) => _.position)) + 1 : 0;
-                const multiplier = product.price_multiplier || 1;
-                let modifiers: Dictionary<any> = { project_id: this.project.id, qty: 0, position: pos };
-                if (product.time_based == 1) modifiers = Object.assign(modifiers, { unit_name: hUnit, price: wage * multiplier });
-                if (product.time_based == hpd) modifiers = Object.assign(modifiers, { unit_name: dUnit, price: wage * hpd * multiplier });
-                modifiers = Object.assign(modifiers, additional);
-                modifiers['product_id'] = null;
-                modifiers['invoice_item_predictions'] = null;
+        if (!product) return undefined;
 
-                const company = this.project.company;
-                if (company?.getParam('INVOICE_DISCOUNT')) {
-                    modifiers['discount'] = parseFloat(company.getParam('INVOICE_DISCOUNT') ?? '0');
-                }
-                if (product.time_based > 0) {
-                    if (company) modifiers['vat_rate'] = company.vatRate();
-                } else if (company?.isVatExcempt()) {
-                    modifiers['vat_rate'] = 0;
-                }
+        const current = this.items();
+        const pos = current.length ? Math.max(...current.map((_) => _.position)) + 1 : 0;
+        const multiplier = product.price_multiplier || 1;
+        let modifiers: Dictionary<any> = { project_id: this.project.id, qty: 0, position: pos };
+        if (product.time_based == 1) modifiers = Object.assign(modifiers, { unit_name: hUnit, price: wage * multiplier });
+        if (product.time_based == hpd) modifiers = Object.assign(modifiers, { unit_name: dUnit, price: wage * hpd * multiplier });
+        modifiers = Object.assign(modifiers, additional);
+        modifiers['product_id'] = null;
+        modifiers['invoice_item_predictions'] = null;
 
-                const item = InvoiceItem.fromJson(modifiers);
-                item.store(item.toPayload(['my_prediction'])).subscribe((_) => {
-                    this.items.update(arr => [...arr, item]);
-                });
-            }
+        const company = this.project.company;
+        if (company?.getParam('INVOICE_DISCOUNT')) {
+            modifiers['discount'] = parseFloat(company.getParam('INVOICE_DISCOUNT') ?? '0');
         }
+        if (product.time_based > 0) {
+            if (company) modifiers['vat_rate'] = company.vatRate();
+        } else if (company?.isVatExcempt()) {
+            modifiers['vat_rate'] = 0;
+        }
+
+        return InvoiceItem.fromJson(modifiers);
     };
 }

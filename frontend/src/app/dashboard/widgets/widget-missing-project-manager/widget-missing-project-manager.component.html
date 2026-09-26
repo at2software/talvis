@@ -9,7 +9,7 @@
     <widget-options [options]="getOptions()" (updated)="_onUpdate($event)" (deleted)="onDelete($event)"></widget-options>
 
     @if (_data.length > 0) {
-        <ul revealList class="list-group list-group-flush">
+        <ul class="list-group list-group-flush">
             @for (_ of _data; track _.id; let i = $index) {
                 <li class="list-group-item d-flex text-nowrap" [nx]="_" context="widget-missing-project-manager" [tables]="_data" [compact]="indexExceedsSettings(i)">
                     <div>

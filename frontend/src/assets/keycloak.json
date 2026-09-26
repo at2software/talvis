@@ -2,7 +2,7 @@
   "realm": "your-realm",
   "auth-server-url": "https://auth.your-domain.example/",
   "ssl-required": "external",
-  "resource": "nexus",
+  "resource": "talvis",
   "public-client": true,
   "confidential-port": 0
 }

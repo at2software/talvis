@@ -10,14 +10,14 @@ export function getCommentActions(self: Comment): NxAction[] {
             doubleClick: true,
             on: canEdit,
             children: [
-                { title: $localize`:@@i18n.comment.default:default`, action: () => self.update({ type: 0 }).subscribe() },
-                { title: $localize`:@@i18n.common.info:info`, action: () => self.update({ type: 1 }).subscribe() },
-                { title: $localize`:@@i18n.comment.warning:warning`, action: () => self.update({ type: 2 }).subscribe() },
-                { title: $localize`:@@i18n.comment.notice:notice`, action: () => self.update({ type: 3 }).subscribe() },
+                { title: $localize`:@@i18n.comment.default:default`, action: () => self.update({ type: 0 }) },
+                { title: $localize`:@@i18n.common.info:info`, action: () => self.update({ type: 1 }) },
+                { title: $localize`:@@i18n.comment.warning:warning`, action: () => self.update({ type: 2 }) },
+                { title: $localize`:@@i18n.comment.notice:notice`, action: () => self.update({ type: 3 }) },
             ],
         },
-        { title: $localize`:@@i18n.comment.makeSticky:make sticky`, action: () => self.update({ is_sticky: true }).subscribe(), on: () => canEdit() && !self.is_sticky },
-        { title: $localize`:@@i18n.comment.unstick:unstick`, action: () => self.update({ is_sticky: false }).subscribe(), on: () => canEdit() && self.is_sticky },
+        { title: $localize`:@@i18n.comment.makeSticky:make sticky`, action: () => self.update({ is_sticky: true }), on: () => canEdit() && !self.is_sticky },
+        { title: $localize`:@@i18n.comment.unstick:unstick`, action: () => self.update({ is_sticky: false }), on: () => canEdit() && self.is_sticky },
         nx().deleteAction(self, 'Really delete this comment?', { on: canEdit }),
     ];
 }

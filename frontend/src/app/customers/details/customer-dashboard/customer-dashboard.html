@@ -12,7 +12,7 @@
 @let _mlChurnProbability = _company.mlChurnProbability12m();
 @let _mlOverdueForContact = _company.mlOverdueForContact();
 @let _mlSupportHours = _company.mlPredictedSupportHours();
-@let _mlChurnHigh = _company.mlChurnHigh();
+@let _mlChurnColor = _company.mlChurnColor();
 @let _mlNeedsAttention = _company.mlNeedsAttention();
 <toolbar>
     <button type="button" class="btn btn-primary" roles="project_manager|marketing" (click)="onAddProject()" ngbTooltip="CTRL+ALT+N" placement="bottom" hotkey="CTRL+ALT+N">
@@ -78,16 +78,16 @@
                     <div class="hstack gap-2 mt-2">
                         <ng-container roles="financial">
                             <button type="button" class="btn btn-sm flex-fill d-flex align-items-center justify-content-center" [class.btn-danger]="_company.is_deprecated" [class.text-muted]="!_company.is_deprecated" (click)="_company.update({is_deprecated: !_company.is_deprecated}).subscribe()" [ngbTooltip]="_company.is_deprecated ? 'Customer is deprecated and ignored for maintenance checks' : 'Customer is active for maintenance checks'" placement="bottom">
-                                <i>{{_company.is_deprecated ? 'block' : 'check_circle'}}</i>
+                                <i>block</i>
                             </button>
                             <button type="button" class="btn btn-sm flex-fill d-flex align-items-center justify-content-center" [class.btn-warning]="_company.requires_po" [class.text-muted]="!_company.requires_po" (click)="_company.update({requires_po: !_company.requires_po}).subscribe()" [ngbTooltip]="_company.requires_po ? 'Customer requires purchase orders before invoicing' : 'No purchase order required'" placement="bottom">
-                                <i>{{_company.requires_po ? 'assignment' : 'assignment_turned_in'}}</i>
+                                <i>receipt_long</i>
                             </button>
                             <button type="button" class="btn btn-sm flex-fill d-flex align-items-center justify-content-center" [class.btn-info]="_company.has_nda" [class.text-muted]="!_company.has_nda" (click)="_company.update({has_nda: !_company.has_nda}).subscribe()" [ngbTooltip]="_company.has_nda ? 'NDA is in place' : 'No NDA signed'" placement="bottom">
-                                <i>{{_company.has_nda ? 'gavel' : 'description'}}</i>
+                                <i>policy</i>
                             </button>
                             <button type="button" class="btn btn-sm flex-fill d-flex align-items-center justify-content-center" [class.btn-success]="_company.accepts_support" [class.text-muted]="!_company.accepts_support" (click)="_company.update({accepts_support: !_company.accepts_support}).subscribe()" [ngbTooltip]="_company.accepts_support ? 'Customer accepts support invoicing without prior notice' : 'Customer requires notification before support invoicing'" placement="bottom">
-                                <i>{{_company.accepts_support ? 'support_agent' : 'support'}}</i>
+                                <i>support_agent</i>
                             </button>
                         </ng-container>
                         <div ngbDropdown class="flex-fill">
@@ -99,11 +99,6 @@
                             <div ngbDropdownMenu>
                                 @for (_ of recurrences; track _.value) {
                                 <button type="button" ngbDropdownItem (click)="_company.update({remarketing_interval: _.value}).subscribe()">{{_.label}}</button>
-                                } @if (_company.remarketing_interval) {
-                                <div class="dropdown-divider"></div>
-                                <button type="button" ngbDropdownItem (click)="_company.update({remarketing_interval: null}).subscribe()">
-                                    <i class="text-muted">clear</i>
-                                </button>
                                 }
                             </div>
                         </div>
@@ -204,7 +199,7 @@
                                 <div class="hstack gap-2">
                                     <div class="flex-fill text-muted" i18n="@@i18n.customers.mlChurnRisk">churn risk (12m)</div>
                                     @if (_mlChurnProbability !== undefined) {
-                                    <div [class.text-danger]="_mlChurnHigh" [class.text-primary]="!_mlChurnHigh" class="font-monospace" [mlReliability]="'customer_churn'" placement="left">{{_mlChurnProbability | percent:'1.0-0'}}</div>
+                                    <div class="font-monospace {{ _mlChurnColor }}" [mlReliability]="'customer_churn'" placement="left">{{_mlChurnProbability | percent:'1.0-0'}}</div>
                                     } @else {
                                     <div>—</div>
                                     }

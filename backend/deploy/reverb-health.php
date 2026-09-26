@@ -35,9 +35,19 @@ if ($key === '') {
     fail('neither PUSHER_APP_KEY nor REVERB_APP_KEY is set in .env');
 }
 
-$socket = @fsockopen($host, $port, $errno, $errstr, 8);
+// Reverb binds the port only after a full Laravel boot, so a deploy that restarts the
+// service reaches this script while the port can still be refusing connections.
+$deadline = time() + 30;
+do {
+    $socket = @fsockopen($host, $port, $errno, $errstr, 8);
+    if ($socket) {
+        break;
+    }
+    usleep(500000);
+} while (time() < $deadline);
+
 if (! $socket) {
-    fail("cannot connect to $host:$port ($errstr)");
+    fail("cannot connect to $host:$port after 30s ($errstr)");
 }
 stream_set_timeout($socket, 8);
 
@@ -65,7 +75,11 @@ if (! preg_match('#^HTTP/1\.1 101#', $response)) {
 
 $frame = substr($response, strpos($response, "\r\n\r\n") + 4);
 while (strlen($frame) < 2) {
-    $frame .= fread($socket, 4096);
+    $chunk = fread($socket, 4096);
+    if ($chunk === '' || $chunk === false) {
+        fail('Reverb upgraded the connection but sent no frame');
+    }
+    $frame .= $chunk;
 }
 
 $length = ord($frame[1]) & 127;

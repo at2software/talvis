@@ -18,12 +18,17 @@
         <parent-project-selector></parent-project-selector>
 
         <!-- next reminder -->
+        <ng-template #reminderFooter>
+            <div class="d-flex justify-content-center border-top py-1">
+                <button class="btn btn-sm text-muted" type="button" (click)="clearDate('remind_at'); d.close()" i18n="@@i18n.common.clear">clear</button>
+            </div>
+        </ng-template>
         <li class="hstack gap-2 py-1 px-2" roles="project_manager">
             <div class="input-group">
                 <div class="input-group-text input-group-text-darker">
                     <i i18n-ngbTooltip="@@i18n.common.reminder" ngbTooltip="reminder">notifications_active</i>
                 </div>
-                <input class="form-control flex-fill" (click)="d.toggle()" tabindex="0" (keydown.enter)="d.toggle()" container="body" (dateSelect)="updateDate('remind_at', $event)" placeholder="yyyy-mm-dd" [(ngModel)]="_project.remind_at" ngbDatepicker #d="ngbDatepicker" />
+                <input class="form-control flex-fill" (click)="d.toggle()" tabindex="0" (keydown.enter)="d.toggle()" container="body" [footerTemplate]="reminderFooter" (dateSelect)="updateDate('remind_at', $event)" placeholder="yyyy-mm-dd" [(ngModel)]="_project.remind_at" ngbDatepicker #d="ngbDatepicker" />
                 <button class="btn text-primary" (click)="d.toggle()" tabindex="0" (keydown.enter)="d.toggle()" type="button"><i>calendar_month</i></button>
             </div>
         </li>
@@ -37,12 +42,17 @@
         </li>
 
         <!-- Deadline -->
+        <ng-template #deadlineFooter>
+            <div class="d-flex justify-content-center border-top py-1">
+                <button class="btn btn-sm text-muted" type="button" (click)="clearDate('due_at'); deadline.close()" i18n="@@i18n.common.clear">clear</button>
+            </div>
+        </ng-template>
         <li class="hstack gap-2 py-1 px-2" roles="project_manager">
             <div class="input-group">
                 <div class="input-group-text input-group-text-darker">
                     <i i18n-ngbTooltip="@@i18n.common.deadline" ngbTooltip="deadline">circle_notifications</i>
                 </div>
-                <input class="form-control flex-fill" (click)="deadline.toggle()" tabindex="0" (keydown.enter)="deadline.toggle()" container="body" (dateSelect)="updateDate('due_at', $event)" placeholder="yyyy-mm-dd" [(ngModel)]="_project.due_at" ngbDatepicker #deadline="ngbDatepicker" />
+                <input class="form-control flex-fill" (click)="deadline.toggle()" tabindex="0" (keydown.enter)="deadline.toggle()" container="body" [footerTemplate]="deadlineFooter" (dateSelect)="updateDate('due_at', $event)" placeholder="yyyy-mm-dd" [(ngModel)]="_project.due_at" ngbDatepicker #deadline="ngbDatepicker" />
                 <button class="btn text-primary" (click)="deadline.toggle()" tabindex="0" (keydown.enter)="deadline.toggle()" type="button"><i>calendar_month</i></button>
             </div>
         </li>

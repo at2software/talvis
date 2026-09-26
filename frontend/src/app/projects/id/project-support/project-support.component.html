@@ -106,7 +106,12 @@
                 <i>receipt_long</i>
                 <span i18n="@@i18n.invoice.supportItems">support items</span>
                 @if (supportItems().length > 0) {
-                    <div class="card-header-actions">
+                    <div class="card-header-actions d-flex">
+                        @if (isProject()) {
+                            <button class="btn btn-sm text-primary" ngbTooltip="move to customer" i18n-ngbTooltip="@@i18n.projects.moveToCustomer" (click)="onMoveSupportToCustomer()">
+                                <i>call_made</i>
+                            </button>
+                        }
                         <a [routerLink]="invoicingRoute()" class="btn btn-sm text-primary" ngbTooltip="go to invoicing" i18n-ngbTooltip="@@i18n.projects.goToInvoicing">
                             <i>arrow_forward</i>
                         </a>

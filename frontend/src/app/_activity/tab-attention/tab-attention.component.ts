@@ -10,6 +10,7 @@ import { PermissionsDirective } from '@directives/permissions.directive';
 import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { ActivityTabComponent } from '@activity/activity-tab.component';
 import { REFLECTION } from '@constants/constants';
+import { dayjs } from '@constants/date/dates';
 import { whenIdle } from '@constants/idle';
 import { GlobalService } from '@models/global.service';
 import { WidgetService } from '@models/widget.service';
@@ -53,31 +54,24 @@ export class TabAttentionComponent {
     #newItems = modelListResource(this.#ready, () => this.#widgetService.indexNewItems());
     newItems = computed<Serializable[]>(() => this.#newItems.value().map((_) => REFLECTION(_)));
     groupedItems = computed(() => {
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const todayTime = today.getTime();
-        const yesterday = new Date(today);
-        yesterday.setDate(yesterday.getDate() - 1);
-        const yesterdayTime = yesterday.getTime();
+        const today = dayjs().startOf('day');
+        const yesterday = today.subtract(1, 'day');
 
         const groups: Record<string, Serializable[]> = {};
         for (const item of this.newItems()) {
-            const itemDate = new Date(item.created_at);
-            itemDate.setHours(0, 0, 0, 0);
-            const dateKey = itemDate.toISOString().split('T')[0];
+            const dateKey = dayjs(item.created_at).format('YYYY-MM-DD');
             (groups[dateKey] ??= []).push(item);
         }
 
         return Object.keys(groups)
-            .sort((a, b) => new Date(b).getTime() - new Date(a).getTime())
+            .sort((a, b) => b.localeCompare(a))
             .map((dateKey) => {
-                const itemDate = new Date(dateKey);
-                const itemDateOnly = itemDate.getTime();
-                const displayDate = itemDateOnly === todayTime
+                const itemDate = dayjs(dateKey);
+                const displayDate = itemDate.isSame(today)
                     ? $localize`:@@i18n.common.today:today`
-                    : itemDateOnly === yesterdayTime
+                    : itemDate.isSame(yesterday)
                         ? $localize`:@@i18n.common.yesterday:yesterday`
-                        : itemDate.toLocaleDateString();
+                        : itemDate.toDate().toLocaleDateString();
                 return { date: dateKey, displayDate, items: groups[dateKey] };
             });
     });

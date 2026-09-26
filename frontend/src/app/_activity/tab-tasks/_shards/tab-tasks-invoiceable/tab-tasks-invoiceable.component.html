@@ -49,7 +49,7 @@
     @if (!isCollapsed('preparedInvoices')) {
         <ul class="list-group">
             @for (_ of _preparedInvoices; track _.id) {
-                <li class="list-group-item hstack gap-2 pointer" [nx]="_" [routerLink]="_.class === 'Company' ? ['/customers', _.id, 'billing'] : ['/projects', _.id, 'invoicing', 'support']">
+                <li class="list-group-item hstack gap-2 pointer" [nx]="_" [routerLink]="_.class === 'Company' ? ['/customers', _.id, 'billing'] : ['/projects', _.id, 'invoicing', 'final']">
                     <avatar [object]="_"></avatar>
                     <div class="flex-fill text-truncate">{{ _.getName() }}</div>
                     <span class="text-muted small text-nowrap">{{ _.net_remaining | mshort }}</span>

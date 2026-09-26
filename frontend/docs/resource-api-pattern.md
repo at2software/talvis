@@ -1,19 +1,19 @@
 # Resource API pattern (Angular 22)
 
-How data loading is done in NEXUS now that `resource()` / `rxResource()` / `httpResource()` are stable.
+How data loading is done in TALVIS now that `resource()` / `rxResource()` / `httpResource()` are stable.
 
 ## TL;DR
 
 - **Reads** go through `modelResource()` / `modelListResource()` (`src/models/http/model-resource.ts`), thin wrappers around `rxResource`.
 - **Mutations stay imperative.** `store()` / `update()` / `delete()`, uploads, downloads, AI calls and anything triggered by a click keep using `.subscribe()`.
-- **Never `httpResource` for NEXUS endpoints.** It bypasses our HTTP layer and returns plain JSON.
+- **Never `httpResource` for TALVIS endpoints.** It bypasses our HTTP layer and returns plain JSON.
 
 ## Why `rxResource`, not `httpResource`
 
 Our data flow is:
 
 ```
-NexusHttpService verb  ->  HttpWrapper.request()  ->  rxjs operators  ->  component
+TalvisHttpService verb  ->  HttpWrapper.request()  ->  rxjs operators  ->  component
    (apiPath, model)        If-Modified-Since            mapVar/serialize
                            error toast (notifyHttpError)
                            mutation notification (NotificationCenter)
@@ -139,7 +139,7 @@ showStatistics = (filters?: Dictionary): Observable<ProductStatisticsDto> =>
 The resource then hands the template real `Product` instances (`[nx]` works) and the
 ranking-only extras live on `product.var.total_revenue`. Pass `Object` as the type argument
 whenever the payload is an envelope rather than the service's own model — otherwise
-`NexusHttpService` deserializes the envelope into that model.
+`TalvisHttpService` deserializes the envelope into that model.
 
 ## Where NOT to use a resource
 

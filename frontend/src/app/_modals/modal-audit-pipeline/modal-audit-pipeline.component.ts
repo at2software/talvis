@@ -14,7 +14,7 @@ import { Serializable } from '@models/_core/serializable';
 import { GitlabProjectDto } from '@models/_core/api-response';
 import { ModalBaseComponent } from '../modal-base.component';
 
-const NEXUS_PREFIX = '[NEXUS] ';
+const TALVIS_PREFIX = '[NEXUS] ';
 
 const CRON_PRESETS = [
     { label: $localize`:@@i18n.common.daily:daily`, cron: '0 0 * * *' },
@@ -129,7 +129,7 @@ export class ModalAuditPipelineComponent extends ModalBaseComponent<boolean> {
         forkJoin(
             this.selectedList().map((stage) =>
                 this.#http.post(`${base}projects/${id}/pipeline_schedules`, {
-                    description: NEXUS_PREFIX + stage,
+                    description: TALVIS_PREFIX + stage,
                     ref,
                     cron,
                     active: true,

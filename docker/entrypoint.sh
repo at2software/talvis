@@ -31,9 +31,9 @@ set_env TRUSTED_PROXIES      "${TRUSTED_PROXIES:-127.0.0.1,::1,10.0.0.0/8,172.16
 
 set_env DB_HOST      "${DB_HOST:-db}"
 set_env DB_PORT      "${DB_PORT:-3306}"
-set_env DB_DATABASE  "${DB_DATABASE:-nexus}"
-set_env DB_USERNAME  "${DB_USERNAME:-nexus}"
-set_env DB_PASSWORD  "${DB_PASSWORD:-nexus}"
+set_env DB_DATABASE  "${DB_DATABASE:-talvis}"
+set_env DB_USERNAME  "${DB_USERNAME:-talvis}"
+set_env DB_PASSWORD  "${DB_PASSWORD:-talvis}"
 
 set_env QUEUE_CONNECTION "sync"
 set_env CACHE_DRIVER     "file"
@@ -54,17 +54,17 @@ set_env ADMIN_EMAIL    "${ADMIN_EMAIL:-admin@example.com}"
 set_env ADMIN_PASSWORD "${ADMIN_PASSWORD:-changeme}"
 
 set_env BROADCAST_CONNECTION "reverb"
-set_env REVERB_APP_ID     "${REVERB_APP_ID:-nexus}"
-set_env REVERB_APP_KEY    "${REVERB_APP_KEY:-nexus-key}"
-set_env REVERB_APP_SECRET "${REVERB_APP_SECRET:-nexus-secret}"
+set_env REVERB_APP_ID     "${REVERB_APP_ID:-talvis}"
+set_env REVERB_APP_KEY    "${REVERB_APP_KEY:-talvis-key}"
+set_env REVERB_APP_SECRET "${REVERB_APP_SECRET:-talvis-secret}"
 set_env REVERB_HOST       "${REVERB_HOST:-0.0.0.0}"
 set_env REVERB_PORT       "${REVERB_PORT:-6001}"
 set_env REVERB_SCHEME     "${REVERB_SCHEME:-http}"
 
 # Map REVERB_* → PUSHER_* so Laravel's default reverb.php/broadcasting.php configs work
-set_env PUSHER_APP_ID      "${REVERB_APP_ID:-nexus}"
-set_env PUSHER_APP_KEY     "${REVERB_APP_KEY:-nexus-key}"
-set_env PUSHER_APP_SECRET  "${REVERB_APP_SECRET:-nexus-secret}"
+set_env PUSHER_APP_ID      "${REVERB_APP_ID:-talvis}"
+set_env PUSHER_APP_KEY     "${REVERB_APP_KEY:-talvis-key}"
+set_env PUSHER_APP_SECRET  "${REVERB_APP_SECRET:-talvis-secret}"
 set_env PUSHER_HOST        "localhost"          # used by broadcasting.php to publish events TO Reverb
 set_env PUSHER_PORT        "${REVERB_PORT:-6001}"
 set_env PUSHER_SCHEME      "${REVERB_SCHEME:-http}"

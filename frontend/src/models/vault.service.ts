@@ -1,11 +1,11 @@
 import { Service } from '@angular/core';
-import { NexusHttpService } from './http/http.nexus';
+import { TalvisHttpService } from './http/http.talvis';
 import { Dictionary } from '@constants/constants';
 import { BankLookupDto } from '@models/_core/api-response';
 import { Vault } from './vault.model';
 
 @Service()
-export class VaultService extends NexusHttpService<Vault> {
+export class VaultService extends TalvisHttpService<Vault> {
     apiPath = 'vault';
 
     index = (filters?: Dictionary) => this.aget('vaults', filters, Vault);

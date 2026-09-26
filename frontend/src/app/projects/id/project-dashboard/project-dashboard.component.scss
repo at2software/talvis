@@ -1,26 +1,2 @@
 .avatar-leader { box-shadow:0 0 3px var(--color-yellow), 0 0 3px var(--color-yellow), 0 0 3px var(--color-yellow); }
 .avatar-designer { box-shadow:0 0 3px var(--color-pink), 0 0 3px var(--color-pink), 0 0 3px var(--color-pink); }
-
-.css-tip {
-	position: relative;
-}
-
-.css-tip:hover::after {
-	content: attr(data-tip);
-	position: absolute;
-	left: 50%;
-	bottom: calc(100% + 6px);
-	transform: translateX(-50%);
-	max-width: 260px;
-	padding: 0.25rem 0.5rem;
-	border: 1px solid var(--color-border2);
-	border-radius: 0.375rem;
-	background: var(--color-bg2);
-	color: var(--color-text);
-	white-space: normal;
-	text-align: center;
-	font-size: 0.75rem;
-	line-height: 1.2;
-	z-index: 1070;
-	pointer-events: none;
-}

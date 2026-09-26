@@ -18,7 +18,7 @@ deploy-clean:
     - set PATH=%NODE_PATH%;%PATH%
     - call npm ci
     - call npm run build:i18n
-    - 'winscp sftp://%PROD_USER%@%PROD_IP%/ /privatekey="E:\nexus.ppk" /command "synchronize remote -transfer=binary -mirror -delete -filemask=""|.*/;.*;"" ./dist/nexus/browser/ /var/www/html/frontend/" "exit"'
+    - 'winscp sftp://%PROD_USER%@%PROD_IP%/ /privatekey="E:\nexus.ppk" /command "synchronize remote -transfer=binary -mirror -delete -filemask=""|.*/;.*;"" ./dist/talvis/browser/ /var/www/html/frontend/" "exit"'
     - 'ssh -i E:\nexus.pem %PROD_USER%@%PROD_IP% -p22 "sudo chmod -R 777 /var/www/html/frontend"'
   rules:
     - when: manual

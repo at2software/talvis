@@ -4,10 +4,10 @@ import { Service } from '@angular/core';
 import { Serializable } from '@models/_core/serializable';
 import { Company } from '@models/company/company.model';
 import { Assignee } from './assignee.model';
-import { NexusHttpService } from '../http/http.nexus';
+import { TalvisHttpService } from '../http/http.talvis';
 
 @Service()
-export class AssignmentService extends NexusHttpService<Assignee> {
+export class AssignmentService extends TalvisHttpService<Assignee> {
     override apiPath = 'assignees';
     override readonly model = Assignee;
 

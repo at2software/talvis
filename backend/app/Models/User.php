@@ -33,7 +33,11 @@ class User extends BaseAuthenticatable {
     use HasFocusDisplay;
     use HasI18nTrait;
     use HasParams;
-    use HasRoles;
+    use HasRoles {
+        assignRole as private spatieAssignRole;
+        removeRole as private spatieRemoveRole;
+        syncRoles as private spatieSyncRoles;
+    }
     use HasTasksTrait;
     use Notifiable;
     use VcardGenderTrait;
@@ -43,6 +47,9 @@ class User extends BaseAuthenticatable {
     protected $with     = ['activeEmployment'];
     protected $appends  = ['icon', 'class', 'is_retired', 'name', 'path', 'gender'];
     protected $fillable = ['color', 'current_focus_id', 'current_focus_type', 'name', 'email', 'password', 'vcard', 'work_zip'];
+
+    /** @var array<int|string, string[]> */
+    private static array $roleNames = [];
 
     protected function casts(): array {
         return [
@@ -147,11 +154,35 @@ class User extends BaseAuthenticatable {
             $roles = explode('|', $roles);
         }
 
-        if ($this->roles()->where('name', 'admin')->exists()) {
-            return true;
-        }
+        $own = $this->roleNames();
 
-        return $this->roles()->whereIn('name', $roles)->exists();
+        return in_array('admin', $own, true) || (bool)array_intersect($own, (array)$roles);
+    }
+
+    public function assignRole(...$roles) {
+        return tap($this->spatieAssignRole(...$roles), fn () => $this->forgetRoleNames());
+    }
+
+    public function removeRole($role) {
+        return tap($this->spatieRemoveRole($role), fn () => $this->forgetRoleNames());
+    }
+
+    public function syncRoles(...$roles) {
+        return tap($this->spatieSyncRoles(...$roles), fn () => $this->forgetRoleNames());
+    }
+
+    private function forgetRoleNames(): void {
+        unset(self::$roleNames[$this->getKey()]);
+    }
+
+    private function roleNames(): array {
+        if ($this->relationLoaded('roles')) {
+            return $this->roles->pluck('name')->all();
+        }
+        if (! $key = $this->getKey()) {
+            return [];
+        }
+        return self::$roleNames[$key] ??= $this->roles()->pluck('name')->all();
     }
 
     public function comments() {

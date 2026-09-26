@@ -1,8 +1,8 @@
 openapi: 3.1.0
 info:
-  title: NEXUS Timetracker API
+  title: TALVIS Timetracker API
   description: >
-    Endpoints for the NEXUS timetracker. All `/api/timetracker/*` routes
+    Endpoints for the TALVIS timetracker. All `/api/timetracker/*` routes
     require a Bearer token obtained via `POST /api/login`.
   version: "1.0.0"
 
@@ -11,7 +11,7 @@ servers:
     variables:
       baseUrl:
         default: "http://localhost:8000"
-        description: NEXUS backend base URL
+        description: TALVIS backend base URL
 
 security:
   - bearerAuth: []

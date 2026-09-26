@@ -1,6 +1,6 @@
 import { Service } from '@angular/core';
 import { Observable, map } from 'rxjs';
-import { NexusHttpService } from '@models/http/http.nexus';
+import { TalvisHttpService } from '@models/http/http.talvis';
 import { Dictionary } from '@constants/constants';
 import { DebriefProblemCategory } from './debrief-problem-category.model';
 import { DebriefProblem } from './debrief-problem.model';
@@ -13,7 +13,7 @@ import { DebriefStatsDto, CategoryBreakdownDto, CategoryBreakdownPositivesDto, T
 export type DebriefStatsResult = DebriefStatsResponseDto<DebriefProblem, DebriefSolution, DebriefPositive, Company>;
 
 @Service()
-export class DebriefService extends NexusHttpService<DebriefProjectDebrief> {
+export class DebriefService extends TalvisHttpService<DebriefProjectDebrief> {
     public apiPath = 'debriefs';
     override readonly model = DebriefProjectDebrief;
 

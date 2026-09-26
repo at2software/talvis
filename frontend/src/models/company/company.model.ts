@@ -34,6 +34,7 @@ export class Company extends VcardClass implements HasInvoiceItems, IHasFiles, I
 
     static readonly FLAG_DRAFT = 0x01;
     static readonly ML_CHURN_HIGH = 0.5;
+    static readonly ML_CHURN_ELEVATED = 0.2;
 
     override readonly getAvatar = computed(() => { this.snapshot(); return environment.envApi + `companies/${this.id}/icon`; });
 
@@ -78,6 +79,8 @@ export class Company extends VcardClass implements HasInvoiceItems, IHasFiles, I
     billing_considerations?: BillingConsiderationDto[];
     quote_acceptance_rate?: number | null;
     avg_payment_days?: number | null;
+    avg_payment_delay_days?: number | null;
+    last_invoice_at?: string | null;
     debrief_problem_count?: number;
     debrief_positive_count?: number;
     timeline_chart?: ProjectTimelineEntryDto[] = [];
@@ -106,12 +109,7 @@ export class Company extends VcardClass implements HasInvoiceItems, IHasFiles, I
         const formality = card?.first('X-FORMALITY')?.vals[0] || 'formal';
         return `${lang}-${formality}`;
     });
-    averagePaymentDelay = computed((): number => {
-        this.snapshot();
-        const paid = this.invoices.filter((i) => i.paid_at);
-        if (paid.length === 0) return 0;
-        return paid.reduce((sum, i) => sum + i.time_paid().diff(i.time_due(), 'days'), 0) / paid.length;
-    });
+    averagePaymentDelay = computed((): number => this.snapshot().avg_payment_delay_days ?? 0);
     remarketingProgress = computed(() => {
         const days = this.remarketingDays();
         return days === 0 ? 0 : this.lastUpdateDuration() / days;
@@ -129,9 +127,9 @@ export class Company extends VcardClass implements HasInvoiceItems, IHasFiles, I
 
     mlPredictedNextPurchaseAt = computed((): Dayjs | undefined => {
         const interval = this.mlPredictedIntervalDays();
-        if (interval !== undefined) {
-            const last = this.invoices.map((i) => dayjs(i.created_at)).sort((a, b) => b.valueOf() - a.valueOf())[0];
-            if (last) return last.add(Math.round(interval), 'day');
+        const last = this.snapshot().last_invoice_at;
+        if (interval !== undefined && last) {
+            return dayjs(last).add(Math.round(interval), 'day');
         }
         return this.ml_predicted_next_purchase_date ? dayjs(this.ml_predicted_next_purchase_date) : undefined;
     });
@@ -142,6 +140,7 @@ export class Company extends VcardClass implements HasInvoiceItems, IHasFiles, I
     });
 
     mlChurnHigh = computed((): boolean => (this.mlChurnProbability12m() ?? 0) >= Company.ML_CHURN_HIGH);
+    mlChurnColor = computed((): string => { const p = this.mlChurnProbability12m() ?? 0; return p >= Company.ML_CHURN_HIGH ? 'text-danger' : p >= Company.ML_CHURN_ELEVATED ? 'text-warning' : 'text-white'; });
     mlNeedsAttention = computed((): boolean => this.mlOverdueForContact() || this.mlChurnHigh());
 
     protected override buildActions(): NxAction[] { return getCompanyActions(this) }

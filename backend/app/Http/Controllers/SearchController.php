@@ -35,14 +35,10 @@ class SearchController extends Controller {
             $allowed('CompanyContact') && $collection = $collection->merge(CompanyContact::select()->whereLike('vcard', $input->query)->with('company', 'contact')->get());
 
             if ($allowed('Contact')) {
-                $contacts = collect();
-                foreach (Contact::select()->whereLike('vcard', $input->query)->get() as $c) {
-                    $companyContacts = $c->companyContacts()->whereHas('company')->with('company', 'contact')->get();
-                    foreach ($companyContacts as $cc) {
-                        $contacts->push($cc);
-                    }
-                }
-                $collection = $collection->merge($contacts);
+                $contactIds = Contact::select('id')->whereLike('vcard', $input->query)->pluck('id');
+                $collection = $collection->merge(
+                    CompanyContact::select()->whereIn('contact_id', $contactIds)->whereHas('company')->with('company', 'contact')->get()
+                );
             }
             $allowed('Company') && $collection           = $collection->merge(Project::select()->whereLike('name', $input->query)->wherePreparedOrRunning()->get());
             $allowed('ProductGroup') && $collection      = $collection->merge(self::GetProductGroups($input->query));
@@ -52,6 +48,7 @@ class SearchController extends Controller {
             $allowed('MarketingProspect') && $collection = $collection->merge(MarketingProspect::select()->whereLike('vcard', $input->query)->get());
 
             $collection = $collection->reject(fn ($m) => $m instanceof CompanyContact && $m->company?->isDraft());
+            $collection = self::keepPreferredEmployment($collection);
             $collection = $collection->unique('path');
             $collection = $collection->sortByDesc('updated_at');
             return $collection;
@@ -59,6 +56,12 @@ class SearchController extends Controller {
             NLog::error($ex);
             return $ex;
         }
+    }
+    private static function keepPreferredEmployment(Collection $collection): Collection {
+        [$employments, $rest] = $collection->partition(fn ($_) => $_ instanceof CompanyContact);
+        return $rest->merge(
+            $employments->sortBy(fn ($_) => [$_->is_retired ? 1 : 0, -$_->id])->unique('contact_id')
+        );
     }
     protected static function GetProductGroups($query): Collection {
         $products = collect();

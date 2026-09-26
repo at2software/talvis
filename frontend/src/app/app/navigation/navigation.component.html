@@ -20,7 +20,7 @@
         <li class="nav-item mod-icon" tabindex="0" (click)="onSearchExpand()" (keyup.enter)="onSearchExpand()" placement="right" tabindex="-1">
             <a hotkey="CTRL+ALT+F" class="nav-search" [class.search-expanded]="searchExpanded()">
                 <div class="label" style="width: 200px">
-                    <search-input #search (itemSelected)="onSelect($event)"></search-input>
+                    <search-input #search [openableOnly]="true" (itemSelected)="onSelect($event)"></search-input>
                 </div>
                 <img src="./assets/modules/search.svg" alt="" />
             </a>
@@ -59,7 +59,7 @@
 <!-- ── Guided Tour Slides ──────────────────────────────────────────────────── -->
 <!-- Visibility mirrors navigationItems[x].visible — derived from RBAC roles in GlobalService -->
 
-<guided-tour id="nav-guide-intro" i18n-title="@@i18n.guidedTour.nav.introTitle" title="NEXUS Navigation" i18n-content="@@i18n.guidedTour.nav.introContent" content="Welcome to NEXUS! The navigation bar on the left gives you quick access to all modules. Let's take a quick look at what's available."> </guided-tour>
+<guided-tour id="nav-guide-intro" i18n-title="@@i18n.guidedTour.nav.introTitle" title="TALVIS Navigation" i18n-content="@@i18n.guidedTour.nav.introContent" content="Welcome to TALVIS! The navigation bar on the left gives you quick access to all modules. Let's take a quick look at what's available."> </guided-tour>
 
 <!-- Dashboard — always visible -->
 <guided-tour id="nav-guide-dashboard" i18n-title="@@i18n.common.dashboard" title="Dashboard" i18n-content="@@i18n.guidedTour.nav.dashboard" content="Your personal dashboard with customizable widgets — get a quick overview of what matters most to you." focusSelector="[data-nav-tour='logo']"> </guided-tour>

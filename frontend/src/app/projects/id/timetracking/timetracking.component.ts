@@ -1,4 +1,4 @@
-import { Page } from '@models/http/http.nexus';
+import { Page } from '@models/http/http.talvis';
 import { ChangeDetectionStrategy, Component, computed, effect, inject, signal, untracked } from '@angular/core';
 import { Focus } from '@models/focus/focus.model';
 import { Observable, Subject } from 'rxjs';

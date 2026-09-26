@@ -50,7 +50,7 @@
         <p>This is a major version change and may include breaking changes. Please review the release notes and plan accordingly for updating your projects.</p>
 
         <div class="footer">
-            <p>This is an automated notification from your Nexus system.</p>
+            <p>This is an automated notification from your TALVIS system.</p>
             <p>You are receiving this email because you subscribed to framework update notifications.</p>
         </div>
     </div>

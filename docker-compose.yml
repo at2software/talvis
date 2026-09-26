@@ -1,12 +1,12 @@
-name: nexus
+name: talvis
 
 services:
 
-  nexus:
+  talvis:
     build:
       context: .
       dockerfile: docker/Dockerfile
-    image: nexus-dev:latest
+    image: talvis-dev:latest
     restart: unless-stopped
     ports:
       - "${FRONTEND_PORT:-3200}:3200"
@@ -20,9 +20,9 @@ services:
       TRUSTED_PROXIES:           "${TRUSTED_PROXIES:-}"
       DB_HOST:                   db
       DB_PORT:                   3306
-      DB_DATABASE:               "${DB_DATABASE:-nexus}"
-      DB_USERNAME:               "${DB_USERNAME:-nexus}"
-      DB_PASSWORD:               "${DB_PASSWORD:-nexus}"
+      DB_DATABASE:               "${DB_DATABASE:-talvis}"
+      DB_USERNAME:               "${DB_USERNAME:-talvis}"
+      DB_PASSWORD:               "${DB_PASSWORD:-talvis}"
       ADMIN_EMAIL:               "${ADMIN_EMAIL:-admin@example.com}"
       ADMIN_PASSWORD:            "${ADMIN_PASSWORD:-changeme}"
       MAIL_MAILER:               "${MAIL_MAILER:-log}"
@@ -34,9 +34,9 @@ services:
       KEYCLOAK_CLIENT_ID:        "${KEYCLOAK_CLIENT_ID:-}"
       KEYCLOAK_REALM_PUBLIC_KEY: "${KEYCLOAK_REALM_PUBLIC_KEY:-}"
       LOG_LEVEL:                 "${LOG_LEVEL:-debug}"
-      REVERB_APP_ID:             "${REVERB_APP_ID:-nexus}"
-      REVERB_APP_KEY:            "${REVERB_APP_KEY:-nexus-key}"
-      REVERB_APP_SECRET:         "${REVERB_APP_SECRET:-nexus-secret}"
+      REVERB_APP_ID:             "${REVERB_APP_ID:-talvis}"
+      REVERB_APP_KEY:            "${REVERB_APP_KEY:-talvis-key}"
+      REVERB_APP_SECRET:         "${REVERB_APP_SECRET:-talvis-secret}"
       REVERB_HOST:               "0.0.0.0"
       REVERB_PORT:               "6001"
       REVERB_SCHEME:             "${REVERB_SCHEME:-http}"
@@ -48,7 +48,7 @@ services:
       - storage_data:/var/www/backend/storage
       - ./docker/nginx.dev.conf:/etc/nginx/nginx.conf
       - ./docker/supervisord.dev.conf:/etc/supervisor/conf.d/supervisord.conf
-      - ./docker/ng-proxy.conf.json:/etc/nexus/ng-proxy.conf.json
+      - ./docker/ng-proxy.conf.json:/etc/talvis/ng-proxy.conf.json
     depends_on:
       db:
         condition: service_healthy
@@ -59,10 +59,10 @@ services:
     ports:
       - "${DB_PORT_HOST:-3308}:3306"
     environment:
-      MYSQL_DATABASE:      "${DB_DATABASE:-nexus}"
-      MYSQL_USER:          "${DB_USERNAME:-nexus}"
-      MYSQL_PASSWORD:      "${DB_PASSWORD:-nexus}"
-      MYSQL_ROOT_PASSWORD: "${DB_ROOT_PASSWORD:-nexus_root}"
+      MYSQL_DATABASE:      "${DB_DATABASE:-talvis}"
+      MYSQL_USER:          "${DB_USERNAME:-talvis}"
+      MYSQL_PASSWORD:      "${DB_PASSWORD:-talvis}"
+      MYSQL_ROOT_PASSWORD: "${DB_ROOT_PASSWORD:-talvis_root}"
     volumes:
       - db_data:/var/lib/mysql
     healthcheck:

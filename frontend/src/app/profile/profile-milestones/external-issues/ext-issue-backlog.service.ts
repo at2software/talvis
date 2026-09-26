@@ -33,7 +33,7 @@ const CONNECT_TIMEOUT_MS = 15000;
  * issues surface even for projects the user has no milestones in. Nothing is persisted server-side.
  *
  * Issue->project resolution sends just the distinct tracker project urls the fetch actually returned
- * to the backend, which resolves them to NEXUS projects - far cheaper than listing every project (and
+ * to the backend, which resolves them to TALVIS projects - far cheaper than listing every project (and
  * every plugin link) the user has just to find the handful that matter for these issues.
  */
 @Service()

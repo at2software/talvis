@@ -7,7 +7,7 @@ use Sabre\DAVACL\PrincipalBackend\PDO;
 use Sabre\Uri;
 
 /**
- * Principal backend that resolves DAV principals from NEXUS users.
+ * Principal backend that resolves DAV principals from TALVIS users.
  *
  * Adapted from sabre/dav's PDO principal backend.
  * Portions Copyright (C) fruux GmbH (https://fruux.com/)

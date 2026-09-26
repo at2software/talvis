@@ -52,6 +52,11 @@ class StatsController extends Controller {
         $end   = Carbon::parseFromLocale($request->validated('endDate'));
         return ProjectStatisticsService::getSuccessRate($start, $end);
     }
+    public function showProjectWarrantyLoad(QuoteAccuracyRequest $request) {
+        $start = Carbon::parseFromLocale($request->validated('startDate'));
+        $end   = Carbon::parseFromLocale($request->validated('endDate'));
+        return ProjectStatisticsService::getWarrantyLoad($start, $end);
+    }
     public static function clusterFor(Carbon $start, Carbon $end): string {
         $diff = $end->diffInDays($start);
         if ($diff > 365 * 4) {

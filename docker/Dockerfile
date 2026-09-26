@@ -1,5 +1,5 @@
 # =============================================================================
-#  NEXUS — Development image
+#  TALVIS — Development image
 #
 #  Serves the Laravel backend via PHP-FPM + nginx (port 8000) and the Angular
 #  frontend via `ng serve` with live reload (port 4200).
@@ -38,10 +38,10 @@ RUN curl -sS https://getcomposer.org/installer \
 
 # PHP-FPM: run workers as nginx user so they can write to storage/
 RUN printf '[www]\nuser = nginx\ngroup = nginx\n' \
-    > /usr/local/etc/php-fpm.d/zzz-nexus.conf
+    > /usr/local/etc/php-fpm.d/zzz-talvis.conf
 
 # ng serve proxy config — routes /backend → PHP API, /app → Reverb WebSocket
-COPY docker/ng-proxy.conf.json /etc/nexus/ng-proxy.conf.json
+COPY docker/ng-proxy.conf.json /etc/talvis/ng-proxy.conf.json
 
 # ── Backend (overridden by volume mount in dev) ───────────────────────────────
 WORKDIR /var/www/backend

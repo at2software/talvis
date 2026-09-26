@@ -109,7 +109,7 @@ class FetchBankBalance extends Command {
         $defaultMmId = Vault::getCredentials('MATTERMOST')['MATTERMOST_DEFAULT_USER_ID'] ?? null;
         $notifyUser  = $defaultMmId ? User::find($defaultMmId) : null;
         if (! $notifyUser) {
-            $this->warn('No notification recipient found — MATTERMOST_DEFAULT_USER_ID not set or not linked to a NEXUS user.');
+            $this->warn('No notification recipient found — MATTERMOST_DEFAULT_USER_ID not set or not linked to a TALVIS user.');
         }
 
         $matched       = 0;

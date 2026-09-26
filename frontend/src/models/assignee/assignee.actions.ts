@@ -3,6 +3,7 @@ import { Assignee, I18N_REMOVE_FROM_TEAM } from './assignee.model';
 import { CompanyContact } from '../company/company-contact.model';
 import { nx } from '@models/_core/nx-bridge';
 import { Project } from '../project/project.model';
+import { tap } from 'rxjs';
 
 export function getAssigneeActions(self: Assignee): NxAction[] {
     return [
@@ -21,13 +22,15 @@ export function getAssigneeActions(self: Assignee): NxAction[] {
             title: $localize`:@@i18n.projects.makeProjectManager:make project manager`,
             group: false,
             on: () => self.isUser(),
-            action: () => nx().service.put(`projects/${self.parent_id}`, { project_manager_id: self.assignee_id }).subscribe(() => {
-                const project = nx().getCurrentRoot();
-                if (project instanceof Project) {
-                    project.patch({ project_manager: self.getUser(), project_manager_id: self.assignee_id });
-                    project.projectManagerChanged.next();
-                }
-            }),
+            action: () => nx().service.put(`projects/${self.parent_id}`, { project_manager_id: self.assignee_id }).pipe(
+                tap(() => {
+                    const project = nx().getCurrentRoot();
+                    if (project instanceof Project) {
+                        project.patch({ project_manager: self.getUser(), project_manager_id: self.assignee_id });
+                        project.projectManagerChanged.next();
+                    }
+                }),
+            ),
         },
         {
             title: $localize`:@@i18n.plugins.linkToPluginUser:link to plugin user`,

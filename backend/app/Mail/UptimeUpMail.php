@@ -20,7 +20,7 @@ class UptimeUpMail extends Mailable {
 
     public function envelope(): Envelope {
         return new Envelope(
-            subject: "[NEXUS] Uptime Recovery: {$this->monitor->name} is back online",
+            subject: "[TALVIS] Uptime Recovery: {$this->monitor->name} is back online",
         );
     }
     public function content(): Content {

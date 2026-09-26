@@ -14,6 +14,7 @@ use App\Jobs\SendInvoiceReminderJob;
 use App\Services\InvoiceItemEnhancementService;
 use App\Services\InvoicePdfService;
 use App\Traits\HasInvoiceItemsTrait;
+use App\Traits\LogsDeletionTrait;
 use App\Traits\PrecomputedTrait;
 use horstoeko\zugferd\codelists\ZugferdInvoiceType;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -23,6 +24,7 @@ use Illuminate\Support\Facades\Artisan;
 class Invoice extends BaseModel {
     use HasFactory;
     use HasInvoiceItemsTrait;
+    use LogsDeletionTrait;
     use PrecomputedTrait;
     use SoftDeletes;
 
@@ -151,6 +153,10 @@ class Invoice extends BaseModel {
         $ss1->save();
         $ss2->save();
     }
+    public function releaseItems(): void {
+        $this->invoiceItems()->whereNull('project_id')->update(['company_id' => $this->company_id]);
+        $this->invoiceItems()->update(['invoice_id' => null]);
+    }
     public static function getInvoiceBlade($items, $footers = [], $discounts = [], string $lang = 'de'): string {
         return view('InvoiceTable', ['items' => $items, 'footers' => $footers, 'discounts' => $discounts, 'lang' => $lang])->render();
     }
@@ -166,7 +172,7 @@ class Invoice extends BaseModel {
     public static function getSepaQr($amount, $title): string {
         $amount      = number_format($amount, 2, '.', '');
         $bic         = Param::get('ME_BIC')->value ?? '';
-        $companyName = Param::get('ME_NAME')->value ?? '';
+        $companyName = Company::myName();
         $iban        = Param::get('ME_IBAN')->value ?? '';
         $qr          = 'BCD'.PHP_EOL.'002'.PHP_EOL.'2'.PHP_EOL.'SCT'.PHP_EOL
                       .$bic.PHP_EOL.$companyName.PHP_EOL.$iban.PHP_EOL

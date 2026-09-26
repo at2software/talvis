@@ -11,7 +11,7 @@ class RoleController extends Controller {
     public function index(): array {
         return [
             'roles' => Role::orderBy('id')->get(['id', 'name', 'description'])->toArray(),
-            'users' => User::with('activeEmployment')
+            'users' => User::with(['activeEmployment', 'roles'])
                 ->where('id', '!=', 1)
                 ->get()
                 ->map(fn ($u) => [

@@ -1,6 +1,6 @@
 import { Service } from '@angular/core';
 import { Observable } from 'rxjs';
-import { NexusHttpService } from './http/http.nexus';
+import { TalvisHttpService } from './http/http.talvis';
 
 export interface PdfTemplate {
     html: string;
@@ -12,7 +12,7 @@ export interface PdfTemplate {
 }
 
 @Service()
-export class PdfTemplateService extends NexusHttpService<never> {
+export class PdfTemplateService extends TalvisHttpService<never> {
     apiPath = 'pdf-template';
 
     load = (): Observable<PdfTemplate> => this.get('pdf-template', {}, Object);

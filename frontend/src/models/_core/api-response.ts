@@ -136,6 +136,7 @@ export interface RevenueCurrentYearDto {
     current: RevenueEntryDto[];
     last: RevenueMonthEntryDto[];
     revenue12?: RevenueMonthEntryDto[];
+    expensesByMonth?: RevenueMonthEntryDto[];
 }
 
 export interface LinearRegressionDataDto {
@@ -176,6 +177,8 @@ export interface StatsDataDto {
     revenue_by_group?: object;
     finished_timeline?: object;
     success_rate?: object;
+    warranty_share?: object;
+    warranty_by_project?: object;
 }
 
 export interface ParticipatingCompanyDto {
@@ -311,6 +314,12 @@ export interface ProjectSuccessRateDto {
     unsuccessful: number;
 }
 
+export interface ProjectWarrantyLoadDto {
+    regular_hours: number;
+    warranty_hours: number;
+    projects: { id: string; name: string; warranty_hours: number; regular_hours: number }[];
+}
+
 export interface QuoteAcceptanceSuggestionDto {
     feature: 'item_count' | 'net' | 'discount_pct' | 'prefix_length';
     from: number;
@@ -334,6 +343,34 @@ export interface QuoteAcceptancePredictionDto {
         company_prior_decided_count: number;
     };
     suggestions: QuoteAcceptanceSuggestionDto[];
+}
+
+export type PaymentPlanStepStatus = 'open' | 'prepared' | 'invoiced';
+
+export interface PaymentPlanDownpaymentDto {
+    id: number;
+    text: string;
+    net: number;
+    invoice: { id: number; name: string; created_at: string; sent: number; paid_at: string | null } | null;
+}
+
+export interface PaymentPlanStepDto {
+    trigger: string;
+    percentage: number;
+    months: number | null;
+    month_index: number | null;
+    amount: number;
+    status: PaymentPlanStepStatus;
+    item: PaymentPlanDownpaymentDto | null;
+}
+
+/** Response of App\Traits\HasPaymentPlanTrait::getPaymentPlanOverview() - the agreed plan with each step matched to an existing downpayment item by net value. */
+export interface PaymentPlanOverviewDto {
+    net: number;
+    is_custom: boolean;
+    tier_label: string | null;
+    steps: PaymentPlanStepDto[];
+    unmatched: PaymentPlanDownpaymentDto[];
 }
 
 export interface ProductSplitItemDto {

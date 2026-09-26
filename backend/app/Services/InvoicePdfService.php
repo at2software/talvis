@@ -45,7 +45,6 @@ class InvoicePdfService {
             $enhancedItems,
             $invoiceNumber,
             $documentType,
-            $footer,
             $project,
             $draft
         );
@@ -96,7 +95,6 @@ class InvoicePdfService {
         $items,
         string $invoiceNumber,
         string $documentType,
-        array $footer,
         ?Project $project,
         bool $draft = false
     ): string {
@@ -122,6 +120,6 @@ class InvoicePdfService {
         if ($draft) {
             return $pdfString;
         }
-        return Document::makeZUGFeRD($pdfString, $items, $company, $invoiceNumber, $documentType, $footer, $project);
+        return Document::makeZUGFeRD($pdfString, $items, $company, $invoiceNumber, $documentType, $project);
     }
 }

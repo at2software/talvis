@@ -14,25 +14,22 @@ import { NxComponent } from '@shards/nx/nx.component';
 import { FormsModule } from '@angular/forms';
 import { AutosaveDirective } from '@directives/autosave.directive';
 import { VcardComponent } from '@app/customers/_shards/vcard/vcard.component';
-import { At2connect } from '@app/customers/_shards/at2connect/at2connect';
-import { GlobalService } from '@models/global.service';
+import { ContactEmployments } from '@app/customers/_shards/contact-employments/contact-employments';
 
 @Component({
     selector: 'customer-vcards',
     templateUrl: './customer-vcards.html',
-    imports: [ScrollbarComponent, ListGroupItemContactComponent, Nx, ProjectComponent, RouterModule, VcardComponent, NxComponent, FormsModule, AutosaveDirective, At2connect],
+    imports: [ScrollbarComponent, ListGroupItemContactComponent, Nx, ProjectComponent, RouterModule, VcardComponent, NxComponent, FormsModule, AutosaveDirective, ContactEmployments],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CustomerVcards {
     #parent = inject(CustomerDetailGuard);
-    #global = inject(GlobalService);
     #companyService = inject(CompanyService);
     #router = inject(Router);
     #route = inject(ActivatedRoute);
     #host = inject(ElementRef<HTMLElement>);
 
     company = tracked(this.#parent.object);
-    readonly at2ConnectEnabled = this.#global.settings['AT2CONNECT_ENABLED'];
 
     constructor() {
         NxStatic.broadcast$.pipe(takeUntilDestroyed()).subscribe((event) => {

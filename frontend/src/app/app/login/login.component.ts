@@ -4,7 +4,7 @@ import { UserService } from '@models/user/user.service';
 import { AuthenticationService } from '@models/auth.service';
 import { deleteCookie, setCookie } from '@constants/cookies';
 import { GlobalService } from '@models/global.service';
-import { NexusHttpInterceptor } from '@app/http.interceptor';
+import { TalvisHttpInterceptor } from '@app/http.interceptor';
 import { environment } from '@environments/environment';
 import { FormsModule } from '@angular/forms';
 
@@ -29,7 +29,7 @@ export class LoginComponent {
 
     constructor() {
         deleteCookie('api_token');
-        delete NexusHttpInterceptor.headers[environment.envApi];
+        delete TalvisHttpInterceptor.headers[environment.envApi];
         this.#global.invalidateInit();
     }
 
@@ -51,7 +51,7 @@ export class LoginComponent {
     login() {
         if (this.canLogin()) {
             deleteCookie('api_token');
-            delete NexusHttpInterceptor.headers[environment.envApi];
+            delete TalvisHttpInterceptor.headers[environment.envApi];
             this.#authService._isLoggedIn = false;
             this.#authService.apiToken = undefined;
             if (AuthenticationService.sysinfo!.method === 'token') {

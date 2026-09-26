@@ -1,5 +1,5 @@
 # =============================================================================
-#  NEXUS — Pre-built release image
+#  TALVIS — Pre-built release image
 #
 #  The Angular frontend has already been compiled by release-foss.sh.
 #  This Dockerfile only installs the PHP backend and copies the pre-built
@@ -31,7 +31,7 @@ RUN curl -sS https://getcomposer.org/installer \
 
 # PHP-FPM: run workers as nginx user so they can write to storage/
 RUN printf '[www]\nuser = nginx\ngroup = nginx\n' \
-    > /usr/local/etc/php-fpm.d/zzz-nexus.conf
+    > /usr/local/etc/php-fpm.d/zzz-talvis.conf
 
 # ── Backend ───────────────────────────────────────────────────────────────────
 WORKDIR /var/www/backend

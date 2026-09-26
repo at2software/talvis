@@ -77,16 +77,16 @@ export class UptimeMonitor extends Serializable {
 
     subscribe() {
         const currentUserId = nx().global.user?.id;
-        if (!currentUserId) return;
+        if (!currentUserId) return undefined;
         const recipientIds = [...(this.recipients?.map((u) => u.id) || []), currentUserId];
-        this.httpService.put(this.apiPathWithId(), { recipient_ids: recipientIds }).subscribe(() => this.var.onSubscribeSuccess?.(this));
+        return this.httpService.put(this.apiPathWithId(), { recipient_ids: recipientIds }).pipe(tap(() => this.var.onSubscribeSuccess?.(this)));
     }
 
     unsubscribe() {
         const currentUserId = nx().global.user?.id;
-        if (!currentUserId) return;
+        if (!currentUserId) return undefined;
         const recipientIds = (this.recipients?.map((u) => u.id) || []).filter((id) => id !== currentUserId);
-        this.httpService.put(this.apiPathWithId(), { recipient_ids: recipientIds }).subscribe(() => this.var.onUnsubscribeSuccess?.(this));
+        return this.httpService.put(this.apiPathWithId(), { recipient_ids: recipientIds }).pipe(tap(() => this.var.onUnsubscribeSuccess?.(this)));
     }
 
     unlinkFromProject() {

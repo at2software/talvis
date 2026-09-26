@@ -1,11 +1,11 @@
 import { Service } from '@angular/core';
 import { Param } from '@models/param/param.model';
-import { NexusHttpService } from '../http/http.nexus';
+import { TalvisHttpService } from '../http/http.talvis';
 import { Dictionary } from '@constants/constants';
 import { ParamChartSeriesDto } from '@models/_core/api-response';
 
 @Service()
-export class ParamService extends NexusHttpService<Param> {
+export class ParamService extends TalvisHttpService<Param> {
     public apiPath = '';
     override readonly model = Param;
 

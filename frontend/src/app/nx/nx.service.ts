@@ -6,7 +6,7 @@ import { HotkeyDirective } from '@directives/hotkey.directive';
 import { Router } from '@angular/router';
 import { GlobalService } from '@models/global.service';
 import { NxStatic } from './nx.static';
-import { NexusHttp } from '@models/http/http.nexus';
+import { TalvisHttp } from '@models/http/http.talvis';
 import { Observable, Subject } from 'rxjs';
 import { Serializable } from '@models/_core/serializable';
 import { HttpClient } from '@angular/common/http';
@@ -40,7 +40,7 @@ export class NxService {
     #lastObject?: Nx;
     #interruptResult: unknown;
     selected: Nx[] = [];
-    #service = inject(NexusHttp);
+    #service = inject(TalvisHttp);
     #router = inject(Router);
     #injector = inject(Injector);
     #glob = inject(GlobalService);
@@ -273,9 +273,9 @@ export class NxService {
                         };
                         const actionType = action.action(resolve, sel.nxContext(), this.#interruptResult);
                         if (actionType instanceof Promise) {
-                            actionType.then((response) => { if (response) resolve(response); });
+                            actionType.then((response) => { if (response) resolve(response); }).catch(() => undefined);
                         } else if (actionType instanceof Observable) {
-                            actionType.subscribe(resolve);
+                            actionType.subscribe({ next: resolve, error: () => undefined });
                         }
                     } else {
                         stackCount--;

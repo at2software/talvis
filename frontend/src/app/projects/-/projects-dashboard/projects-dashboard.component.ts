@@ -1,4 +1,4 @@
-﻿import { Page } from '@models/http/http.nexus';
+﻿import { Page } from '@models/http/http.talvis';
 import { ChangeDetectionStrategy, Component, afterNextRender, inject, signal, viewChild } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Dictionary, filtered, span, StartEnd } from '@constants/constants';

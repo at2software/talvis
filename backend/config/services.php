@@ -34,12 +34,6 @@ return [
         'endpoint'     => env('OPENAI_ENDPOINT'),
         'access_token' => env('OPENAI_ACCESS_TOKEN'),
     ],
-    'at2connect' => [
-        'channel_id'   => env('AT2CONNECT_DEFAULT_CHANNEL_ID', ''),
-        'channel_name' => env('AT2CONNECT_DEFAULT_CHANNEL_NAME', 'Support'),
-        'user_id'      => env('AT2CONNECT_USER_ID', ''),
-        'url'          => env('AT2CONNECT_URL', ''),
-    ],
     'slack' => [
         'api_endpoint' => env('SLACK_API_ENDPOINT', ''),
         'access_token' => env('SLACK_ACCESS_TOKEN', ''),

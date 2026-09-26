@@ -28,7 +28,7 @@ import { ModalInvoiceDiscountComponent } from '@app/_modals/modal-invoice-discou
 import { ModalInvoiceAddInstalmentComponent } from '@app/_modals/modal-invoice-add-instalment/modal-invoice-add-instalment.component';
 import { SafePipe } from '@pipes/safe.pipe';
 import { MoneyPipe } from '@pipes/money.pipe';
-import { catchError, forkJoin, map, of } from 'rxjs';
+import { catchError, forkJoin, of } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { modelListResource, modelResource } from '@models/http/model-resource';
 import { QuoteAcceptanceSuggestionDto } from '@models/_core/api-response';
@@ -104,7 +104,7 @@ export class ProjectInvoicingComponent {
 
     readonly #quoteDescriptions = modelListResource(
         () => this.#parent.object()?.id || undefined,
-        (projectId) => this.#projectService.indexQuoteDescriptions(projectId).pipe(map((d) => d.map((s) => s.toString()))),
+        (projectId) => this.#projectService.indexQuoteDescriptions(projectId),
     );
     readonly quoteDescriptions = this.#quoteDescriptions.value;
 
@@ -198,6 +198,12 @@ export class ProjectInvoicingComponent {
 
         moveToCustomer.subscribe((_) => {
             this.#router.navigate(['/customers/' + this.#parent.object().company_id + '/billing']);
+        });
+    }
+    convertSupportToRegular() {
+        this.#projectService.convertSupportItemsToRegular(this.#parent.object()).subscribe(() => {
+            this.#parent.reload();
+            this.onInvoicingTypeChange(TInvoicing.FinalInvoice);
         });
     }
     makeDraftInvoice = () => this.makeInvoice(true);
@@ -328,8 +334,13 @@ export class ProjectInvoicingComponent {
             if (switchToQuote) {
                 this.onInvoicingTypeChange(TInvoicing.Quote);
             }
-            this.#parent.reload();
+            this.#reloadProjectAndItems();
         });
+    }
+
+    #reloadProjectAndItems() {
+        this.#parent.reload();
+        this.invoicingContent()?.table()?.reload();
     }
 
     #getNextPositionForStage(stage: number): number {
@@ -428,7 +439,7 @@ export class ProjectInvoicingComponent {
                 payload0.stage = 0;
                 payload0.position = this.#getNextPositionForStage(0);
 
-                forkJoin([stage2Item.store(payload2), stage0Item.store(payload0)]).subscribe(() => this.#parent.reload());
+                forkJoin([stage2Item.store(payload2), stage0Item.store(payload0)]).subscribe(() => this.#reloadProjectAndItems());
             });
     }
 

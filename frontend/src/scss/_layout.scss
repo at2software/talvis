@@ -696,6 +696,9 @@ table {
     &:hover {
         @extend .dnd-item-drag;
     }
+    > .card-header > .card-header-actions {
+        margin-right: 1.75rem;
+    }
 }
 
 .cdk-drag-animating {

@@ -6,6 +6,7 @@ use App\Enums\ClusterType;
 use Carbon\Carbon;
 use Closure;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 class FociTimelineQuery {
     /** @param Closure $foci Returns a fresh Focus query/relation builder each call. */
@@ -18,13 +19,19 @@ class FociTimelineQuery {
         return $this->fillGapsInUserData($data, $min, $max, $cluster);
     }
     private function getFociDateRange(): array {
-        $min     = Carbon::parse(($this->foci)()->min('started_at'));
-        $max     = Carbon::parse(($this->foci)()->max('started_at'));
+        $table = ($this->foci)()->getModel()->getTable();
+        $range = ($this->foci)()->toBase()->select(
+            DB::raw("MIN(`$table`.`started_at`) AS min_started"),
+            DB::raw("MAX(`$table`.`started_at`) AS max_started"),
+        )->first();
+
+        $min     = Carbon::parse($range->min_started ?? null);
+        $max     = Carbon::parse($range->max_started ?? null);
         $cluster = ClusterType::getType($min, $max);
         return [$min, $max, $cluster];
     }
     private function getFociUsers(): Collection {
-        return ($this->foci)()->groupBy('user_id')->get();
+        return ($this->foci)()->with('user')->groupBy('user_id')->get();
     }
     private function mapUsersToClusterData(Collection $users, ClusterType $cluster): Collection {
         $rows = ($this->foci)()
@@ -38,29 +45,24 @@ class FociTimelineQuery {
         return $users->map(fn ($_) => [
             'user' => $_->user->only(['name', 'color', 'id']),
             'data' => ($rows->get($_->user->id) ?? collect())
-                ->sortBy('month')
-                ->values()
-                ->map(fn ($x) => ['period' => $x->month, 'value' => $x->sum]),
+                ->map(fn ($x) => ['period' => $x->month, 'value' => (float)$x->sum]),
         ]);
     }
     private function fillGapsInUserData(Collection $data, Carbon $min, Carbon $max, ClusterType $cluster): Collection {
-        foreach ($data as &$user) {
-            for ($date = $min->copy(); $date < $max; $cluster->increase($date)) {
-                $day = $date->format($cluster->toCarbonFormat());
-                if (! $this->collectionContains($user['data'], fn ($_) => $_['period'] === $day)) {
-                    $user['data']->push(['period' => $day, 'value' => 0]);
-                }
-            }
-            $user['data'] = $user['data']->sortBy('period');
-        }
-        return $data;
+        $periods = $this->listPeriods($min, $max, $cluster);
+
+        return $data->map(function ($user) use ($periods) {
+            $values       = $user['data']->keyBy('period');
+            $user['data'] = $periods->map(fn ($_) => $values[$_] ?? ['period' => $_, 'value' => 0.0]);
+            return $user;
+        });
     }
-    private function collectionContains(Collection $collection, callable $callback): bool {
-        foreach ($collection as $item) {
-            if ($callback($item)) {
-                return true;
-            }
+    private function listPeriods(Carbon $min, Carbon $max, ClusterType $cluster): Collection {
+        $format  = $cluster->toCarbonFormat();
+        $periods = collect();
+        for ($date = Carbon::parse($min->format($format)); $date <= $max; $cluster->increase($date)) {
+            $periods->push($date->format($format));
         }
-        return false;
+        return $periods;
     }
 }

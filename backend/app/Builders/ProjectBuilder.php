@@ -2,6 +2,7 @@
 
 namespace App\Builders;
 
+use App\Models\Project;
 use App\Models\ProjectState;
 use App\Traits\HasParamsBuilder;
 use Illuminate\Support\Facades\DB;
@@ -23,6 +24,16 @@ class ProjectBuilder extends BaseBuilder {
     }
     public function wherePreparedOrRunning() {
         return $this->whereProgressIn([ProjectState::Prepared, ProjectState::Running]);
+    }
+    public function whereTrackable() {
+        return $this->where(fn ($_) => $_
+            ->whereProgressIn([ProjectState::Prepared, ProjectState::Running])
+            ->orWhere(fn ($__) => $__->whereWithinWarrantyBound()));
+    }
+    public function whereWithinWarrantyBound() {
+        return $this
+            ->whereHas('latestState', fn ($_) => $_->where('progress', ProjectState::Finished)->where('is_successful', true))
+            ->whereRelation('states', 'project_project_state.created_at', '>=', now()->subMonths(Project::maxWarrantyMonths()));
     }
     public function whereProgressIn(array $progress) {
         return $this->whereHas('latestState', fn ($q) => $q->whereIn('progress', $progress));

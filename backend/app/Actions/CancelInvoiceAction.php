@@ -36,7 +36,7 @@ class CancelInvoiceAction {
             $invoice
         );
 
-        $invoice->invoiceItems()->update(['invoice_id' => null]);
+        $invoice->releaseItems();
 
         $invoice->setCancelledAttributes();
         $cancellationInvoice->cancellation_invoice_id = $invoice->id;

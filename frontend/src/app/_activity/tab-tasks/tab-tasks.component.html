@@ -6,9 +6,6 @@
                 @if (_user.hasRole('hr')) {
                     <tab-tasks-hr (countChanged)="onCount('hr', $event)"></tab-tasks-hr>
                 }
-                @if (_user.hasRole('admin')) {
-                    <tab-tasks-deletion-requests (countChanged)="onCount('deletionRequests', $event)"></tab-tasks-deletion-requests>
-                }
                 <tab-tasks-sentinels (countChanged)="onCount('sentinels', $event)"></tab-tasks-sentinels>
                 @if (_user.hasRole('marketing')) {
                     <tab-tasks-remarketing></tab-tasks-remarketing>

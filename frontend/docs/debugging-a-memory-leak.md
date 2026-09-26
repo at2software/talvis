@@ -1,4 +1,4 @@
-# Capturing a NEXUS memory leak in Edge
+# Capturing a TALVIS memory leak in Edge
 
 For a tab that climbs into the GBs and pins a CPU core after being left open. Not reproduced on
 demand here — 12 navigation cycles between the dashboard and the project list held flat at
@@ -79,7 +79,7 @@ The probe ran ~38 minutes before the tab hard-crashed with `Error code: Out of M
 - **Only one interval-based auto-refresh exists anywhere in the frontend**:
   `widget-hr-team.component.ts`'s `timer(60000, 60000)`, which happens to poll `team-status` -
   the same endpoint seen firing repeatedly. It's cleaned up correctly via `takeUntilDestroyed()`,
-  so it isn't a leak by itself, but if **more than one browser tab/window has NEXUS open**, each
+  so it isn't a leak by itself, but if **more than one browser tab/window has TALVIS open**, each
   runs its own independent 60 s timer against the same endpoint, and their firings drift into
   sync often enough to look bursty - worth ruling out by just asking.
 
@@ -108,7 +108,7 @@ throws away everything the pasted script just wrapped and hands the fresh `main.
 unmodified `fetch`/`XHR`/`WebSocket` again. The probe only exists in that page instance's JS,
 never across a navigation.
 
-To catch the WebSocket from its first message: **close every other NEXUS tab/window**, open one
+To catch the WebSocket from its first message: **close every other TALVIS tab/window**, open one
 fresh tab, **F12 → Console first**, *then* navigate to `nexus.at2.me` and paste the moment the
 console becomes usable - before login/dashboard finishes loading, if you can. Angular's own
 bootstrap takes a network round-trip before it opens the socket, so there's a real window, not a
@@ -122,7 +122,7 @@ reconnects (network hiccup, laptop sleep, etc. - pusher-js opens a fresh `WebSoc
 ```js
 (() => {
   const started = Date.now();
-  const STORE_KEY = '__nexus_probe_v2';
+  const STORE_KEY = '__talvis_probe_v2';
   const rows = [];
   const sockets = { messages: 0, bytes: 0, byEvent: {} };
   const requests = new Map();
@@ -204,45 +204,45 @@ reconnects (network hiccup, laptop sleep, etc. - pusher-js opens a fresh `WebSoc
     try {
       localStorage.setItem(STORE_KEY, JSON.stringify({ rows: rows.slice(-120), wsByEvent: sockets.byEvent, ua: navigator.userAgent, savedAt: new Date().toISOString() }));
     } catch {}
-    console.log(`[nexus-probe] ${row.min}min heap=${row.heapMB}MB dom=${row.domNodes} ws=${row.wsMsgs} http=${row.httpReqs} longtasks=${row.longTasks}(${row.longTaskSec}s) top=${row.topRequests[0] || '-'}`);
+    console.log(`[talvis-probe] ${row.min}min heap=${row.heapMB}MB dom=${row.domNodes} ws=${row.wsMsgs} http=${row.httpReqs} longtasks=${row.longTasks}(${row.longTaskSec}s) top=${row.topRequests[0] || '-'}`);
   };
 
   sample();
   const id = setInterval(sample, 60000);
 
-  window.__nexusProbe = {
+  window.__talvisProbe = {
     report: () => { sample(); return JSON.stringify({ rows, wsByEvent: sockets.byEvent, topRequests: topRequests(15), ua: navigator.userAgent }, null, 1); },
     stop: () => clearInterval(id),
   };
-  console.log('[nexus-probe v2] running - autosaves every minute, so it survives a crash. Call __nexusProbe.report() any time.');
+  console.log('[talvis-probe v2] running - autosaves every minute, so it survives a crash. Call __talvisProbe.report() any time.');
 })();
 ```
 
-Then **use NEXUS normally and leave the tab open**. It prints one line a minute. When memory has
-climbed noticeably, run `__nexusProbe.report()` and send the output.
+Then **use TALVIS normally and leave the tab open**. It prints one line a minute. When memory has
+climbed noticeably, run `__talvisProbe.report()` and send the output.
 
 ### Reading the log after a crash
 
 `localStorage` survived the crash even though the JS state didn't - it's written by the browser
 process on every `setItem`, not held in the tab that died. It's scoped to the origin
 (`https://nexus.at2.me`), not to that specific tab, so clicking **Refresh** on the crash page, or
-opening NEXUS in any new tab, gets you back to the same data. No need to reinstall the probe.
+opening TALVIS in any new tab, gets you back to the same data. No need to reinstall the probe.
 
 **Easiest hand-off** - open the console and run this, which puts the raw JSON straight on the
 clipboard, ready to paste into Slack or a text file:
 
 ```js
-copy(localStorage.getItem('__nexus_probe_v2'))
+copy(localStorage.getItem('__talvis_probe_v2'))
 ```
 
 **To read it inline instead**, expand it directly in the console:
 
 ```js
-JSON.parse(localStorage.getItem('__nexus_probe_v2'))
+JSON.parse(localStorage.getItem('__talvis_probe_v2'))
 ```
 
 **Without touching the console at all** - **F12** → **Application** tab → **Storage → Local
-Storage → https://nexus.at2.me** → click the `__nexus_probe_v2` row, and the value shows in the
+Storage → https://nexus.at2.me** → click the `__talvis_probe_v2` row, and the value shows in the
 preview pane at the bottom.
 
 The very last save is at most 60 seconds old at the moment of the crash, so the final minute
@@ -308,7 +308,7 @@ and sort by **Self Time**. The top entry names the function that is spinning. Sc
 
 Don't need a new repro for these:
 
-1. **Was more than one NEXUS tab or window open?** `team-status` has exactly one auto-poller in
+1. **Was more than one TALVIS tab or window open?** `team-status` has exactly one auto-poller in
    the whole codebase, and it's per-tab. Multiple tabs means multiple independent 60 s timers
    against the same endpoint, which can drift into sync often enough to look bursty.
 2. **What were the full URLs behind `950`, `1679`, `1359`?** If that browser session is still
@@ -320,11 +320,11 @@ Don't need a new repro for these:
 
 Whichever of these you have:
 
-- The `__nexusProbe.report()` output, or the crash-recovery `localStorage` read
+- The `__talvisProbe.report()` output, or the crash-recovery `localStorage` read
 - The detached-elements screenshot after a garbage collection
 - The heap-comparison top rows, with the Retainers panel open on the largest
 - The Performance Bottom-Up screenshot
 - The two answers above
 
 Also useful: roughly how long the tab had been open, whether live sharing was on, and whether
-anyone else was working in NEXUS at the time.
+anyone else was working in TALVIS at the time.

@@ -17,7 +17,7 @@
                 <progress-bar [height]="3" [progress]="_data.revenue / _data.expenses" [style]="'primary'" overStyle="success"></progress-bar>
             </div>
             <ng-template #tipContent>
-                <ul revealList class="list-group" style="width: auto !important">
+                <ul class="list-group" style="width: auto !important">
                     <li class="list-group-item hstack text-nowrap gap-2">
                         <div class="text-truncate flex-fill text-start">
                             <span i18n="@@i18n.dashboard.revenueThisYear">revenue this year</span>
@@ -31,7 +31,7 @@
                             <span i18n="@@i18n.widget-revenue-monthly">monthly revenue</span>
                             <span class="notranslate">:</span>
                         </div>
-                        <div class="font-monospace text-end">{{ _data.revenue / yearProgress() | money }}</div>
+                        <div class="font-monospace text-end">{{ avgMonthlyRevenue() | money }}</div>
                     </li>
                     <li class="list-group-item hstack text-nowrap gap-2">
                         <div class="text-truncate flex-fill text-start">
@@ -39,14 +39,14 @@
                             <span i18n="@@i18n.dashboard.monthlyEarnings">monthly earnings</span>
                             <span class="notranslate">:</span>
                         </div>
-                        <div class="font-monospace text-end">{{ _data.revenue / yearProgress() - avgCost() | money }}</div>
+                        <div class="font-monospace text-end">{{ avgMonthlyRevenue() - avgCostYtd() | money }}</div>
                     </li>
                     <li class="list-group-item hstack text-nowrap gap-2">
                         <div class="text-truncate flex-fill text-start">
                             <span i18n="@@i18n.dashboard.estimatedEarningsThisYear">estimated earnings this year</span>
                             <span class="notranslate">:</span>
                         </div>
-                        <div class="font-monospace text-end">{{ (_data.revenue / yearProgress() - avgCost()) * 12 | money }}</div>
+                        <div class="font-monospace text-end">{{ (avgMonthlyRevenue() - avgCostYtd()) * 12 | money }}</div>
                     </li>
                 </ul>
             </ng-template>

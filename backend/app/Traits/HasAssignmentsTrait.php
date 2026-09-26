@@ -26,6 +26,9 @@ trait HasAssignmentsTrait {
     public function assignedContacts() {
         return $this->morphedByMany(CompanyContact::class, 'assignee', 'assignments', 'parent_id');
     }
+    public function clearAssignedTimeBudgets(): int {
+        return $this->assignees()->where('assignee_type', User::class)->update(['hours_planned' => 0, 'hours_weekly' => 0]);
+    }
     public function addAssigneeFromRequest(?Request $request = null) {
         $request = $request ?? request();
         $request->validate([

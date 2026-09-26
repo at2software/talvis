@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Http\Controllers\At2ConnectController;
 use App\Http\Controllers\PluginFintsController;
 use App\Http\Controllers\PluginGitController;
 use App\Http\Controllers\PluginLocalAiController;
@@ -46,15 +45,6 @@ class Vault extends Model {
                     'PASSWORD'        => 'password',
                     'TOWN_SQUARE'     => 'broadcast channel id',
                     'DEFAULT_USER_ID' => 'default user ID',
-                ]),
-            ],
-            [
-                'prefix'     => 'AT2CONNECT',
-                'name'       => 'at²connect',
-                'controller' => At2ConnectController::class,
-                'active'     => false,
-                'keys'       => collect([
-                    'URL' => 'URL',
                 ]),
             ],
             [

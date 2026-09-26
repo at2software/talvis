@@ -1,0 +1,73 @@
+<div class="modal d-block" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-title">
+                    <i class="text-primary">upload_file</i>
+                    <span class="ms-1" i18n="@@i18n.projects.importPlanningTitle">import planning</span>
+                    <span class="ms-2 text-muted small">{{ fileName }}</span>
+                </span>
+                <button type="button" class="btn-close" (click)="decline()" tabindex="0" (keydown.enter)="decline()" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                @if (rows().length === 0) {
+                    <div class="text-center text-muted py-4" i18n="@@i18n.projects.importPlanningNothing">nothing recognised in this file</div>
+                } @else {
+                    <div class="hstack gap-2 mb-2">
+                        <button type="button" class="btn btn-sm btn-outline-primary" (click)="toggleSelectAll()">
+                            @if (allSelected()) {
+                                <span i18n="@@i18n.issues.deselectAll">deselect all</span>
+                            } @else {
+                                <span i18n="@@i18n.issues.selectAll">select all</span>
+                            }
+                        </button>
+                        <span class="text-muted small ms-auto">
+                            {{ itemCount() }} <span i18n="@@i18n.common.items">items</span>, {{ headerCount() }} <span i18n="@@i18n.common.headers">headers</span>
+                        </span>
+                    </div>
+                    <div style="max-height: 420px; overflow-y: auto">
+                        <table class="table table-sm mb-0">
+                            <thead>
+                                <tr>
+                                    <th style="width: 30px"></th>
+                                    <th i18n="@@i18n.common.description">description</th>
+                                    <th style="width: 120px" class="text-end" i18n="@@i18n.common.quantity">quantity</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @for (row of rows(); track $index) {
+                                    <tr class="cursor-pointer" [class.bg-darker]="row.type === type.Header" (click)="toggleSelected($index)" tabindex="0" (keydown.enter)="toggleSelected($index)">
+                                        <td>
+                                            <input type="checkbox" class="form-check-input" [checked]="isSelected($index)" (click)="$event.stopPropagation()" (change)="toggleSelected($index)" />
+                                        </td>
+                                        <td [class.text-muted]="row.type !== type.Default || !isSelected($index)">
+                                            {{ row.text }}
+                                            @if (row.type === type.Header) {
+                                                <span class="badge bg-darker text-muted ms-2" i18n="@@i18n.common.header">header</span>
+                                            }
+                                            @if (row.type === type.Optional) {
+                                                <span class="badge bg-darker text-primary ms-2" i18n="@@i18n.projects.planningRowOptional">optional</span>
+                                            }
+                                            @if (row.type === type.Inactive) {
+                                                <span class="badge bg-darker text-muted ms-2" i18n="@@i18n.common.disabled">disabled</span>
+                                            }
+                                        </td>
+                                        <td class="text-end text-muted small">
+                                            @if (row.type !== type.Header) {
+                                                <span>{{ row.qty }} {{ row.unit }}</span>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn" (click)="decline()" tabindex="0" (keydown.enter)="decline()" i18n="@@i18n.common.cancel">cancel</button>
+                <button type="button" class="btn btn-primary" (click)="accept()" [disabled]="!canSubmit()" hotkey="CTRL+ENTER" i18n="@@i18n.common.import">import</button>
+            </div>
+        </div>
+    </div>
+</div>

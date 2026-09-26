@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Enums\InvoiceItemType;
 use App\Enums\MilestoneState;
 use App\Models\Assignment;
+use App\Models\ProjectState;
 use Illuminate\Support\Facades\Auth;
 
 class TimetrackerDataService {
@@ -17,7 +18,10 @@ class TimetrackerDataService {
         return $collection
             ->with('latest_focus', 'pluginLinks', 'hoursInvestedSum')
             ->get()
-            ->filter(fn ($_) => $_->state->progress < 2)
+            ->filter(function ($_) {
+                $_->is_in_warranty = $_->isInWarranty();
+                return $_->state->progress < ProjectState::Finished || $_->is_in_warranty;
+            })
             ->map(function ($_) {
                 foreach (self::PROJECT_LOADERS as $key) {
                     $_->{$key};
@@ -49,7 +53,8 @@ class TimetrackerDataService {
             })
             ->map->only([...self::GLOBAL_LOADERS, ...self::PROJECT_LOADERS,
                 'project_manager_id', 'due_at', 'deadline_at', 'pluginLinks', 'needs_progress_bar',
-                'state', 'finished_state', 'progress', 'is_internal', 'is_time_based', 'items', 'work_estimated', 'hours_planned', 'has_time_budget'])
+                'state', 'finished_state', 'progress', 'is_internal', 'is_time_based', 'items', 'work_estimated', 'hours_planned', 'has_time_budget',
+                'is_in_warranty', 'warranty_until'])
             ->all();
     }
     public function mapCompanies($collection): array {

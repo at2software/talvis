@@ -102,6 +102,12 @@
                 <div>{{ _project.finished_at | date }}</div>
             </li>
         }
+        @if (_project.warranty_until) {
+            <li class="list-group-item hstack gap-2">
+                <div class="flex-fill" i18n="@@i18n.project.warrantyUntil">warranty until</div>
+                <div [class.text-warning]="_project.isInWarranty()">{{ _project.warranty_until | date }}</div>
+            </li>
+        }
         @if (_project.is_time_based && !_project.is_internal) {
             <li class="list-group-item hstack gap-2 cursor-pointer" roles="financial" routerLink="./invoicing">
                 <div class="flex-fill" i18n="@@i18n.common.unbilledFoci">unbilled foci</div>

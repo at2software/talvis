@@ -1,5 +1,5 @@
 [Unit]
-Description=NEXUS Laravel Reverb websocket server
+Description=TALVIS Laravel Reverb websocket server
 Documentation=https://git.at2.me/at2/Projects/at2/nexus/issues/-/issues/610
 After=network.target
 
@@ -13,6 +13,8 @@ WorkingDirectory=/var/www/html/backend
 # (0.0.0.0:8080) do not match what nginx proxies to. See the /app/ location in
 # /etc/nginx/sites-available/default before changing either.
 ExecStart=/usr/bin/php artisan reverb:start --host 127.0.0.1 --port 6001
+
+UMask=0002
 
 Restart=always
 RestartSec=3

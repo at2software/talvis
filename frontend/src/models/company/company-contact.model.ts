@@ -17,6 +17,8 @@ export class CompanyContact extends VcardClass {
     override readonly getAvatar = computed(() => environment.envApi + `companies/${this.snapshot().company_id}/icon`);
     override get gender(): string { return this.contact?.gender ?? ''; }
 
+    readonly isRetired = computed(() => this.snapshot().is_retired === true);
+
     protected override buildActions(): NxAction[] { return getCompanyContactActions(this) }
 
     company_id: string = '';

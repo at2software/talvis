@@ -8,7 +8,7 @@
 
     @if (employees().length) {
         <div class="card-body">
-            <ul revealList class="list-group">
+            <ul class="list-group">
                 @for (e of employees(); track e.id) {
                     <li class="list-group-item d-flex cursor-pointer" routerLink="/hr/{{ e.id }}/employment">
                         <div class="text-nowrap me-2">

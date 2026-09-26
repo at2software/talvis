@@ -28,6 +28,7 @@ class CustomerRevenueStatsService {
         $typeValues = array_map(fn ($e) => $e->value, InvoiceItemType::Total);
 
         $allItems = DB::table('invoice_items')
+            ->whereNull('invoice_items.deleted_at')
             ->join('invoices', 'invoice_items.invoice_id', '=', 'invoices.id')
             ->whereIn('invoices.company_id', $companyIds)
             ->where('invoices.is_cancelled', false)

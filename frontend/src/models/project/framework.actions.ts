@@ -6,7 +6,7 @@ export function getFrameworkActions(self: Framework): NxAction[] {
         {
             title: $localize`:@@i18n.common.setDeprecated:set deprecated`,
             group: true,
-            action: () => self.httpService.put('projects/frameworks', { url: self.url, is_deprecated: true }).subscribe(),
+            action: () => self.httpService.put('projects/frameworks', { url: self.url, is_deprecated: true }),
             type: NxActionType.Destructive,
             roles: 'admin',
         },

@@ -32,7 +32,7 @@ export class TabCommentsComponent {
     path = input.required<string>();
 
     hasActivity = signal<Dictionary<boolean>>({});
-    showActivity = signal<Dictionary<boolean>>({ nexus: true });
+    showActivity = signal<Dictionary<boolean>>({ talvis: true });
 
     #commentService = inject(CommentService);
     #gitService = inject(GitService);
@@ -40,10 +40,10 @@ export class TabCommentsComponent {
     #pluginFactory = inject(PluginInstanceFactory);
     #destroyRef = inject(DestroyRef);
 
-    #nexusComments = modelListResource(this.path, (path) => this.#commentService.indexFor(path));
-    #allComments = linkedSignal(() => this.#nexusComments.value().map((c) => {
+    #talvisComments = modelListResource(this.path, (path) => this.#commentService.indexFor(path));
+    #allComments = linkedSignal(() => this.#talvisComments.value().map((c) => {
         c.var = c.var || {};
-        c.var.source = 'nexus';
+        c.var.source = 'talvis';
         return c;
     }));
 
@@ -60,12 +60,12 @@ export class TabCommentsComponent {
     readonly commentTextarea = viewChild<ElementRef<HTMLTextAreaElement>>('commentTextarea');
     readonly scrollbar = viewChild(ScrollbarComponent);
 
-    selectedTarget: 'nexus' | ChatPluginInstance = 'nexus';
+    selectedTarget: 'talvis' | ChatPluginInstance = 'talvis';
     availableChatTargets = signal<ChatPluginInstance[]>([]);
 
     constructor() {
         effect(() => {
-            if (this.#nexusComments.hasValue()) untracked(() => this.#loadPlugins());
+            if (this.#talvisComments.hasValue()) untracked(() => this.#loadPlugins());
         });
 
         effect(() => {
@@ -77,7 +77,7 @@ export class TabCommentsComponent {
         activityTab.onFocus = () => setTimeout(() => this.scrollToBottom(), 0);
     }
 
-    reload = () => this.#nexusComments.reload();
+    reload = () => this.#talvisComments.reload();
 
     #loadPlugins() {
         const currentProject = this.currentProject();
@@ -207,7 +207,7 @@ export class TabCommentsComponent {
         const text = target.value.trim();
         if (!text) return;
 
-        if (this.selectedTarget === 'nexus') {
+        if (this.selectedTarget === 'talvis') {
             Comment.fromJson({}).store({ text, path: this.path() }).subscribe(() => {
                 this.reload();
                 target.value = '';
@@ -223,7 +223,7 @@ export class TabCommentsComponent {
     }
 
     getPlaceholder(): string {
-        if (this.selectedTarget === 'nexus') {
+        if (this.selectedTarget === 'talvis') {
             return $localize`:@@i18n.info.newCommentCtrlEnterToSave:New Comment (CTRL+ENTER to save)`;
         }
         const pluginName = this.selectedTarget.constructor?.name?.replace('Plugin', '') || 'Chat';
@@ -231,11 +231,11 @@ export class TabCommentsComponent {
     }
 
     getTargetIcon(): string {
-        if (this.selectedTarget === 'nexus') return 'nexus';
+        if (this.selectedTarget === 'talvis') return 'nexus';
         return this.selectedTarget.icon() || 'chat';
     }
 
-    selectTarget(target: 'nexus' | ChatPluginInstance) {
+    selectTarget(target: 'talvis' | ChatPluginInstance) {
         this.selectedTarget = target;
     }
 

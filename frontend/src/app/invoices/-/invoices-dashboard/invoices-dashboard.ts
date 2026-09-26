@@ -1,4 +1,4 @@
-import { Page } from '@models/http/http.nexus';
+import { Page } from '@models/http/http.talvis';
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { InvoicesTable } from '@app/invoices/_shards/invoices-table/invoices-table';

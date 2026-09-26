@@ -11,7 +11,7 @@ use App\Models\Task;
 use Illuminate\Support\Facades\DB;
 
 class DuplicateProjectAction {
-    private const PROJECT_FIELDS = ['company_id', 'description', 'project_id', 'product_id', 'remind_at', 'deadline_at', 'lead_probability', 'project_manager_id', 'no_git_required', 'po_number', 'is_time_based', 'is_internal', 'individual_wage'];
+    private const PROJECT_FIELDS = ['company_id', 'description', 'project_id', 'product_id', 'remind_at', 'due_at', 'deadline_at', 'lead_probability', 'project_manager_id', 'no_git_required', 'po_number', 'is_time_based', 'is_internal', 'individual_wage'];
     private const PLUGIN_LINK_FIELDS = ['name', 'url', 'type', 'framework_id', 'framework_version'];
     private const ASSIGNMENT_FIELDS = ['role_id', 'assignee_id', 'assignee_type', 'hours_planned', 'hours_weekly', 'flags'];
     private const TASK_FIELDS = ['name', 'description', 'link', 'status', 'due_date'];

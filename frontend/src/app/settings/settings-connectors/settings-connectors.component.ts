@@ -39,9 +39,8 @@ const VAULT_INFO: Dictionary<{ label: string; description: string }[]> = {
         { label: 'login', description: 'Username or email address of the bot account' },
         { label: 'password', description: 'Password of the bot account' },
         { label: 'broadcast channel', description: 'Channel ID used for system-wide notifications' },
-        { label: 'default user ID', description: 'NEXUS user ID who receives direct payment notifications (e.g. discrepancies from bank reconciliation)' },
+        { label: 'default user ID', description: 'TALVIS user ID who receives direct payment notifications (e.g. discrepancies from bank reconciliation)' },
     ],
-    AT2CONNECT: [{ label: 'URL', description: 'Base URL of the at²connect instance' }],
     GITLAB: [
         { label: 'GitLab URL', description: 'Base URL of your GitLab instance (e.g. https://gitlab.com)' },
         { label: 'access token', description: 'Personal or project access token — requires API scope' },
@@ -181,7 +180,7 @@ export class SettingsConnectorsComponent {
     mapKey = (key: string) => this.currentVault()!.prefix + '_' + key;
     isKeyMissing = (key: string) => this.currentVault()?.missing?.includes(key) ?? false;
     vaultIcon = (vault: TVault) =>
-        ({ MATTERMOST: 'mattermost', GITLAB: 'git', AT2CONNECT: 'nexus', FINTS: 'bank' }[vault.prefix] ?? vault.prefix.toLowerCase());
+        ({ MATTERMOST: 'mattermost', GITLAB: 'git', FINTS: 'bank' }[vault.prefix] ?? vault.prefix.toLowerCase());
 
     #onIbanChange(iban: string) {
         const normalized = iban.replace(/\s/g, '').toUpperCase();

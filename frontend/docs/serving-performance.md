@@ -1,6 +1,6 @@
 # Serving performance
 
-Notes on why the NEXUS UI felt slow and what was done about it. The application code was not the
+Notes on why the TALVIS UI felt slow and what was done about it. The application code was not the
 bottleneck — Angular is zoneless, every component is `OnPush` and every `@for` is tracked. What
 made it slow was how assets and avatars were being *served*.
 

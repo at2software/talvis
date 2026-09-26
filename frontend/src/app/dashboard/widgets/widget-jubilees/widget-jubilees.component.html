@@ -7,7 +7,7 @@
     <widget-options [options]="getOptions()" (updated)="_onUpdate($event)" (deleted)="onDelete($event)"></widget-options>
 
     @if (jubilees().length) {
-        <ul revealList class="list-group">
+        <ul class="list-group">
             @for (j of jubilees(); track $index) {
                 <li class="list-group-item hstack gap-2" [class.today]="isToday(j)">
                     <div class="text-nowrap">

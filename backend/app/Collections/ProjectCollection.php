@@ -15,8 +15,7 @@ class ProjectCollection extends BaseCollection {
             }
             if ($project->relationLoaded('assigned_users')) {
                 $project->assigned_users->each(function ($user) {
-                    $user->makeHidden('pivot');
-                    $user->unsetRelation('activeEmployment');
+                    $user->makeHidden(['pivot', 'activeEmployment']);
                 });
             }
         });

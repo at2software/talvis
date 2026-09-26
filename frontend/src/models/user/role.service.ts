@@ -3,7 +3,7 @@ import { RoleManagementDto } from '@models/_core/api-response';
 import { Role } from '@models/user/role.model';
 import { User } from '@models/user/user.model';
 import { GlobalService } from '../global.service';
-import { NexusHttpService } from '../http/http.nexus';
+import { TalvisHttpService } from '../http/http.talvis';
 import { Serializable } from '@models/_core/serializable';
 import { firstValueFrom, map, Observable } from 'rxjs';
 
@@ -14,7 +14,7 @@ interface RoleManagementResult {
 }
 
 @Service()
-export class RoleService extends NexusHttpService<Serializable> {
+export class RoleService extends TalvisHttpService<Serializable> {
     apiPath = 'roles';
     onReady = new EventEmitter<void>();
     onUpdate = new EventEmitter<void>();

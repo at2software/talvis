@@ -8,29 +8,3 @@
     </div>
     <app-vcard [object]="_card"></app-vcard>
 }
-
-<div class="card mb-3">
-    <div class="card-header d-flex">
-        <div class="flex-fill" i18n="@@i18n.companies.other-company-employments">other company employments</div>
-        <div>
-            <search-input only="Company" (itemSelected)="onCompanySelect($event)" [query]="searchQuery"></search-input>
-        </div>
-    </div>
-    @if (_card.contact.companies.length > 1) {
-        <ul class="list-group">
-            @for (c of _card.contact.companies; track c.id) {
-                @if (c.id !== _card.company_id) {
-                    <li class="list-group-item list-group-item-action hstack gap-2" [nx]="c">
-                        <div>
-                            <avatar [object]="c"></avatar>
-                        </div>
-                        <div class="flex-fill">{{ c.getName() }}</div>
-                        <div>
-                            <i class="text-primary pointer" (click)="onUnlink(c)" (keyup.enter)="onUnlink(c)" tabindex="0">link_off</i>
-                        </div>
-                    </li>
-                }
-            }
-        </ul>
-    }
-</div>

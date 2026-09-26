@@ -34,6 +34,9 @@ import { Model } from '@constants/model/type-discriminators';
 import { computed } from '@angular/core';
 import { Dictionary } from '@constants/constants';
 import type { ProjectTimelineEntryDto } from '@models/_core/api-response';
+
+export const PROJECT_OVERRUN_WARN_THRESHOLD_DEFAULT = 110;
+
 export const PROJECT_STATES: Dictionary<string> = {
     Prepared: $localize`:@@i18n.invoice.prepared:prepared`,
     InProgress: $localize`:@@i18n.common.active:active`,
@@ -84,6 +87,7 @@ export class Project extends Serializable implements HasInvoiceItems, IHasFiles,
     quoted_at?: string;
     due_at?: string;
     finished_at?: string;
+    warranty_until?: string;
     remind_at?: string;
     revenue_last_12?: number;
     started_at?: string;
@@ -126,6 +130,7 @@ export class Project extends Serializable implements HasInvoiceItems, IHasFiles,
     readonly hasTimeBudget           = computed((): boolean => { this.snapshot(); return this.is_time_based === 1; });
     readonly momentStarted           = computed((): Dayjs => { this.snapshot(); return dayjs(this.started_at); });
     readonly momentFinished          = computed((): Dayjs => { this.snapshot(); return dayjs(this.finished_at); });
+    readonly isInWarranty            = computed((): boolean => { const j = this.snapshotAsThis(); return !!j.warranty_until && dayjs(j.warranty_until).isAfter(dayjs()); });
     readonly momentDue               = computed((): Dayjs => { this.snapshot(); return dayjs(this.due_at); });
     readonly momentRemind            = computed((): Dayjs => { this.snapshot(); return dayjs(this.remind_at); });
     readonly frontendUrl             = computed((): string => { this.snapshot(); return `/projects/${this.id}`; });
@@ -189,7 +194,8 @@ export class Project extends Serializable implements HasInvoiceItems, IHasFiles,
         if (j.state?.progress !== ProjectState.ProgressRunning || !!j.is_internal || !!j.is_time_based) return false;
         if (j.ml_predicted_hours === null || j.ml_predicted_hours === undefined) return false;
         if (j.work_estimated === null || j.work_estimated === undefined || j.work_estimated <= 0) return false;
-        return j.ml_predicted_hours > j.work_estimated;
+        const threshold = Number(nx().global.setting('PROJECT_OVERRUN_WARN_THRESHOLD')) || PROJECT_OVERRUN_WARN_THRESHOLD_DEFAULT;
+        return (100 * j.ml_predicted_hours) / j.work_estimated >= threshold;
     }
 
     #calcBadge(): undefined | [string, string] {

@@ -1,5 +1,6 @@
 import { NxActionType } from "@models/_core/nx.actions";
 import { MarketingProspect } from "./marketing-prospect.model";
+import { firstValueFrom } from 'rxjs';
 
 export const MarketingProspectActions = (that: MarketingProspect) => [
     {
@@ -60,7 +61,7 @@ export const MarketingProspectActions = (that: MarketingProspect) => [
         title: $localize`:@@i18n.common.delete:delete`,
         group: true,
         type: NxActionType.Destructive,
-        action: () => that.modalConfirm().then(() => that.httpService.delete(`marketing/prospects/${that.id}`).subscribe()),
+        action: () => that.modalConfirm().then(() => firstValueFrom(that.httpService.delete(`marketing/prospects/${that.id}`)).then(() => that)),
         hotkey: 'DEL',
         roles: 'marketing',
     },

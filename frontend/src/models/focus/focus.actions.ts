@@ -19,18 +19,18 @@ export function getFocusActions(self: Focus): NxAction[] {
             action: (_resolve, _ctx, result: ExtIssueLinkResult | undefined) =>
                 result ? self.update({ ext_issue_plugin_link_id: result.ext_issue_plugin_link_id, ext_issue_id: result.ext_issue_id }) : undefined,
         },
-        { title: $localize`:@@i18n.foci.resetToOrga:reset to organisational`, action: () => self.update({ project_id: null }).subscribe(), roles: 'hr' },
+        { title: $localize`:@@i18n.foci.resetToOrga:reset to organisational`, action: () => self.update({ project_id: null }), roles: 'hr' },
         {
             title: $localize`:@@i18n.foci.enableInvoicing:enable invoicing`,
             on: () => !self.invoice_item_id && self.is_unpaid,
-            action: () => self.update({ is_unpaid: false }).subscribe(),
+            action: () => self.update({ is_unpaid: false }),
             group: true,
             roles: 'project_manager|financial',
         },
         {
             title: $localize`:@@i18n.foci.disableInvoicing:disable invoicing`,
             on: () => !self.invoice_item_id && !self.is_unpaid,
-            action: () => self.update({ is_unpaid: true }).subscribe(),
+            action: () => self.update({ is_unpaid: true }),
             group: true,
             roles: 'project_manager|financial',
         },
@@ -62,7 +62,7 @@ export function getFocusActions(self: Focus): NxAction[] {
                 return (user?.latest_foci ?? []).map((_: any) => ({
                     title: _.parent_name,
                     group: true,
-                    action: () => self.update({ parent_path: _.parent_path }).subscribe(),
+                    action: () => self.update({ parent_path: _.parent_path }),
                 }));
             },
         },

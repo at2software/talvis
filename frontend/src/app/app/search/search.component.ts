@@ -3,8 +3,6 @@ import { ChangeDetectionStrategy, Component, ElementRef, inject, signal, viewChi
 import { SearchInputComponent } from '@shards/search-input/search-input.component';
 import { Serializable } from '@models/_core/serializable';
 
-type SearchResult = Serializable & { company_id?: string };
-
 @Component({
     changeDetection: ChangeDetectionStrategy.OnPush,
     selector: 'app-search',
@@ -37,21 +35,11 @@ export class SearchComponent {
         }
     }
 
-    onSelect(e: SearchResult) {
+    onSelect(e: Serializable) {
         this.searchbox().blur();
         this.searchbox().empty();
         this.expanded.set(false);
-        this.#router.navigate([this.#pathFor(e)]);
-    }
-
-    #pathFor(o: SearchResult) {
-        switch (o.class) {
-            case 'Company': return '/customers/' + o.id;
-            case 'CompanyContact': return '/customers/' + o.company_id;
-            case 'Project': return '/projects/' + o.id;
-            case 'Product': return '/products/' + o.id;
-            case 'Invoice': return '/financial/' + o.id;
-        }
-        return '/';
+        const url = e.frontendUrl();
+        if (url) this.#router.navigate([url]);
     }
 }

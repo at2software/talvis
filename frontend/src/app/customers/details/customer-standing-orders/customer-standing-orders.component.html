@@ -16,9 +16,4 @@
     </div>
 </toolbar>
 
-<invoices-standing [parent]="_company" [class.d-none]="table.items.length === 0" #table></invoices-standing>
-@if (table.items.length === 0) {
-    <div class="card">
-        <empty-state [card]="false" class="invoices" title="no standing orders" i18n-title="@@i18n.invoices.noStandingOrders"></empty-state>
-    </div>
-}
+<invoices-standing [parent]="_company"></invoices-standing>

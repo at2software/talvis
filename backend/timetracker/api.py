@@ -2,13 +2,13 @@ import requests
 from datetime import datetime, timezone
 
 
-class NexusAPIError(Exception):
+class TalvisAPIError(Exception):
     def __init__(self, status_code: int, message: str):
         self.status_code = status_code
         super().__init__(message)
 
 
-class NexusAPI:
+class TalvisAPI:
     def __init__(self, base_url: str, token: str = ""):
         self.base_url = base_url.rstrip("/")
         self.token = token
@@ -21,7 +21,7 @@ class NexusAPI:
 
     def _raise_for(self, resp: requests.Response):
         if not resp.ok:
-            raise NexusAPIError(resp.status_code, resp.text or f"HTTP {resp.status_code}")
+            raise TalvisAPIError(resp.status_code, resp.text or f"HTTP {resp.status_code}")
 
     def login(self, email: str, password: str) -> dict:
         """POST /login — returns environment dict; sets self.token on success."""

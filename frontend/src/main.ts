@@ -4,7 +4,7 @@ import { AppComponent } from '@app/app/app.component';
 import { APP_BASE_HREF, PlatformLocation, registerLocaleData } from '@angular/common';
 import { HttpFeature, HttpFeatureKind, provideHttpClient, withInterceptors, withXhr } from '@angular/common/http';
 import { provideRouter, withNavigationErrorHandler, withPreloading, PreloadAllModules } from '@angular/router';
-import { nexusHttpInterceptor } from '@app/http.interceptor';
+import { talvisHttpInterceptor } from '@app/http.interceptor';
 import { RouteChangeListenerService } from '@app/routeChangeListener.service';
 import { GlobalService } from '@models/global.service';
 import { AuthenticationService } from '@models/auth.service';
@@ -37,7 +37,7 @@ AuthenticationService.loadSysInfo().then(async (sysinfo) => {
                 { provide: MODEL_REGISTRY_TOKEN, useFactory: () => MODEL_REGISTRY },
                 LocaleService,
 
-                provideHttpClient(withXhr(), ...keycloakHttpOptions, withInterceptors([nexusHttpInterceptor])),
+                provideHttpClient(withXhr(), ...keycloakHttpOptions, withInterceptors([talvisHttpInterceptor])),
                 { provide: LOCALE_CONFIG, useValue: { format: 'DD.MM.YYYY' } },
                 { provide: ErrorHandler, useClass: ChunkErrorHandler },
                 { provide: APP_BASE_HREF, useFactory: (s: PlatformLocation) => s.getBaseHrefFromDOM(), deps: [PlatformLocation] },

@@ -14,7 +14,7 @@
                 <!-- Header -->
                 <div class="wizard-header d-flex align-items-center gap-2 mb-4">
                     <i class="text-primary">rocket_launch</i>
-                    <span class="fw-semibold flex-fill" i18n="@@i18n.onboarding.setupNexus">set up NEXUS</span>
+                    <span class="fw-semibold flex-fill" i18n="@@i18n.onboarding.setupTalvis">set up TALVIS</span>
                     @if (_step < 3) {
                         <small class="text-muted">{{ currentStepIndex() + 1 }} / {{ totalSteps() }}</small>
                         <button class="btn-plain ms-2" (click)="dismiss()" i18n-title="@@i18n.common.dismiss" title="dismiss">
@@ -74,7 +74,7 @@
                 @if (_step === 0) {
                     <div class="wizard-step flex-fill d-flex flex-column justify-content-center">
                         <h4 i18n="@@i18n.onboarding.letsCreateCompany">Let's create your company first</h4>
-                        <p class="text-muted mb-4" i18n="@@i18n.onboarding.companyDescription">NEXUS needs a company entry to represent your organization. This will become your "my company" reference throughout the system.</p>
+                        <p class="text-muted mb-4" i18n="@@i18n.onboarding.companyDescription">TALVIS needs a company entry to represent your organization. This will become your "my company" reference throughout the system.</p>
                         <div class="input-group">
                             <input type="text" class="form-control form-control-lg" [(ngModel)]="companyName" i18n-placeholder="@@i18n.onboarding.companyNamePlaceholder" placeholder="e.g. Acme Corp" (keyup.enter)="createCompany()" />
                             <button class="btn btn-primary" [disabled]="!companyName.trim() || _loading" (click)="createCompany()">
@@ -92,7 +92,7 @@
                 @if (_step === 1) {
                     <div class="wizard-step flex-fill d-flex flex-column justify-content-center">
                         <h4 i18n="@@i18n.onboarding.setUpLocalization">Set up localization</h4>
-                        <p class="text-muted mb-4" i18n="@@i18n.onboarding.localizationDescription">Choose the language, country and currency for your NEXUS instance.</p>
+                        <p class="text-muted mb-4" i18n="@@i18n.onboarding.localizationDescription">Choose the language, country and currency for your TALVIS instance.</p>
 
                         <div class="mb-3">
                             <label class="form-label fw-semibold" for="wizLanguage" i18n="@@i18n.settings.systemLanguageIso">language (ISO 639-1)</label>
@@ -200,7 +200,7 @@
                             <i>check_circle</i>
                         </div>
                         <h3 class="mb-2" i18n="@@i18n.onboarding.wizard.successTitle">You're all set!</h3>
-                        <p class="text-muted mb-4" i18n="@@i18n.onboarding.wizard.successMessage">Your NEXUS instance is fully configured and ready to go. Let's get started on your awesome experience!</p>
+                        <p class="text-muted mb-4" i18n="@@i18n.onboarding.wizard.successMessage">Your TALVIS instance is fully configured and ready to go. Let's get started on your awesome experience!</p>
                         <button class="btn btn-primary btn-lg px-5" (click)="close()">
                             <span i18n="@@i18n.onboarding.wizard.letsGo">let's go</span>
                             <i class="ms-1">rocket_launch</i>

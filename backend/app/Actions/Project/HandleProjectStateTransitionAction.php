@@ -51,6 +51,7 @@ class HandleProjectStateTransitionAction {
 
         if ($project->hasStateChangedTo(ProjectState::Finished, $previousState)) {
             Comment::create([...$project->toPoly(), 'text' => $stateChangeMessage, 'user_id' => $userId, 'is_mini' => true, 'type' => CommentType::Info]);
+            $project->clearAssignedTimeBudgets();
 
             if (! config('app.debug')) {
                 $props = PluginMattermostController::buildWebhookProps($name, $icon);

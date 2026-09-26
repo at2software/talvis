@@ -9,6 +9,7 @@ class ProjectState extends BaseModel {
     use HasFactory;
 
     protected $fillable = ['name', 'progress', 'color', 'is_in_stats', 'is_successful', 'created_at', 'updated_at'];
+    protected $hidden   = ['laravel_through_key'];
 
     protected function casts(): array {
         return [

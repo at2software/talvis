@@ -19,7 +19,6 @@ npm-debug.log
 yarn-error.log
 resources/aqua_migration
 .vscode
-composer.lock
 .env
 /grc-*
 /nexus-up.settings.bat

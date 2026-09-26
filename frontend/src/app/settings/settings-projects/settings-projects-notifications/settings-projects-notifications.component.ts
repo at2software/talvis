@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, linkedSignal, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { InputSettingsGroupComponent } from '@shards/input-group/input-settings-group.component';
-import { NexusHttp } from '@models/http/http.nexus';
+import { TalvisHttp } from '@models/http/http.talvis';
 import { ParamValueDto } from '@models/_core/api-response';
 import { modelResource } from '@models/http/model-resource';
 
@@ -21,8 +21,9 @@ const parseThresholds = (param?: ParamValueDto): number[] => {
 })
 export class SettingsProjectsNotificationsComponent {
     newThreshold = signal<number | null>(null);
+    readonly years = $localize`:@@i18n.common.years:years`;
 
-    #http = inject(NexusHttp);
+    #http = inject(TalvisHttp);
 
     readonly #param = modelResource(() => this.#http.get<ParamValueDto | undefined>('params/PROJECT_WORK_THRESHOLDS'));
     readonly thresholds = linkedSignal(() => parseThresholds(this.#param.value()));

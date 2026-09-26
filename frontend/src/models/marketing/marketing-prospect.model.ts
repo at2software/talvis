@@ -14,6 +14,7 @@ import { computed } from '@angular/core';
 import { tap } from 'rxjs';
 import { MarketingProspectActions } from './marketing-prospect.actions';
 import { Dictionary } from '@constants/constants';
+import { nx } from '@models/_core/nx-bridge';
 
 @Model('MarketingProspect')
 export class MarketingProspect extends VcardClass implements IHasMarker {
@@ -46,6 +47,8 @@ export class MarketingProspect extends VcardClass implements IHasMarker {
         disqualified: 'text-danger',
         on_hold: 'text-muted',
     }
+
+    override frontendUrl = (): string | undefined => (nx().global.user?.hasRole('marketing') ? `/marketing/prospects/${this.id}` : undefined);
 
     protected override buildActions(): NxAction[] { return MarketingProspectActions(this) }
 

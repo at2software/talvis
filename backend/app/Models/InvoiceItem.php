@@ -5,21 +5,26 @@ namespace App\Models;
 use App\Builders\InvoiceItemBuilder;
 use App\Enums\InvoiceItemType;
 use App\Enums\InvoiceVatHandling;
+use App\Traits\LogsDeletionTrait;
 use App\Traits\PrecomputedTrait;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Auth;
 
 class InvoiceItem extends BaseModel {
     use HasFactory;
+    use LogsDeletionTrait;
     use PrecomputedTrait;
+    use SoftDeletes;
 
     const INFO_REDUCED = ['progress', 'id', 'text', 'qty', 'unit_name'];
     const ACTIVE       = ['inactive', 'active', 'optional'];
 
     protected $my_mutators = ['my_prediction'];
     protected $touches     = ['invoice', 'company', 'project'];
-    protected $appends     = ['class', 'icon', 'path', 'progress'];
+    protected $appends     = ['class', 'icon', 'path', 'progress', 'delete_blockers'];
     protected $fillable    = [
         'company_id',
         'discount',
@@ -42,7 +47,8 @@ class InvoiceItem extends BaseModel {
         'ext_issue_plugin_link_id',
         'ext_issue_id',
     ];
-    protected $hides = ['deleted_at'];
+    protected $hides  = ['deleted_at'];
+    protected $hidden = ['fociUserSums'];
 
     protected function casts(): array {
         return [
@@ -90,6 +96,11 @@ class InvoiceItem extends BaseModel {
     public function billedFoci() {
         return $this->hasMany(Focus::class, 'invoiced_in_item_id');
     }
+    public function fociUserSums() {
+        return $this->hasMany(Focus::class)
+            ->selectRaw('invoice_item_id, user_id, SUM(duration) as duration')
+            ->groupBy('invoice_item_id', 'user_id');
+    }
     public function company() {
         return $this->belongsTo(Company::class);
     }
@@ -123,7 +134,9 @@ class InvoiceItem extends BaseModel {
 
     protected function myPrediction(): Attribute {
         return Attribute::make(
-            get: fn () => InvoiceItemPrediction::find(Auth::user()->id, $this->id)->value('qty'),
+            get: fn () => $this->relationLoaded('predictions')
+                ? $this->predictions->firstWhere('user_id', Auth::user()->id)?->qty
+                : InvoiceItemPrediction::find(Auth::user()->id, $this->id)->value('qty'),
             set: function ($val) {
                 $pred      = InvoiceItemPrediction::findOrCreate(Auth::user()->id, $this->id);
                 $pred->qty = $val;
@@ -153,16 +166,25 @@ class InvoiceItem extends BaseModel {
         );
     }
     public function getFociSumAttribute() {
-        return $this->foci()->sum('duration');
+        if (array_key_exists('foci_sum_duration', $this->attributes)) {
+            return floatval($this->attributes['foci_sum_duration']);
+        }
+        return floatval($this->foci()->sum('duration'));
     }
     public function getBilledFociSumAttribute() {
-        return $this->billedFoci()->sum('duration');
+        if (array_key_exists('billed_foci_sum_duration', $this->attributes)) {
+            return floatval($this->attributes['billed_foci_sum_duration']);
+        }
+        return floatval($this->billedFoci()->sum('duration'));
     }
     public function getFociByUserAttribute() {
-        return $this->foci()
-            ->selectRaw('user_id, SUM(duration) as duration')
-            ->groupBy('user_id')
-            ->get()
+        $sums = $this->relationLoaded('fociUserSums')
+            ? $this->fociUserSums
+            : $this->foci()
+                ->selectRaw('user_id, SUM(duration) as duration')
+                ->groupBy('user_id')
+                ->get();
+        return $sums
             ->map(fn ($focus) => [
                 'user_id'  => $focus->user_id,
                 'duration' => floatval($focus->duration),
@@ -170,6 +192,9 @@ class InvoiceItem extends BaseModel {
             ->values();
     }
     public function getBilledFociCountAttribute() {
+        if (array_key_exists('billed_foci_count', $this->attributes)) {
+            return intval($this->attributes['billed_foci_count']);
+        }
         return $this->billedFoci()->count();
     }
     public function getAssumedWorkloadAttribute() {
@@ -209,6 +234,51 @@ class InvoiceItem extends BaseModel {
             }
         }
         return 0;
+    }
+
+    // ########
+    // DELETION
+    // ########
+
+    public function deletionBlockers(): array {
+        return $this->invoice_id ? ['invoiced'] : [];
+    }
+    public function getDeleteBlockersAttribute(): array {
+        return $this->deletionBlockers();
+    }
+    public function deletionLabel(): string {
+        return $this->text;
+    }
+    public function deletionContext(): ?Model {
+        return $this->project ?? $this->company;
+    }
+    public function deletionMeta(): array {
+        return [
+            'net'               => floatval($this->net),
+            'qty'               => floatval($this->qty),
+            'unit_name'         => $this->unit_name,
+            'type'              => $this->type?->name,
+            'stage'             => $this->stage,
+            'project_id'        => $this->project_id,
+            'company_id'        => $this->company_id,
+            'invoice_id'        => $this->invoice_id,
+            'foci_count'        => $this->foci()->count(),
+            'foci_duration'     => floatval($this->foci()->sum('duration')),
+            'billed_foci_count' => $this->billedFoci()->count(),
+            'billed_foci_ids'   => $this->billedFoci()->pluck('id')->all(),
+            'milestone_ids'     => $this->milestones()->pluck('milestones.id')->all(),
+        ];
+    }
+    public function afterDeletionRestore(array $meta): void {
+        Focus::whereIn('id', $meta['billed_foci_ids'] ?? [])
+            ->whereNull('invoiced_in_item_id')
+            ->update(['invoiced_in_item_id' => $this->id]);
+    }
+    protected static function booted(): void {
+        parent::booted();
+        static::deleting(function (InvoiceItem $item) {
+            $item->billedFoci()->update(['invoiced_in_item_id' => null]);
+        });
     }
     public function newEloquentBuilder($query) {
         return new InvoiceItemBuilder($query);

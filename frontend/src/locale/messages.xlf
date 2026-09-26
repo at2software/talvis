@@ -296,12 +296,12 @@
         <source>comments</source>
       </segment>
     </unit>
-    <unit id="i18n.comments.toggleNexusComments">
+    <unit id="i18n.comments.toggleTalvisComments">
       <notes>
         <note category="location">src/app/_activity/tab-comments/tab-comments.component.html:19</note>
       </notes>
       <segment>
-        <source>Toggle Nexus comments</source>
+        <source>Toggle TALVIS comments</source>
       </segment>
     </unit>
     <unit id="i18n.comments.toggleGitActivity">
@@ -328,12 +328,12 @@
         <source>Toggle Mattermost activity</source>
       </segment>
     </unit>
-    <unit id="i18n.comments.commentInNexus">
+    <unit id="i18n.comments.commentInTalvis">
       <notes>
         <note category="location">src/app/_activity/tab-comments/tab-comments.component.html:47,49</note>
       </notes>
       <segment>
-        <source>comment in NEXUS</source>
+        <source>comment in TALVIS</source>
       </segment>
     </unit>
     <unit id="i18n.common.daysAgo">
@@ -2019,6 +2019,30 @@
         <source><ph id="0" equiv="PH" disp="step.months ?? 0"/> monthly prepayments after project start</source>
       </segment>
     </unit>
+    <unit id="i18n.payment.triggerMonthlyNth">
+      <notes>
+        <note category="location">src/app/_shards/payment-plan-editor/payment-plan-editor.component.ts:33</note>
+      </notes>
+      <segment>
+        <source>monthly prepayment <ph id="0" equiv="index" disp="step.month_index"/> of <ph id="1" equiv="total" disp="step.months ?? 0"/> after project start</source>
+      </segment>
+    </unit>
+    <unit id="i18n.payment.stepPrepared">
+      <notes>
+        <note category="location">src/app/_modals/modal-invoice-add-instalment/modal-invoice-add-instalment.component.ts:123</note>
+      </notes>
+      <segment>
+        <source>prepared, not invoiced yet</source>
+      </segment>
+    </unit>
+    <unit id="i18n.payment.unmatchedDownpayments">
+      <notes>
+        <note category="location">src/app/_modals/modal-invoice-add-instalment/modal-invoice-add-instalment.component.html:48</note>
+      </notes>
+      <segment>
+        <source>not part of the agreed plan</source>
+      </segment>
+    </unit>
     <unit id="i18n.payment.noTiersDefined">
       <notes>
         <note category="location">src/app/_shards/payment-plan-editor/payment-plan-tiers-editor.component.html:2,5</note>
@@ -2238,12 +2262,12 @@
         <source>vacation request</source>
       </segment>
     </unit>
-    <unit id="i18n.common.nexus_environment_error">
+    <unit id="i18n.common.talvis_environment_error">
       <notes>
         <note category="location">src/app/app/environment404/environment404.component.html:5,7</note>
       </notes>
       <segment>
-        <source>NEXUS // environment error</source>
+        <source>TALVIS // environment error</source>
       </segment>
     </unit>
     <unit id="i18n.common.environment_error_message">
@@ -2251,7 +2275,7 @@
         <note category="location">src/app/app/environment404/environment404.component.html:8,10</note>
       </notes>
       <segment>
-        <source>The environment information seems to be corrupted. You are not logged out, but you cannot use NEXUS at the moment. Please report this to your system administrator and try again.</source>
+        <source>The environment information seems to be corrupted. You are not logged out, but you cannot use TALVIS at the moment. Please report this to your system administrator and try again.</source>
       </segment>
     </unit>
     <unit id="i18n.common.try_again">
@@ -2271,12 +2295,12 @@
         <source>logout</source>
       </segment>
     </unit>
-    <unit id="i18n.common.nexus_login">
+    <unit id="i18n.common.talvis_login">
       <notes>
         <note category="location">src/app/app/login/login.component.html:5,7</note>
       </notes>
       <segment>
-        <source>NEXUS // log-in</source>
+        <source>TALVIS // log-in</source>
       </segment>
     </unit>
     <unit id="i18n.common.email_address">
@@ -2308,7 +2332,7 @@
         <note category="location">src/app/app/navigation/navigation.component.html:62</note>
       </notes>
       <segment>
-        <source>NEXUS Navigation</source>
+        <source>TALVIS Navigation</source>
       </segment>
     </unit>
     <unit id="i18n.guidedTour.nav.introContent">
@@ -2316,7 +2340,7 @@
         <note category="location">src/app/app/navigation/navigation.component.html:62,64</note>
       </notes>
       <segment>
-        <source>Welcome to NEXUS! The navigation bar on the left gives you quick access to all modules. Let&apos;s take a quick look at what&apos;s available.</source>
+        <source>Welcome to TALVIS! The navigation bar on the left gives you quick access to all modules. Let&apos;s take a quick look at what&apos;s available.</source>
       </segment>
     </unit>
     <unit id="i18n.common.dashboard">
@@ -2824,7 +2848,7 @@
         <note category="location">src/app/customers/-/customers-dashboard/customers-dashboard.component.html:157</note>
       </notes>
       <segment>
-        <source>Create a new company by entering a name — or simply paste a website URL. NEXUS will automatically try to parse the company&apos;s imprint page to fill in address, contact details, and more.</source>
+        <source>Create a new company by entering a name — or simply paste a website URL. TALVIS will automatically try to parse the company&apos;s imprint page to fill in address, contact details, and more.</source>
       </segment>
     </unit>
     <unit id="i18n.customers.company_name_or_url">
@@ -3295,14 +3319,6 @@
         <source>rest</source>
       </segment>
     </unit>
-    <unit id="i18n.common.at2connect">
-      <notes>
-        <note category="location">src/app/customers/_shards/at2connect/at2connect.html:5,6</note>
-      </notes>
-      <segment>
-        <source>at2 connect</source>
-      </segment>
-    </unit>
     <unit id="i18n.common.languageFormality">
       <notes>
         <note category="location">src/app/customers/_shards/company-locale-selector/company-locale-selector.component.ts:17</note>
@@ -3463,6 +3479,14 @@
         <source>set new email</source>
       </segment>
     </unit>
+    <unit id="i18n.customers.multiple_emails_hint">
+      <notes>
+        <note category="location">src/app/customers/_shards/customer-payment-details/customer-payment-details.component.ts:86</note>
+      </notes>
+      <segment>
+        <source>separate multiple recipients with a semicolon</source>
+      </segment>
+    </unit>
     <unit id="i18n.customers.set_new_vat_id">
       <notes>
         <note category="location">src/app/customers/_shards/customer-payment-details/customer-payment-details.component.ts:85</note>
@@ -3596,10 +3620,18 @@
     </unit>
     <unit id="i18n.companies.other-company-employments">
       <notes>
-        <note category="location">src/app/customers/_shards/edit-vcard.ts/edit-vcard.ts.component.html:9,11</note>
+        <note category="location">src/app/customers/_shards/contact-employments/contact-employments.html:5</note>
       </notes>
       <segment>
         <source>other company employments</source>
+      </segment>
+    </unit>
+    <unit id="i18n.companies.addEmployment">
+      <notes>
+        <note category="location">src/app/customers/_shards/contact-employments/contact-employments.html:7</note>
+      </notes>
+      <segment>
+        <source>add employment</source>
       </segment>
     </unit>
     <unit id="i18n.common.whatsapp">
@@ -4068,6 +4100,94 @@
         <source>quote number</source>
       </segment>
     </unit>
+    <unit id="i18n.common.years">
+      <notes>
+        <note category="location">src/app/settings/settings-projects/settings-projects-notifications/settings-projects-notifications.component.ts:24</note>
+      </notes>
+      <segment>
+        <source>years</source>
+      </segment>
+    </unit>
+    <unit id="i18n.project.warranty">
+      <notes>
+        <note category="location">src/app/settings/settings-projects/settings-projects-notifications/settings-projects-notifications.component.html:10</note>
+      </notes>
+      <segment>
+        <source>warranty</source>
+      </segment>
+    </unit>
+    <unit id="i18n.project.warrantyDuration">
+      <notes>
+        <note category="location">src/app/settings/settings-projects/settings-projects-notifications/settings-projects-notifications.component.html:13</note>
+      </notes>
+      <segment>
+        <source>warranty period</source>
+      </segment>
+    </unit>
+    <unit id="i18n.project.warrantyDurationDesc">
+      <notes>
+        <note category="location">src/app/settings/settings-projects/settings-projects-notifications/settings-projects-notifications.component.html:12</note>
+      </notes>
+      <segment>
+        <source>Time after a project is finished during which time can still be tracked on it. Available as the [warranty-duration] placeholder in quotes and invoices.</source>
+      </segment>
+    </unit>
+    <unit id="i18n.placeholder.warrantyDuration">
+      <notes>
+        <note category="location">src/app/settings/_shards/tab-placeholder-info/tab-placeholder-info.component.html:50</note>
+      </notes>
+      <segment>
+        <source>agreed warranty period in years (cascades: project → customer → default)</source>
+      </segment>
+    </unit>
+    <unit id="i18n.placeholder.warrantyUntil">
+      <notes>
+        <note category="location">src/app/settings/_shards/tab-placeholder-info/tab-placeholder-info.component.html:54</note>
+      </notes>
+      <segment>
+        <source>date the warranty expires; empty until the project is finished successfully</source>
+      </segment>
+    </unit>
+    <unit id="i18n.project.warrantyUntil">
+      <notes>
+        <note category="location">src/app/projects/_shards/project-info/project-info.component.html:107</note>
+      </notes>
+      <segment>
+        <source>warranty until</source>
+      </segment>
+    </unit>
+    <unit id="i18n.project.warrantyHours">
+      <notes>
+        <note category="location">src/app/projects/-/projects-stats/projects-stats.component.ts:386</note>
+      </notes>
+      <segment>
+        <source>warranty</source>
+      </segment>
+    </unit>
+    <unit id="i18n.project.regularHours">
+      <notes>
+        <note category="location">src/app/projects/-/projects-stats/projects-stats.component.ts:387</note>
+      </notes>
+      <segment>
+        <source>project runtime</source>
+      </segment>
+    </unit>
+    <unit id="i18n.projects.warrantyShare">
+      <notes>
+        <note category="location">src/app/projects/-/projects-stats/projects-stats.component.html:70</note>
+      </notes>
+      <segment>
+        <source>warranty vs. project runtime</source>
+      </segment>
+    </unit>
+    <unit id="i18n.projects.warrantyByProject">
+      <notes>
+        <note category="location">src/app/projects/-/projects-stats/projects-stats.component.html:82</note>
+      </notes>
+      <segment>
+        <source>hours booked after project completion</source>
+      </segment>
+    </unit>
     <unit id="i18n.project.quoteValidFor">
       <notes>
         <note category="location">src/app/settings/settings-projects/settings-projects-quote/settings-projects-quote.component.html:9</note>
@@ -4187,14 +4307,6 @@
       </notes>
       <segment>
         <source>toggle dropdown</source>
-      </segment>
-    </unit>
-    <unit id="i18n.invoices.noStandingOrders">
-      <notes>
-        <note category="location">src/app/customers/details/customer-standing-orders/customer-standing-orders.component.html:22</note>
-      </notes>
-      <segment>
-        <source>no standing orders</source>
       </segment>
     </unit>
     <unit id="i18n.customers.customersubscriptionsWorks">
@@ -4547,7 +4659,7 @@
         <note category="location">src/app/dashboard/dashboard.component.html:62,64</note>
       </notes>
       <segment>
-        <source>Most objects in NEXUS support right-click context menus with quick actions. You can easily spot them — their background turns teal when you hover over them.</source>
+        <source>Most objects in TALVIS support right-click context menus with quick actions. You can easily spot them — their background turns teal when you hover over them.</source>
       </segment>
     </unit>
     <unit id="i18n.guidedTour.dashboard.multiselectTitle">
@@ -4877,6 +4989,14 @@
       </notes>
       <segment>
         <source>Revenue (12m)</source>
+      </segment>
+    </unit>
+    <unit id="i18n.dashboard.avgRevenueYtd">
+      <notes>
+        <note category="location">src/app/dashboard/widgets/widget-revenue-current-year/widget-revenue-current-year.component.ts:86,105</note>
+      </notes>
+      <segment>
+        <source>Revenue (YTD)</source>
       </segment>
     </unit>
     <unit id="i18n.dashboard.revenueThisYear">
@@ -6411,7 +6531,7 @@
         <note category="location">src/app/invoices/-/invoices-standing/invoices-standing.component.html:27,30</note>
       </notes>
       <segment>
-        <source>Automate your recurring revenue. Set up standing orders and let NEXUS handle the rhythm of your business.</source>
+        <source>Automate your recurring revenue. Set up standing orders and let TALVIS handle the rhythm of your business.</source>
       </segment>
     </unit>
     <unit id="i18n.common.next">
@@ -6589,6 +6709,14 @@
       </notes>
       <segment>
         <source>days until reminder</source>
+      </segment>
+    </unit>
+    <unit id="i18n.invoices.notTimeBasedSelection">
+      <notes>
+        <note category="location">src/app/invoices/_shards/invoice-prepare/invoice-prepare.html:103</note>
+      </notes>
+      <segment>
+        <source>items whose unit could not be mapped to a time-based quantity</source>
       </segment>
     </unit>
     <unit id="i18n.invoices.afterInstalments">
@@ -8909,12 +9037,12 @@
         <source>LocalAI Proxy uses username + token authentication through a proxy service.</source>
       </segment>
     </unit>
-    <unit id="i18n.profile.nexusPluginConfigurationIsManaged">
+    <unit id="i18n.profile.talvisPluginConfigurationIsManaged">
       <notes>
         <note category="location">src/app/profile/profile-plugins/plugin-config-modal/plugin-config-modal.component.html:218,223</note>
       </notes>
       <segment>
-        <source>NEXUS plugin configuration is managed automatically.</source>
+        <source>TALVIS plugin configuration is managed automatically.</source>
       </segment>
     </unit>
     <unit id="i18n.profile.deletePlugin">
@@ -9477,7 +9605,7 @@
         <note category="location">src/app/profile/profile-travel-expenses/profile-travel-expenses.component.html:196,197</note>
       </notes>
       <segment>
-        <source>Info: PDF muss noch manuell an die Geschäftsführung für die weitere Verarbeitung weitergeleitet werden. Im NEXUS wird nichts gespeichert.</source>
+        <source>Info: PDF muss noch manuell an die Geschäftsführung für die weitere Verarbeitung weitergeleitet werden. Im TALVIS wird nichts gespeichert.</source>
       </segment>
     </unit>
     <unit id="i18n.profile.pdfGenerieren">
@@ -11014,6 +11142,14 @@
       </notes>
       <segment>
         <source>move to customer</source>
+      </segment>
+    </unit>
+    <unit id="i18n.projects.convertSupportToRegular">
+      <notes>
+        <note category="location">src/app/projects/id/project-invoicing/project-invoicing.component.html:93</note>
+      </notes>
+      <segment>
+        <source>convert to regular items</source>
       </segment>
     </unit>
     <unit id="i18n.projects.quoteAcceptance">
@@ -12591,7 +12727,7 @@
         <note category="location">src/app/settings/settings-connectors/settings-connectors.component.html:1,3</note>
       </notes>
       <segment>
-        <source>Connectors link NEXUS to external services via encrypted credentials. Values are stored securely and never exposed again after saving — leave fields blank to keep existing values unchanged.</source>
+        <source>Connectors link TALVIS to external services via encrypted credentials. Values are stored securely and never exposed again after saving — leave fields blank to keep existing values unchanged.</source>
       </segment>
     </unit>
     <unit id="i18n.settings.pipelineJobs">
@@ -12784,6 +12920,22 @@
       </notes>
       <segment>
         <source>email thresholds</source>
+      </segment>
+    </unit>
+    <unit id="i18n.settings.overrunWarnThreshold">
+      <notes>
+        <note category="location">src/app/settings/settings-projects/settings-projects-notifications/settings-projects-notifications.component.html:21</note>
+      </notes>
+      <segment>
+        <source>warning threshold</source>
+      </segment>
+    </unit>
+    <unit id="i18n.settings.overrunWarnThresholdDesc">
+      <notes>
+        <note category="location">src/app/settings/settings-projects/settings-projects-notifications/settings-projects-notifications.component.html:20</note>
+      </notes>
+      <segment>
+        <source>Show an orange warning badge on a project as soon as the predicted final effort reaches this share of the estimated work.</source>
       </segment>
     </unit>
     <unit id="i18n.settings.emailThresholdsDesc">
@@ -13059,11 +13211,19 @@
     </unit>
     <unit id="i18n.common.retire">
       <notes>
-        <note category="location">src/models/company/company-contact.actions.ts:14</note>
+        <note category="location">src/models/company/company-contact.actions.ts:17</note>
         <note category="location">src/models/user/user.actions.ts:16</note>
       </notes>
       <segment>
         <source>retire</source>
+      </segment>
+    </unit>
+    <unit id="i18n.common.reactivate">
+      <notes>
+        <note category="location">src/models/company/company-contact.actions.ts:18</note>
+      </notes>
+      <segment>
+        <source>reactivate</source>
       </segment>
     </unit>
     <unit id="i18n.companies.setFavorite">
@@ -14076,44 +14236,54 @@
         <source>vacation</source>
       </segment>
     </unit>
-    <unit id="i18n.common.requestDeletion">
-      <notes>
-        <note category="location">src/app/nx/nx.static.ts:88</note>
-      </notes>
+    <unit id="i18n.settings.deletionLog">
       <segment>
-        <source>request deletion</source>
+        <source>deletion log</source>
       </segment>
     </unit>
-    <unit id="i18n.common.requestDeletionReason">
-      <notes>
-        <note category="location">src/app/nx/nx.static.ts:92</note>
-      </notes>
+    <unit id="i18n.deletionLog.deletedBy">
       <segment>
-        <source>Why should this be deleted?</source>
+        <source>deleted by</source>
       </segment>
     </unit>
-    <unit id="i18n.common.deletionRequested">
-      <notes>
-        <note category="location">src/app/nx/nx.static.ts:99</note>
-      </notes>
+    <unit id="i18n.deletionLog.entry">
       <segment>
-        <source>Deletion requested</source>
+        <source>entry</source>
       </segment>
     </unit>
-    <unit id="i18n.common.deletionRequests">
-      <notes>
-        <note category="location">src/app/_activity/tab-tasks/_shards/tab-tasks-deletion-requests/tab-tasks-deletion-requests.component.html:5</note>
-      </notes>
+    <unit id="i18n.deletionLog.context">
       <segment>
-        <source>deletion requests</source>
+        <source>context</source>
       </segment>
     </unit>
-    <unit id="i18n.deletionRequest.reallyReject">
-      <notes>
-        <note category="location">src/app/_activity/tab-tasks/_shards/tab-tasks-deletion-requests/tab-tasks-deletion-requests.component.ts:54</note>
-      </notes>
+    <unit id="i18n.deletionLog.restore">
       <segment>
-        <source>Reject this deletion request?</source>
+        <source>restore</source>
+      </segment>
+    </unit>
+    <unit id="i18n.deletionLog.empty">
+      <segment>
+        <source>nothing was deleted yet</source>
+      </segment>
+    </unit>
+    <unit id="i18n.common.back">
+      <segment>
+        <source>back</source>
+      </segment>
+    </unit>
+    <unit id="i18n.invoices.deleteItemTrackedHint">
+      <segment>
+        <source>tracked time loses its assignment.</source>
+      </segment>
+    </unit>
+    <unit id="i18n.invoices.deleteItemBilledHint">
+      <segment>
+        <source>prepared for billing count as unbilled again.</source>
+      </segment>
+    </unit>
+    <unit id="i18n.invoices.deleteItemMilestoneHint">
+      <segment>
+        <source>milestone loses this item.</source>
       </segment>
     </unit>
     <unit id="i18n.common.due">
@@ -14420,6 +14590,86 @@
       </notes>
       <segment>
         <source>no credentials for this tracker</source>
+      </segment>
+    </unit>
+    <unit id="i18n.projects.planningSampleHint">
+      <notes>
+        <note category="location">src/app/projects/id/project-planning/project-planning.component.html:19</note>
+      </notes>
+      <segment>
+        <source>download a sample planning file — drop a filled in copy onto this card to create the items</source>
+      </segment>
+    </unit>
+    <unit id="i18n.projects.planningDropUnsupported">
+      <notes>
+        <note category="location">src/app/projects/id/project-planning/project-planning.component.ts:161</note>
+      </notes>
+      <segment>
+        <source>only markdown files can be dropped here</source>
+      </segment>
+    </unit>
+    <unit id="i18n.projects.planningDropEmpty">
+      <notes>
+        <note category="location">src/app/projects/id/project-planning/project-planning.component.ts:171</note>
+      </notes>
+      <segment>
+        <source>no planning items found in the dropped file</source>
+      </segment>
+    </unit>
+    <unit id="i18n.projects.planningImporting">
+      <notes>
+        <note category="location">src/app/projects/id/project-planning/project-planning.component.ts:222</note>
+      </notes>
+      <segment>
+        <source>creating planning items…</source>
+      </segment>
+    </unit>
+    <unit id="i18n.projects.planningImported">
+      <notes>
+        <note category="location">src/app/projects/id/project-planning/project-planning.component.ts:232</note>
+      </notes>
+      <segment>
+        <source>planning items created</source>
+      </segment>
+    </unit>
+    <unit id="i18n.projects.planningImportFailed">
+      <notes>
+        <note category="location">src/app/projects/id/project-planning/project-planning.component.ts:238</note>
+      </notes>
+      <segment>
+        <source>could not create the planning items</source>
+      </segment>
+    </unit>
+    <unit id="i18n.projects.importPlanningTitle">
+      <notes>
+        <note category="location">src/app/_modals/modal-import-planning/modal-import-planning.component.html:7</note>
+      </notes>
+      <segment>
+        <source>import planning</source>
+      </segment>
+    </unit>
+    <unit id="i18n.projects.importPlanningNothing">
+      <notes>
+        <note category="location">src/app/_modals/modal-import-planning/modal-import-planning.component.html:14</note>
+      </notes>
+      <segment>
+        <source>nothing recognised in this file</source>
+      </segment>
+    </unit>
+    <unit id="i18n.common.items">
+      <notes>
+        <note category="location">src/app/_modals/modal-import-planning/modal-import-planning.component.html:25</note>
+      </notes>
+      <segment>
+        <source>items</source>
+      </segment>
+    </unit>
+    <unit id="i18n.projects.planningRowOptional">
+      <notes>
+        <note category="location">src/app/_modals/modal-import-planning/modal-import-planning.component.html:49</note>
+      </notes>
+      <segment>
+        <source>optional</source>
       </segment>
     </unit>
   </file>

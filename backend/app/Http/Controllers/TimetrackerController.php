@@ -46,7 +46,7 @@ class TimetrackerController extends Controller {
             ];
             // $builderCompanies->whereNot('id', $meCompanyId);
         }
-        $projects  = $this->dataService->mapProjects(request()->user()->projects()->with('company')->wherePreparedOrRunning());
+        $projects  = $this->dataService->mapProjects(request()->user()->projects()->with('company')->whereTrackable());
         $companies = $this->dataService->mapCompanies($builderCompanies);
         return $this->sorted([$orga], $projects, $companies);
     }
@@ -77,8 +77,8 @@ class TimetrackerController extends Controller {
             $payload['ext_issue_id'] = request('ext_issue_id');
         }
         if ($parent = $this->getParentPolyFromRequest()) {
-            if (is_a($parent, Project::class) && $parent->state->progress == ProjectState::Finished) {
-                return response('Cannot create foci on finished projects!', 400);
+            if (is_a($parent, Project::class) && $parent->state->progress == ProjectState::Finished && ! $parent->isInWarranty()) {
+                return response('Cannot create foci on finished projects outside their warranty period!', 400);
             }
             if (is_a($parent, Project::class)) {
                 if ($assignment = $parent->assignees()->where(request()->user()->toPoly('assignee'))->first()) {
@@ -164,7 +164,7 @@ class TimetrackerController extends Controller {
         return request()->user();
     }
     public function search(SearchRequest $request) {
-        $projects  = $this->dataService->mapProjects(Project::wherePreparedOrRunning()->where('name', 'like', '%'.request('q').'%'));
+        $projects  = $this->dataService->mapProjects(Project::whereTrackable()->where('name', 'like', '%'.request('q').'%'));
         $companies = $this->dataService->mapCompanies(Company::where('vcard', 'like', '%'.request('q').'%'));
         return $this->sorted($projects, $companies);
     }

@@ -30,7 +30,7 @@ export class TaskService extends PluginInstance implements ITaskPlugin {
     getProfileUrl = (): string => '';
     getUserSelectionModalPath = () => '';
     getInterfacePropertyName = () => 'ITaskPluginProperty';
-    getPluginTypeName = () => 'nexus';
+    getPluginTypeName = () => 'talvis';
 
     getActivityComments = (_projectId: string = '', _maxInitialItems: number = 150, _resolveUser?: (email?: string, username?: string, name?: string, pluginAttribute?: string) => unknown): Observable<never[]> => of([]);
     baseUrl = (): string => environment.envApi;
@@ -48,7 +48,7 @@ export class TaskService extends PluginInstance implements ITaskPlugin {
     addCoAssignee = (_: Task, user: User) => this.post(`tasks/${_.id}/co-assignees`, { user_id: user.id }, (json) => Assignee.fromJson(json));
     removeCoAssignee = (_: Task, assignmentId: string) => this.delete(`tasks/${_.id}/co-assignees/${assignmentId}`);
     icon = () => 'nexus';
-    getName = () => 'NEXUS';
+    getName = () => 'TALVIS';
 
     load = () => {
         this.init.next();

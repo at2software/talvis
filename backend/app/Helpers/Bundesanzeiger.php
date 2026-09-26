@@ -3,6 +3,7 @@
 namespace App\Helpers;
 
 use Composer\CaBundle\CaBundle;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\DomCrawler\Crawler;
@@ -12,6 +13,8 @@ class Bundesanzeiger {
 
     private function http() {
         return Http::withOptions(['verify' => CaBundle::getSystemCaRootBundlePath()])
+            ->connectTimeout(15)
+            ->timeout(60)
             ->withHeaders([
                 'Accept'                    => 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
                 'Accept-Encoding'           => 'gzip, deflate, br',
@@ -31,7 +34,13 @@ class Bundesanzeiger {
             ]);
     }
     public function process($companyName) {
-        $html = $this->fetchSearchResults($companyName);
+        try {
+            $html = $this->fetchSearchResults($companyName);
+        } catch (ConnectionException $e) {
+            Log::warning('Bundesanzeiger: Request failed for '.$companyName.': '.$e->getMessage());
+            return [];
+        }
+
         if (empty($html)) {
             return [];
         }

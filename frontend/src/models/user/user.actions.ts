@@ -11,7 +11,7 @@ export function getUserActions(self: User): NxAction[] {
                 if (context?.component && context.initiative) context.component.unsubscribeFromInitiative(self.id);
             },
         },
-        { title: $localize`:@@i18n.common.retire:retire`, on: () => !self.is_retired, context: '!initiative_subscriber', action: () => self.update({ is_retired: true }).subscribe(), roles: 'hr' },
+        { title: $localize`:@@i18n.common.retire:retire`, on: () => !self.is_retired, context: '!initiative_subscriber', action: () => self.update({ is_retired: true }), roles: 'hr' },
         {
             title: $localize`:@@i18n.plugins.linkToPluginUser:link to plugin user`,
             group: true,
@@ -27,10 +27,10 @@ export function getUserActions(self: User): NxAction[] {
             context: '!initiative_subscriber',
             roles: 'admin',
             children: [
-                { title: $localize`:@@i18n.common.admin:admin`, action: () => self.update({ user_group: 'admin' }).subscribe() },
-                { title: $localize`:@@i18n.common.projectManager:project manager`, action: () => self.update({ user_group: 'project_manager' }).subscribe() },
-                { title: $localize`:@@i18n.common.developer:developer`, action: () => self.update({ user_group: 'developer' }).subscribe() },
-                { title: $localize`:@@i18n.common.noUserGroup:no user group`, action: () => self.update({ user_group: null }).subscribe() },
+                { title: $localize`:@@i18n.common.admin:admin`, action: () => self.update({ user_group: 'admin' }) },
+                { title: $localize`:@@i18n.common.projectManager:project manager`, action: () => self.update({ user_group: 'project_manager' }) },
+                { title: $localize`:@@i18n.common.developer:developer`, action: () => self.update({ user_group: 'developer' }) },
+                { title: $localize`:@@i18n.common.noUserGroup:no user group`, action: () => self.update({ user_group: null }) },
             ],
         },
     ];

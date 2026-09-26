@@ -1,0 +1,38 @@
+@let _employments = employments();
+
+<div class="card mb-3">
+    <div class="card-header">
+        <span i18n="@@i18n.companies.other-company-employments">other company employments</span>
+        <div class="card-header-actions">
+            <i #pop="ngbPopover" class="text-primary pointer" [ngbPopover]="popContent" placement="start" container="body" [autoClose]="'outside'" (shown)="onPopoverShown()" popoverTitle="add employment" i18n-popoverTitle="@@i18n.companies.addEmployment">add</i>
+
+            <ng-template #popContent>
+                <search-input #popSearch only="Company" (itemSelected)="onCompanySelect($event, pop)">
+                    <div class="dropdown-divider"></div>
+                    <div class="dropdown-item hstack gap-2 pointer text-primary" (click)="createNewCompany(popSearch, pop)" (keyup.enter)="createNewCompany(popSearch, pop)" tabindex="0">
+                        <div><i>add</i></div>
+                        <div class="flex-fill">
+                            <span i18n="@@i18n.common.createNew">create new</span>
+                            @if (popSearch.query()) {
+                                <span class="fw-bold">"{{ popSearch.query() }}"</span>
+                            }
+                        </div>
+                    </div>
+                </search-input>
+            </ng-template>
+        </div>
+    </div>
+    <ul-compact class="list-group">
+        @for (e of _employments; track e.id) {
+            <li class="list-group-item list-group-item-action hstack gap-2" [compact]="e.isRetired()" [class.opacity-50]="e.isRetired()" [nx]="e" [tables]="siblings()" (actionsResolved)="onActionsResolved()">
+                <div>
+                    <avatar [object]="e.company"></avatar>
+                </div>
+                <div class="flex-fill text-truncate">{{ e.company.getName() }}</div>
+                <div>
+                    <i class="text-primary pointer" (click)="onUnlink(e)" (keyup.enter)="onUnlink(e)" tabindex="0">link_off</i>
+                </div>
+            </li>
+        }
+    </ul-compact>
+</div>

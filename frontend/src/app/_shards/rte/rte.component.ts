@@ -27,7 +27,7 @@ export class RteComponent {
     readonly modules: QuillModules = { toolbar: { container: `#${this.toolbarId}` } };
 
     get binding(): string {
-        return Reflect.get(this.object(), this.key());
+        return Reflect.get(this.object(), this.key()) ?? '';
     }
     set binding(v: string) {
         Reflect.set(this.object(), this.key(), v);

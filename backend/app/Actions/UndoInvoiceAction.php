@@ -17,7 +17,7 @@ class UndoInvoiceAction {
         }
 
         $firstItem = $invoice->invoiceItems()->first();
-        $invoice->invoiceItems()->update(['invoice_id' => null]);
+        $invoice->releaseItems();
         $invoice->delete();
 
         $invoiceNoParam        = Param::get('INVOICE_NO_CURRENT');

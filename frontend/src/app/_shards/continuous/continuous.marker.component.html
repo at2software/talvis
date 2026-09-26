@@ -1,16 +1,12 @@
-@if (remainingPages() > 0) {
-    <button type="button" 
-        class="btn bg-dark bg-gradient continuous-button" 
-        [class.text-primary]="!autoloadRemaining()" 
-        [disabled]="autoloadRemaining() || loaded()" 
-        i18n-ngbTooltip="@@i18n.info.loadAllRemainingPagesFromDatabase" 
-        ngbTooltip="load all remaining pages from database" 
-        (click)="loadRemaining()">
-        <i>sync</i>{{ remainingPages() }}
-    </button>
-}
+<toolbar>
+    @if (remainingPages() > 0) {
+        <div class="btn-group" role="group">
+            <button type="button" class="btn btn-plain" [class.text-primary]="!autoloadRemaining()" [disabled]="autoloadRemaining() || loaded()" i18n-ngbTooltip="@@i18n.info.loadAllRemainingPagesFromDatabase" ngbTooltip="load all remaining pages from database" (click)="loadRemaining()"><i>sync</i>{{ remainingPages() }}</button>
+        </div>
+    }
+</toolbar>
 
 <div class="loader-container" [class.d-none]="!active()">
-    <spinner class="py-4 nexus-loader"></spinner>
+    <spinner class="py-4 talvis-loader"></spinner>
 </div>
 <i class="text-muted user-select-none" [class.d-none]="active() || loaded()" title="Waiting to start loader">hourglass_disabled</i>

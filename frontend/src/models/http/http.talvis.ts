@@ -32,11 +32,11 @@ type VERB_ARGS = [url: string, $2?: Dictionary | Body | Type<unknown> | null, $3
 export const idOf = (target: string | number | Serializable): string | number => (target instanceof Serializable ? target.id : target);
 
 @Service()
-export class NexusHttp extends HttpInjectWrapper {
+export class TalvisHttp extends HttpInjectWrapper {
     override baseUrl = () => environment.envApi;
 }
 
-export abstract class NexusHttpService<T extends Serializable> extends HttpInjectWrapper {
+export abstract class TalvisHttpService<T extends Serializable> extends HttpInjectWrapper {
     public abstract apiPath: string;
 
     readonly model?: Type<T>;

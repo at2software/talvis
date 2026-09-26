@@ -22,7 +22,7 @@ import { DebriefProblem } from '@models/project/debrief-problem.model';
 import { DebriefProblemCategory } from '@models/project/debrief-problem-category.model';
 import { DebriefProjectDebrief } from '@models/project/debrief-project-debrief.model';
 import { DebriefSolution } from '@models/project/debrief-solution.model';
-import { DeletionRequest } from '@models/deletion-request/deletion-request.model';
+import { DeletionLog } from '@models/deletion-log/deletion-log.model';
 import { Encryption } from '@models/encryption/encryption.model';
 import { Expense } from '@models/expense/expense.model';
 import { ExpenseCategory } from '@models/expense/expense-category.model';
@@ -80,7 +80,7 @@ export const MODEL_REGISTRY: Record<string, any> = {
     'DebriefProblemCategory': DebriefProblemCategory,
     'DebriefProjectDebrief': DebriefProjectDebrief,
     'DebriefSolution': DebriefSolution,
-    'DeletionRequest': DeletionRequest,
+    'DeletionLog': DeletionLog,
     'Encryption': Encryption,
     'Expense': Expense,
     'ExpenseCategory': ExpenseCategory,

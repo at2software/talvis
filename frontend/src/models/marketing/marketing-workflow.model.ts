@@ -5,6 +5,7 @@ import { MarketingActivity } from './marketing-activity.model';
 import { MarketingInitiative } from './marketing-initiative.model';
 import { TPivot } from './marketing-performance-metrics.model';
 import { Model } from '@constants/model/type-discriminators';
+import { firstValueFrom } from 'rxjs';
 import type { ActivityStatsDto } from '@models/_core/api-response';
 
 export interface TProspectStats {
@@ -41,7 +42,7 @@ export class MarketingWorkflow extends Serializable {
                 context: 'initiative_details',
                 action: () => {
                     const removeActivities = confirm('Do you also want to remove all prospect activities from this workflow?\n\n' + 'Click OK to remove activities, Cancel to keep them.');
-                    this.httpService.delete(`marketing/initiatives/${this.pivot?.marketing_initiative_id}/workflows/${this.id}`, { body: { remove_prospect_activities: removeActivities } }).subscribe();
+                    return this.httpService.delete(`marketing/initiatives/${this.pivot?.marketing_initiative_id}/workflows/${this.id}`, { body: { remove_prospect_activities: removeActivities } });
                 },
                 roles: 'marketing',
             },
@@ -50,7 +51,7 @@ export class MarketingWorkflow extends Serializable {
                 group: true,
                 type: NxActionType.Destructive,
                 context: '!initiative_details',
-                action: () => this.modalConfirm().then(() => this.httpService.delete(`marketing/workflows/${this.id}`).subscribe()),
+                action: () => this.modalConfirm().then(() => firstValueFrom(this.httpService.delete(`marketing/workflows/${this.id}`)).then(() => this)),
                 hotkey: 'DEL',
                 roles: 'marketing',
             },

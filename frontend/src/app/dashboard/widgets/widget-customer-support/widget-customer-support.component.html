@@ -14,7 +14,7 @@
     }
 
     @if (!getOptions()['chart-only']?.value) {
-        <ul-compact revealList [badge]="badgeCount(data()) > 0 ? '' + badgeCount(data()) : undefined">
+        <ul-compact [badge]="badgeCount(data()) > 0 ? '' + badgeCount(data()) : undefined">
             @for (_ of data(); track _.id; let i = $index) {
                 <li class="list-group-item d-flex text-nowrap" [nx]="_" [tables]="data()" [compact]="indexExceedsSettings(i) && !_.getBadge()">
                     <div>

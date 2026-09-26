@@ -13,8 +13,10 @@ trait HasParams {
     public static $WITH = ['latestFloatParams', 'latestStringParams', 'latestTextParams'];
 
     public function initializeHasParams() {
-        // $this->with = array_unique(array_merge($this->with ?? [], $this->additionalWith));
         $this->hidden = array_unique(array_merge($this->hidden ?? [], self::$WITH));
+        if ($this->eagerLoadParams ?? false) {
+            $this->with = array_unique(array_merge($this->with ?? [], self::$WITH));
+        }
     }
 
     public function floatParams() {
@@ -54,7 +56,7 @@ trait HasParams {
         return $this->latestParamFor('INVOICE_REVENUE_12M')->whereAfter(now()->subYear(), 'created_at');
     }
     public function latestParamFor(string $key): HasOne {
-        $param = Param::where('key', $key)->first();
+        $param = Param::get($key, doNotCreate: true);
         if (! $param) {
             return $this->hasOne(FloatParam::class, 'parent_id')->whereRaw('0 = 1'); // fallback
         }

@@ -184,8 +184,8 @@ class MilestoneController extends Controller {
         if ($pm && $pm->id !== $actingUser->id) {
             $props = [
                 'from_webhook'         => 'true',
-                'webhook_display_name' => $milestone->user->name ?? 'NEXUS',
-                'override_username'    => $milestone->user->name ?? 'NEXUS',
+                'webhook_display_name' => $milestone->user->name ?? 'TALVIS',
+                'override_username'    => $milestone->user->name ?? 'TALVIS',
                 'override_icon_url'    => config('app.api_url').($milestone->user->icon ?? ''),
             ];
             $state         = MilestoneState::from($milestone->state);

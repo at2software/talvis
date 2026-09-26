@@ -2,34 +2,25 @@ import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, model
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
 import { CompanyContact } from '@models/company/company-contact.model';
-import { CompanyContactService } from '@models/company/company-contact.service';
 import { VcardComponent } from '../vcard/vcard.component';
-import { Company } from '@models/company/company.model';
-import { Serializable } from '@models/_core/serializable';
 import { CustomerDetailGuard } from '@app/customers/customers.details.guard';
-import { SearchInputComponent } from '@shards/search-input/search-input.component';
-import { Nx } from '@app/nx/nx.directive';
-import { AvatarComponent } from '@shards/avatar/avatar.component';
-import { CompanyContactStoreDto } from '@models/_core/api-response';
 
 @Component({
     changeDetection: ChangeDetectionStrategy.OnPush,
     selector: 'edit-vcard',
     templateUrl: './edit-vcard.ts.component.html',
-    imports: [VcardComponent, SearchInputComponent, Nx, AvatarComponent],
+    imports: [VcardComponent],
 })
 export class EditVcardTsComponent {
     card = model.required<CompanyContact>();
 
     fnRow = computed(() => this.card().contact.card()?.rows.findIndex((_) => _.key == 'FN'));
     nRow = computed(() => this.card().contact.card()?.rows.findIndex((_) => _.key == 'N'));
-    searchQuery = '';
 
     #router = inject(ActivatedRoute);
     #parent = inject(CustomerDetailGuard);
 
     company = this.#parent.object;
-    #companyContactService = inject(CompanyContactService);
     #destroyRef = inject(DestroyRef);
 
     constructor() {
@@ -39,40 +30,16 @@ export class EditVcardTsComponent {
             if (card) {
                 this.card.set(card);
                 setTimeout(() => {
-                    object.var.selectedEmployee = this.card;
+                    object.var.selectedEmployee = card;
                     this.#parent.touch();
                 });
             }
         });
         this.#destroyRef.onDestroy(() => {
-            const current = this.#parent.object();
-            if (current.var) {
-                current.var.selectedEmployee = undefined;
-                this.#parent.touch();
-            }
+            if (this.#parent.object() !== object) return;
+            object.var.selectedEmployee = undefined;
+            this.#parent.touch();
         });
-    }
-
-    onCompanySelect(selected: Serializable) {
-        const company = selected.assert(Company);
-        if (!company) return;
-        if (this.card().company_id !== company.id) {
-            this.searchQuery = '';
-            this.#companyContactService
-                .link<CompanyContactStoreDto>({
-                    company_id: company.id,
-                    contact_id: this.card().contact_id,
-                    vcard: 'TEL:\nEMAIL:\nTEL;type=cell:\nTITLE:',
-                })
-                .subscribe((response) => {
-                    this.card().contact.companies.push(Company.fromJson(response.company));
-                });
-        }
-    }
-
-    onUnlink(company: Company) {
-        this.card().contact.companies.remove(company);
-        this.#companyContactService.unlink(this.card().contact_id, company.id).subscribe();
     }
 
     save() {

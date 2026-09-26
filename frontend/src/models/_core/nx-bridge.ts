@@ -40,7 +40,7 @@ export interface NxBridge {
     navigateTo(url: string): void;
     getService<T>(token: ProviderToken<T>): T;
     getCurrentRoot(): Serializable | undefined;
-    deleteAction(self: Serializable, message: string, options?: DeleteActionOptions): NxAction;
+    deleteAction(self: Serializable, message: string | (() => string), options?: DeleteActionOptions): NxAction;
     clipboardActions(self: Serializable, addContext?: string): NxAction[];
     openModal<R = unknown>(ref: ModalRef, ...args: unknown[]): Promise<R | undefined>;
     confirm(title: string, message: string): Promise<boolean>;

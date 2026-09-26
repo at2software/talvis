@@ -50,6 +50,13 @@ export const SETTINGS_ROUTES: Routes = [
                 title: $localize`:@@i18n.settings.commands:commands`,
             },
             {
+                path: 'deletion-log',
+                loadComponent: () => import('./deletion-log/settings-deletion-log.component').then((m) => m.SettingsDeletionLogComponent),
+                canActivate: [PermissionsGuard],
+                data: { roles: 'admin', fallback: ['settings'] },
+                title: $localize`:@@i18n.settings.deletionLog:deletion log`,
+            },
+            {
                 path: 'roles',
                 loadComponent: () => import('./roles/roles.component').then((m) => m.UsersComponent),
                 canActivate: [PermissionsGuard],

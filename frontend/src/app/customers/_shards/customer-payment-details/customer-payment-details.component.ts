@@ -83,7 +83,8 @@ export class CustomerPaymentDetailsComponent {
     }
 
     onChangeEmail() {
-        this.inputModal.open($localize`:@@i18n.customers.set_new_email:set new email`).then((r) => {
+        const hint = $localize`:@@i18n.customers.multiple_emails_hint:separate multiple recipients with a semicolon`;
+        this.inputModal.open($localize`:@@i18n.customers.set_new_email:set new email`, false, hint, this.current()?.invoice_email ?? '').then((r) => {
             if (r?.text) {
                 this.current()!
                     .update({ invoice_email: r.text })

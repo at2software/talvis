@@ -95,7 +95,7 @@ export class MarketingAssetsComponent {
             title: this.changeCategoryLabel,
             children: otherCategories.map((c) => ({
                 title: c.name,
-                action: () => this.#marketingService.updateMarketingAssetCategory(asset.id, c.name).subscribe(() => this.#onAssetRecategorized()),
+                action: () => this.#marketingService.updateMarketingAssetCategory(asset.id, c.name).pipe(tap(() => this.#onAssetRecategorized())),
             })),
         });
     }

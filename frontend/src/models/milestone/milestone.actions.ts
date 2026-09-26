@@ -3,6 +3,7 @@ import { Milestone } from './milestone.model';
 import { MilestoneState, MILESTONE_STATES } from './milestone-state.enum';
 import { nx } from '@models/_core/nx-bridge';
 import { MODAL } from '@models/_core/modal-registry';
+import { firstValueFrom } from 'rxjs';
 
 export function getMilestoneActions(self: Milestone): NxAction[] {
     return [
@@ -40,19 +41,14 @@ export function getMilestoneActions(self: Milestone): NxAction[] {
             on: () => !self.invoice_items || self.invoice_items.length === 0,
             action: () => {
                 const initialValue = self.workload_hours?.toString() || '';
-                nx()
+                return nx()
                     .promptInput($localize`:@@i18n.milestone.workloadHours:workload (hours)`, false, $localize`:@@i18n.milestone.setDurationInfo:Enter the estimated workload in hours for this milestone`, initialValue)
                     .then((result) => {
-                        if (result && result.text) {
-                            const hours = parseFloat(result.text);
-                            if (!isNaN(hours) && hours >= 0) {
-                                self.update({ workload_hours: hours }).subscribe();
-                            }
-                        }
+                        const hours = parseFloat(result?.text ?? '');
+                        if (isNaN(hours) || hours < 0) return undefined;
+                        return firstValueFrom(self.update({ workload_hours: hours }));
                     })
-                    .catch(() => {
-                        // Modal dismissed
-                    });
+                    .catch(() => undefined);
             },
         },
         {

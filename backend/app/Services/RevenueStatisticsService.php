@@ -6,6 +6,7 @@ use App\Enums\InvoiceItemType;
 use App\Models\Invoice;
 use App\Models\InvoiceItem;
 use App\Models\Param;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class RevenueStatisticsService {
@@ -13,16 +14,17 @@ class RevenueStatisticsService {
         $current = now()->startOfYear();
         $last    = now()->startOfYear()->subYear(1);
         return [
-            'expenses'  => Param::get('CASHFLOW_ANNUAL_EXPENSES')->value,
-            'revenue'   => Invoice::whereBetween('created_at', [$current, now()])->sum('net'),
-            'current'   => Invoice::whereBetween('created_at', [$current, now()])->clusterBy()->get()->map(fn ($_) => $_->only(['month', 'sum'])),
-            'last'      => Invoice::whereBetween('created_at', [$last, $current])->clusterBy('DATE_ADD(created_at, INTERVAL 1 YEAR)')->get()->map(fn ($_) => $_->only(['month', 'sum'])),
-            'revenue12' => self::getRevenue12MByMonth($current),
+            'expenses'        => Param::get('CASHFLOW_ANNUAL_EXPENSES')->value,
+            'revenue'         => Invoice::whereBetween('created_at', [$current, now()])->sum('net'),
+            'current'         => Invoice::whereBetween('created_at', [$current, now()])->clusterBy()->get()->map(fn ($_) => $_->only(['month', 'sum'])),
+            'last'            => Invoice::whereBetween('created_at', [$last, $current])->clusterBy('DATE_ADD(created_at, INTERVAL 1 YEAR)')->get()->map(fn ($_) => $_->only(['month', 'sum'])),
+            'revenue12'       => self::paramHistoryByMonth('INVOICE_REVENUE_12M', $current),
+            'expensesByMonth' => self::paramHistoryByMonth('CASHFLOW_ANNUAL_EXPENSES', $current),
         ];
     }
 
-    private static function getRevenue12MByMonth($since) {
-        return Param::get('INVOICE_REVENUE_12M')->history()
+    private static function paramHistoryByMonth(string $key, Carbon $since) {
+        return Param::get($key)->history()
             ?->whereBetween('created_at', [$since, now()])
             ->orderBy('created_at')
             ->get(['created_at', 'value'])

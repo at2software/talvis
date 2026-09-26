@@ -5,6 +5,7 @@ namespace App\Helpers;
 use Composer\CaBundle\CaBundle;
 use GuzzleHttp\Client;
 use GuzzleHttp\Cookie\CookieJar;
+use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\DomCrawler\Crawler;
 
@@ -15,10 +16,12 @@ class HandelsRegister {
 
     private function initClient() {
         $this->client = new Client([
-            'verify'      => CaBundle::getSystemCaRootBundlePath(),
-            'cookies'     => new CookieJar,
-            'http_errors' => false,
-            'headers'     => [
+            'verify'          => CaBundle::getSystemCaRootBundlePath(),
+            'cookies'         => new CookieJar,
+            'http_errors'     => false,
+            'connect_timeout' => 15,
+            'timeout'         => 60,
+            'headers'         => [
                 'User-Agent'      => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
                 'Accept'          => 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
                 'Accept-Language' => 'de-DE,de;q=0.9',
@@ -28,14 +31,26 @@ class HandelsRegister {
     public function process($commercialRegister) {
         $this->initClient();
 
-        $resultsHtml = $this->fetchSearchResults($commercialRegister);
+        try {
+            $resultsHtml = $this->fetchSearchResults($commercialRegister);
+        } catch (GuzzleException $e) {
+            Log::warning('HandelsRegister: Request failed for '.$commercialRegister.': '.$e->getMessage());
+            return null;
+        }
+
         if ($resultsHtml === 'fehlerhaft') {
             return ['fehlerhaft' => true];
         }
         if (empty($resultsHtml)) {
             return null;
         }
-        return $this->parseCompany($resultsHtml);
+
+        try {
+            return $this->parseCompany($resultsHtml);
+        } catch (GuzzleException $e) {
+            Log::warning('HandelsRegister: Request failed for '.$commercialRegister.': '.$e->getMessage());
+            return null;
+        }
     }
     private function parseCommercialRegister($commercialRegister) {
         if (preg_match('/[|,]/', $commercialRegister)) {

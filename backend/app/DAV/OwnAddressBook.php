@@ -7,7 +7,7 @@ namespace App\DAV;
 use Sabre\CardDAV\AddressBook;
 
 /**
- * CardDAV address book node with NEXUS-specific read-only ACLs.
+ * CardDAV address book node with TALVIS-specific read-only ACLs.
  *
  * Adapted from sabre/dav's AddressBook class.
  * Portions Copyright (C) fruux GmbH (https://fruux.com/), original author

@@ -3,6 +3,7 @@
 @let _quoteDescs = quoteDescriptions();
 @let _backendConsiderations = backendConsiderations();
 @let _hasDownpaymentItems = hasDownpaymentItems();
+@let _hasSupportItems = hasSupportItems();
 @let _pendingDownpayments = pendingDownpayments();
 @let _invoicedDownpayments = invoicedDownpayments();
 @let _downpaymentRemaining = downpaymentRemaining();
@@ -90,6 +91,12 @@
                     <i>call_made</i>
                     <span i18n="@@i18n.projects.moveToCustomer">move to customer</span>
                 </button>
+                @if (_invoicingType === 2 && _hasSupportItems) {
+                    <button ngbDropdownItem (click)="convertSupportToRegular()" class="hstack gap-2">
+                        <i>swap_horiz</i>
+                        <span i18n="@@i18n.projects.convertSupportToRegular">convert to regular items</span>
+                    </button>
+                }
             </div>
         </div>
     }

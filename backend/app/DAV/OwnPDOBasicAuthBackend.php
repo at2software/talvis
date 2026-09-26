@@ -7,7 +7,7 @@ use Sabre\HTTP;
 
 /**
  * HTTP Basic authentication backend that validates DAV credentials
- * against NEXUS user accounts.
+ * against TALVIS user accounts.
  *
  * Adapted from sabre/dav's PDO auth backend.
  * Portions Copyright (C) fruux GmbH (https://fruux.com/)

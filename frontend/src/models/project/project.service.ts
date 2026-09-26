@@ -6,7 +6,8 @@ import { FrameworkLatest } from './framework-latest.model';
 import { PdfCreationType } from '@enums/PdfCreationType';
 import { map, Observable, of } from 'rxjs';
 import { serialize } from '@constants/rxjs/rxjs-operators';
-import { NexusHttpService, idOf } from '../http/http.nexus';
+import { TalvisHttpService, idOf } from '../http/http.talvis';
+import { notifyHttpError } from '@models/http/file-download';
 import { Company } from '../company/company.model';
 import { nx } from '@models/_core/nx-bridge';
 import { TInvoicing } from '@models/project/invoicing-type';
@@ -14,7 +15,7 @@ import { Milestone } from '@models/milestone/milestone.model';
 import { Task } from '@models/task/task.model';
 import { Serializable } from '@models/_core/serializable';
 import { InvoiceItem } from '@models/invoice/invoice-item.model';
-import { MilestonesDto, ConvertDto, ParticipatingCompanyDto, PredictionStatsDto, QuoteAcceptancePredictionDto } from '@models/_core/api-response';
+import { MilestonesDto, ConvertDto, ParticipatingCompanyDto, PaymentPlanOverviewDto, PredictionStatsDto, QuoteAcceptancePredictionDto } from '@models/_core/api-response';
 
 export interface ProjectPluginLinkResolution {
     url: string;
@@ -23,7 +24,7 @@ export interface ProjectPluginLinkResolution {
 }
 
 @Service()
-export class ProjectService extends NexusHttpService<Project> {
+export class ProjectService extends TalvisHttpService<Project> {
     public apiPath = 'projects';
     override readonly model = Project;
 
@@ -44,9 +45,11 @@ export class ProjectService extends NexusHttpService<Project> {
     linkMilestoneToInvoiceItem = (milestoneId: string, invoiceItemId: string) => this.post(`milestones/${milestoneId}/invoice-items/${invoiceItemId}`, {});
     predictionStats = (projectId: string) => this.get<PredictionStatsDto>(`projects/${projectId}/invoice-items/stats`, {});
     showQuoteAcceptancePrediction = (projectId: string) => this.get<QuoteAcceptancePredictionDto>(`projects/${projectId}/quote-acceptance-prediction`, {});
+    showPaymentPlan = (projectId: string) => this.get<PaymentPlanOverviewDto>(`projects/${projectId}/payment-plan`, {});
 
     moveRegularItemsToCustomer = (_: Project) => this.put(`projects/${_.id}/move-regular-to-customer`);
     moveSupportToCustomer = (_: Project) => this.put(`projects/${_.id}/move-support-to-customer`, {}, Object);
+    convertSupportItemsToRegular = (_: Project) => this.put(`projects/${_.id}/convert-support-to-regular`, {}, Object);
     makePdf = (parent: Serializable, type: PdfCreationType = PdfCreationType.Preview, success?: () => unknown) => this.getFile(parent.apiPathWithId() + '/pdf', { type: type }, success);
 
     indexMissingGit = () => this.aget('projects/missing-git', {}, Project);
@@ -59,7 +62,7 @@ export class ProjectService extends NexusHttpService<Project> {
     indexPaginated = (filters?: Dictionary) => this.paginate(this.apiPath, filters);
     indexForCompany = (_: Company | string | number, filters?: Dictionary): Observable<Project[]> => this.aget(`companies/${idOf(_)}/projects`, filters);
     indexCoParticipatedProjects = (company: Company, filters?: Dictionary): Observable<Project[]> => this.aget(`companies/${company.id}/co-participated-projects`, filters);
-    indexQuoteDescriptions = (projectId: string): Observable<string[]> => this.aget<string>(`projects/${projectId}/quote-descriptions`, {});
+    indexQuoteDescriptions = (projectId: string): Observable<string[]> => this.aget(`projects/${projectId}/quote-descriptions`, {}, Object);
     indexFrameworks = (): Observable<Framework[]> => this.aget('projects/frameworks', {}, Framework);
     indexLatestFrameworks = (): Observable<FrameworkLatest[]> => this.aget('projects/frameworks/latest', {}, FrameworkLatest);
     indexReporting = (params: Dictionary) => this.aget('projects/reporting', params, Project);
@@ -74,10 +77,14 @@ export class ProjectService extends NexusHttpService<Project> {
         const stage = stageMap[type] ?? 0;
         const params: Dictionary = draft ? { type: stage, draft: 1 } : { type: stage };
         const download = nx().global.user!.getFloatParam('INVOICE_DOWNLOAD', 1);
+        const done = () => {
+            if (!draft) nx().global.onInvoiceCreated.next();
+            success?.();
+        };
         if (draft || download === 1) {
-            this.getFile(`projects/${project.id}/invoice`, params, success);
+            this.getFile(`projects/${project.id}/invoice`, params, done);
         } else {
-            this.getBlob(`projects/${project.id}/invoice`, params).subscribe({ next: () => success?.() });
+            this.getBlob(`projects/${project.id}/invoice`, params).subscribe({ next: done, error: notifyHttpError });
         }
     }
 

@@ -13,8 +13,10 @@ use App\Models\Project;
 use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
+use PHPUnit\Framework\Attributes\Group;
 use Tests\TestCase;
 
+#[Group('database')]
 class ProjectDatasetTest extends TestCase {
     use DatabaseTransactions;
 

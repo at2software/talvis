@@ -7,7 +7,7 @@ use Sabre\CardDAV;
 use Sabre\CardDAV\Backend\PDO;
 
 /**
- * CardDAV backend that exposes NEXUS contacts as a read-only address book
+ * CardDAV backend that exposes TALVIS contacts as a read-only address book
  * per user.
  *
  * Adapted from sabre/dav's PDO CardDAV backend.

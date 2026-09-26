@@ -4,7 +4,7 @@
         <span class="flex-fill text-truncate" i18n="@@i18n.widget-hr-team">team status</span>
     </div>
 
-    <ul-compact revealList>
+    <ul-compact>
         @for (user of data(); track user.id) {
             <li class="d-flex" [nx]="user" [compact]="!user.current_focus && !user.is_sick && !user.is_on_vacation" [class.text-muted]="!user.current_focus">
                 <avatar [object]="user" class="me-2"></avatar>

@@ -7,6 +7,22 @@
 </div>
 
 <div class="card mb-3">
+    <div class="card-header" i18n="@@i18n.project.warranty">warranty</div>
+    <div class="card-body">
+        <p class="text-muted small mb-3" i18n="@@i18n.project.warrantyDurationDesc">Time after a project is finished during which time can still be tracked on it. Available as the [warranty-duration] placeholder in quotes and invoices.</p>
+        <input-settings-group id="PROJECT_WARRANTY_DURATION" [suffix]="years" placeholder="1" i18n="@@i18n.project.warrantyDuration">warranty period</input-settings-group>
+    </div>
+</div>
+
+<div class="card mb-3">
+    <div class="card-header" i18n="@@i18n.project.overrunPredicted">overrun predicted</div>
+    <div class="card-body">
+        <p class="text-muted small mb-3" i18n="@@i18n.settings.overrunWarnThresholdDesc">Show an orange warning badge on a project as soon as the predicted final effort reaches this share of the estimated work.</p>
+        <input-settings-group id="PROJECT_OVERRUN_WARN_THRESHOLD" suffix="%" placeholder="110" i18n="@@i18n.settings.overrunWarnThreshold">warning threshold</input-settings-group>
+    </div>
+</div>
+
+<div class="card mb-3">
     <div class="card-header" i18n="@@i18n.settings.emailThresholds">email thresholds</div>
     <div class="card-body">
         <p class="text-muted small mb-3" i18n="@@i18n.settings.emailThresholdsDesc">Send an email to the project manager when hours invested divided by estimated work exceeds a threshold. Notifications reset automatically if the ratio drops below the threshold again.</p>

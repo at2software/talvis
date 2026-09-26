@@ -73,19 +73,19 @@ class InvoiceController extends Controller {
         return (new UndoInvoiceAction)->execute($_);
     }
     public function sendMail(Invoice $_) {
-        if (config('app.nexus_debug')) {
+        if (config('app.talvis_debug')) {
             return;
         }
         return $_->sendMail();
     }
     public function sendReminder(Invoice $_) {
-        if (config('app.nexus_debug')) {
+        if (config('app.talvis_debug')) {
             return;
         }
         return $_->sendReminder();
     }
     public function sendToDatev(Invoice $_) {
-        if (config('app.nexus_debug')) {
+        if (config('app.talvis_debug')) {
             return;
         }
         Invoice::disablePropagation();

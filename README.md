@@ -1,12 +1,12 @@
-# NEXUS
+# TALVIS
 
-**Source-available business management suite for service-oriented teams.**
+**Open-source business management suite for service-oriented teams.**
 
-NEXUS combines CRM, project management, invoicing, time tracking, HR, marketing automation, uptime monitoring, and workflow automation into a single, self-hosted web application. Internal use is free with no subscription fees. Commercial hosting or SaaS use requires a commercial license — see [LICENSE.md](LICENSE.md) for details.
+TALVIS combines CRM, project management, invoicing, time tracking, HR, marketing automation, uptime monitoring, and workflow automation into a single, self-hosted web application. Free and open source under the [GNU AGPL v3](LICENSE).
 
 > Built for digital agencies, IT service companies, consultancies, and software development teams.
 
-![NEXUS dashboard](docs/screenshots/dashboard-overview.png)
+![TALVIS dashboard](docs/screenshots/dashboard-overview.png)
 
 ---
 
@@ -45,7 +45,7 @@ NEXUS combines CRM, project management, invoicing, time tracking, HR, marketing 
 
 | Layer | Technology |
 |---|---|
-| Frontend | Angular 22+, TypeScript, Bootstrap 5, RxJS |
+| Frontend | Angular 22, TypeScript, Bootstrap 5, RxJS |
 | Backend | Laravel 13, PHP 8.3+, Eloquent ORM |
 | Database | MySQL / MariaDB |
 | Real-Time | Laravel Reverb (WebSockets) |
@@ -57,7 +57,7 @@ NEXUS combines CRM, project management, invoicing, time tracking, HR, marketing 
 ## Repository Structure
 
 ```
-nexus/
+talvis/
 ├── frontend/          Angular SPA (TypeScript)
 ├── backend/           Laravel API (PHP)
 ├── docker/            Docker build files
@@ -72,7 +72,7 @@ nexus/
 
 ## Running with Docker
 
-The quickest way to get NEXUS running is with Docker Compose. This builds the application from source and starts it together with a MariaDB database.
+The quickest way to get TALVIS running is with Docker Compose. This builds the application from source and starts it together with a MariaDB database.
 
 ### Prerequisites
 
@@ -94,10 +94,10 @@ Open `.env` and set at minimum:
 |---|---|---|
 | `ADMIN_EMAIL` | Initial admin account e-mail | `admin@example.com` |
 | `ADMIN_PASSWORD` | Initial admin account password | `changeme` |
-| `DB_PASSWORD` | MariaDB password for NEXUS | `nexus` |
-| `DB_ROOT_PASSWORD` | MariaDB root password | `nexus_root` |
+| `DB_PASSWORD` | MariaDB password for TALVIS | `talvis` |
+| `DB_ROOT_PASSWORD` | MariaDB root password | `talvis_root` |
 
-> **Important:** Change all default passwords before exposing NEXUS to a network.
+> **Important:** Change all default passwords before exposing TALVIS to a network.
 > `DB_USERNAME` must not be `root` — MariaDB reserves that name.
 
 ### 2. Build and start
@@ -114,10 +114,20 @@ Subsequent starts use the cached image and are instant.
 
 | Service | URL |
 |---|---|
-| NEXUS | http://localhost:3200 |
+| TALVIS | http://localhost:3200 |
 | Backend API | http://localhost:8000 |
 
 Log in with the `ADMIN_EMAIL` / `ADMIN_PASSWORD` you set in `.env`.
+
+### Upgrading from NEXUS (1.3.x and earlier)
+
+TALVIS is the new name of NEXUS. Release 1.4.0 renames the Docker project, image and volumes, so an existing installation needs a one-time migration:
+
+1. Extract the new release next to the old one and copy your old `.env` into it.
+2. Run the migration from the new directory — `bash docker/upgrade-from-nexus.sh` in a source checkout, `bash upgrade-from-nexus.sh` in a release tarball. On Windows, use Git Bash or WSL.
+3. `docker compose up -d`
+
+The script stops the old containers, copies the `nexus_*` volumes into new `talvis_*` volumes and pins the old database defaults in `.env`, since your existing database was created with them. The old volumes are left untouched; remove them once TALVIS runs correctly. If you started NEXUS with `docker compose -p <name>`, pass that name as the first argument.
 
 ### 4. Stop
 
@@ -138,7 +148,7 @@ docker compose down -v
 If you want to build and tag the image yourself (e.g. for a private registry):
 
 ```bash
-docker build -f docker/Dockerfile -t nexus:latest .
+docker build -f docker/Dockerfile -t talvis:latest .
 ```
 
 The build context is the repository root. The multi-stage `Dockerfile` handles everything:
@@ -166,23 +176,13 @@ MAIL_PORT=587
 MAIL_FROM_ADDRESS=noreply@example.com
 ```
 
-### Behind a reverse proxy
-
-```env
-APP_URL=https://nexus.example.com
-TRUSTED_PROXIES=127.0.0.1,::1,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16
-CORS_ALLOWED_ORIGINS=https://nexus.example.com
-```
-
-Set `APP_URL` to the public `https://` URL and make sure the proxy sends `X-Forwarded-Proto`. Proxies on loopback or a private network are trusted by default; for anything else list its IP or CIDR in `TRUSTED_PROXIES` (or use `*`). `CORS_ALLOWED_ORIGINS` defaults to the origin of `APP_URL`.
-
 ### Keycloak SSO
 
 ```env
 APP_AUTH=keycloak
 KEYCLOAK_BASE_URL=https://keycloak.example.com
 KEYCLOAK_REALM=my-realm
-KEYCLOAK_CLIENT_ID=nexus
+KEYCLOAK_CLIENT_ID=talvis
 KEYCLOAK_REALM_PUBLIC_KEY=<your-public-key>
 ```
 
@@ -215,28 +215,35 @@ npx ng serve --configuration=de   # → http://localhost:4200
 
 ## AI-Assisted Development
 
-The core of NEXUS — architecture, data model, UI design, and business logic — is handcrafted, built over years of daily use in our own company. AI agents (Claude) assist with some parts of the codebase, most notably the Docker packaging for this public release and initial drafts of some newer features. Every AI-generated addition is reviewed by a human before it lands.
+The core of TALVIS — architecture, data model, UI design, and business logic — is handcrafted, built over years of daily use in our own company. AI agents (Claude) assist with some parts of the codebase, most notably the Docker packaging for this public release and initial drafts of some newer features. Every AI-generated addition is reviewed by a human before it lands.
 
 ---
 
 ## License
 
-NEXUS is licensed under the **Business Source License 1.1 (BSL)**. Key terms:
+Copyright (C) 2026 at² GmbH
 
-- **Free for internal use** — self-host NEXUS for your own organization at no cost
-- **Commercial license required** — offering NEXUS as a hosted/SaaS product to third parties requires a commercial license (€25 EUR/tenant/month, minimum €100/month)
-- **Converts to AGPL v3** — four years after each release, that version becomes fully open source under the GNU Affero General Public License v3.0
+TALVIS is free software: you can redistribute it and/or modify it under the terms of the **GNU Affero General Public License** as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version. See [LICENSE](LICENSE) for the full text.
 
-BSL is a *source-available* license, not an OSI-approved open-source license. The source code is publicly available and forkable, but with the commercial-use restrictions described above.
+TALVIS is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-See [LICENSE.md](LICENSE.md) for the full terms or contact [info@at2-software.com](mailto:info@at2-software.com) for commercial licensing.
+In short: you may use, modify, self-host and resell TALVIS, including as a hosted service. If you run a modified version for users over a network, you must offer them the source code of your modified version under the same license.
+
+**Earlier releases:** NEXUS 1.2.0 – 1.3.3 were published under the Business Source License 1.1. at² GmbH hereby also makes all of those releases available under the GNU AGPL v3 or later.
+
+SPDX-License-Identifier: `AGPL-3.0-or-later`
 
 ### Third-Party Code
 
-NEXUS builds on the open-source libraries declared in `backend/composer.json` and `frontend/package.json`. Beyond those dependencies, the CalDAV/CardDAV integration in `backend/app/DAV/` contains classes adapted from [sabre/dav](https://sabre.io/) backend code — portions Copyright (C) fruux GmbH, licensed under the [Modified BSD License](http://sabre.io/license/). Attribution is retained in the affected files.
+TALVIS builds on the open-source libraries declared in `backend/composer.json` and `frontend/package.json`, each under its own license. Beyond those dependencies:
+
+- The CalDAV/CardDAV integration in `backend/app/DAV/` contains classes adapted from [sabre/dav](https://sabre.io/) backend code — portions Copyright (C) fruux GmbH, licensed under the [Modified BSD License](http://sabre.io/license/). Attribution is retained in the affected files.
+- The bundled fonts Michroma, Bruno Ace and Source Sans Pro are licensed under the [SIL Open Font License 1.1](https://openfontlicense.org) — see `frontend/src/assets/fonts/OFL.txt` and `backend/public/fonts/OFL.txt`.
 
 ---
 
 ## Contributing
 
-<!-- TODO: Add contributing guidelines -->
+Bug reports, fixes, documentation and translations are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a pull request — every commit needs a `Signed-off-by` line certifying the [Developer Certificate of Origin](DCO).
+
+Security issues: please write to [security@at2-software.com](mailto:security@at2-software.com) instead of opening a public issue.

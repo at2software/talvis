@@ -2,6 +2,11 @@ import { Service } from '@angular/core';
 import { CdkTable } from '@angular/cdk/table';
 import { Dictionary } from '@constants/constants';
 
+const loadExcelJs = async () => {
+    const mod = await import('exceljs');
+    return (mod as unknown as { default?: typeof mod }).default ?? mod;
+};
+
 @Service()
 export class TableExportService {
     async exportAnyTableToCSV(table: HTMLTableElement | CdkTable<unknown>, filenamePrefix: string = '') {
@@ -19,7 +24,7 @@ export class TableExportService {
         }
 
         const rows = this.#convertTableToCsv(table);
-        const { Workbook } = await import('exceljs');
+        const { Workbook } = await loadExcelJs();
         const wb = new Workbook();
         const ws = wb.addWorksheet('Daten');
         ws.addRows(rows);

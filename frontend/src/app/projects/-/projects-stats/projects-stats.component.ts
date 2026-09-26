@@ -19,7 +19,7 @@ import { EmptyStateComponent } from '@shards/empty-state/empty-state.component';
 import { ToolbarComponent } from '@app/app/toolbar/toolbar.component';
 import { NComponent } from '@shards/n/n.component';
 import { MlReliabilityDirective } from '@directives/ml-reliability.directive';
-import { TimeValuePointDto, XYPointDto, TooltipParamsDto, StatsDataDto, ProjectProductMixDto, ProjectSuccessRateDto } from '@models/_core/api-response';
+import { TimeValuePointDto, XYPointDto, TooltipParamsDto, StatsDataDto, ProjectProductMixDto, ProjectSuccessRateDto, ProjectWarrantyLoadDto } from '@models/_core/api-response';
 
 type TimePeriod = NonNullable<DaterangepickerDirective['value']>;
 
@@ -78,6 +78,7 @@ export class ProjectsStatsComponent {
     readonly #quoteAccuracy = modelListResource(this.#period, (period) => this.stats.showQuoteAccuracy(period));
     readonly #productMix = modelResource(this.#period, (period) => this.stats.showProjectProductMix(period));
     readonly #successRate = modelResource(this.#period, (period) => this.stats.showProjectSuccessRate(period));
+    readonly #warrantyLoad = modelResource(this.#period, (period) => this.stats.showProjectWarrantyLoad(period));
 
     isLoaded = computed(() => this.#svb.hasValue());
 
@@ -87,6 +88,8 @@ export class ProjectsStatsComponent {
         quote_acceptance_signal: this.#signalCurveChart(),
         ...this.#productMixCharts(),
         success_rate: this.#successRateChart(),
+        warranty_share: this.#warrantyShareChart(),
+        warranty_by_project: this.#warrantyByProjectChart(),
     }));
 
     hasData = computed(() => this.data().svb?.series?.some((s) => (s.data?.length ?? 0) > 0) ?? false);
@@ -357,6 +360,66 @@ export class ProjectsStatsComponent {
             })),
         };
     }
+
+    #warrantyShareChart() {
+        const load: ProjectWarrantyLoadDto | undefined = this.#warrantyLoad.value();
+        if (!load) return undefined;
+
+        const total = load.regular_hours + load.warranty_hours;
+        if (total <= 0) return undefined;
+
+        const pct = (load.warranty_hours / total) * 100;
+        const warrantyColor = Color.fromVar('--color-warning-soft', '').toHexString();
+        const regularColor = Color.fromVar('--color-primary-0', '').darken(30).toHexString();
+
+        return {
+            chart: { height: 260 },
+            backgroundColor: 'transparent',
+            animation: false,
+            tooltip: { trigger: 'item', ...ECHARTS_DEFAULT_TOOLTIP_OPTIONS, formatter: (rawParams: unknown) => { const p = rawParams as { name: string; value: number }; return `${p.name}: ${this.#hours(p.value)}`; } },
+            graphic: [{ type: 'text', left: 'center', top: 'center', style: { text: `${pct.toFixed(1)}%`, fill: '#fff', fontSize: 20 } }],
+            series: [
+                {
+                    type: 'pie',
+                    radius: ['40%', '70%'],
+                    data: [
+                        { value: load.warranty_hours, name: $localize`:@@i18n.project.warrantyHours:warranty`, itemStyle: { color: warrantyColor, ...ECHARTS_DONUT_ITEM_STYLE } },
+                        { value: load.regular_hours, name: $localize`:@@i18n.project.regularHours:project runtime`, itemStyle: { color: regularColor, ...ECHARTS_DONUT_ITEM_STYLE } },
+                    ],
+                    label: { show: false },
+                },
+            ],
+        };
+    }
+
+    #warrantyByProjectChart() {
+        const load: ProjectWarrantyLoadDto | undefined = this.#warrantyLoad.value();
+        if (!load?.projects.length) return undefined;
+
+        const rows = [...load.projects].reverse();
+        const warrantyColor = Color.fromVar('--color-warning-soft', '').toHexString();
+
+        return {
+            chart: { height: Math.max(160, rows.length * 26 + 40) },
+            backgroundColor: 'transparent',
+            animation: false,
+            grid: { left: 10, right: 40, top: 10, bottom: 25, containLabel: true },
+            xAxis: { type: 'value', min: 0, axisLabel: { formatter: (val: number) => this.#hours(val) } },
+            yAxis: { type: 'category', data: rows.map((_) => _.name), axisLabel: { width: 160, overflow: 'truncate' } },
+            tooltip: {
+                trigger: 'item',
+                ...ECHARTS_DEFAULT_TOOLTIP_OPTIONS,
+                formatter: (rawParams: unknown) => {
+                    const p = rawParams as { dataIndex: number };
+                    const row = rows[p.dataIndex];
+                    return `${row.name}<br>${$localize`:@@i18n.project.warrantyHours:warranty`}: ${this.#hours(row.warranty_hours)}<br>${$localize`:@@i18n.project.regularHours:project runtime`}: ${this.#hours(row.regular_hours)}`;
+                },
+            },
+            series: [{ type: 'bar', itemStyle: { color: warrantyColor, borderRadius: [0, 3, 3, 0] }, data: rows.map((_) => _.warranty_hours) }],
+        };
+    }
+
+    #hours = (value: number) => `${this.shortPipe.transform(value)}h`;
 
     #successRateChart() {
         const rate: ProjectSuccessRateDto | undefined = this.#successRate.value();

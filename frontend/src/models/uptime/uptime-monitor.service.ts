@@ -1,11 +1,11 @@
 import { Service } from '@angular/core';
 import { Observable } from 'rxjs';
-import { NexusHttpService } from '../http/http.nexus';
+import { TalvisHttpService } from '../http/http.talvis';
 import { UptimeMonitor } from './uptime-monitor.model';
 import { Dictionary } from '@constants/constants';
 import { UptimeCheckDayDto, UptimeTestCheckDto } from '@models/_core/api-response';
 @Service()
-export class UptimeMonitorService extends NexusHttpService<UptimeMonitor> {
+export class UptimeMonitorService extends TalvisHttpService<UptimeMonitor> {
     public apiPath = 'uptime_monitors';
     override readonly model = UptimeMonitor;
 

@@ -20,7 +20,7 @@ class UptimeDownMail extends Mailable {
 
     public function envelope(): Envelope {
         return new Envelope(
-            subject: "[NEXUS] Uptime Alert: {$this->monitor->name} is down",
+            subject: "[TALVIS] Uptime Alert: {$this->monitor->name} is down",
         );
     }
     public function content(): Content {

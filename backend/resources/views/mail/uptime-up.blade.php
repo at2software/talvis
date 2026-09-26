@@ -28,6 +28,6 @@
 </table>
 
 <p style="margin-top: 20px; color: #6b7280;">
-    This is an automated notification from NEXUS Uptime Monitoring.<br>
+    This is an automated notification from TALVIS Uptime Monitoring.<br>
     You are receiving this because you are monitoring this service.
 </p>

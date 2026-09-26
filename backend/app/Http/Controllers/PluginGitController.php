@@ -128,8 +128,8 @@ class PluginGitController extends PluginController {
         return $this->post($link->buildApiPath().'/hooks', [
             'url'               => config('app.api_url').'gitlab',
             'token'             => $this->env('APIKEY'),
-            'name'              => 'NEXUS',
-            'description'       => 'NEXUS Webhook',
+            'name'              => 'TALVIS',
+            'description'       => 'TALVIS Webhook',
             'deployment_events' => true,
             'issues_events'     => true,
             'job_events'        => true,

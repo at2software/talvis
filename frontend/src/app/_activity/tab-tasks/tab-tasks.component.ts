@@ -10,14 +10,13 @@ import { TabTasksMilestonesComponent } from './_shards/tab-tasks-milestones/tab-
 import { TabTasksPluginTasksComponent } from './_shards/tab-tasks-plugin-tasks/tab-tasks-plugin-tasks.component';
 import { TabTasksMissingGitComponent } from './_shards/tab-tasks-missing-git/tab-tasks-missing-git.component';
 import { TabTasksMarketingActivitiesComponent } from './_shards/tab-tasks-marketing-activities/tab-tasks-marketing-activities.component';
-import { TabTasksDeletionRequestsComponent } from './_shards/tab-tasks-deletion-requests/tab-tasks-deletion-requests.component';
 import { GlobalService } from '@models/global.service';
 
 @Component({
     changeDetection: ChangeDetectionStrategy.OnPush,
     selector: 'activity-tab-tasks',
     templateUrl: './tab-tasks.component.html',
-    imports: [ActivityTabComponent, ScrollbarComponent, TabTasksHrComponent, TabTasksSentinelsComponent, TabTasksRemarketingComponent, TabTasksMilestonesComponent, TabTasksMissingGitComponent, TabTasksMarketingActivitiesComponent, TabTasksPluginTasksComponent, TabTasksDeletionRequestsComponent],
+    imports: [ActivityTabComponent, ScrollbarComponent, TabTasksHrComponent, TabTasksSentinelsComponent, TabTasksRemarketingComponent, TabTasksMilestonesComponent, TabTasksMissingGitComponent, TabTasksMarketingActivitiesComponent, TabTasksPluginTasksComponent],
 })
 export class TabTasksComponent {
     readonly tabComponent = viewChild.required(ActivityTabComponent);

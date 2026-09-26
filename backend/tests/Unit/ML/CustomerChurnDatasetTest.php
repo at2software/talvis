@@ -11,8 +11,10 @@ use App\Models\InvoiceItem;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
+use PHPUnit\Framework\Attributes\Group;
 use Tests\TestCase;
 
+#[Group('database')]
 class CustomerChurnDatasetTest extends TestCase {
     use DatabaseTransactions;
 

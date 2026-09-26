@@ -24,6 +24,8 @@ class Precomputed implements CastsAttributes {
         $newValue = $model->{$methodName}($key);
 
         DB::table($model->getTable())->where('id', $model->getKey())->update([$key => $newValue]);
+        $model->setAttribute($key, $newValue);
+        $model->syncOriginalAttribute($key);
         return floatval($newValue);
     }
     public function set(Model $model, string $key, mixed $value, array $attributes): mixed {

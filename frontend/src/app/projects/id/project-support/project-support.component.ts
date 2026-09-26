@@ -2,7 +2,7 @@ import { CdkTableModule } from '@angular/cdk/table';
 import { ChangeDetectionStrategy, Component, computed, DestroyRef, effect, ElementRef, inject, input, linkedSignal, output, signal, viewChild } from '@angular/core';
 import { modelListResource, modelResource } from '@models/http/model-resource';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { Nx } from '@app/nx/nx.directive';
 import { NComponent } from '@shards/n/n.component';
 import { StartEnd } from '@constants/constants';
@@ -16,6 +16,7 @@ import { InvoiceItemService } from '@models/invoice/invoice-item.service';
 import { Product } from '@models/product/product.model';
 import { ProductService } from '@models/product/product.service';
 import { Project } from '@models/project/project.model';
+import { ProjectService } from '@models/project/project.service';
 import { Company } from '@models/company/company.model';
 import { Serializable } from '@models/_core/serializable';
 import { ExtIssueResolverService, ExtIssueRef } from '@models/ext-issue/ext-issue-resolver.service';
@@ -41,9 +42,13 @@ import { StackedTableDirective } from '@directives/stacked-table.directive';
 })
 export class ProjectSupportComponent {
 
+    static readonly isPendingSupportItem = (_: InvoiceItem) => _.stage === 1 && !_.invoice_id;
+
     #focusService = inject(FocusService);
     #invoiceItemService = inject(InvoiceItemService);
     #productService = inject(ProductService);
+    #projectService = inject(ProjectService);
+    #router = inject(Router);
     #extIssueResolver = inject(ExtIssueResolverService);
     #pluginFactory = inject(PluginInstanceFactory);
     #destroyRef = inject(DestroyRef);
@@ -93,9 +98,9 @@ export class ProjectSupportComponent {
     });
 
     readonly #supportItems = modelListResource(this.#parentId, () =>
-        this.#invoiceItemService.getInvoiceItems(this.parent(), { append: 'my_prediction', with: 'predictions' }).pipe(map((items: InvoiceItem[]) => items.filter((x) => x.stage === 1 && !x.invoice_id))),
+        this.#invoiceItemService.getInvoiceItems(this.parent(), { append: 'my_prediction', with: 'predictions' }).pipe(map((items: InvoiceItem[]) => items.filter(ProjectSupportComponent.isPendingSupportItem))),
     );
-    readonly supportItems = this.#supportItems.value;
+    readonly supportItems = linkedSignal(this.#supportItems.value);
 
     constructor() {
         effect(() => {
@@ -111,11 +116,7 @@ export class ProjectSupportComponent {
         });
     }
 
-    reloadFoci = () => this.#foci.reload();
-
-    onFociActionsResolved = () => this.#extIssueResolver.resolveRows(this.isProject() ? (this.parent() as Project) : undefined, this.allFoci(), this.extIssues);
-
-    reloadSupportItems = () => this.#supportItems.reload();
+    onFociActionsResolved = () => this.#foci.reload();
 
     #onSelection(_: unknown) {
         setTimeout(() => {
@@ -150,12 +151,16 @@ export class ProjectSupportComponent {
         if (product) {
             let desc = this.selectionDescription();
             desc += '<br>' + $localize`:@@i18n.invoices.performancePeriod:performance period` + ' ' + min!.format('DD.MM.YYYY') + ' - ' + max!.format('DD.MM.YYYY');
-            this.#focusService.createInvoiceItemsFor(this.parent(), selectedIds, desc, parseFloat(this.selectionSum()), product.id).subscribe(() => {
-                this.reloadSupportItems();
-                this.reloadFoci();
+            this.#focusService.createInvoiceItemsFor(this.parent(), selectedIds, desc, parseFloat(this.selectionSum()), product.id).subscribe((newItem) => {
+                if (ProjectSupportComponent.isPendingSupportItem(newItem)) this.supportItems.update((items) => [...items, newItem]);
                 this.parentReloadRequested.emit();
             });
         }
+    }
+
+    onMoveSupportToCustomer() {
+        const project = this.parent() as Project;
+        this.#projectService.moveSupportToCustomer(project).subscribe(() => this.#router.navigate(['/customers/' + project.company_id + '/billing']));
     }
 
     onProductSelect(selected: Serializable) {

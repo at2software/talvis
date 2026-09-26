@@ -1,33 +1,80 @@
+@let _plan = plan();
+@let _selected = selectedStep();
+@let _hasPlan = (_plan?.steps?.length ?? 0) > 0 || (_plan?.unmatched?.length ?? 0) > 0;
+@let _loading = planLoading();
 <div class="modal d-block" tabindex="-1">
-    <div class="modal-dialog">
+    <div class="modal-dialog" [class.modal-lg]="_hasPlan">
         <div class="modal-content">
             <div class="modal-header">
                 <span class="modal-title" i18n="@@i18n.common.addInstalment">add instalment</span>
             </div>
             <div class="modal-body">
-                <div class="form-floating mb-3">
-                    <input type="text" class="form-control" id="instalmentDescription" placeholder="description" [(ngModel)]="item.text" i18n-placeholder="@@i18n.common.description" />
-                    <label for="instalmentDescription" i18n="@@i18n.common.description">description</label>
-                </div>
-                <div class="input-group mb-3">
-                    <span class="input-group-text" i18n="@@i18n.common.base">base</span>
-                    <input type="number" class="form-control" [(ngModel)]="displayBasePrice" (change)="applyPercentage()" />
-                    <span class="input-group-text">{{ global.currencySymbol() }}</span>
-                </div>
-                <div class="input-group mb-3">
-                    <span class="input-group-text" i18n="@@i18n.common.percentage">percentage</span>
-                    <input type="number" class="form-control" [(ngModel)]="percentage" (change)="applyPercentage()" />
-                    <span class="input-group-text">%</span>
-                    <button type="button" class="btn btn-outline-info btn-sm ms-2" (click)="setPercentage(5)">5%</button>
-                    <button type="button" class="btn btn-outline-info btn-sm" (click)="setPercentage(10)">10%</button>
-                    <button type="button" class="btn btn-outline-info btn-sm" (click)="setPercentage(15)">15%</button>
-                    <button type="button" class="btn btn-outline-info btn-sm" (click)="setPercentage(20)">20%</button>
-                    <button type="button" class="btn btn-outline-info btn-sm" (click)="setPercentage(25)">25%</button>
-                    <button type="button" class="btn btn-outline-info btn-sm" (click)="setPercentage(30)">30%</button>
-                </div>
-                <div class="form-floating mb-3">
-                    <input type="number" class="form-control" id="instalmentValue" placeholder="100" [(ngModel)]="item.price" />
-                    <label for="instalmentValue" i18n="@@i18n.common.valuePositive">value (positive)</label>
+                <div class="row g-4">
+                    @if (_hasPlan && _plan) {
+                        <div class="col-5">
+                            <div class="mb-2">
+                                @if (_plan.is_custom) {
+                                    <small class="text-primary" i18n="@@i18n.payment.customPlan">custom payment plan</small>
+                                } @else if (_plan.tier_label) {
+                                    <small class="text-muted" i18n="@@i18n.payment.defaultPlanTier">default payment plan ({{ _plan.tier_label }} projects)</small>
+                                } @else {
+                                    <small class="text-muted" i18n="@@i18n.payment.defaultPlan">default payment plan</small>
+                                }
+                            </div>
+
+                            @for (step of _plan.steps; track $index) {
+                                <button type="button" class="btn btn-plain w-100 text-start px-2 py-1" (click)="applyStep(step)">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="badge" [class]="statusClass(step.status)" style="min-width: 42px" [ngbTooltip]="statusTooltip(step.item)">{{ step.percentage | number: '1.0-2' }}%</span>
+                                        <span class="small flex-fill" [class.text-primary]="step === _selected" [class.text-muted]="step !== _selected">{{ stepLabel(step) }}</span>
+                                        <span class="small">{{ step.amount | money }}</span>
+                                    </div>
+                                </button>
+                            }
+
+                            @if (_plan.unmatched.length) {
+                                <small class="text-muted d-block mt-3 mb-1" i18n="@@i18n.payment.unmatchedDownpayments">not part of the agreed plan</small>
+                                @for (down of _plan.unmatched; track down.id) {
+                                    <button type="button" class="btn btn-plain w-100 text-start px-2 py-1" (click)="applyDownpayment(down)">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <span class="badge" [class]="statusClass(down.invoice ? 'invoiced' : 'prepared')" style="min-width: 42px" [ngbTooltip]="statusTooltip(down)">&mdash;</span>
+                                            <span class="small text-muted flex-fill text-truncate">{{ down.text }}</span>
+                                            <span class="small">{{ down.net | money }}</span>
+                                        </div>
+                                    </button>
+                                }
+                            }
+                        </div>
+                    } @else if (_loading) {
+                        <div class="col-5"><spinner /></div>
+                    }
+
+                    <div [class.col-7]="_hasPlan || _loading" [class.col-12]="!_hasPlan && !_loading">
+                        <div class="form-floating mb-3">
+                            <input type="text" class="form-control" id="instalmentDescription" placeholder="description" [(ngModel)]="item.text" i18n-placeholder="@@i18n.common.description" />
+                            <label for="instalmentDescription" i18n="@@i18n.common.description">description</label>
+                        </div>
+                        <div class="input-group mb-3">
+                            <span class="input-group-text" i18n="@@i18n.common.base">base</span>
+                            <input type="number" class="form-control" [(ngModel)]="displayBasePrice" (change)="applyPercentage()" />
+                            <span class="input-group-text">{{ global.currencySymbol() }}</span>
+                        </div>
+                        <div class="input-group mb-3">
+                            <span class="input-group-text" i18n="@@i18n.common.percentage">percentage</span>
+                            <input type="number" class="form-control" [(ngModel)]="percentage" (change)="applyPercentage()" />
+                            <span class="input-group-text">%</span>
+                            <button type="button" class="btn btn-outline-info btn-sm ms-2" (click)="setPercentage(5)">5%</button>
+                            <button type="button" class="btn btn-outline-info btn-sm" (click)="setPercentage(10)">10%</button>
+                            <button type="button" class="btn btn-outline-info btn-sm" (click)="setPercentage(15)">15%</button>
+                            <button type="button" class="btn btn-outline-info btn-sm" (click)="setPercentage(20)">20%</button>
+                            <button type="button" class="btn btn-outline-info btn-sm" (click)="setPercentage(25)">25%</button>
+                            <button type="button" class="btn btn-outline-info btn-sm" (click)="setPercentage(30)">30%</button>
+                        </div>
+                        <div class="form-floating mb-3">
+                            <input type="number" class="form-control" id="instalmentValue" placeholder="100" [(ngModel)]="item.price" />
+                            <label for="instalmentValue" i18n="@@i18n.common.valuePositive">value (positive)</label>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">

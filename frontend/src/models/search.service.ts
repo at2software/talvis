@@ -1,9 +1,9 @@
 import { Service } from '@angular/core';
-import { NexusHttpService } from './http/http.nexus';
+import { TalvisHttpService } from './http/http.talvis';
 import { Dictionary } from '@constants/constants';
 
 @Service()
-export class SearchService extends NexusHttpService<any> {
+export class SearchService extends TalvisHttpService<any> {
     apiPath = 'search';
 
     search = (query: string, filters: object = {}) => this.post<Dictionary>('search', Object.assign(filters, { query: query }));

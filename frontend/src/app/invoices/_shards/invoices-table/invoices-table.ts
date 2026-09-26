@@ -1,4 +1,4 @@
-import { Page } from '@models/http/http.nexus';
+import { Page } from '@models/http/http.talvis';
 import { ChangeDetectionStrategy, Component, computed, effect, inject, input, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Invoice } from '@models/invoice/invoice.model';
@@ -64,6 +64,8 @@ export class InvoicesTable {
     onResult(data: Invoice[]) {
         this._invoices.update((inv) => [...inv, ...data]);
     }
+
+    onActionsResolved = () => this._invoices.update((inv) => [...inv]);
 
     openFile = (inv: Invoice | InvoiceReminder) => this.#fileService.download(inv);
     percentForPaid = (_: Invoice) => _.time_paid().diff(_.createdAt(), 'day') / this.maxPaymentDuration();

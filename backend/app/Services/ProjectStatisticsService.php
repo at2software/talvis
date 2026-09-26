@@ -31,14 +31,15 @@ class ProjectStatisticsService {
             ->pluck('finished_at', 'project_id');
 
         $items = DB::table('invoice_items')
+            ->whereNull('deleted_at')
             ->whereIn('project_id', $projectIds)
             ->whereIn('type', array_map(fn ($e) => $e->value, InvoiceItemType::ProjectTotal))
             ->whereNotNull('product_source_id')
             ->select('project_id', 'product_source_id', 'net')
             ->get();
 
-        $productSourceIds        = $items->pluck('product_source_id')->unique()->values();
-        $productGroupIdBySources = DB::table('products')->whereIn('id', $productSourceIds)->pluck('product_group_id', 'id');
+        $productSourceIds         = $items->pluck('product_source_id')->unique()->values();
+        $productGroupIdBySources  = DB::table('products')->whereIn('id', $productSourceIds)->pluck('product_group_id', 'id');
         $rootGroupMap             = ProductGroup::buildRootGroupMap();
 
         $netByProject = [];
@@ -69,10 +70,10 @@ class ProjectStatisticsService {
                 $groupKey       = 'unassigned';
             } else {
                 $gid                  = $winner['group']->id;
-                $groupTotals[$gid]  ??= ['id' => $gid, 'name' => $winner['group']->name, 'color' => $winner['group']->color, 'count' => 0, 'net' => 0.0];
+                $groupTotals[$gid] ??= ['id' => $gid, 'name' => $winner['group']->name, 'color' => $winner['group']->color, 'count' => 0, 'net' => 0.0];
                 $groupTotals[$gid]['count']++;
                 $groupTotals[$gid]['net'] += $winner['net'];
-                $groupKey  = $gid;
+                $groupKey   = $gid;
                 $projectNet = $winner['net'];
             }
 
@@ -91,7 +92,6 @@ class ProjectStatisticsService {
             'timeline'   => collect($timeline)->map(fn ($groups, $period) => ['period' => $period, 'groups' => $groups])->values(),
         ];
     }
-
     public static function getSuccessRate(Carbon $start, Carbon $end): array {
         $rows = DB::table('project_project_state as pps')
             ->join('project_states as ps', 'ps.id', '=', 'pps.project_state_id')
@@ -108,7 +108,47 @@ class ProjectStatisticsService {
 
         return ['successful' => $successful, 'unsuccessful' => $unsuccessful];
     }
+    public static function getWarrantyLoad(Carbon $start, Carbon $end): array {
+        $latestState = DB::table('project_project_state')
+            ->groupBy('project_id')
+            ->selectRaw('project_id, MAX(id) AS pps_id');
 
+        $finished = DB::table('project_project_state as pps')
+            ->joinSub($latestState, 'latest', 'latest.pps_id', '=', 'pps.id')
+            ->join('project_states as ps', 'ps.id', '=', 'pps.project_state_id')
+            ->where('ps.progress', ProjectState::Finished)
+            ->where('ps.is_successful', true)
+            ->selectRaw('pps.project_id, pps.created_at AS finished_at');
+
+        $rows = DB::table('foci as f')
+            ->join('projects as p', 'p.id', '=', 'f.parent_id')
+            ->leftJoinSub($finished, 'fin', 'fin.project_id', '=', 'f.parent_id')
+            ->where('f.parent_type', Project::class)
+            ->where('p.is_internal', false)
+            ->whereNull('p.deleted_at')
+            ->whereBetween('f.started_at', [$start, $end])
+            ->groupBy('p.id', 'p.name')
+            ->selectRaw('p.id, p.name,
+                SUM(CASE WHEN fin.finished_at IS NOT NULL AND f.started_at > fin.finished_at THEN f.duration ELSE 0 END) AS warranty_hours,
+                SUM(CASE WHEN fin.finished_at IS NULL OR f.started_at <= fin.finished_at THEN f.duration ELSE 0 END) AS regular_hours')
+            ->get();
+
+        return [
+            'regular_hours'  => round((float)$rows->sum('regular_hours'), 2),
+            'warranty_hours' => round((float)$rows->sum('warranty_hours'), 2),
+            'projects'       => $rows
+                ->filter(fn ($_) => $_->warranty_hours > 0)
+                ->sortByDesc('warranty_hours')
+                ->take(10)
+                ->map(fn ($_) => [
+                    'id'             => $_->id,
+                    'name'           => $_->name,
+                    'warranty_hours' => round((float)$_->warranty_hours, 2),
+                    'regular_hours'  => round((float)$_->regular_hours, 2),
+                ])
+                ->values(),
+        ];
+    }
     public static function getQuoteAccuracy(Carbon $start, Carbon $end): array {
         $q = Project::whereHas('states', fn ($q) => $q
             ->where('progress', ProjectState::Finished)

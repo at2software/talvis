@@ -1,6 +1,7 @@
 {
-  "name": "NEXUS",
+  "name": "TALVIS",
   "version": "0.1.0",
+  "license": "AGPL-3.0-or-later",
   "scripts": {
     "ng": "ng",
     "start": "npm run generate:models && ng serve",
@@ -11,7 +12,7 @@
     "extract-and-translate": "ng extract-i18n && python translate.py",
     "generate:models": "node scripts/generate-model-registry.js",
     "lint": "ng lint",
-    "analyze": "ng build --configuration=production --stats-json && esbuild-visualizer --metadata dist/nexus/stats.json --filename dist/nexus/stats.html"
+    "analyze": "ng build --configuration=production --stats-json && esbuild-visualizer --metadata dist/talvis/stats.json --filename dist/talvis/stats.html"
   },
   "private": true,
   "dependencies": {

@@ -1,6 +1,6 @@
 """
-NEXUS Timetracker
-Minimal Windows GUI for tracking time against NEXUS projects and companies.
+TALVIS Timetracker
+Minimal Windows GUI for tracking time against TALVIS projects and companies.
 """
 
 import json
@@ -10,7 +10,7 @@ import tkinter as tk
 from datetime import datetime
 from tkinter import messagebox, simpledialog, ttk
 
-from api import NexusAPI, NexusAPIError
+from api import TalvisAPI, TalvisAPIError
 
 SETTINGS_FILE = os.path.join(os.path.dirname(__file__), "settings.json")
 
@@ -63,14 +63,14 @@ def fmt_hours(hours: float) -> str:
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title("NEXUS Timetracker")
+        self.title("TALVIS Timetracker")
         self.configure(bg=BG)
         self.resizable(False, False)
         self.geometry("420x520")
         self.protocol("WM_DELETE_WINDOW", self._on_close)
 
         self.settings = load_settings()
-        self.api = NexusAPI(self.settings["api_url"], self.settings.get("token", ""))
+        self.api = TalvisAPI(self.settings["api_url"], self.settings.get("token", ""))
 
         # tracking state
         self.active_target: dict | None = None
@@ -92,8 +92,8 @@ class App(tk.Tk):
         self.geometry("380x300")
         f = tk.Frame(self, bg=BG)
 
-        tk.Label(f, text="NEXUS Timetracker", font=FONT_LG, bg=BG, fg=ACCENT).pack(pady=(40, 4))
-        tk.Label(f, text="Sign in with your NEXUS credentials", font=FONT_SM, bg=BG, fg=FG_DIM).pack(pady=(0, 24))
+        tk.Label(f, text="TALVIS Timetracker", font=FONT_LG, bg=BG, fg=ACCENT).pack(pady=(40, 4))
+        tk.Label(f, text="Sign in with your TALVIS credentials", font=FONT_SM, bg=BG, fg=FG_DIM).pack(pady=(0, 24))
 
         form = tk.Frame(f, bg=BG)
         form.pack(padx=40, fill="x")
@@ -136,7 +136,7 @@ class App(tk.Tk):
                         self.settings["token"] = self.api.token
                         save_settings(self.settings)
                     self.after(0, self._show_main)
-                except NexusAPIError as e:
+                except TalvisAPIError as e:
                     msg = "Invalid credentials." if e.status_code == 403 else f"Error {e.status_code}: {e}"
                     self.after(0, lambda: (status_var.set(msg), btn.config(state="normal", text="Login")))
                 except Exception as e:
@@ -216,7 +216,7 @@ class App(tk.Tk):
             try:
                 targets = self.api.get_targets()
                 self.after(0, lambda: self._render_targets(targets))
-            except NexusAPIError as e:
+            except TalvisAPIError as e:
                 if e.status_code in (401, 403):
                     self.after(0, lambda: (self._stop_timer(),
                                            messagebox.showerror("Session expired", "Please log in again."),

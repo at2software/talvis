@@ -10,9 +10,9 @@ export function getExpenseActions(self: Expense): NxAction[] {
             title: 'change matching string',
             action: () => {
                 const val = window.prompt('matching string', self.matching_string ?? '');
-                if (val === null) return;
+                if (val === null) return undefined;
                 self.matching_string = val;
-                self.update().subscribe();
+                return self.update();
             },
         },
         {
@@ -20,7 +20,7 @@ export function getExpenseActions(self: Expense): NxAction[] {
             on: () => !!self.matching_string,
             action: () => {
                 self.matching_string = '';
-                self.update().subscribe();
+                return self.update();
             },
         },
         nx().deleteAction(self, $localize`:@@i18n.common.reallyDeleteThisExpense:really delete this expense?`, { roles: 'admin' }),

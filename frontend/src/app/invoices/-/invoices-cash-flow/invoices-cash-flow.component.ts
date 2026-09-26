@@ -1,4 +1,4 @@
-import { Page } from '@models/http/http.nexus';
+import { Page } from '@models/http/http.talvis';
 import { ChangeDetectionStrategy, Component, inject, model, signal } from '@angular/core';
 import { Observable } from 'rxjs';
 import { CASHFLOW_CHART_CHARTS, CASHFLOW_CHART_I18N, CASHFLOW_CHART_ICONS, CASHFLOW_CHART_KEYS } from '@dashboard/widgets/widget-cashflow/widget-cashflow.options';

@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DecimalPipe } from '@angular/common';
 import { modelResource } from '@models/http/model-resource';
 import { RouterModule } from '@angular/router';
@@ -25,6 +26,11 @@ export class TabTasksInvoiceableComponent extends TabTasksBaseComponent {
     #timeBased = modelResource(this.ready, () => this.#widgetService.indexCashflow('PROJECTS_TIMEBASED', {}, Project));
     #customerSupport = modelResource(this.ready, () => this.#widgetService.indexCashflow('CUSTOMER_SUPPORT', {}, Company));
     #preparedInvoices = modelResource(this.ready, () => this.#widgetService.preparedInvoices());
+
+    constructor() {
+        super();
+        this.global.onInvoiceCreated.pipe(takeUntilDestroyed()).subscribe(() => this.reload());
+    }
 
     timeBased = computed(() => this.#positiveDesc([this.#timeBased.value()?.objects ?? []].flat(), (p) => p.uninvoiced_hours));
     customerSupport = computed(() => this.#positiveDesc([this.#customerSupport.value()?.objects ?? []].flat(), (c) => c.foci_unbilled_sum_duration));

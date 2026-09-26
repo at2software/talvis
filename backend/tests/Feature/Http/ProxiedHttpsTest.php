@@ -28,24 +28,24 @@ class ProxiedHttpsTest extends TestCase {
         $this->app->detectEnvironment(fn () => 'production');
     }
     public function test_forwarded_proto_from_a_trusted_proxy_marks_the_request_secure(): void {
-        $request = $this->fromProxy('http://nexus.test/api/login', ['X-Forwarded-Proto' => 'https']);
+        $request = $this->fromProxy('http://talvis.test/api/login', ['X-Forwarded-Proto' => 'https']);
 
         $this->assertTrue($request->secure());
     }
     public function test_no_redirect_when_the_proxy_terminated_tls(): void {
-        $this->inProduction('https://nexus.test/backend');
+        $this->inProduction('https://talvis.test/backend');
 
-        $request  = $this->fromProxy('http://nexus.test/api/login', ['X-Forwarded-Proto' => 'https']);
+        $request  = $this->fromProxy('http://talvis.test/api/login', ['X-Forwarded-Proto' => 'https']);
         $response = (new HttpRedirect)->handle($request, fn () => response('ok'));
 
         $this->assertSame('ok', $response->getContent());
     }
     public function test_redirect_keeps_the_path_prefix_the_proxy_stripped(): void {
-        $this->inProduction('https://nexus.test/backend');
+        $this->inProduction('https://talvis.test/backend');
 
-        $request  = $this->fromProxy('http://nexus.test/api/login?next=1');
+        $request  = $this->fromProxy('http://talvis.test/api/login?next=1');
         $response = (new HttpRedirect)->handle($request, fn () => response('ok'));
 
-        $this->assertSame('https://nexus.test/backend/api/login?next=1', $response->headers->get('Location'));
+        $this->assertSame('https://talvis.test/backend/api/login?next=1', $response->headers->get('Location'));
     }
 }

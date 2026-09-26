@@ -1,7 +1,7 @@
 <activity-tab icon="attach_money">
     @let _user = user();
     <div class="container">
-        @if (_user?.hasRole('financial')) {
+        @if (_user?.hasRole('financial') && opened()) {
             <scrollbar>
                 <tab-tasks-invoiceable></tab-tasks-invoiceable>
             </scrollbar>

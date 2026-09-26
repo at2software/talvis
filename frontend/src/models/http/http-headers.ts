@@ -1,9 +1,9 @@
 import { Dictionary } from '@constants/constants';
 import { HttpHeaders } from '@angular/common/http';
 
-export const NexusHttpInterceptor = {
+export const TalvisHttpInterceptor = {
     headers: {} as Dictionary<HttpHeaders>,
     add(url: string, headers: HttpHeaders) {
-        NexusHttpInterceptor.headers[url] = headers;
+        TalvisHttpInterceptor.headers[url] = headers;
     },
 };

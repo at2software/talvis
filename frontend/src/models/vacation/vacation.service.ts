@@ -1,7 +1,7 @@
 import { Service } from '@angular/core';
 import { Dictionary } from '@constants/constants';
 import { Vacation } from './vacation.model';
-import { NexusHttpService } from '../http/http.nexus';
+import { TalvisHttpService } from '../http/http.talvis';
 import { VacationGrant } from './vacation-grant.model';
 import { User } from '../user/user.model';
 import { nx } from '@models/_core/nx-bridge';
@@ -10,7 +10,7 @@ import { HolidayDto } from '@models/_core/api-response';
 import { dayjs } from '@constants/date/dates';
 
 @Service()
-export class VacationService extends NexusHttpService<Vacation> {
+export class VacationService extends TalvisHttpService<Vacation> {
     apiPath = 'vacations';
     override readonly model = Vacation;
 

@@ -14,7 +14,7 @@
     </thead>
     <tbody>
         @for (x of _invoices(); track x.id) {
-        <tr class="align-middle {{x.markerClass()}}" [nx]="x" [tables]="_invoices()" context="invoice.module.table">
+        <tr class="align-middle {{x.markerClass()}}" [nx]="x" [tables]="_invoices()" (actionsResolved)="onActionsResolved()" context="invoice.module.table">
             <td class="text-start" [class.text-muted]="x.is_cancelled">{{ x.created_at | date }}</td>
             <td class="text-start">
                 <avatar [object]="x"></avatar>

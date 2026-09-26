@@ -18,6 +18,7 @@ use App\Traits\HasFociTrait;
 use App\Traits\HasI18nTrait;
 use App\Traits\HasInvoiceItemsTrait;
 use App\Traits\HasParams;
+use App\Traits\LogsDeletionTrait;
 use App\Traits\PrecomputedTrait;
 use App\Traits\VcardTrait;
 use Carbon\Carbon;
@@ -25,6 +26,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class Company extends BaseModel {
     use CanMakeInvoiceTrait;
@@ -35,13 +37,14 @@ class Company extends BaseModel {
     use HasI18nTrait;
     use HasInvoiceItemsTrait;
     use HasParams;
+    use LogsDeletionTrait;
     use PrecomputedTrait;
     use SoftDeletes;
     use VcardTrait;
 
     public const FLAG_DRAFT = 0x01;
 
-    protected $fillable = ['vcard', 'created_at', 'updated_at', 'customer_number', 'company_id', 'contact_id', 'net', 'flags', 'vat_id'];
+    protected $fillable = ['vcard', 'created_at', 'updated_at', 'customer_number', 'company_id', 'contact_id', 'net', 'flags', 'vat_id', 'commercial_register', 'invoice_email', 'is_deprecated', 'requires_po', 'has_nda', 'accepts_support', 'remarketing_interval', 'default_product_id', 'source_id', 'source_type'];
     protected $appends  = ['icon', 'class', 'path', 'name', 'needs_vat_handling', 'address', 'has_time_budget'];
     protected $hidden   = ['deleted_at'];
 
@@ -56,9 +59,16 @@ class Company extends BaseModel {
             'requires_po'          => 'boolean',
             'has_nda'              => 'boolean',
             'is_deprecated'        => 'boolean',
+            'accepts_support'      => 'boolean',
             'needs_vat_handling'   => 'boolean',
             'has_time_budget'      => 'boolean',
         ];
+    }
+    public static function me(): ?self {
+        return self::find(Param::get('ME_ID')->value);
+    }
+    public static function myName(): string {
+        return trim((string)(Param::get('ME_NAME')->value ?? '')) ?: trim((string)(self::me()?->name ?? ''));
     }
     public function newCollection(array $models = []) {
         return new CompanyCollection($models);
@@ -110,12 +120,21 @@ class Company extends BaseModel {
             return null;
         }
 
-        $lastInvoiceAt = $this->latestInvoice?->created_at;
+        $lastInvoiceAt = $this->last_invoice_at;
         if (! $lastInvoiceAt) {
             return null;
         }
 
         return $lastInvoiceAt->copy()->addDays((int)round($intervalDays));
+    }
+
+    public function getLastInvoiceAtAttribute(): ?Carbon {
+        return $this->latestInvoice?->created_at;
+    }
+
+    public function getAvgPaymentDelayDaysAttribute(): ?float {
+        $avg = $this->invoices()->whereNotNull('paid_at')->avg(DB::raw('DATEDIFF(paid_at, due_at)'));
+        return $avg === null ? null : (float)$avg;
     }
 
     public function getMlOverdueForContactAttribute(): bool {
@@ -141,6 +160,11 @@ class Company extends BaseModel {
     }
     public function getNeedsVatHandlingAttribute(): bool {
         return $this->vcard->needsVatHandling();
+    }
+    public function invoiceRecipients(): array {
+        $addresses = preg_split('/[;,]/', (string)$this->invoice_email) ?: [];
+        $addresses = array_map('trim', $addresses);
+        return array_values(array_unique(array_filter($addresses, fn ($_) => filter_var($_, FILTER_VALIDATE_EMAIL))));
     }
     protected function hasTimeBudget(): Attribute {
         return Attribute::make(

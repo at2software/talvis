@@ -81,7 +81,6 @@ return [
     'ML_RELIABILITY_PROJECT_QUOTE_ACCEPTANCE' => ['type' => TextParam::class,  'history' => false],
     'ML_RELIABILITY_SUPPORT_LOAD'          => ['type' => TextParam::class,  'history' => false],
     'INVOICE_SUFFIX'                       => ['type' => TextParam::class, 'history' => false],
-    'AT2CONNECT_ENABLED'                   => ['type' => FloatParam::class, 'history' => false, 'default' => 0],
     'ME_BIC'                               => ['type' => StringParam::class, 'history' => false],
     'ME_COMPANY_OWNERS'                    => ['type' => StringParam::class, 'history' => false],
     'ME_COUNTRY_SUBDIVISION_NAME'          => ['type' => StringParam::class, 'history' => false],
@@ -105,6 +104,7 @@ return [
     'PROJECT_PREFIX'                       => ['type' => TextParam::class, 'history' => false],
     'PROJECTS_POSTPONE_WITH_COMMENT'       => ['type' => FloatParam::class, 'history' => false],
     'PROJECT_SUFFIX'                       => ['type' => TextParam::class, 'history' => false],
+    'PROJECT_WARRANTY_DURATION'            => ['type' => FloatParam::class, 'history' => false, 'default' => 1],
     'PROJECT_LEGAL'                        => ['type' => TextParam::class, 'history' => false],
     'QUOTE_NO_CURRENT'                     => ['type' => FloatParam::class, 'history' => false],
     'QUOTE_NO_DIGITS'                      => ['type' => FloatParam::class, 'history' => false],
@@ -144,5 +144,6 @@ return [
     'PROJECT_WORK_THRESHOLDS'                => ['type' => TextParam::class, 'history' => false],
     'PROJECT_WORK_THRESHOLD_NOTIFIED'        => ['type' => TextParam::class, 'history' => false],
     'PROJECT_PREDICTED_OVERRUN_THRESHOLDS'   => ['type' => TextParam::class, 'history' => false],
+    'PROJECT_OVERRUN_WARN_THRESHOLD'         => ['type' => FloatParam::class, 'history' => false, 'default' => 110],
     'PROJECT_PREDICTED_OVERRUN_NOTIFIED'     => ['type' => TextParam::class, 'history' => false],
 ];

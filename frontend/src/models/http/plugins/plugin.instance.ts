@@ -1,6 +1,6 @@
 import { EMPTY, expand, last, map, Observable, of, ReplaySubject, scan } from 'rxjs';
 import { Encryption } from '@models/encryption/encryption.model';
-import { NexusHttpInterceptor } from '@models/http/http-headers';
+import { TalvisHttpInterceptor } from '@models/http/http-headers';
 import { HttpHeaders } from '@angular/common/http';
 import { Serializable } from '@models/_core/serializable';
 import { HttpWrapper } from '../http.wrapper';
@@ -72,7 +72,7 @@ export abstract class PluginInstance extends HttpWrapper implements IPlugin {
             if (this.state === 'idle') {
                 this.state = 'connecting';
                 if (this.needsHttpInterceptor) {
-                    NexusHttpInterceptor.add(this.enc.value.url, this.interceptorHeaders());
+                    TalvisHttpInterceptor.add(this.enc.value.url, this.interceptorHeaders());
                 }
                 this.connect(url).then(this.#propagateConnectedState).catch(this.#propagateConnectionFailState);
             }

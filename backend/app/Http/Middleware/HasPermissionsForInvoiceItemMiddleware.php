@@ -4,7 +4,7 @@ namespace App\Http\Middleware;
 
 use App\Models\InvoiceItem;
 use App\Models\Project;
-use App\Models\ProjectState;
+use App\Models\User;
 use Closure;
 use Illuminate\Http\Request;
 use Spatie\Permission\Exceptions\UnauthorizedException;
@@ -15,10 +15,10 @@ use Symfony\Component\HttpFoundation\Response;
  *
  *  - Any authenticated user may update only their own my_prediction.
  *  - admin / invoicing: may create, update and delete invoice items unconditionally.
- *  - project_manager:    may only do so while the item's project is still in the
- *                        "Prepared" state. The project is taken from the bound
- *                        item (update/destroy) or from project_id in the request
- *                        body (store). No project / not "Prepared" => denied.
+ *  - project_manager:    may only do so on projects they manage. The project is taken
+ *                        from the bound item (update/destroy) or from project_id in the
+ *                        request body (store). A project without a manager is open to
+ *                        every project_manager; no project at all => denied.
  */
 class HasPermissionsForInvoiceItemMiddleware {
     public function handle(Request $request, Closure $next): Response {
@@ -35,7 +35,7 @@ class HasPermissionsForInvoiceItemMiddleware {
             return $next($request);
         }
 
-        if ($user->hasRole('project_manager') && $this->projectIsPrepared($request)) {
+        if ($user->hasRole('project_manager') && $this->managesProject($request, $user)) {
             return $next($request);
         }
 
@@ -44,9 +44,12 @@ class HasPermissionsForInvoiceItemMiddleware {
     private function isOnlyMyPrediction(Request $request): bool {
         return count($request->all()) === 1 && $request->has('my_prediction');
     }
-    private function projectIsPrepared(Request $request): bool {
+    private function managesProject(Request $request, User $user): bool {
         $project = $this->resolveProject($request);
-        return $project?->state?->progress == ProjectState::Prepared;
+        if (! $project) {
+            return false;
+        }
+        return $project->project_manager_id === null || $project->project_manager_id == $user->id;
     }
     private function resolveProject(Request $request): ?Project {
         if ($invoiceItem = $request->route('invoice_item')) {

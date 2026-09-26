@@ -1,7 +1,7 @@
 import { Service } from '@angular/core';
 import { Focus } from '@models/focus/focus.model';
 import { Serializable } from '@models/_core/serializable';
-import { NexusHttpService, Page } from '../http/http.nexus';
+import { TalvisHttpService, Page } from '../http/http.talvis';
 import { InvoiceItem } from '../invoice/invoice-item.model';
 import { Project } from '../project/project.model';
 import { Company } from '../company/company.model';
@@ -9,7 +9,7 @@ import { Observable } from 'rxjs';
 import { User } from '../user/user.model';
 
 @Service()
-export class FocusService extends NexusHttpService<Focus> {
+export class FocusService extends TalvisHttpService<Focus> {
     public apiPath = 'foci';
     override readonly model = Focus;
     indexFor = (_: Serializable) => this.paginate(`${_.apiPathWithId()}/foci`);

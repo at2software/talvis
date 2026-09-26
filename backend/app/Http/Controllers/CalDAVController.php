@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\DAV\CapturingSapi;
 use App\DAV\OwnCalDAVBackend;
 use App\DAV\OwnPDOBasicAuthBackend;
 use App\DAV\OwnPrincipalBackend;
@@ -14,25 +15,15 @@ use Sabre\DAV;
 use Sabre\DAVACL;
 
 class CalDAVController extends Controller {
-    public function createResponseWithCorrectHeader(Request $request) {
-        $response = new Response;
-        if (! $request->isMethod('GET')) {
-            $response->header('Content-Type', 'application/xml');
-        }
-        if (! $request->isMethod('OPTIONS')) {
-            $response->setStatusCode(207);
-        }
-        return $response;
+    public function handleCalDAV(Request $request): Response {
+        $server = $this->startCalDAVServer($request->route()->getName());
+        return CapturingSapi::toLaravelResponse($server->httpResponse);
     }
-    public function handleCalDAV(Request $request) {
-        $routeName = $request->route()->getName();
-        $this->startCardDAVServer($routeName);
-        return $this->createResponseWithCorrectHeader($request);
-    }
-    public function startCardDAVServer(string $rootUri) {
+
+    public function startCalDAVServer(string $rootUri): DAV\Server {
         $pdo = DB::connection()->getPdo();
         $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-        $server = $this->createCardDAVServer($pdo);
+        $server = $this->createCalDAVServer($pdo);
 
         $server->setBaseUri($rootUri);
 
@@ -46,17 +37,20 @@ class CalDAVController extends Controller {
         $server->addPlugin($icsPlugin);
 
         $server->start();
+        return $server;
     }
-    public function createCardDAVServer($pdo) {
+
+    public function createCalDAVServer(\PDO $pdo): DAV\Server {
         $principalBackend = new OwnPrincipalBackend($pdo);
-        $caldendarBackend = new OwnCalDAVBackend($pdo);
+        $calendarBackend  = new OwnCalDAVBackend($pdo);
 
         $tree = [
             new DAVACL\PrincipalCollection($principalBackend),
-            new CalDAV\CalendarRoot($principalBackend, $caldendarBackend),
+            new CalDAV\CalendarRoot($principalBackend, $calendarBackend),
         ];
 
-        $server = new DAV\Server($tree);
+        DAV\Server::$exposeVersion = false;
+        $server = new DAV\Server($tree, new CapturingSapi);
 
         $caldavPlugin = new CalDAV\Plugin;
         $server->addPlugin($caldavPlugin);

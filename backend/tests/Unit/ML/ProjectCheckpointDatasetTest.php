@@ -11,8 +11,10 @@ use Carbon\Carbon;
 use Database\Factories\ProjectStateFactory;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\DB;
+use PHPUnit\Framework\Attributes\Group;
 use Tests\TestCase;
 
+#[Group('database')]
 class ProjectCheckpointDatasetTest extends TestCase {
     use DatabaseTransactions;
 

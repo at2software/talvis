@@ -17,7 +17,7 @@ class Document extends BaseModel {
         $template = str_replace('[documentTitle]', $title, $template);
         $template = str_replace('[footerContext]', $footerContext ?? $title, $template);
 
-        $name     = Param::get('ME_NAME')->value ?? '';
+        $name     = Company::myName();
         $email    = Param::get('ME_EMAIL')->value ?? '';
         $phone    = Param::get('ME_PHONE')->value ?? '';
         $fax      = Param::get('ME_FAX')->value ?? '';
@@ -29,7 +29,7 @@ class Document extends BaseModel {
         $hregName = Param::get('ME_HREG_NAME')->value ?? '';
         $owners   = Param::get('ME_COMPANY_OWNERS')->value ?? '';
 
-        $me       = Company::find(Param::get('ME_ID')->value);
+        $me       = Company::me();
         $street   = $me?->vcard?->getFirstAttr('ADR', [])['STREET'] ?? '';
         $postcode = $me?->vcard?->getFirstAttr('ADR', [])['POSTALCODE'] ?? '';
         $city     = $me?->vcard?->getFirstAttr('ADR', [])['LOCALITY'] ?? '';
@@ -107,17 +107,8 @@ class Document extends BaseModel {
     public static function getQuoteValidity(?Project $project): string {
         return self::cascadingParam('QUOTE_VALIDITY_DURATION', $project, '30');
     }
-    // Cascade: project -> customer company -> global default. Durations are stored on
-    // Company, not CompanyContact — always resolve to Company.
     private static function cascadingParam(string $key, ?Project $project, string $default): string {
-        if ($project && $projectValue = $project->param($key)->value) {
-            return $projectValue;
-        }
-        $company = $project?->company;
-        if ($company && $customerValue = $company->param($key)->value) {
-            return $customerValue;
-        }
-        return Param::get($key)->value ?? $default;
+        return $project ? $project->cascadingParam($key, $default) : (Param::get($key)->value ?? $default);
     }
     public static function personalizationArray(CompanyContact|Company|null $contact = null, ?Project $project = null) {
         $replaces = [];
@@ -126,6 +117,9 @@ class Document extends BaseModel {
         $replaces['dayNow']           = date('d.m.Y');
         $replaces['day+due']          = date('d.m.Y', strtotime('+'.$INVOICE_PAYMENT_DURATION.' days'));
         $replaces['payment-duration'] = $INVOICE_PAYMENT_DURATION;
+
+        $replaces['warranty-duration'] = self::cascadingParam('PROJECT_WARRANTY_DURATION', $project, Project::DEFAULT_WARRANTY_YEARS);
+        $replaces['warranty-until']    = $project?->warranty_until?->format('d.m.Y') ?? '';
 
         if ($contact) {
             if ($contact instanceof CompanyContact) {
@@ -145,14 +139,18 @@ class Document extends BaseModel {
         return $replaces;
     }
     public static function renderPdf(string $template): string {
-        $pdf    = Pdf::loadHTML($template);
-        $output = $pdf->output();
+        $template = self::dropWhiteText($template);
+        $pdf      = Pdf::loadHTML($template);
+        $output   = $pdf->output();
 
         if (! str_contains($template, '[pageCount]')) {
             return $output;
         }
         $pages = $pdf->getDomPDF()->getCanvas()->get_page_count();
         return Pdf::loadHTML(str_replace('[pageCount]', (string)$pages, $template))->output();
+    }
+    private static function dropWhiteText(string $html): string {
+        return preg_replace('/(?<![-\w])color\s*:\s*(?:#(?:f{8}|f{6}|f{4}|f{3})(?![0-9a-f])|white\b|rgba?\(\s*255\s*,\s*255\s*,\s*255[^)]*\))\s*;?/i', '', $html);
     }
     public static function getBase64QrCode($text) {
         return 'data:image/png;base64, '.base64_encode(QrCode::size(500)->format('png')->generate($text));
@@ -222,8 +220,8 @@ class Document extends BaseModel {
         return [$_[2], $_[1], $_[0], $_[5], $_[3], $_[6], $_[4]];
     }
 
-    public static function makeZUGFeRD($pdf, $items, $company, $id = 0, string $documentTypeCode = ZugferdInvoiceType::INVOICE, $footer = [], ?Project $project = null) {
-        return ZugferdInvoiceBuilder::build($pdf, $items, $company, $id, $documentTypeCode, $footer, $project);
+    public static function makeZUGFeRD($pdf, $items, $company, $id = 0, string $documentTypeCode = ZugferdInvoiceType::INVOICE, ?Project $project = null) {
+        return ZugferdInvoiceBuilder::build($pdf, $items, $company, $id, $documentTypeCode, $project);
     }
     public static function mergePdfs($relativePath, $uploadedFiles) {
         $finalPdf    = new Fpdi;

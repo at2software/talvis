@@ -18,7 +18,7 @@ const components: [string, Type<unknown>][] = [
 // endpoint, so they are never absent behind the guard.
 const project = {
     id: '1',
-    name: 'NEXUS',
+    name: 'TALVIS',
     assignees: [],
     invoice_items: [],
     plugin_links: [],

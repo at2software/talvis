@@ -1,4 +1,4 @@
-import { Page } from '@models/http/http.nexus';
+import { Page } from '@models/http/http.talvis';
 import { Router } from '@angular/router';
 import { AfterViewInit, ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { CompanyService } from '@models/company/company.service';

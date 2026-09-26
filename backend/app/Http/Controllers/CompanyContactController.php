@@ -9,7 +9,7 @@ class CompanyContactController extends Controller {
     public function update(Request $request, CompanyContact $company_contact): CompanyContact {
         $company_contact->applyAndSave($request);
         $company_contact->projects;
-        $company_contact->contact->companies;
+        $company_contact->contact->load(['companyContacts' => fn ($q) => $q->whereHas('company')->with('company')]);
         return $company_contact;
     }
     public function destroy(Request $request, CompanyContact $companyContact) {
@@ -17,7 +17,7 @@ class CompanyContactController extends Controller {
     }
     public function show(CompanyContact $company_contact): CompanyContact {
         $company_contact->projects;
-        $company_contact->contact->companies;
+        $company_contact->contact->load(['companyContacts' => fn ($q) => $q->whereHas('company')->with('company')]);
         return $company_contact;
     }
     public function store(Request $request) {

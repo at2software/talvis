@@ -1,12 +1,12 @@
 import { Service } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Invoice } from '@models/invoice/invoice.model';
-import { NexusHttpService } from '../http/http.nexus';
+import { TalvisHttpService } from '../http/http.talvis';
 import { File } from './file.model';
 import { InvoiceReminder } from '../invoice/invoice-reminder.model';
 
 @Service()
-export class FileService extends NexusHttpService<File> {
+export class FileService extends TalvisHttpService<File> {
     public apiPath = 'files';
     override readonly model = File;
 

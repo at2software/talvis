@@ -23,6 +23,8 @@ import { Model } from '@constants/model/type-discriminators';
 import { computed } from '@angular/core';
 import { IHasExtIssue, effectiveExtIssueOf } from '../ext-issue/ext-issue.interface';
 
+export const HOURS_PER_PERSON_DAY = 8;
+
 @Model('InvoiceItem')
 export class InvoiceItem extends Serializable implements IHasMarker, IHasExtIssue {
     static API_PATH = (): string => 'invoice_items';
@@ -68,6 +70,8 @@ export class InvoiceItem extends Serializable implements IHasMarker, IHasExtIssu
     progress?: number;
     marker: number | null = null;
     foci_by_user?: { user_id: string; duration: number }[];
+    foci_sum_duration?: number;
+    delete_blockers: string[] = [];
 
     canModifyQuantity = computed(() => this.snapshot().type === 0);
     qtyMultiplicator = computed(() => this.snapshot().unit_name === '%' ? 0.01 : 1);
@@ -248,7 +252,7 @@ export class InvoiceItem extends Serializable implements IHasMarker, IHasExtIssu
             return qty;
         }
         if (hourUnits.some((unit) => normalizedUnit === unit || normalizedUnit === unit + '.')) {
-            return qty / 8;
+            return qty / HOURS_PER_PERSON_DAY;
         }
         return 0;
     }

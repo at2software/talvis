@@ -3,12 +3,12 @@ import { Service } from '@angular/core';
 import { map } from 'rxjs';
 import { PdfCreationType } from '@enums/PdfCreationType';
 import { Invoice } from '@models/invoice/invoice.model';
-import { NexusHttpService } from '../http/http.nexus';
+import { TalvisHttpService } from '../http/http.talvis';
 import { Expense } from '@models/expense/expense.model';
 import { CustomerStatsDto, LiquidityDto, TimeValuePointDto } from '@models/_core/api-response';
 
 @Service()
-export class InvoiceService extends NexusHttpService<Invoice> {
+export class InvoiceService extends TalvisHttpService<Invoice> {
     public apiPath = 'invoices';
     indexPaginated = (filters?: Dictionary) => this.paginate(this.apiPath, filters);
     override readonly model = Invoice;

@@ -12,10 +12,11 @@
         <media-preview [parent]="_project"></media-preview>
 
         @if (_project && _project.state.isPrepared()) {
-            <div class="card mb-3">
+            <div class="card mb-3" [dnd]="''" [collect]="true" (dndDrop)="onPlanningFileDropped($event)">
                 <div class="card-header">
                     <span i18n="@@i18n.common.planning">planning</span>
                     <div class="card-header-actions">
+                        <i (click)="onSampleDownload()" tabindex="0" (keydown.enter)="onSampleDownload()" class="text-primary cursor-pointer" ngbTooltip="download a sample planning file — drop a filled in copy onto this card to create the items" i18n-ngbTooltip="@@i18n.projects.planningSampleHint">download</i>
                         @if (_showPredictions) {
                             <i (click)="showPredictions.set(!_showPredictions)" tabindex="0" (keydown.enter)="showPredictions.set(!_showPredictions)" class="text-primary cursor-pointer">visibility</i>
                         }

@@ -1,5 +1,5 @@
 import { inject, Service } from '@angular/core';
-import { NexusHttpService } from '../http/http.nexus';
+import { TalvisHttpService } from '../http/http.talvis';
 import { BehaviorSubject } from 'rxjs';
 import { Router, NavigationEnd } from '@angular/router';
 import { WebSocketService, MousePosition, SharingStatus, MouseClick, QuickMessage } from '@services/websocket.service';
@@ -17,7 +17,7 @@ export interface ActiveSharing {
 }
 
 @Service()
-export class LiveSharingService extends NexusHttpService<any> {
+export class LiveSharingService extends TalvisHttpService<any> {
     apiPath = 'live-sharing';
     #ws = inject(WebSocketService);
     #router = inject(Router);

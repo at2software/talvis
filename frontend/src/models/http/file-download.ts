@@ -5,10 +5,25 @@ export const httpErrorMessage = (err: HttpErrorResponse): string | undefined =>
     err.error?.message ?? err.error?.error_description ?? err.statusText;
 
 export function notifyHttpError(err: unknown): void {
-    if (err instanceof HttpErrorResponse && err.status >= 400) {
-        console.warn('[HTTP]', err.status, err.url ?? '', err.error ?? err.statusText);
-        const message = httpErrorMessage(err);
-        if (message) Toast.error(message);
+    if (!(err instanceof HttpErrorResponse) || err.status < 400) return;
+    console.warn('[HTTP]', err.status, err.url ?? '', err.error ?? err.statusText);
+    if (err.error instanceof Blob) {
+        err.error
+            .text()
+            .then((text) => Toast.error(parseErrorBody(text) ?? err.statusText))
+            .catch(() => Toast.error(err.statusText));
+        return;
+    }
+    const message = httpErrorMessage(err);
+    if (message) Toast.error(message);
+}
+
+function parseErrorBody(text: string): string | undefined {
+    try {
+        const body = JSON.parse(text);
+        return body?.message ?? body?.error_description;
+    } catch {
+        return undefined;
     }
 }
 

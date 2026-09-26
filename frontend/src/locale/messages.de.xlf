@@ -220,10 +220,10 @@
         <target>Kommentare</target>
       </segment>
     </unit>
-    <unit id="i18n.comments.toggleNexusComments">
+    <unit id="i18n.comments.toggleTalvisComments">
       <segment>
-        <source>Toggle Nexus comments</source>
-        <target>Nexus-Kommentare umschalten</target>
+        <source>Toggle TALVIS comments</source>
+        <target>TALVIS-Kommentare umschalten</target>
       </segment>
     </unit>
     <unit id="i18n.comments.toggleGitActivity">
@@ -244,10 +244,10 @@
         <target>Mattermost-Aktivität umschalten</target>
       </segment>
     </unit>
-    <unit id="i18n.comments.commentInNexus">
+    <unit id="i18n.comments.commentInTalvis">
       <segment>
-        <source>Comment in Nexus</source>
-        <target>Kommentieren Sie in Nexus</target>
+        <source>Comment in TALVIS</source>
+        <target>Kommentieren Sie in TALVIS</target>
       </segment>
     </unit>
     <unit id="i18n.common.daysAgo">
@@ -1132,16 +1132,16 @@
         <target>Urlaubsantrag</target>
       </segment>
     </unit>
-    <unit id="i18n.common.nexus_environment_error">
+    <unit id="i18n.common.talvis_environment_error">
       <segment>
-        <source>NEXUS // Environment Error</source>
-        <target>NEXUS // Umgebungsvariablen-Fehler</target>
+        <source>TALVIS // Environment Error</source>
+        <target>TALVIS // Umgebungsvariablen-Fehler</target>
       </segment>
     </unit>
     <unit id="i18n.common.environment_error_message">
       <segment>
-        <source>The environment information seems to be corrupted. You are not logged out, but you cannot use NEXUS at the moment. Please report this to your system administrator and try again.</source>
-        <target>Die Umgebungsvariablen sind fehlerhaft. Sie sind nicht ausgeloggt, aber Sie können NEXUS momentan nicht verwenden.</target>
+        <source>The environment information seems to be corrupted. You are not logged out, but you cannot use TALVIS at the moment. Please report this to your system administrator and try again.</source>
+        <target>Die Umgebungsvariablen sind fehlerhaft. Sie sind nicht ausgeloggt, aber Sie können TALVIS momentan nicht verwenden.</target>
       </segment>
     </unit>
     <unit id="i18n.common.try_again">
@@ -1156,10 +1156,10 @@
         <target>Logout</target>
       </segment>
     </unit>
-    <unit id="i18n.common.nexus_login">
+    <unit id="i18n.common.talvis_login">
       <segment>
-        <source>NEXUS // LOG-IN</source>
-        <target>NEXUS // LOG-IN</target>
+        <source>TALVIS // LOG-IN</source>
+        <target>TALVIS // LOG-IN</target>
       </segment>
     </unit>
     <unit id="i18n.common.email_address">
@@ -1678,12 +1678,6 @@
         <target>Rest</target>
       </segment>
     </unit>
-    <unit id="i18n.common.at2connect">
-      <segment>
-        <source>at2 connect</source>
-        <target>at²connect</target>
-      </segment>
-    </unit>
     <unit id="i18n.common.languageFormality">
       <segment>
         <source>Language &amp; Formality</source>
@@ -1754,6 +1748,12 @@
       <segment>
         <source>set new email</source>
         <target>Neue Email setzen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.customers.multiple_emails_hint">
+      <segment>
+        <source>separate multiple recipients with a semicolon</source>
+        <target>Mehrere Empfänger mit Semikolon trennen</target>
       </segment>
     </unit>
     <unit id="i18n.customers.set_new_vat_id">
@@ -1856,6 +1856,12 @@
       <segment>
         <source>other company employments</source>
         <target>Andere Beschäftigungen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.companies.addEmployment">
+      <segment>
+        <source>add employment</source>
+        <target>Beschäftigung hinzufügen</target>
       </segment>
     </unit>
     <unit id="i18n.common.whatsapp">
@@ -2200,6 +2206,72 @@
         <target>Angebotsnummer</target>
       </segment>
     </unit>
+    <unit id="i18n.common.years">
+      <segment>
+        <source>years</source>
+        <target>Jahre</target>
+      </segment>
+    </unit>
+    <unit id="i18n.project.warranty">
+      <segment>
+        <source>warranty</source>
+        <target>Gewährleistung</target>
+      </segment>
+    </unit>
+    <unit id="i18n.project.warrantyDuration">
+      <segment>
+        <source>warranty period</source>
+        <target>Gewährleistungsdauer</target>
+      </segment>
+    </unit>
+    <unit id="i18n.project.warrantyDurationDesc">
+      <segment>
+        <source>Time after a project is finished during which time can still be tracked on it. Available as the [warranty-duration] placeholder in quotes and invoices.</source>
+        <target>Zeitraum nach Projektabschluss, in dem weiterhin Zeiten auf das Projekt gebucht werden können. Als Platzhalter [warranty-duration] in Angeboten und Rechnungen verfügbar.</target>
+      </segment>
+    </unit>
+    <unit id="i18n.placeholder.warrantyDuration">
+      <segment>
+        <source>agreed warranty period in years (cascades: project → customer → default)</source>
+        <target>vereinbarte Gewährleistungsdauer in Jahren (Kaskade: Projekt → Kunde → Standard)</target>
+      </segment>
+    </unit>
+    <unit id="i18n.placeholder.warrantyUntil">
+      <segment>
+        <source>date the warranty expires; empty until the project is finished successfully</source>
+        <target>Datum, an dem die Gewährleistung endet; leer, solange das Projekt nicht erfolgreich abgeschlossen ist</target>
+      </segment>
+    </unit>
+    <unit id="i18n.project.warrantyUntil">
+      <segment>
+        <source>warranty until</source>
+        <target>Gewährleistung bis</target>
+      </segment>
+    </unit>
+    <unit id="i18n.project.warrantyHours">
+      <segment>
+        <source>warranty</source>
+        <target>Gewährleistung</target>
+      </segment>
+    </unit>
+    <unit id="i18n.project.regularHours">
+      <segment>
+        <source>project runtime</source>
+        <target>Projektlaufzeit</target>
+      </segment>
+    </unit>
+    <unit id="i18n.projects.warrantyShare">
+      <segment>
+        <source>warranty vs. project runtime</source>
+        <target>Gewährleistung vs. Projektlaufzeit</target>
+      </segment>
+    </unit>
+    <unit id="i18n.projects.warrantyByProject">
+      <segment>
+        <source>hours booked after project completion</source>
+        <target>Stunden nach Projektabschluss</target>
+      </segment>
+    </unit>
     <unit id="i18n.project.quoteValidFor">
       <segment>
         <source>quote valid for</source>
@@ -2282,12 +2354,6 @@
       <segment>
         <source>toggle dropdown</source>
         <target>Dropdown umschalten</target>
-      </segment>
-    </unit>
-    <unit id="i18n.invoices.noStandingOrders">
-      <segment>
-        <source>no standing orders</source>
-        <target>keine Daueraufträge</target>
       </segment>
     </unit>
     <unit id="i18n.customers.customersubscriptionsWorks">
@@ -2632,6 +2698,12 @@
         <target>Umsatz (12M)</target>
       </segment>
     </unit>
+    <unit id="i18n.dashboard.avgRevenueYtd">
+      <segment>
+        <source>Revenue (YTD)</source>
+        <target>Umsatz (lfd. Jahr)</target>
+      </segment>
+    </unit>
     <unit id="i18n.dashboard.revenueThisYear">
       <segment>
         <source>revenue this year</source>
@@ -2641,13 +2713,13 @@
     <unit id="i18n.dashboard.monthlyEarnings">
       <segment>
         <source>monthly earnings</source>
-        <target>monatliche Einnahmen</target>
+        <target>monatlicher Überschuss</target>
       </segment>
     </unit>
     <unit id="i18n.dashboard.estimatedEarningsThisYear">
       <segment>
         <source>estimated earnings this year</source>
-        <target>geschätzte Einnahmen dieses Jahr</target>
+        <target>geschätzter Überschuss dieses Jahr</target>
       </segment>
     </unit>
     <unit id="i18n.widget-revenue-monthlyRange">
@@ -3468,6 +3540,12 @@
       <segment>
         <source>days until reminder</source>
         <target>Tage bis zur Mahnung</target>
+      </segment>
+    </unit>
+    <unit id="i18n.invoices.notTimeBasedSelection">
+      <segment>
+        <source>items whose unit could not be mapped to a time-based quantity</source>
+        <target>Positionen, deren Einheit sich keiner zeitbasierten Menge zuordnen lässt</target>
       </segment>
     </unit>
     <unit id="i18n.invoices.afterInstalments">
@@ -5009,10 +5087,10 @@
         <target>LocalAI Proxy verwendet Benutzername + Token-Authentifizierung über einen Proxy-Dienst.</target>
       </segment>
     </unit>
-    <unit id="i18n.profile.nexusPluginConfigurationIsManaged">
+    <unit id="i18n.profile.talvisPluginConfigurationIsManaged">
       <segment>
-        <source>NEXUS plugin configuration is managed automatically.</source>
-        <target>NEXUS-Plugin-Konfiguration wird automatisch verwaltet.</target>
+        <source>TALVIS plugin configuration is managed automatically.</source>
+        <target>TALVIS-Plugin-Konfiguration wird automatisch verwaltet.</target>
       </segment>
     </unit>
     <unit id="i18n.profile.deletePlugin">
@@ -5395,8 +5473,8 @@
     </unit>
     <unit id="i18n.profile.infoPdfMussNochManuell">
       <segment>
-        <source> Info: PDF muss noch manuell an die Geschäftsführung für die weitere Verarbeitung weitergeleitet werden. Im NEXUS wird nichts gespeichert. </source>
-        <target>Info: PDF muss noch manuell an die Geschäftsführung für die weitere Verarbeitung weitergeleitet werden. Im NEXUS wird nichts gespeichert.</target>
+        <source> Info: PDF muss noch manuell an die Geschäftsführung für die weitere Verarbeitung weitergeleitet werden. Im TALVIS wird nichts gespeichert. </source>
+        <target>Info: PDF muss noch manuell an die Geschäftsführung für die weitere Verarbeitung weitergeleitet werden. Im TALVIS wird nichts gespeichert.</target>
       </segment>
     </unit>
     <unit id="i18n.profile.pdfGenerieren">
@@ -6527,6 +6605,12 @@
         <target>zu Kunde verschieben</target>
       </segment>
     </unit>
+    <unit id="i18n.projects.convertSupportToRegular">
+      <segment>
+        <source>convert to regular items</source>
+        <target>in reguläre Positionen umwandeln</target>
+      </segment>
+    </unit>
     <unit id="i18n.projects.quoteAcceptance">
       <segment>
         <source>quote acceptance</source>
@@ -7609,6 +7693,18 @@
         <target>E-Mail-Schwellenwerte</target>
       </segment>
     </unit>
+    <unit id="i18n.settings.overrunWarnThreshold">
+      <segment>
+        <source>warning threshold</source>
+        <target>Warnschwelle</target>
+      </segment>
+    </unit>
+    <unit id="i18n.settings.overrunWarnThresholdDesc">
+      <segment>
+        <source>Show an orange warning badge on a project as soon as the predicted final effort reaches this share of the estimated work.</source>
+        <target>Zeigt an einem Projekt ein oranges Warn-Badge, sobald der vorhergesagte Gesamtaufwand diesen Anteil des geschätzten Aufwands erreicht.</target>
+      </segment>
+    </unit>
     <unit id="i18n.settings.emailThresholdsDesc">
       <segment>
         <source>Send an email to the project manager when hours invested divided by estimated work exceeds a threshold. Notifications reset automatically if the ratio drops below the threshold again.</source>
@@ -7775,6 +7871,12 @@
       <segment>
         <source>retire</source>
         <target>ausgeschieden</target>
+      </segment>
+    </unit>
+    <unit id="i18n.common.reactivate">
+      <segment>
+        <source>reactivate</source>
+        <target>reaktivieren</target>
       </segment>
     </unit>
     <unit id="i18n.widget-superadmin-warning">
@@ -9091,6 +9193,24 @@
         <target><ph id="0" equiv="PH" disp="step.months ?? 0"/> monatliche Vorauszahlungen nach Projektstart</target>
       </segment>
     </unit>
+    <unit id="i18n.payment.triggerMonthlyNth">
+      <segment>
+        <source>monthly prepayment <ph id="0" equiv="index" disp="step.month_index"/> of <ph id="1" equiv="total" disp="step.months ?? 0"/> after project start</source>
+        <target><ph id="0" equiv="index" disp="step.month_index"/>. von <ph id="1" equiv="total" disp="step.months ?? 0"/> monatlichen Vorauszahlungen nach Projektstart</target>
+      </segment>
+    </unit>
+    <unit id="i18n.payment.stepPrepared">
+      <segment>
+        <source>prepared, not invoiced yet</source>
+        <target>vorbereitet, noch nicht abgerechnet</target>
+      </segment>
+    </unit>
+    <unit id="i18n.payment.unmatchedDownpayments">
+      <segment>
+        <source>not part of the agreed plan</source>
+        <target>nicht Teil des vereinbarten Zahlungsplans</target>
+      </segment>
+    </unit>
     <unit id="i18n.payment.months">
       <segment>
         <source>mo.</source>
@@ -9207,8 +9327,8 @@
     </unit>
     <unit id="i18n.invoices.standingOrdersEmptyDescription">
       <segment>
-        <source>Automate your recurring revenue. Set up standing orders and let NEXUS handle the rhythm of your business.</source>
-        <target>Automatisiere deine wiederkehrenden Einnahmen. Richte Daueraufträge ein und lass NEXUS den Rhythmus deines Unternehmens übernehmen.</target>
+        <source>Automate your recurring revenue. Set up standing orders and let TALVIS handle the rhythm of your business.</source>
+        <target>Automatisiere deine wiederkehrenden Einnahmen. Richte Daueraufträge ein und lass TALVIS den Rhythmus deines Unternehmens übernehmen.</target>
       </segment>
     </unit>
     <unit id="i18n.invoices.noExpensesYet">
@@ -9261,8 +9381,8 @@
     </unit>
     <unit id="i18n.settings.connectorsDescription">
       <segment>
-        <source> Connectors link NEXUS to external services via encrypted credentials. Values are stored securely and never exposed again after saving — leave fields blank to keep existing values unchanged. </source>
-        <target> Konnektoren verbinden NEXUS mit externen Diensten über verschlüsselte Zugangsdaten. Werte werden sicher gespeichert und nach dem Speichern nicht mehr angezeigt — lasse Felder leer, um bestehende Werte unverändert zu lassen. </target>
+        <source> Connectors link TALVIS to external services via encrypted credentials. Values are stored securely and never exposed again after saving — leave fields blank to keep existing values unchanged. </source>
+        <target> Konnektoren verbinden TALVIS mit externen Diensten über verschlüsselte Zugangsdaten. Werte werden sicher gespeichert und nach dem Speichern nicht mehr angezeigt — lasse Felder leer, um bestehende Werte unverändert zu lassen. </target>
       </segment>
     </unit>
     <unit id="i18n.marketing.day">
@@ -9607,10 +9727,10 @@
         <target>Diese Ansicht visualisiert das Netzwerk zwischen Unternehmen. Fügen Sie in der Netzwerk-Registerkarte jedes Kunden Verbindungen hinzu, um zu sehen, wer wen kennt.</target>
       </segment>
     </unit>
-    <unit id="i18n.onboarding.setupNexus">
+    <unit id="i18n.onboarding.setupTalvis">
       <segment>
-        <source>set up NEXUS</source>
-        <target>NEXUS einrichten</target>
+        <source>set up TALVIS</source>
+        <target>TALVIS einrichten</target>
       </segment>
     </unit>
     <unit id="i18n.onboarding.companyNamePlaceholder">
@@ -9627,8 +9747,8 @@
     </unit>
     <unit id="i18n.onboarding.companyDescription">
       <segment>
-        <source> NEXUS needs a company entry to represent your organization. This will become your &quot;my company&quot; reference throughout the system. </source>
-        <target> NEXUS benötigt einen Unternehmenseintrag für Ihre Organisation. Dieser wird im gesamten System als „mein Unternehmen" verwendet. </target>
+        <source> TALVIS needs a company entry to represent your organization. This will become your &quot;my company&quot; reference throughout the system. </source>
+        <target> TALVIS benötigt einen Unternehmenseintrag für Ihre Organisation. Dieser wird im gesamten System als „mein Unternehmen" verwendet. </target>
       </segment>
     </unit>
     <unit id="i18n.onboarding.setUpLocalization">
@@ -9639,8 +9759,8 @@
     </unit>
     <unit id="i18n.onboarding.localizationDescription">
       <segment>
-        <source> Choose the language, country and currency for your NEXUS instance. </source>
-        <target> Wählen Sie die Sprache, das Land und die Währung für Ihre NEXUS-Instanz. </target>
+        <source> Choose the language, country and currency for your TALVIS instance. </source>
+        <target> Wählen Sie die Sprache, das Land und die Währung für Ihre TALVIS-Instanz. </target>
       </segment>
     </unit>
     <unit id="i18n.onboarding.saveAndFinish">
@@ -9655,10 +9775,10 @@
         <target>Alles erledigt!</target>
       </segment>
     </unit>
-    <unit id="i18n.onboarding.nexusReady">
+    <unit id="i18n.onboarding.talvisReady">
       <segment>
-        <source> Your NEXUS instance is configured and ready to use. </source>
-        <target> Ihre NEXUS-Instanz ist konfiguriert und einsatzbereit. </target>
+        <source> Your TALVIS instance is configured and ready to use. </source>
+        <target> Ihre TALVIS-Instanz ist konfiguriert und einsatzbereit. </target>
       </segment>
     </unit>
     <unit id="i18n.onboarding.canChangeInSettings">
@@ -9669,8 +9789,8 @@
     </unit>
     <unit id="i18n.dashboard.welcomeTitle">
       <segment>
-        <source>Welcome to NEXUS</source>
-        <target>Willkommen bei NEXUS</target>
+        <source>Welcome to TALVIS</source>
+        <target>Willkommen bei TALVIS</target>
       </segment>
     </unit>
     <unit id="i18n.dashboard.welcomeDescription">
@@ -9813,8 +9933,8 @@
     </unit>
     <unit id="i18n.onboarding.wizard.successMessage">
       <segment>
-        <source> Your NEXUS instance is fully configured and ready to go. Let's get started on your awesome experience! </source>
-        <target> Ihre NEXUS-Instanz ist vollständig konfiguriert und einsatzbereit. Legen Sie los und erleben Sie NEXUS! </target>
+        <source> Your TALVIS instance is fully configured and ready to go. Let's get started on your awesome experience! </source>
+        <target> Ihre TALVIS-Instanz ist vollständig konfiguriert und einsatzbereit. Legen Sie los und erleben Sie TALVIS! </target>
       </segment>
     </unit>
     <unit id="i18n.onboarding.wizard.letsGo">
@@ -9825,8 +9945,8 @@
     </unit>
     <unit id="i18n.guidedTour.disable">
       <segment>
-        <source>disable NEXUS guide</source>
-        <target>NEXUS-Anleitung deaktivieren</target>
+        <source>disable TALVIS guide</source>
+        <target>TALVIS-Anleitung deaktivieren</target>
       </segment>
     </unit>
     <unit id="i18n.guidedTour.done">
@@ -9843,14 +9963,14 @@
     </unit>
     <unit id="i18n.guidedTour.nav.introTitle">
       <segment>
-        <source>NEXUS Navigation</source>
-        <target>NEXUS-Navigation</target>
+        <source>TALVIS Navigation</source>
+        <target>TALVIS-Navigation</target>
       </segment>
     </unit>
     <unit id="i18n.guidedTour.nav.introContent">
       <segment>
-        <source>Welcome to NEXUS! The navigation bar on the left gives you quick access to all modules. Let's take a quick look at what's available.</source>
-        <target>Willkommen bei NEXUS! Die Navigationsleiste auf der linken Seite bietet schnellen Zugriff auf alle Module. Schauen wir uns kurz an, was verfügbar ist.</target>
+        <source>Welcome to TALVIS! The navigation bar on the left gives you quick access to all modules. Let's take a quick look at what's available.</source>
+        <target>Willkommen bei TALVIS! Die Navigationsleiste auf der linken Seite bietet schnellen Zugriff auf alle Module. Schauen wir uns kurz an, was verfügbar ist.</target>
       </segment>
     </unit>
     <unit id="i18n.guidedTour.nav.dashboard">
@@ -9933,8 +10053,8 @@
     </unit>
     <unit id="i18n.guidedTour.customers.addContent">
       <segment>
-        <source>Create a new company by entering a name — or simply paste a website URL. NEXUS will automatically try to parse the company's imprint page to fill in address, contact details, and more.</source>
-        <target>Erstellen Sie ein neues Unternehmen durch Eingabe eines Namens — oder fügen Sie einfach eine Website-URL ein. NEXUS versucht automatisch, die Impressumsseite des Unternehmens zu analysieren, um Adresse, Kontaktdaten und mehr zu befüllen.</target>
+        <source>Create a new company by entering a name — or simply paste a website URL. TALVIS will automatically try to parse the company's imprint page to fill in address, contact details, and more.</source>
+        <target>Erstellen Sie ein neues Unternehmen durch Eingabe eines Namens — oder fügen Sie einfach eine Website-URL ein. TALVIS versucht automatisch, die Impressumsseite des Unternehmens zu analysieren, um Adresse, Kontaktdaten und mehr zu befüllen.</target>
       </segment>
     </unit>
     <unit id="i18n.guidedTour.assets.categoriesTitle">
@@ -10113,8 +10233,8 @@
     </unit>
     <unit id="i18n.guidedTour.dashboard.contextMenusContent">
       <segment>
-        <source>Most objects in NEXUS support right-click context menus with quick actions. You can easily spot them — their background turns teal when you hover over them.</source>
-        <target>Die meisten Objekte in NEXUS unterstützen Rechtsklick-Kontextmenüs mit schnellen Aktionen. Sie erkennen sie ganz einfach — ihr Hintergrund wird türkis, wenn Sie mit der Maus darüber fahren.</target>
+        <source>Most objects in TALVIS support right-click context menus with quick actions. You can easily spot them — their background turns teal when you hover over them.</source>
+        <target>Die meisten Objekte in TALVIS unterstützen Rechtsklick-Kontextmenüs mit schnellen Aktionen. Sie erkennen sie ganz einfach — ihr Hintergrund wird türkis, wenn Sie mit der Maus darüber fahren.</target>
       </segment>
     </unit>
     <unit id="i18n.guidedTour.dashboard.multiselectTitle">
@@ -11316,38 +11436,73 @@
       </segment>
     </unit>
 
-    <unit id="i18n.common.requestDeletion">
+    <unit id="i18n.settings.deletionLog">
       <segment>
-        <source>request deletion</source>
-        <target>Löschung beantragen</target>
+        <source>deletion log</source>
+        <target>Löschprotokoll</target>
       </segment>
     </unit>
 
-    <unit id="i18n.common.requestDeletionReason">
+    <unit id="i18n.deletionLog.deletedBy">
       <segment>
-        <source>Why should this be deleted?</source>
-        <target>Warum soll dies gelöscht werden?</target>
+        <source>deleted by</source>
+        <target>gelöscht von</target>
       </segment>
     </unit>
 
-    <unit id="i18n.common.deletionRequested">
+    <unit id="i18n.deletionLog.entry">
       <segment>
-        <source>Deletion requested</source>
-        <target>Löschung beantragt</target>
+        <source>entry</source>
+        <target>Eintrag</target>
       </segment>
     </unit>
 
-    <unit id="i18n.common.deletionRequests">
+    <unit id="i18n.deletionLog.context">
       <segment>
-        <source>deletion requests</source>
-        <target>Löschanträge</target>
+        <source>context</source>
+        <target>Kontext</target>
       </segment>
     </unit>
 
-    <unit id="i18n.deletionRequest.reallyReject">
+    <unit id="i18n.deletionLog.restore">
       <segment>
-        <source>Reject this deletion request?</source>
-        <target>Diesen Löschantrag ablehnen?</target>
+        <source>restore</source>
+        <target>wiederherstellen</target>
+      </segment>
+    </unit>
+
+    <unit id="i18n.deletionLog.empty">
+      <segment>
+        <source>nothing was deleted yet</source>
+        <target>bisher wurde nichts gelöscht</target>
+      </segment>
+    </unit>
+
+    <unit id="i18n.common.back">
+      <segment>
+        <source>back</source>
+        <target>zurück</target>
+      </segment>
+    </unit>
+
+    <unit id="i18n.invoices.deleteItemTrackedHint">
+      <segment>
+        <source>tracked time loses its assignment.</source>
+        <target>erfasste Zeit verliert die Zuordnung.</target>
+      </segment>
+    </unit>
+
+    <unit id="i18n.invoices.deleteItemBilledHint">
+      <segment>
+        <source>prepared for billing count as unbilled again.</source>
+        <target>zur Abrechnung vorbereitet gelten wieder als nicht abgerechnet.</target>
+      </segment>
+    </unit>
+
+    <unit id="i18n.invoices.deleteItemMilestoneHint">
+      <segment>
+        <source>milestone loses this item.</source>
+        <target>Meilenstein verliert diese Position.</target>
       </segment>
     </unit>
 
@@ -11580,5 +11735,65 @@
       </segment>
     </unit>
 
+    <unit id="i18n.projects.planningSampleHint">
+      <segment>
+        <source>download a sample planning file — drop a filled in copy onto this card to create the items</source>
+        <target>Beispiel-Planungsdatei herunterladen — eine ausgefüllte Kopie auf diese Karte ziehen, um die Positionen anzulegen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.projects.planningDropUnsupported">
+      <segment>
+        <source>only markdown files can be dropped here</source>
+        <target>hier können nur Markdown-Dateien abgelegt werden</target>
+      </segment>
+    </unit>
+    <unit id="i18n.projects.planningDropEmpty">
+      <segment>
+        <source>no planning items found in the dropped file</source>
+        <target>in der abgelegten Datei wurden keine Planungspositionen gefunden</target>
+      </segment>
+    </unit>
+    <unit id="i18n.projects.planningImporting">
+      <segment>
+        <source>creating planning items…</source>
+        <target>Planungspositionen werden angelegt…</target>
+      </segment>
+    </unit>
+    <unit id="i18n.projects.planningImported">
+      <segment>
+        <source>planning items created</source>
+        <target>Planungspositionen angelegt</target>
+      </segment>
+    </unit>
+    <unit id="i18n.projects.planningImportFailed">
+      <segment>
+        <source>could not create the planning items</source>
+        <target>die Planungspositionen konnten nicht angelegt werden</target>
+      </segment>
+    </unit>
+    <unit id="i18n.projects.importPlanningTitle">
+      <segment>
+        <source>import planning</source>
+        <target>Planung importieren</target>
+      </segment>
+    </unit>
+    <unit id="i18n.projects.importPlanningNothing">
+      <segment>
+        <source>nothing recognised in this file</source>
+        <target>in dieser Datei wurde nichts erkannt</target>
+      </segment>
+    </unit>
+    <unit id="i18n.common.items">
+      <segment>
+        <source>items</source>
+        <target>Positionen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.projects.planningRowOptional">
+      <segment>
+        <source>optional</source>
+        <target>optional</target>
+      </segment>
+    </unit>
   </file>
 </xliff>

@@ -25,6 +25,7 @@ use App\Traits\HasPaymentPlanTrait;
 use App\Traits\HasProjectStateTrait;
 use App\Traits\HasQuoteDescriptionsTrait;
 use App\Traits\HasTasksTrait;
+use App\Traits\LogsDeletionTrait;
 use App\Traits\PrecomputedTrait;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -50,6 +51,14 @@ class Project extends BaseModel {
         $current = (string)(Param::get('QUOTE_NO_CURRENT')->value ?? 0);
         return $prefix.str_pad($current, $digits, '0', STR_PAD_LEFT).$suffix;
     }
+    public static function maxWarrantyMonths(): int {
+        $param = Param::get('PROJECT_WARRANTY_DURATION');
+        $years = max(
+            (float)($param->value ?? self::DEFAULT_WARRANTY_YEARS),
+            (float)FloatParam::where('param_id', $param->id)->max('value')
+        );
+        return (int)ceil($years * 12);
+    }
     public static function incrementQuoteNumber(): void {
         $param        = Param::get('QUOTE_NO_CURRENT');
         $param->value = $param->value + 1;
@@ -67,14 +76,19 @@ class Project extends BaseModel {
     use HasProjectStateTrait;
     use HasQuoteDescriptionsTrait;
     use HasTasksTrait;
+    use LogsDeletionTrait;
     use PrecomputedTrait;
     use SoftDeletes;
 
-    public const ADDS = [InvoiceItemType::Default, InvoiceItemType::Discount];
+    public const ADDS                   = [InvoiceItemType::Default, InvoiceItemType::Discount];
+    public const DEFAULT_WARRANTY_YEARS = '1';
 
-    protected $touches  = ['company'];
-    protected $appends  = ['class', 'icon', 'path', 'params', 'net', 'state', 'has_time_budget'];
-    protected $fillable = ['company_id', 'name', 'description', 'project_id', 'product_id', 'remind_at', 'deadline_at', 'lead_probability', 'project_manager_id', 'no_git_required', 'po_number', 'is_time_based', 'is_internal', 'individual_wage'];
+    protected $touches         = ['company'];
+    protected $appends         = ['class', 'icon', 'path', 'params', 'net', 'state', 'has_time_budget'];
+    protected $with            = ['latestStateRelation', 'company'];
+    protected $hidden          = ['latestStateRelation'];
+    protected $eagerLoadParams = true;
+    protected $fillable        = ['company_id', 'name', 'description', 'project_id', 'product_id', 'remind_at', 'due_at', 'deadline_at', 'lead_probability', 'project_manager_id', 'no_git_required', 'po_number', 'is_time_based', 'is_internal', 'individual_wage'];
 
     protected function casts(): array {
         return [
@@ -141,9 +155,13 @@ class Project extends BaseModel {
     // #########
 
     public function getStateAttribute(): ?ProjectState {
-        return $this->relationLoaded('states') && $this->states->isNotEmpty()
-            ? $this->states->first()
-            : $this->states()->first();
+        if ($this->relationLoaded('states') && $this->states->isNotEmpty()) {
+            return $this->states->first();
+        }
+        if ($this->relationLoaded('latestStateRelation')) {
+            return $this->latestStateRelation;
+        }
+        return $this->states()->first();
     }
     public function setStateAttribute($value) {
         return ProjectProjectState::create([
@@ -155,6 +173,14 @@ class Project extends BaseModel {
         return $this->relationLoaded('lastFinishedStateRelation')
             ? $this->lastFinishedStateRelation?->pivot->created_at
             : $this->lastFinishedState()->first()?->pivot->created_at;
+    }
+    public function getWarrantyUntilAttribute(): ?Carbon {
+        if ($this->state?->progress != ProjectState::Finished || ! $this->state->is_successful) {
+            return null;
+        }
+        $finishedAt = $this->finished_at;
+        $months     = (int)round($this->warrantyYears() * 12);
+        return $finishedAt && $months > 0 ? Carbon::parse($finishedAt)->addMonths($months) : null;
     }
     public function getStartedAtAttribute() {
         return $this->relationLoaded('firstStartedStateRelation')
@@ -325,6 +351,10 @@ class Project extends BaseModel {
                 AND `ps_sub`.`progress` IN (?, ?)
             )', [ProjectState::Running, ProjectState::Finished]);
     }
+    public function latestStateRelation() {
+        return $this->hasOneThrough(ProjectState::class, ProjectProjectState::class, 'project_id', 'id', 'id', 'project_state_id')
+            ->orderByDesc('project_project_state.id');
+    }
     public function lastFinishedStateRelation() {
         return $this->hasOneThrough(ProjectState::class, 'project_project_state')
             ->where('progress', ProjectState::Finished)
@@ -343,6 +373,17 @@ class Project extends BaseModel {
     public function debriefs() {
         return $this->hasMany(DebriefProjectDebrief::class);
     }
+    public function warrantyYears(): float {
+        return (float)$this->cascadingParam('PROJECT_WARRANTY_DURATION', self::DEFAULT_WARRANTY_YEARS);
+    }
+    public function isInWarranty(): bool {
+        return $this->warranty_until?->isFuture() ?? false;
+    }
+    public function cascadingParam(string $key, string $default): string {
+        return $this->param($key)->value
+            ?: $this->company?->param($key)->value
+            ?: (Param::get($key)->value ?? $default);
+    }
     public function getWage($baseWage = null) {
         if ($this->individual_wage !== null) {
             return $this->individual_wage;
@@ -356,7 +397,7 @@ class Project extends BaseModel {
         return app(DuplicateProjectAction::class)->execute($this, $name);
     }
     public function setParent(?int $parentId): void {
-        if (!$parentId) {
+        if (! $parentId) {
             $this->project_id = null;
             return;
         }
@@ -367,7 +408,7 @@ class Project extends BaseModel {
                 ->where('assignee_type', $assignee->assignee_type)
                 ->where('assignee_id', $assignee->assignee_id)
                 ->exists();
-            if (!$exists) {
+            if (! $exists) {
                 Assignment::create([
                     ...$this->toPoly(),
                     ...$assignee->assignee->toPoly('assignee'),
@@ -389,6 +430,23 @@ class Project extends BaseModel {
     }
     public function moveItemsToCustomer($itemsQuery, array $itemUpdates = []): void {
         app(MoveProjectItemsToCustomerAction::class)->execute($this, $itemsQuery, $itemUpdates);
+    }
+    public function convertSupportItemsToRegular(): int {
+        $items = $this->supportInvoiceItems()->whereNull('company_id')->get();
+        if ($items->isEmpty()) {
+            return 0;
+        }
+
+        $position = $this->preparedInvoiceItems()->max('position') ?? -1;
+
+        Invoice::disablePropagation();
+        $items->each(function (InvoiceItem $item) use (&$position) {
+            $item->update(['stage' => 0, 'position' => ++$position]);
+        });
+        Invoice::enablePropagation();
+        $this->propagateDirty();
+
+        return $items->count();
     }
     public function handleStateTransition(ProjectState $previousState, int $userId): void {
         app(HandleProjectStateTransitionAction::class)->execute($this, $previousState, $userId);

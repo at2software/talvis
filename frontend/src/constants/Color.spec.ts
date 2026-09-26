@@ -23,8 +23,8 @@ describe('Color', () => {
     });
 
     it('uniqueColorFromString is deterministic', () => {
-        const a = Color.uniqueColorFromString('nexus');
-        const b = Color.uniqueColorFromString('nexus');
+        const a = Color.uniqueColorFromString('talvis');
+        const b = Color.uniqueColorFromString('talvis');
         expect(a).toBe(b);
     });
 

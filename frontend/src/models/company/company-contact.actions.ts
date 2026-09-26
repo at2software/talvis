@@ -14,11 +14,12 @@ export function getCompanyContactActions(self: CompanyContact): NxAction[] {
                 action: () => self.linkToPlugin(inst),
             })),
         },
-        { title: $localize`:@@i18n.common.retire:retire`, group: true, action: () => self.update({ is_retired: true }).subscribe(), roles: 'hr' },
-        { title: $localize`:@@i18n.companies.setFavorite:set favorite`, group: true, action: () => self.update({ is_favorite: true }).subscribe(), on: () => !self.is_favorite },
-        { title: $localize`:@@i18n.companies.setAsDefaultContact:set as default contact`, group: true, action: () => nx().service.put(`companies/${self.company_id}`, { default_contact_id: self.id }).subscribe() },
-        { title: $localize`:@@i18n.companies.setAsInvoiceContact:set as invoice contact`, group: true, action: () => nx().service.put(`companies/${self.company_id}`, { default_invoicee_id: self.id }).subscribe() },
-        { title: $localize`:@@i18n.companies.unsetFavorite:unset favorite`, group: true, action: () => self.update({ is_favorite: false }).subscribe(), on: () => self.is_favorite },
+        { title: $localize`:@@i18n.common.retire:retire`, group: true, on: () => !self.isRetired(), action: () => self.update({ is_retired: true }), roles: 'project_manager|marketing' },
+        { title: $localize`:@@i18n.common.reactivate:reactivate`, group: true, on: () => self.isRetired(), action: () => self.update({ is_retired: false }), roles: 'project_manager|marketing' },
+        { title: $localize`:@@i18n.companies.setFavorite:set favorite`, group: true, action: () => self.update({ is_favorite: true }), on: () => !self.is_favorite },
+        { title: $localize`:@@i18n.companies.setAsDefaultContact:set as default contact`, group: true, action: () => nx().service.put(`companies/${self.company_id}`, { default_contact_id: self.id }) },
+        { title: $localize`:@@i18n.companies.setAsInvoiceContact:set as invoice contact`, group: true, action: () => nx().service.put(`companies/${self.company_id}`, { default_invoicee_id: self.id }) },
+        { title: $localize`:@@i18n.companies.unsetFavorite:unset favorite`, group: true, action: () => self.update({ is_favorite: false }), on: () => self.is_favorite },
         nx().deleteAction(self, $localize`:@@i18n.companies.reallyDeleteThisContact:really delete this contact?`, { roles: 'admin' }),
     ];
 }

@@ -19,9 +19,14 @@ class Assignment extends BaseModel {
 
     protected $fillable = ['role_id', 'parent_id', 'parent_type', 'assignee_id', 'assignee_type', 'hours_planned', 'hours_weekly', 'flags'];
     protected $appends  = ['avg_hpd'];
+    protected $with     = ['avgHpdParam'];
+    protected $hidden   = ['avgHpdParam'];
 
+    public function avgHpdParam() {
+        return $this->latestParamFor('ASSIGNMENT_AVG_HPD');
+    }
     public function getAvgHpdAttribute() {
-        return $this->latestParamFor('ASSIGNMENT_AVG_HPD')->first()?->value;
+        return $this->avgHpdParam?->value;
     }
     public function role() {
         return $this->belongsTo(Role::class);

@@ -13,7 +13,7 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Collection;
 
 /**
- * @method static \Illuminate\Foundation\Bus\PendingDispatch dispatch(\Illuminate\Support\Collection $links, array{id: int, name: string, web_url: string} $project, array{status: string, ref: string, id: int} $objectAttributes, array<int, array{id: int, name: string, status: string}> $builds)
+ * @method static \Illuminate\Foundation\Bus\PendingDispatch dispatch(\Illuminate\Support\Collection $links, array{id: int, name: string, web_url: string} $project, array{status: string, ref: string, id: int} $objectAttributes, array<int, array{id: int, name: string, status: string, stage?: string}> $builds)
  */
 class GitPipelineWebhookJob implements ShouldQueue {
     use Dispatchable;
@@ -26,7 +26,7 @@ class GitPipelineWebhookJob implements ShouldQueue {
      * @param Collection<int, PluginLink> $links
      * @param array{id: int, name: string, web_url: string} $project
      * @param array{status: string, ref: string, id: int} $objectAttributes
-     * @param array<int, array{id: int, name: string, status: string}> $builds
+     * @param array<int, array{id: int, name: string, status: string, stage?: string}> $builds
      */
     public function __construct(
         private Collection $links,
@@ -45,11 +45,7 @@ class GitPipelineWebhookJob implements ShouldQueue {
         $ref        = $this->objectAttributes['ref'];
         $message    = "[`$emoji ⎇ $ref`]($projectUrl): ";
 
-        foreach ($this->builds as $build) {
-            $eBuild = $this->emojiForStatus($build['status']);
-            $url    = $projectUrl.'/-/jobs/'.$build['id'];
-            $message .= " [`$eBuild {$build['name']}`]($url)";
-        }
+        $message .= $this->pipelineJobList($this->builds, $projectUrl);
 
         $cacheId                 = 'git_pipeline_'.$this->objectAttributes['id'];
         $props                   = $this->props($this->project['name']);

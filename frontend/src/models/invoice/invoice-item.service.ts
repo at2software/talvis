@@ -1,13 +1,13 @@
 import { Service } from '@angular/core';
 import { InvoiceItem } from '@models/invoice/invoice-item.model';
-import { NexusHttpService } from '@models/http/http.nexus';
+import { TalvisHttpService } from '@models/http/http.talvis';
 import { Company } from '@models/company/company.model';
 import { Project } from '@models/project/project.model';
 import { Serializable } from '@models/_core/serializable';
 import { Dictionary } from '@constants/constants';
 
 @Service()
-export class InvoiceItemService extends NexusHttpService<InvoiceItem> {
+export class InvoiceItemService extends TalvisHttpService<InvoiceItem> {
     public apiPath = 'invoice_items';
     override readonly model = InvoiceItem;
 

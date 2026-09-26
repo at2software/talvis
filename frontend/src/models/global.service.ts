@@ -8,7 +8,7 @@ import { BehaviorSubject, ReplaySubject, Subject, filter, firstValueFrom, map, t
 import { Encryption } from '@models/encryption/encryption.model';
 import { AuthenticationService } from './auth.service';
 import { deleteCookie, getCookie } from '@constants/cookies';
-import { NexusHttpInterceptor } from '@models/http/http-headers';
+import { TalvisHttpInterceptor } from '@models/http/http-headers';
 import { HttpHeaders } from '@angular/common/http';
 import { resolved } from '@constants/resolved';
 import { PluginInstanceFactory } from './http/plugins/plugin.instance.factory';
@@ -16,7 +16,7 @@ import { Router } from '@angular/router';
 import { Project } from './project/project.model';
 import { LeadSource } from './project/lead-source.model';
 import { ProjectState } from './project/project-state.model';
-import { NexusHttpService } from './http/http.nexus';
+import { TalvisHttpService } from './http/http.talvis';
 import { Serializable } from '@models/_core/serializable';
 import type { NxAction } from '@models/_core/nx.actions';
 import type { INxContextMenu } from '@models/_core/nx.contextmenu.interface';
@@ -33,7 +33,7 @@ interface NavigationItem {
 }
 
 @Service()
-export class GlobalService extends NexusHttpService<Serializable> {
+export class GlobalService extends TalvisHttpService<Serializable> {
     readonly #auth = inject(AuthenticationService);
     readonly #factory = inject(PluginInstanceFactory);
     readonly #router = inject(Router);
@@ -65,6 +65,7 @@ export class GlobalService extends NexusHttpService<Serializable> {
     readonly navigationItems = signal<NavigationItem[]>([]);
     readonly bottomNavigationItems = signal<NavigationItem[]>([]);
     readonly onActionsResolved = new Subject<{ object: INxContextMenu; action: NxAction }>();
+    readonly onInvoiceCreated = new Subject<void>();
     readonly env = environment;
     readonly supportedLanguages: string[] = ['en', 'de'];
 
@@ -122,7 +123,7 @@ export class GlobalService extends NexusHttpService<Serializable> {
                 this.authResolved.set(true);
                 if (AuthenticationService.sysinfo?.method === 'token') {
                     deleteCookie('api_token');
-                    delete NexusHttpInterceptor.headers[environment.envApi];
+                    delete TalvisHttpInterceptor.headers[environment.envApi];
                     this.#router.navigate(['/login']);
                 } else {
                     this.#router.navigate(['/environment404']);
@@ -133,7 +134,7 @@ export class GlobalService extends NexusHttpService<Serializable> {
     reloadInvoiceNumber = () => this.get('invoices/current_no_int').pipe(tap((_) => (this.settings['INVOICE_NO_CURRENT'] = '' + _)));
 
     setTokenInterceptor = (token: string) => {
-        NexusHttpInterceptor.add(
+        TalvisHttpInterceptor.add(
             environment.envApi,
             new HttpHeaders({
                 'Content-Type': 'application/json',
@@ -178,10 +179,10 @@ export class GlobalService extends NexusHttpService<Serializable> {
         this.me_id = env.settings.ME_ID as string;
 
         this.user.encryptionInitialized.subscribe(() => {
-            const nexus = Encryption.fromJson({ key: 'nexus' });
-            nexus.value = { url: environment.envApi };
+            const talvis = Encryption.fromJson({ key: 'talvis' });
+            talvis.value = { url: environment.envApi };
             this.encryptions = [
-                nexus,
+                talvis,
                 ...env.encryptions
                     .map((_) => Encryption.fromJson(_))
                     .filter((obj: Encryption) => {

@@ -156,11 +156,10 @@ class CompanyController extends Controller {
         }
         $user = Auth::user();
         $company->employees;
-        $company->invoices;
         $company->employees->each(fn ($_) => $_->contact);
         $company->assignees;
         $company->assignees->each(fn ($_) => $_->assignee);
-        $company->append('address');
+        $company->append('address', 'last_invoice_at', 'avg_payment_delay_days');
         if ($user->hasAnyRole(['admin', 'financial'])) {
             $company->append('params');
         }
@@ -253,8 +252,8 @@ class CompanyController extends Controller {
             'baseProjects',
             'employees',
             'employees.contact',
-            'employees.contact.companies',
-            'invoices',
+            'employees.contact.companyContacts' => fn ($q) => $q->whereHas('company')->with('company'),
+            'latestInvoice',
             'source',
             'files',
             ...HasParams::$WITH,
@@ -274,7 +273,7 @@ class CompanyController extends Controller {
 
         $company->setAttribute('available_connections', $availableConnections);
         $company->baseProjects->each(fn ($_) => $_->append('hours_invested', 'work_estimated'));
-        $company->append('address', 'desicion_duration', 'timeline_chart');
+        $company->append('address', 'desicion_duration', 'timeline_chart', 'last_invoice_at', 'avg_payment_delay_days');
         if (Auth::user()->hasAnyRole(['admin', 'financial'])) {
             $company->append('params', 'billing_considerations');
             $company->upcomingRepeatingInvoiceItems;

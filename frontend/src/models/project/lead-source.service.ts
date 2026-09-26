@@ -1,8 +1,8 @@
 import { Service } from '@angular/core';
-import { NexusHttpService } from '@models/http/http.nexus';
+import { TalvisHttpService } from '@models/http/http.talvis';
 import { LeadSource } from './lead-source.model';
 
 @Service()
-export class LeadSourceService extends NexusHttpService<LeadSource> {
+export class LeadSourceService extends TalvisHttpService<LeadSource> {
     public apiPath = 'lead_sources';
 }

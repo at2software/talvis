@@ -20,7 +20,7 @@ class CompanyContact extends BaseModel {
         )->cleaned();
     }
 
-    protected $fillable = ['vcard', 'created_at', 'updated_at', 'company_id', 'contact_id', 'flags'];
+    protected $fillable = ['vcard', 'created_at', 'updated_at', 'company_id', 'contact_id', 'flags', 'is_retired', 'is_favorite', 'is_invoicing_address'];
     protected $touches  = ['company', 'contact'];
     protected $appends  = ['gender', 'class', 'path'];
 

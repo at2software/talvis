@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # =============================================================================
-#  NEXUS FOSS — Production Build Script
+#  TALVIS FOSS — Production Build Script
 #
 #  Builds the Angular frontend and assembles a self-contained production
 #  package in dist/ that can be deployed with:
@@ -11,7 +11,7 @@
 #
 #  Usage (from the repository root):
 #    bash build-prod.sh          ← build dist/
-#    bash build-prod.sh --tar    ← build dist/ and create NEXUS-x.y.z.tar.gz
+#    bash build-prod.sh --tar    ← build dist/ and create TALVIS-x.y.z.tar.gz
 # =============================================================================
 
 set -euo pipefail
@@ -53,11 +53,11 @@ ok "Node ${NODE_VER}  /  npm ${NPM_VER}"
 
     # Build en first, then move aside — the second build clears the output dir
     npx ng build --configuration=production,en
-    mv dist/nexus/browser/en "$SCRIPT_DIR/en-build-tmp"
+    mv dist/talvis/browser/en "$SCRIPT_DIR/en-build-tmp"
     ok "English build complete"
 
     npx ng build --configuration=production,de
-    mv "$SCRIPT_DIR/en-build-tmp" dist/nexus/browser/en
+    mv "$SCRIPT_DIR/en-build-tmp" dist/talvis/browser/en
     ok "Angular build complete (en + de)"
 )
 
@@ -74,7 +74,7 @@ cp -r "$SCRIPT_DIR/backend" "$DIST/backend"
 ok "backend/ copied"
 
 # Pre-built Angular assets
-mv "$SCRIPT_DIR/frontend/dist/nexus/browser" "$DIST/frontend"
+mv "$SCRIPT_DIR/frontend/dist/talvis/browser" "$DIST/frontend"
 ok "frontend/ copied (pre-built Angular)"
 
 # Docker config — Dockerfile.prod is the prebuilt variant (no Node stage needed)
@@ -82,19 +82,20 @@ cp "$SCRIPT_DIR/docker/Dockerfile.prod"  "$DIST/docker/Dockerfile"
 cp "$SCRIPT_DIR/docker/entrypoint.sh"    "$DIST/docker/entrypoint.sh"
 cp "$SCRIPT_DIR/docker/nginx.conf"       "$DIST/docker/nginx.conf"
 cp "$SCRIPT_DIR/docker/supervisord.conf" "$DIST/docker/supervisord.conf"
+cp "$SCRIPT_DIR/docker/upgrade-from-nexus.sh" "$DIST/upgrade-from-nexus.sh"
 ok "docker/ copied"
 
 # Production docker-compose.yml
 cat > "$DIST/docker-compose.yml" << 'COMPOSE_EOF'
-name: nexus
+name: talvis
 
 services:
 
-  nexus:
+  talvis:
     build:
       context: .
       dockerfile: docker/Dockerfile
-    image: nexus:latest
+    image: talvis:latest
     restart: unless-stopped
     ports:
       - "${FRONTEND_PORT:-3200}:3200"
@@ -105,9 +106,9 @@ services:
       APP_AUTH:                  "${APP_AUTH:-token}"
       DB_HOST:                   db
       DB_PORT:                   3306
-      DB_DATABASE:               "${DB_DATABASE:-nexus}"
-      DB_USERNAME:               "${DB_USERNAME:-nexus}"
-      DB_PASSWORD:               "${DB_PASSWORD:-nexus}"
+      DB_DATABASE:               "${DB_DATABASE:-talvis}"
+      DB_USERNAME:               "${DB_USERNAME:-talvis}"
+      DB_PASSWORD:               "${DB_PASSWORD:-talvis}"
       ADMIN_EMAIL:               "${ADMIN_EMAIL:-admin@example.com}"
       ADMIN_PASSWORD:            "${ADMIN_PASSWORD:-changeme}"
       MAIL_MAILER:               "${MAIL_MAILER:-log}"
@@ -119,9 +120,9 @@ services:
       KEYCLOAK_CLIENT_ID:        "${KEYCLOAK_CLIENT_ID:-}"
       KEYCLOAK_REALM_PUBLIC_KEY: "${KEYCLOAK_REALM_PUBLIC_KEY:-}"
       LOG_LEVEL:                 "${LOG_LEVEL:-error}"
-      REVERB_APP_ID:             "${REVERB_APP_ID:-nexus}"
-      REVERB_APP_KEY:            "${REVERB_APP_KEY:-nexus-key}"
-      REVERB_APP_SECRET:         "${REVERB_APP_SECRET:-nexus-secret}"
+      REVERB_APP_ID:             "${REVERB_APP_ID:-talvis}"
+      REVERB_APP_KEY:            "${REVERB_APP_KEY:-talvis-key}"
+      REVERB_APP_SECRET:         "${REVERB_APP_SECRET:-talvis-secret}"
       REVERB_HOST:               "0.0.0.0"
       REVERB_PORT:               "6001"
       REVERB_SCHEME:             "${REVERB_SCHEME:-http}"
@@ -137,10 +138,10 @@ services:
     ports:
       - "${DB_PORT_HOST:-3308}:3306"
     environment:
-      MYSQL_DATABASE:      "${DB_DATABASE:-nexus}"
-      MYSQL_USER:          "${DB_USERNAME:-nexus}"
-      MYSQL_PASSWORD:      "${DB_PASSWORD:-nexus}"
-      MYSQL_ROOT_PASSWORD: "${DB_ROOT_PASSWORD:-nexus_root}"
+      MYSQL_DATABASE:      "${DB_DATABASE:-talvis}"
+      MYSQL_USER:          "${DB_USERNAME:-talvis}"
+      MYSQL_PASSWORD:      "${DB_PASSWORD:-talvis}"
+      MYSQL_ROOT_PASSWORD: "${DB_ROOT_PASSWORD:-talvis_root}"
     volumes:
       - db_data:/var/lib/mysql
     healthcheck:
@@ -158,6 +159,7 @@ ok "docker-compose.yml written"
 
 # .env.example, VERSION
 cp "$SCRIPT_DIR/.env.example" "$DIST/.env.example"
+cp "$SCRIPT_DIR/LICENSE" "$DIST/LICENSE"
 echo "$VERSION" > "$DIST/VERSION"
 ok ".env.example and VERSION written"
 
@@ -166,7 +168,7 @@ if [[ -f "$SCRIPT_DIR/docker/DIST_README.md" ]]; then
     sed "s/__VERSION__/${VERSION}/g" "$SCRIPT_DIR/docker/DIST_README.md" > "$DIST/README.md"
 else
     cat > "$DIST/README.md" << README_EOF
-# NEXUS v${VERSION}
+# TALVIS v${VERSION}
 
 ## Quick Start
 
@@ -190,11 +192,11 @@ ok "Cleaned frontend build artefacts"
 # =============================================================================
 if [[ "$CREATE_TAR" == true ]]; then
     step "Creating tarball"
-    TARBALL="$SCRIPT_DIR/NEXUS-${VERSION}.tar.gz"
+    TARBALL="$SCRIPT_DIR/TALVIS-${VERSION}.tar.gz"
     rm -f "$TARBALL"
-    tar -czf "$TARBALL" -C "$SCRIPT_DIR" --transform "s|^dist|NEXUS-${VERSION}|" dist
+    tar -czf "$TARBALL" -C "$SCRIPT_DIR" --transform "s|^dist|TALVIS-${VERSION}|" dist
     TARBALL_SIZE="$(du -sh "$TARBALL" | cut -f1)"
-    ok "NEXUS-${VERSION}.tar.gz  (${TARBALL_SIZE})"
+    ok "TALVIS-${VERSION}.tar.gz  (${TARBALL_SIZE})"
 fi
 
 # =============================================================================
@@ -205,6 +207,6 @@ echo -e "${GREEN}${BOLD}Production build v${VERSION} complete!${NC}"
 echo ""
 echo -e "  ${CYAN}Production package${NC}  dist/  ←  cd dist && docker compose up -d"
 if [[ "$CREATE_TAR" == true ]]; then
-    echo -e "  ${CYAN}Release tarball    ${NC}  NEXUS-${VERSION}.tar.gz"
+    echo -e "  ${CYAN}Release tarball    ${NC}  TALVIS-${VERSION}.tar.gz"
 fi
 echo ""

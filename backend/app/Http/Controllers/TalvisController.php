@@ -7,7 +7,7 @@ use App\Models\Project;
 use App\Models\ProjectState;
 use Illuminate\Http\Request;
 
-class NexusController extends Controller {
+class TalvisController extends Controller {
     public function attention(Request $request) {
         $fnStr = function ($fs, $o) {
             return is_callable($fs) ? $fs($o) : $fs;

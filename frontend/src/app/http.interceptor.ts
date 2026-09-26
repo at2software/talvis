@@ -3,17 +3,17 @@ import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { catchError, throwError } from 'rxjs';
 import { deleteCookie } from '@constants/cookies';
-import { NexusHttpInterceptor } from '@models/http/http-headers';
+import { TalvisHttpInterceptor } from '@models/http/http-headers';
 import { AuthenticationService } from '@models/auth.service';
 
-export { NexusHttpInterceptor };
+export { TalvisHttpInterceptor };
 
-export const nexusHttpInterceptor: HttpInterceptorFn = (req, next) => {
+export const talvisHttpInterceptor: HttpInterceptorFn = (req, next) => {
     const router = inject(Router);
     let request = req;
-    for (const url of Object.keys(NexusHttpInterceptor.headers)) {
+    for (const url of Object.keys(TalvisHttpInterceptor.headers)) {
         if (req.url.startsWith(url)) {
-            request = req.clone({ headers: NexusHttpInterceptor.headers[url] });
+            request = req.clone({ headers: TalvisHttpInterceptor.headers[url] });
             break;
         }
     }

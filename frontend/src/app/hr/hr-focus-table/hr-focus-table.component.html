@@ -96,6 +96,7 @@
         </div>
     </div>
     <div class="modal-footer">
-        <button class="btn btn-primary text-end" [class.d-none]="!addFocusDate" (click)="onNewEntry()" i18n="@@i18n.common.add">add</button>
+        <button type="button" class="btn" (click)="modal.dismiss()" i18n="@@i18n.common.cancel">cancel</button>
+        <button type="button" class="btn btn-primary" (click)="onNewEntry()" [disabled]="!addFocusDate" hotkey="CTRL+ENTER" i18n="@@i18n.common.ok">ok</button>
     </div>
 </ng-template>

@@ -1,10 +1,10 @@
 @echo off
-:: NEXUS FOSS — Windows launcher for build-prod.sh
+:: TALVIS FOSS — Windows launcher for build-prod.sh
 :: Finds Git Bash and runs the build script through it.
 ::
 :: Usage:
 ::   build-prod.bat          <- build dist/
-::   build-prod.bat --tar    <- build dist/ and create NEXUS-x.y.z.tar.gz
+::   build-prod.bat --tar    <- build dist/ and create TALVIS-x.y.z.tar.gz
 
 setlocal
 

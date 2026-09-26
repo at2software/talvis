@@ -6,6 +6,7 @@ import { MarketingWorkflow } from './marketing-workflow.model';
 import { MarketingInitiativeActivity } from './marketing-initiative-activity.model';
 import { User } from '@models/user/user.model';
 import { Model } from '@constants/model/type-discriminators';
+import { firstValueFrom } from 'rxjs';
 
 @Model('MarketingInitiative')
 export class MarketingInitiative extends Serializable {
@@ -45,23 +46,17 @@ export class MarketingInitiative extends Serializable {
                     {
                         title: 'Active',
                         on: () => this.status !== 'active',
-                        action: () => {
-                            this.update({ status: 'active' }).subscribe();
-                        },
+                        action: () => this.update({ status: 'active' }),
                     },
                     {
                         title: 'Paused',
                         on: () => this.status !== 'paused',
-                        action: () => {
-                            this.update({ status: 'paused' }).subscribe();
-                        },
+                        action: () => this.update({ status: 'paused' }),
                     },
                     {
                         title: 'Completed',
                         on: () => this.status !== 'completed',
-                        action: () => {
-                            this.update({ status: 'completed' }).subscribe();
-                        },
+                        action: () => this.update({ status: 'completed' }),
                     },
                 ],
             },
@@ -69,7 +64,7 @@ export class MarketingInitiative extends Serializable {
                 title: $localize`:@@i18n.common.delete:delete`,
                 group: true,
                 type: NxActionType.Destructive,
-                action: () => this.modalConfirm().then(() => this.httpService.delete(`marketing/initiatives/${this.id}`).subscribe()),
+                action: () => this.modalConfirm().then(() => firstValueFrom(this.httpService.delete(`marketing/initiatives/${this.id}`)).then(() => this)),
                 hotkey: 'DEL',
                 roles: 'marketing',
             },

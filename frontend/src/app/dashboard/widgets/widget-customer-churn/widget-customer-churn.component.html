@@ -8,7 +8,7 @@
 
     <widget-options [options]="getOptions()" (updated)="_onUpdate($event)" (deleted)="onDelete($event)"></widget-options>
 
-    <ul-compact revealList [badge]="badgeCount(_data) > 0 ? '' + badgeCount(_data) : undefined">
+    <ul-compact [badge]="badgeCount(_data) > 0 ? '' + badgeCount(_data) : undefined">
         @for (_ of _data; track _.id; let i = $index) {
             @let overdue = _.mlOverdueForContact();
             @let churn_danger = _.mlChurnHigh();
@@ -22,7 +22,7 @@
                 <div class="flex-fill ms-3 text-truncate">
                     <div class="d-flex text-truncate">
                         <div class="flex-fill text-truncate">{{ _.getName() }}</div>
-                        <div class="text-nowrap" [class.text-danger]="churn_danger" [class.text-primary]="!churn_danger">{{ _.mlChurnProbability12m() | percent: '1.0-0' }}</div>
+                        <div class="text-nowrap {{ _.mlChurnColor() }}">{{ _.mlChurnProbability12m() | percent: '1.0-0' }}</div>
                     </div>
                     @if (overdue) {
                         <div class="text-muted text-truncate small">

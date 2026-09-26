@@ -10,7 +10,7 @@ import { InvoiceItemType } from '@enums/invoice-item.type';
 import { Product } from '@models/product/product.model';
 import { Company } from '@models/company/company.model';
 import { Invoice } from '@models/invoice/invoice.model';
-import { InvoiceItem } from '@models/invoice/invoice-item.model';
+import { HOURS_PER_PERSON_DAY, InvoiceItem } from '@models/invoice/invoice-item.model';
 import { InputModalService } from '@app/_modals/modal-input/modal-input.service';
 import { moveInvoiceItems, reindexInvoiceItems } from './invoice-item.reorder.const';
 import { HasInvoiceItems } from '@interfaces/hasInvoiceItems.interface';
@@ -77,6 +77,11 @@ export class InvoicePrepare {
     selection = signal<InvoiceItem[]>([]);
     selectionNet = signal<number>(0);
     selectionQty = signal<number>(0);
+
+    readonly #selectionNotTimeBased = computed(() => this.selection().filter((_) => _.isRegularItem() && _.pt === 0));
+    selectionHours = computed(() => this.selectionQty() * HOURS_PER_PERSON_DAY);
+    selectionNotTimeBasedCount = computed(() => this.#selectionNotTimeBased().length);
+    selectionNotTimeBasedNet = computed(() => this.#selectionNotTimeBased().reduce((sum, _) => sum + _.net, 0));
 
     readonly #itemsResource = modelListResource(
         () => (this.items() === undefined ? this.parent()?.id : undefined),

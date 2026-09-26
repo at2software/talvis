@@ -2,6 +2,7 @@ import { Serializable } from '@models/_core/serializable';
 import { NxAction, NxActionType } from '@models/_core/nx.actions';
 import type { ActivityStatsDto } from '@models/_core/api-response';
 import { Model } from '@constants/model/type-discriminators';
+import { firstValueFrom } from 'rxjs';
 
 export type TPivot<K1 extends string, K2 extends string> = {
     created_at?: string;
@@ -38,7 +39,7 @@ export class MarketingPerformanceMetric extends Serializable {
                 group: true,
                 type: NxActionType.Destructive,
                 context: 'initiative_details',
-                action: () => this.httpService.delete(`marketing/initiatives/${this.pivot?.marketing_initiative_id}/metrics/${this.id}`).subscribe(),
+                action: () => this.httpService.delete(`marketing/initiatives/${this.pivot?.marketing_initiative_id}/metrics/${this.id}`),
                 roles: 'marketing',
             },
             {
@@ -46,7 +47,7 @@ export class MarketingPerformanceMetric extends Serializable {
                 group: true,
                 type: NxActionType.Destructive,
                 context: '!initiative_details',
-                action: () => this.modalConfirm().then(() => this.httpService.delete(`marketing/metrics/${this.id}`).subscribe()),
+                action: () => this.modalConfirm().then(() => firstValueFrom(this.httpService.delete(`marketing/metrics/${this.id}`)).then(() => this)),
                 hotkey: 'DEL',
                 roles: 'marketing',
             },

@@ -1,9 +1,9 @@
 import { Service } from '@angular/core';
 import { Comment } from '@models/comment/comment.model';
-import { NexusHttpService } from '../http/http.nexus';
+import { TalvisHttpService } from '../http/http.talvis';
 
 @Service()
-export class CommentService extends NexusHttpService<Comment> {
+export class CommentService extends TalvisHttpService<Comment> {
     public apiPath = 'comments';
     override readonly model = Comment;
     indexFor = (path: string) => this.aget(path + '/comments');

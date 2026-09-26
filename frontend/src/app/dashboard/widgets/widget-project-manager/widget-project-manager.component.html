@@ -12,7 +12,7 @@
     <widget-options [options]="getOptions()" (updated)="_onUpdate($event)" (deleted)="onDelete($event)"></widget-options>
 
     @if (!onlyChart() && !getOptions()['chart-only']?.value) {
-        <ul-compact revealList>
+        <ul-compact>
             @for (_ of data(); track _.id) {
                 <li class="list-group-item d-flex text-nowrap {{ _.markerClass() }}" [nx]="_" [tables]="data()" [compact]="isCompact(_)" [ngbTooltip]="_.var.projectType === 'acquisition' ? getProbabilityTooltip(_) : ''">
                     <div>

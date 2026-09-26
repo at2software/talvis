@@ -1,7 +1,6 @@
 import type { Type } from '@angular/core';
 import { renderComponent } from '@testing/component-test';
 import { TabAttentionComponent } from '@app/_activity/tab-attention/tab-attention.component';
-import { TabTasksDeletionRequestsComponent } from '@app/_activity/tab-tasks/_shards/tab-tasks-deletion-requests/tab-tasks-deletion-requests.component';
 import { TabTasksHrComponent } from '@app/_activity/tab-tasks/_shards/tab-tasks-hr/tab-tasks-hr.component';
 import { TabTasksInvoiceableComponent } from '@app/_activity/tab-tasks/_shards/tab-tasks-invoiceable/tab-tasks-invoiceable.component';
 import { TabTasksMarketingActivitiesComponent } from '@app/_activity/tab-tasks/_shards/tab-tasks-marketing-activities/tab-tasks-marketing-activities.component';
@@ -12,7 +11,6 @@ import { TabTasksSentinelsComponent } from '@app/_activity/tab-tasks/_shards/tab
 
 const components: [string, Type<unknown>][] = [
     ['TabAttentionComponent', TabAttentionComponent],
-    ['TabTasksDeletionRequestsComponent', TabTasksDeletionRequestsComponent],
     ['TabTasksHrComponent', TabTasksHrComponent],
     ['TabTasksInvoiceableComponent', TabTasksInvoiceableComponent],
     ['TabTasksMarketingActivitiesComponent', TabTasksMarketingActivitiesComponent],

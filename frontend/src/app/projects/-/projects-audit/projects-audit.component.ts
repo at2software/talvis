@@ -30,7 +30,7 @@ import { Product } from '@models/product/product.model';
 import { Serializable } from '@models/_core/serializable';
 import { Dictionary } from '@constants/constants';
 
-const NEXUS_PREFIX = '[NEXUS] ';
+const TALVIS_PREFIX = '[NEXUS] ';
 
 @Component({
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -109,7 +109,7 @@ export class ProjectsAuditComponent {
                 .pipe(catchError(() => of([])))
                 .subscribe((raw) => {
                     p.schedules = (raw ?? [])
-                        .filter((_) => _.description?.startsWith(NEXUS_PREFIX))
+                        .filter((_) => _.description?.startsWith(TALVIS_PREFIX))
                         .map((_) => this.#makeSchedule(_, p));
                     p.var.loading = false;
                 });
@@ -199,7 +199,7 @@ export class ProjectsAuditComponent {
     }
 
     stageName(description: string): string {
-        return description.startsWith(NEXUS_PREFIX) ? description.slice(NEXUS_PREFIX.length) : description;
+        return description.startsWith(TALVIS_PREFIX) ? description.slice(TALVIS_PREFIX.length) : description;
     }
 
     cronLabel(cron: string): string {

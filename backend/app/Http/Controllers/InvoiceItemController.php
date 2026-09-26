@@ -16,6 +16,9 @@ class InvoiceItemController extends Controller {
         return $q->get()->each->append('rootGroup');
     }
     public function destroy(InvoiceItem $invoiceItem) {
+        if ($invoiceItem->deletionBlockers()) {
+            abort(409, 'Already invoiced - correct it with a cancellation or credit note.');
+        }
         return $invoiceItem->delete();
     }
     public function store(Request $request) {

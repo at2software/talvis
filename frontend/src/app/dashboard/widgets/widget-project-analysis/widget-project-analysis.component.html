@@ -11,7 +11,7 @@
 
     @if (!project()) {
         @if (runningProjects().length) {
-            <ul revealList class="list-group">
+            <ul class="list-group">
                 @for (p of runningProjects(); track p.id) {
                     <li class="list-group-item d-flex align-items-center gap-2 cursor-pointer" [nx]="p" (click)="selectProject(p)" (keyup.enter)="selectProject(p)" tabindex="0">
                         <span class="flex-fill text-truncate">{{ p.name }}</span>
@@ -32,7 +32,7 @@
             </div>
         }
 
-        <ul revealList class="list-group">
+        <ul class="list-group">
             @if (!p.is_internal && hasInvoicesModule()) {
                 <li class="list-group-item hstack gap-2">
                     <div class="flex-fill" i18n="@@i18n.common.totalBudget">total budget</div>

@@ -4,7 +4,7 @@
         <div class="me-2 d-flex gap-1 align-items-center">
             @for (m of item.milestones; track m.id) {
             <div class="d-flex align-items-center gap-1">
-                <i class="cursor-default css-tip"
+                <i class="cursor-default"
                     [ngbTooltip]="'Milestone: ' + m.name + (m.progress ? ' (' + (m.progress | number: '1.0-0') + '%)' : '')"
                     [class.text-muted]="m.state === 0" [class.text-primary]="m.state === 1"
                     [class.text-success]="m.state === 2">
@@ -28,8 +28,8 @@
         <div class="flex-fill me-2 text-truncate" [innerHTML]="safeItemText(item)"
             [class]="getItemTextColor(item)"></div>
         @if (item.progress && item.pt > 0) {
-        <div class="text-end me-2 text-nowrap css-tip" [class]="getProgressColorClass(item)"
-            [attr.data-tip]="(item.fociSum | number: '1.1-1') + 'h / ' + (item.pt * 8 | number: '1.1-1') + 'h'">{{
+        <div class="text-end me-2 text-nowrap" [class]="getProgressColorClass(item)" container="body"
+            [ngbTooltip]="(item.fociSum | number: '1.1-1') + 'h / ' + (item.pt * 8 | number: '1.1-1') + 'h'">{{
             item.progress * 100 | number: '1.0-0' }}%</div>
         }
     </div>
@@ -37,16 +37,16 @@
     @if (getUserContributions(item).length > 0) {
     <div class="progress" [style.height.px]="3">
         @for (contribution of getUserContributions(item); track contribution.user?.id) {
-        <div class="progress-bar css-tip" [style.width.%]="contribution.percentage"
-            [style.background-color]="contribution.color"
-            [attr.data-tip]="getUserName(contribution.user) + ': ' + (contribution.hours | number: '1.1-1') + 'h'">
+        <div class="progress-bar" [style.width.%]="contribution.percentage"
+            [style.background-color]="contribution.color" container="body"
+            [ngbTooltip]="getUserName(contribution.user) + ': ' + (contribution.hours | number: '1.1-1') + 'h'">
         </div>
         }
     </div>
     } @else if (item.progress) {
     <div class="progress" [style.height.px]="3">
-        <div class="progress-bar bg-primary css-tip" [style.width.%]="item.progress * 100"
-            [attr.data-tip]="(item.progress * 100 | number: '1.0-0') + '%'"></div>
+        <div class="progress-bar bg-primary" [style.width.%]="item.progress * 100" container="body"
+            [ngbTooltip]="(item.progress * 100 | number: '1.0-0') + '%'"></div>
     </div>
     }
     }

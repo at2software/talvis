@@ -1,6 +1,6 @@
 import { Service } from '@angular/core';
 import { Observable } from 'rxjs';
-import { NexusHttpService } from '../http/http.nexus';
+import { TalvisHttpService } from '../http/http.talvis';
 import { Milestone } from './milestone.model';
 import { MilestoneData, MilestonesGroup } from './milestone-group.model';
 import { Project } from '@models/project/project.model';
@@ -13,7 +13,7 @@ export type PmMilestones = Dictionary & {
 };
 
 @Service()
-export class MilestoneService extends NexusHttpService<Milestone> {
+export class MilestoneService extends TalvisHttpService<Milestone> {
     public apiPath = 'milestones';
     override readonly model = Milestone;
 

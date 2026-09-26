@@ -3,7 +3,7 @@ import { ChangeDetectionStrategy, Component, computed, effect, inject } from '@a
 import { BaseWidgetComponent } from '../base.widget.component';
 import { OptionType } from '../widget-options/widget-options.component';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { NexusHttpInterceptor } from '@app/http.interceptor';
+import { TalvisHttpInterceptor } from '@app/http.interceptor';
 import { Color } from '@constants/Color';
 import { dayjs } from '@constants/date/dates';
 
@@ -42,7 +42,7 @@ export class WidgetExtComponent extends BaseWidgetComponent {
         };
         if (additionalHeaders[0]) headerOptions[additionalHeaders[0]] = additionalHeaders[1];
 
-        NexusHttpInterceptor.add(url, new HttpHeaders(headerOptions));
+        TalvisHttpInterceptor.add(url, new HttpHeaders(headerOptions));
         return this.#http.get<{ data: Dictionary[] }>(url);
     }, () => !!this.getOptions()['url']?.value);
 

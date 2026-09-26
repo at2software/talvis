@@ -43,7 +43,7 @@ class AddMissingGitWebhooksCommand extends Command {
     }
     public function parsePluginLink(PluginLink $link): bool {
         if (! str_starts_with($link->url, config('services.gitlab.url'))) {
-            NLog::error("<AddMissingGitWebhooksCommand> NEXUS does not support linking another GitLab instance '$link->url' != '".config('app.url')."'");
+            NLog::error("<AddMissingGitWebhooksCommand> TALVIS does not support linking another GitLab instance '$link->url' != '".config('app.url')."'");
             return true;
         }
         try {

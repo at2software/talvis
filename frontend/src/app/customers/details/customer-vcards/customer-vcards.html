@@ -21,16 +21,15 @@
             <app-vcard [object]="_company"></app-vcard>
         </div>
         <div class="col-md-3">
-            @if (_company.var.selectedEmployee) {
-                @if (at2ConnectEnabled) {
-                    <at2connect [contact]="_company.var.selectedEmployee.contact"></at2connect>
-                }
+            @let _employee = _company.var.selectedEmployee;
+            @if (_employee) {
+                <contact-employments [card]="_employee"></contact-employments>
                 <div class="card sticky-side">
                     <div class="card-header" i18n="@@i18n.common.projects">projects</div>
                     <div class="card-body">
                         <ul class="list-group">
-                            @for (p of _company.var.selectedEmployee.projects; track p.id) {
-                            <nx [title]="p.name" [nx]="p" [tables]="_company.var.selectedEmployee.projects">
+                            @for (p of _employee.projects; track p.id) {
+                            <nx [title]="p.name" [nx]="p" [tables]="_employee.projects">
                                 <project [project]="p"></project>
                             </nx>
                             }

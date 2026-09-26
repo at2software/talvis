@@ -27,18 +27,23 @@ export class SearchInputComponent {
     only = input<string>('');
     has_icon = input<boolean>(false);
     minSearch = input<number>(3);
+    openableOnly = input<boolean>(false);
     selected = model<Serializable | undefined>(undefined);
 
     protected readonly searchbox = viewChild.required<ElementRef<HTMLInputElement>>('searchbox');
     protected readonly dropdown = viewChild<ScrollbarComponent>('dropdown');
+    private readonly footer = viewChild.required<ElementRef<HTMLElement>>('footer');
 
     readonly currentIndex = signal(0);
-    readonly results = signal<Serializable[]>([]);
+    readonly #allResults = signal<Serializable[]>([]);
+    readonly results = computed<Serializable[]>(() => (this.openableOnly() ? this.#allResults().filter((_) => _.frontendUrl()) : this.#allResults()));
     readonly isLoading = signal(false);
     readonly hasSearched = signal(false);
 
+    readonly #hasFooter = signal(false);
+
     readonly hasResults = computed(() => this.results().length > 0);
-    readonly shouldShowDropdown = computed(() => this.hasSearched() && (this.results().length > 0 || this.isLoading()));
+    readonly shouldShowDropdown = computed(() => this.hasSearched() && (this.results().length > 0 || this.isLoading() || this.#hasFooter()));
 
     #delay: ReturnType<typeof setTimeout> | null = null;
     #currentSearchTerm = '';
@@ -47,7 +52,10 @@ export class SearchInputComponent {
     readonly #el = inject(ElementRef);
 
     constructor() {
-        afterNextRender(() => this.focus());
+        afterNextRender(() => {
+            this.focus();
+            this.#hasFooter.set(this.footer().nativeElement.childElementCount > 0);
+        });
     }
 
     focus = () => setTimeout(() => this.searchbox()?.nativeElement.focus(), 0);
@@ -55,7 +63,7 @@ export class SearchInputComponent {
     blur = () => this.searchbox()?.nativeElement?.blur();
 
     clear() {
-        this.results.set([]);
+        this.#allResults.set([]);
         this.isLoading.set(false);
         this.hasSearched.set(false);
         this.#currentSearchTerm = '';
@@ -160,13 +168,13 @@ export class SearchInputComponent {
             next: (x) => {
                 if (this.#currentSearchTerm === search) {
                     this.currentIndex.set(0);
-                    this.results.set(Object.values(x).map((item) => REFLECTION<Serializable>(item)));
+                    this.#allResults.set(Object.values(x).map((item) => REFLECTION<Serializable>(item)));
                     this.isLoading.set(false);
                 }
             },
             error: () => {
                 this.isLoading.set(false);
-                this.results.set([]);
+                this.#allResults.set([]);
             },
         });
     }
@@ -186,7 +194,7 @@ export class SearchInputComponent {
     }
 
     open(o: Serializable) {
-        this.results.set([]);
+        this.#allResults.set([]);
         this.query.set(o.getName());
         this.selected.set(o);
         this.itemSelected.emit(o);

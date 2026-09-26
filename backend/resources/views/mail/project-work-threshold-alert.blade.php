@@ -66,7 +66,7 @@
         <p>The ratio of hours invested to estimated work has reached <strong>{{ $percent }}%</strong>. Please review the project timeline and budget.</p>
 
         <div class="footer">
-            <p>This is an automated notification from your Nexus system.</p>
+            <p>This is an automated notification from your TALVIS system.</p>
             <p>You are receiving this email because you are the project manager of <strong>{{ $project->name }}</strong>.</p>
         </div>
     </div>

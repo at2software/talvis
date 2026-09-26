@@ -1,7 +1,8 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, effect, inject, input, output, signal } from '@angular/core';
 import { Observable, Subscription } from 'rxjs';
 import { Serializable } from '@models/_core/serializable';
-import { NexusHttp, Page } from '@models/http/http.nexus';
+import { TalvisHttp, Page } from '@models/http/http.talvis';
+import { ToolbarComponent } from '@app/app/toolbar/toolbar.component';
 import { SpinnerComponent } from '@shards/spinner/spinner.component';
 
 @Component({
@@ -9,7 +10,7 @@ import { SpinnerComponent } from '@shards/spinner/spinner.component';
     selector: 'continuous-marker',
     templateUrl: './continuous.marker.component.html',
     styleUrls: ['./continuous.marker.component.scss'],
-    imports: [SpinnerComponent],
+    imports: [ToolbarComponent, SpinnerComponent],
 })
 export class ContinuousMarkerComponent<T extends Serializable> {
     active = signal(false);
@@ -24,7 +25,7 @@ export class ContinuousMarkerComponent<T extends Serializable> {
     #observerSub?: Subscription;
 
     #ref = inject(ElementRef);
-    #service = inject(NexusHttp);
+    #service = inject(TalvisHttp);
     #destroyRef = inject(DestroyRef);
 
     observer = input<Observable<Page<T>> | undefined>(undefined);

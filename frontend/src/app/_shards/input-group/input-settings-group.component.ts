@@ -4,7 +4,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { from, map, of, switchMap } from 'rxjs';
 import { Serializable } from '@models/_core/serializable';
 import { Param } from '@models/param/param.model';
-import { NexusHttp } from '@models/http/http.nexus';
+import { TalvisHttp } from '@models/http/http.talvis';
 import { modelResource } from '@models/http/model-resource';
 import { NgbTypeaheadModule } from '@ng-bootstrap/ng-bootstrap';
 import { InputGroupComponent } from './input-group.component';
@@ -20,7 +20,7 @@ export class InputSettingsGroupComponent extends InputGroupComponent {
     parent = input<Serializable | undefined>();
 
     #global = inject(GlobalService);
-    #http = inject(NexusHttp);
+    #http = inject(TalvisHttp);
 
     readonly #globalParam = modelResource(
         () => (this.parent() ? undefined : this.id()),

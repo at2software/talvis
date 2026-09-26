@@ -66,7 +66,7 @@
                                 <spinner [size]="24"></spinner>
                             </div>
                         } @else if (!project.schedules.length) {
-                            <div class="card-body text-muted small">no active NEXUS schedules</div>
+                            <div class="card-body text-muted small">no active TALVIS schedules</div>
                         } @else {
                             <ul class="list-group list-group-flush">
                                 @for (schedule of project.schedules; track schedule.id) {

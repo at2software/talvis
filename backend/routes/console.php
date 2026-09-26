@@ -15,7 +15,7 @@ Schedule::command('cron:update-lead-probability')->daily();
 Schedule::command('cron:standing-orders')->daily();
 Schedule::command('cron:cashflow')->daily();
 Schedule::command('cron:fetch-bank-balance')->daily();
-Schedule::command('cron:add-company-news-comments')->daily();
+Schedule::command('cron:add-company-news-comments')->dailyAt('09:00')->runInBackground();
 Schedule::command('cron:support-regression')->monthly();
 Schedule::command('cron:linear-regression-forecast')->monthly();
 Schedule::command('cron:monthly-stats')->monthly();

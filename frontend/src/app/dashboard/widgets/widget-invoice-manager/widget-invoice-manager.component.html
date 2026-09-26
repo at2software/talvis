@@ -12,7 +12,7 @@
     <widget-options style="overflow: hidden;" [options]="getOptions()" (updated)="_onUpdate($event)" (deleted)="onDelete($event)"></widget-options>
 
     @if (!onlyChart() && !getOptions()['chart-only']?.value) {
-        <ul-compact revealList>
+        <ul-compact>
             @for (group of groupedData(); track group.company.id) {
                 <li class="list-group-item hstack gap-2 text-nowrap" [nx]="group.company" [compact]="isCompactGroup(group)">
                     <div>

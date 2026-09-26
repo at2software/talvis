@@ -84,8 +84,21 @@ export function getInvoiceItemActions(self: InvoiceItem): NxAction[] {
                 return self.update();
             },
         },
-        nx().deleteAction(self, $localize`:@@i18n.invoices.reallyDeleteThisInvoiceItem:really delete this invoice item?`, { roles: 'invoicing|financial|project_manager' }),
+        nx().deleteAction(self, () => deleteMessageFor(self), { roles: 'invoicing|project_manager', on: () => !self.delete_blockers.length }),
     ];
+}
+
+function deleteMessageFor(self: InvoiceItem): string {
+    const lines = [$localize`:@@i18n.invoices.reallyDeleteThisInvoiceItem:really delete this invoice item?`];
+    const tracked = self.foci_sum_duration ?? 0;
+    const billed = self.billed_foci_sum_duration ?? 0;
+    const milestones = self.milestones?.length ?? 0;
+
+    if (tracked > 0) lines.push(`${tracked} h ` + $localize`:@@i18n.invoices.deleteItemTrackedHint:tracked time loses its assignment.`);
+    if (billed > 0) lines.push(`${billed} h ` + $localize`:@@i18n.invoices.deleteItemBilledHint:prepared for billing count as unbilled again.`);
+    if (milestones > 0) lines.push(`${milestones}x ` + $localize`:@@i18n.invoices.deleteItemMilestoneHint:milestone loses this item.`);
+
+    return lines.join(' ');
 }
 
 function roundUpToMultiple(value: number, step: number): number {

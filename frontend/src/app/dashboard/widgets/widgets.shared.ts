@@ -17,6 +17,5 @@ import { EmptyStateComponent } from '@shards/empty-state/empty-state.component';
 import { NgxEchartsDirective } from 'ngx-echarts';
 import { CompactItemDirective } from '@shards/ul-compact/CompactItemDirective';
 import { UlCompactComponent } from '@shards/ul-compact/ul-compact.component';
-import { RevealListDirective } from '@directives/reveal-list.directive';
 
-export const WIDGET_SHARED = [Nx, NComponent, AvatarComponent, ProjectComponent, MoneyShortPipe, ProgressBarComponent, DatePipe, DecimalPipe, NgStyle, PercentPipe, WidgetOptionsComponent, MoneyPipe, NgbTooltipModule, EchartsComponent, EchartsCardComponent, EchartsRangeCardComponent, UlCompactComponent, CompactItemDirective, RevealListDirective, RouterModule, LoadingPipe, EmptyStateComponent, NgxEchartsDirective];
+export const WIDGET_SHARED = [Nx, NComponent, AvatarComponent, ProjectComponent, MoneyShortPipe, ProgressBarComponent, DatePipe, DecimalPipe, NgStyle, PercentPipe, WidgetOptionsComponent, MoneyPipe, NgbTooltipModule, EchartsComponent, EchartsCardComponent, EchartsRangeCardComponent, UlCompactComponent, CompactItemDirective, RouterModule, LoadingPipe, EmptyStateComponent, NgxEchartsDirective];

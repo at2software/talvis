@@ -11,6 +11,7 @@ import { VcardRow } from '@models/vcard/vcard-row';
 import { Project } from './project.model';
 import { MODAL } from '@models/_core/modal-registry';
 import { ModalInputResult } from '@models/_core/modal-results';
+import { firstValueFrom, tap } from 'rxjs';
 
 const POSTPONE_DURATIONS = [
     { title: i18n1Week, duration: 1 },
@@ -39,7 +40,7 @@ export const getProjectActions = (self: Project) => [
         title: $localize`:@@i18n.common.makeRootProject:make root project`,
         group: true,
         on: (): boolean => (self.project_id ? true : false),
-        action: () => self.update({ project_id: null }).subscribe(),
+        action: () => self.update({ project_id: null }),
     },
     {
         title: $localize`:@@i18n.common.setState:set state`,
@@ -111,7 +112,7 @@ export const getProjectActions = (self: Project) => [
     {
         title: $localize`:@@i18n.project.removeFromWidget:remove from widget`,
         context: 'widgetPreparedInvoices',
-        action: () => self.modalConfirm('Attention', 'do you really want to ignore this project from invoice preparation?').then(() => self.update({ is_ignored_from_prepared: true }).subscribe()),
+        action: () => self.modalConfirm('Attention', 'do you really want to ignore this project from invoice preparation?').then(() => firstValueFrom(self.update({ is_ignored_from_prepared: true }))),
         group: true,
         type: NxActionType.Destructive,
         roles: 'admin',
@@ -120,13 +121,13 @@ export const getProjectActions = (self: Project) => [
         title: $localize`:@@i18n.project.noGitRequired:no git required`,
         on: () => !self.no_git_required,
         group: true,
-        action: () => self.update({ no_git_required: true }).subscribe(() => nx().broadcast({ type: TBroadcast.Update, data: self })),
+        action: () => self.update({ no_git_required: true }).pipe(tap(() => nx().broadcast({ type: TBroadcast.Update, data: self }))),
     },
     {
         title: $localize`:@@i18n.project.undoNoGitRequired:undo: no git required`,
         on: () => !!self.no_git_required,
         group: true,
-        action: () => self.update({ no_git_required: false }).subscribe(() => nx().broadcast({ type: TBroadcast.Update, data: self })),
+        action: () => self.update({ no_git_required: false }).pipe(tap(() => nx().broadcast({ type: TBroadcast.Update, data: self }))),
     },
     {
         title: 'Contact...',
@@ -137,7 +138,7 @@ export const getProjectActions = (self: Project) => [
     ...self.markerActions(),
     {
         title: $localize`:@@i18n.common.delete:delete`,
-        action: () => self.modalConfirm().then(() => self.delete().subscribe()),
+        action: () => self.modalConfirm().then(() => firstValueFrom(self.delete())),
         group: true,
         type: NxActionType.Destructive,
         hotkey: 'CTRL+DELETE',

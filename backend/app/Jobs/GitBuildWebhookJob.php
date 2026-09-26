@@ -54,11 +54,7 @@ class GitBuildWebhookJob implements ShouldQueue {
         $emoji          = $this->emojiForStatus($pipelineStatus);
         $message        = "[`$emoji ⎇ $ref`]($projectUrl): ";
 
-        foreach ($jobs as $job) {
-            $eJob    = $this->emojiForStatus($job['status']);
-            $url     = $projectUrl.'/-/jobs/'.$job['id'];
-            $message .= " [`$eJob {$job['name']}`]($url)";
-        }
+        $message .= $this->pipelineJobList($jobs, $projectUrl);
 
         $cacheId                 = 'git_pipeline_'.$pipelineId;
         $props                   = $this->props($this->project['name']);

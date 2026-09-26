@@ -6,11 +6,8 @@ use App\Builders\ContactBuilder;
 use App\Traits\HasI18nTrait;
 use App\Traits\VcardGenderTrait;
 use App\Traits\VcardTrait;
-use BaconQrCode\Exception\RuntimeException;
 use Carbon\Carbon;
-use Exception;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Ramsey\Uuid\Uuid;
 
 class Contact extends BaseModel {
     use HasFactory;
@@ -18,7 +15,7 @@ class Contact extends BaseModel {
     use VcardGenderTrait;
     use VcardTrait;
 
-    protected $fillable = ['vcard', 'created_at', 'updated_at', 'at2_connect_token', 'at2_connect_thread_id', 'flags'];
+    protected $fillable = ['vcard', 'created_at', 'updated_at', 'flags'];
     protected $touches  = [];
     protected $appends  = ['gender', 'class', 'path', 'icon'];
 
@@ -36,37 +33,6 @@ class Contact extends BaseModel {
     }
     public function assignments() {
         return $this->hasMany(Assignment::class)->with('assignee');
-    }
-    public function getQrCodeAttribute() {
-        $at2_connect_url = $this->getQrCodeContentAttribute();
-        try {
-            return $at2_connect_url ? Document::getBase64QrCode($at2_connect_url) : null;
-        } catch (RuntimeException $ex) {
-            return null;
-        } catch (Exception $ex) {
-            return null;
-        }
-    }
-    public function getQrCodeContentAttribute() {
-        $at2_connect_url = $this->at2_connect_token ? config('services.at2connect.url').'?token='.$this->at2_connect_token : null;
-        return $at2_connect_url;
-    }
-    public static function isMattermostTimestampFromToday(int $msTimestamp): bool {
-        return Carbon::createFromTimestamp($msTimestamp / 1000)->isSameDay(Carbon::today());
-    }
-    public function createAt2ConnectToken() {
-        if (! $this->at2_connect_token) {
-            $this->at2_connect_token = Uuid::uuid4()->toString();
-            $this->save();
-        }
-        return $this;
-    }
-    public function deleteAt2ConnectToken() {
-        if ($this->at2_connect_token) {
-            $this->at2_connect_token = null;
-            $this->save();
-        }
-        return $this;
     }
     public function newEloquentBuilder($query) {
         return new ContactBuilder($query);

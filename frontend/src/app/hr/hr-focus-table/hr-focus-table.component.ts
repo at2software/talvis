@@ -1,4 +1,4 @@
-import { Page } from '@models/http/http.nexus';
+import { Page } from '@models/http/http.talvis';
 import { Dictionary } from '@constants/constants';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, computed, effect, inject, input, TemplateRef, untracked } from '@angular/core';
 import { dayjs, Dayjs } from '@constants/date/dates';
@@ -122,6 +122,9 @@ export class HrFocusTableComponent {
 
     openAddFocusModal(content: TemplateRef<unknown>) {
         this.addFocusParent = undefined;
+        this.addFocusDate = { ...this.defaultFocusDate };
+        this.addFocusTime = { hour: 10, minute: 0 };
+        this.addFocusDuration = 0;
         this.#modal.open(content, { ariaLabelledBy: 'modal-basic-title' });
     }
 

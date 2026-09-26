@@ -64,6 +64,33 @@
     </div>
 </div>
 
+<div class="row">
+    <div class="col-12 col-md-6 col-xl-3">
+        <div class="card mb-3">
+            <div class="card-header" i18n="@@i18n.projects.warrantyShare">warranty vs. project runtime</div>
+            <div class="card-body">
+                @if (statsData.warranty_share) {
+                    <nx-echarts [options]="statsData.warranty_share"></nx-echarts>
+                } @else {
+                    <p class="text-muted text-center mb-0" i18n="@@i18n.common.noData">no data available</p>
+                }
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-md-6 col-xl-9">
+        <div class="card mb-3">
+            <div class="card-header" i18n="@@i18n.projects.warrantyByProject">hours booked after project completion</div>
+            <div class="card-body">
+                @if (statsData.warranty_by_project) {
+                    <nx-echarts [options]="statsData.warranty_by_project"></nx-echarts>
+                } @else {
+                    <p class="text-muted text-center mb-0" i18n="@@i18n.common.noData">no data available</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
 @if (isLoaded() && !hasData()) {
     <div class="card mb-3">
         <empty-state [card]="false" class="projects" i18n-title="@@i18n.projects.statsEmpty" title="no project statistics yet">

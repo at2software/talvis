@@ -9,8 +9,6 @@ import { HotkeyDirective } from '@directives/hotkey.directive';
 import { GuidedTourComponent } from '@shards/guided-tour/guided-tour.component';
 import { Serializable } from '@models/_core/serializable';
 
-type SearchResult = Serializable & { company_id?: string };
-
 @Component({
     changeDetection: ChangeDetectionStrategy.OnPush,
     selector: 'app-navigation',
@@ -67,20 +65,10 @@ export class NavigationComponent {
         this.searchExpanded.set(false);
     }
 
-    onSelect(e: SearchResult) {
+    onSelect(e: Serializable) {
         this.clearSearch();
-        this.#router.navigate([this.#pathFor(e)]);
-    }
-
-    #pathFor(o: SearchResult) {
-        switch (o.class) {
-            case 'Company': return '/customers/' + o.id;
-            case 'CompanyContact': return '/customers/' + o.company_id;
-            case 'Project': return '/projects/' + o.id;
-            case 'Product': return '/products/' + o.id;
-            case 'Invoice': return '/financial/' + o.id;
-        }
-        return '/';
+        const url = e.frontendUrl();
+        if (url) this.#router.navigate([url]);
     }
 
     toggleMobileMenu() { this.isMenuOpen.update((v) => !v); }

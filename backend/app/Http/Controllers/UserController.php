@@ -282,7 +282,7 @@ class UserController extends Controller {
     public function showEnvironment() {
         $user = Auth::user()->load('activeEmployment', ...HasParams::$WITH)->append(['role_names', 'params']);
 
-        $team = User::with(['encryptions', 'activeEmployment'])
+        $team = User::with(['encryptions', 'activeEmployment', 'roles', ...HasParams::$WITH])
             ->get()
             ->sortBy('is_retired')
             ->map(function ($user) {
@@ -291,8 +291,7 @@ class UserController extends Controller {
                 }
                 $user->append('role_names');
 
-                $biasFactor = $user->param('STATS_PREDICTION_BIAS')->value ?? null;
-                $user->setAttribute('bias_factor', $biasFactor);
+                $user->setAttribute('bias_factor', $user->params['STATS_PREDICTION_BIAS'] ?? null);
                 return $user;
             });
 

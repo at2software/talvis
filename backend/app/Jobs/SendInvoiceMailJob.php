@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Helpers\NLog;
 use App\Mail\InvoiceMail;
 use App\Models\Invoice;
 use Illuminate\Bus\Queueable;
@@ -22,6 +23,11 @@ class SendInvoiceMailJob implements ShouldQueue {
     ) {}
 
     public function handle(): void {
-        Mail::to($this->invoice->company->invoice_email)->send(new InvoiceMail($this->invoice));
+        $recipients = $this->invoice->company->invoiceRecipients();
+        if (empty($recipients)) {
+            NLog::warning('No valid invoice mail recipient', ['invoice_id' => $this->invoice->id, 'invoice_email' => $this->invoice->company->invoice_email]);
+            return;
+        }
+        Mail::to($recipients)->send(new InvoiceMail($this->invoice));
     }
 }

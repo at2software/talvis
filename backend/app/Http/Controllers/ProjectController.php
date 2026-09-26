@@ -125,7 +125,7 @@ class ProjectController extends Controller {
             return $query->whereNull('company_id')->whereNull('invoice_id')->get()->appendRequest();
         }
 
-        $items = $query->withCount('billedFoci')->withSum('billedFoci', 'duration')->get();
+        $items = $query->withCount('billedFoci')->withSum('billedFoci', 'duration')->withSum('foci', 'duration')->get();
         $items->appendRequest();
         $items->append(['progress']);
         return $items;
@@ -136,11 +136,13 @@ class ProjectController extends Controller {
             ->with([
                 'productSource',
                 'predictions',
+                'fociUserSums',
                 'milestones' => fn ($q) => $q->select('milestones.id', 'invoice_item_id', 'name', 'progress', 'state', 'flags', 'user_id')->without('invoiceItem'),
                 'milestones.user:id,name,color',
             ])
             ->withCount('billedFoci')
             ->withSum('billedFoci', 'duration')
+            ->withSum('foci', 'duration')
             ->oldest('position')
             ->get();
 
@@ -158,7 +160,7 @@ class ProjectController extends Controller {
         if ($request->boolean('support_only')) {
             $items = $query->whereNull('company_id')->whereNull('invoice_id')->get();
         } else {
-            $items = $query->withCount('billedFoci')->withSum('billedFoci', 'duration')->get();
+            $items = $query->withCount('billedFoci')->withSum('billedFoci', 'duration')->withSum('foci', 'duration')->get();
         }
 
         $financialFields = [
@@ -216,6 +218,9 @@ class ProjectController extends Controller {
     public function moveRegularItemsToCustomer(Project $_) {
         $_->moveItemsToCustomer($_->invoiceItems()->orderBy('position'));
         return true;
+    }
+    public function convertSupportItemsToRegular(Project $_) {
+        return ['converted' => $_->convertSupportItemsToRegular()];
     }
     public function update(UpdateProjectRequest $request, Project $project) {
 
@@ -358,6 +363,9 @@ class ProjectController extends Controller {
 
     public function resolvePluginLinkUrls(Request $request) {
         return $this->projectPluginLinkResolverService->resolve((array)$request->input('urls', []));
+    }
+    public function showPaymentPlan(Project $_) {
+        return $_->getPaymentPlanOverview();
     }
     public function showQuoteAcceptancePrediction(Project $_) {
         $result = $this->projectQuoteAcceptanceService->build($_);

@@ -262,10 +262,6 @@ class ApiEndpointBenchmarkTest extends TestCase {
             return 'WebDAV endpoint';
         }
 
-        if (collect($middleware)->contains(fn (string $name) => str_contains($name, 'At2ConnectAuthMiddleware'))) {
-            return 'At2 Connect endpoint';
-        }
-
         if (str_contains($uri, 'team-monitor')) {
             return 'Requires API key auth';
         }
@@ -428,7 +424,7 @@ class ApiEndpointBenchmarkTest extends TestCase {
             'company_contact' => 'App\\Models\\CompanyContact',
             'contact' => 'App\\Models\\Contact',
             'debrief' => 'App\\Models\\DebriefProjectDebrief',
-            'deletion_request' => 'App\\Models\\DeletionRequest',
+            'deletion_log' => 'App\\Models\\DeletionLog',
             'expense' => 'App\\Models\\Expense',
             'expense_category' => 'App\\Models\\ExpenseCategory',
             'file' => 'App\\Models\\File',

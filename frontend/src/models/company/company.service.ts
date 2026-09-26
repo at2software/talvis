@@ -3,14 +3,15 @@ import { Company } from '@models/company/company.model';
 import { CompanyContact } from '@models/company/company-contact.model';
 import { PdfCreationType } from '@enums/PdfCreationType';
 import { Observable } from 'rxjs';
-import { NexusHttpService, idOf } from '../http/http.nexus';
+import { TalvisHttpService, idOf } from '../http/http.talvis';
+import { notifyHttpError } from '@models/http/file-download';
 import { Connection } from './connection.model';
 import { Dictionary } from '@constants/constants';
 import { nx } from '@models/_core/nx-bridge';
 import { CustomerLocationDto, MonthlyBiasDataDto } from '@models/_core/api-response';
 
 @Service()
-export class CompanyService extends NexusHttpService<Company> {
+export class CompanyService extends TalvisHttpService<Company> {
     apiPath = 'companies';
     indexPaginated = (filters?: Dictionary) => this.paginate(this.apiPath, filters);
 
@@ -33,10 +34,14 @@ export class CompanyService extends NexusHttpService<Company> {
     makeInvoice(_: Company, success?: () => unknown, draft = false) {
         const params: Dictionary = draft ? { type: PdfCreationType.Create, draft: 1 } : { type: PdfCreationType.Create };
         const download = nx().global.user!.getFloatParam('INVOICE_DOWNLOAD', 1);
+        const done = () => {
+            if (!draft) nx().global.onInvoiceCreated.next();
+            success?.();
+        };
         if (draft || download === 1) {
-            return this.getFile(`companies/${_.id}/invoice`, params, success);
+            return this.getFile(`companies/${_.id}/invoice`, params, done);
         } else {
-            return this.getBlob(`companies/${_.id}/invoice`, params).subscribe({ next: () => success?.() });
+            return this.getBlob(`companies/${_.id}/invoice`, params).subscribe({ next: done, error: notifyHttpError });
         }
     }
 

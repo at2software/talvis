@@ -3,7 +3,7 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { PluginConfigModalComponent } from './plugin-config-modal/plugin-config-modal.component';
 import { InputModalService } from '@app/_modals/modal-input/modal-input.service';
 import { ConfirmationService } from '@app/_modals/modal-confirm/confirmation.service';
-import { NexusHttp } from '@models/http/http.nexus';
+import { TalvisHttp } from '@models/http/http.talvis';
 import { Encryption } from '@models/encryption/encryption.model';
 import { GlobalService } from '@models/global.service';
 import { PluginInstanceFactory } from '@models/http/plugins/plugin.instance.factory';
@@ -26,7 +26,7 @@ import { PluginEntryDto } from '@models/_core/api-response';
 export class ProfilePluginsComponent {
     global = inject(GlobalService);
     factory = inject(PluginInstanceFactory);
-    #http = inject(NexusHttp);
+    #http = inject(TalvisHttp);
     #userService = inject(UserService);
     #confirmationService = inject(ConfirmationService);
     #modalInput = inject(InputModalService);
@@ -60,12 +60,12 @@ export class ProfilePluginsComponent {
         ...this.factory.getPluginEncryptionsOfType('mantis').map((p) => this.#makeEntry(p, 'mantis', 'MantisBT')),
         ...this.factory.getPluginEncryptionsOfType('slack').map((p) => this.#makeEntry(p, 'slack', 'Slack')),
         ...this.factory.getPluginEncryptionsOfType('local_ai').map((p) => this.#makeEntry(p, 'local_ai', 'LocalAI Proxy')),
-        ...this.factory.getPluginEncryptionsOfType('nexus').map((p) => this.#makeEntry(p, 'nexus', 'NEXUS')),
+        ...this.factory.getPluginEncryptionsOfType('talvis').map((p) => this.#makeEntry(p, 'talvis', 'TALVIS')),
     ];
 
     getPluginStatusText = (plugin: PluginEntryDto): string => {
         try {
-            if (plugin.type === 'nexus') return '';
+            if (plugin.type === 'talvis') return '';
             if (!plugin?.value?.url) return 'not configured';
             const originalEncryption = this.factory.getPluginEncryptionsOfType(plugin.key || plugin.type).find((e) => e.id === plugin.id);
             if (!originalEncryption) return 'unknown';

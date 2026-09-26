@@ -19,7 +19,7 @@
             <span class="flex-fill" i18n="@@i18n.common.comments">comments</span>
             @if (_hasActivity['GitLabPlugin'] || _hasActivity['MantisPlugin'] || _hasActivity['MattermostPlugin']) {
                 <div class="d-flex gap-2 align-items-center">
-                    <n class="pointer" [class.text-primary]="_showActivity['nexus']" [class.text-muted]="!_showActivity['nexus']" (click)="toggleActivity('nexus')" ngbTooltip="Toggle Nexus comments" i18n-ngbTooltip="@@i18n.comments.toggleNexusComments">nexus</n>
+                    <n class="pointer" [class.text-primary]="_showActivity['talvis']" [class.text-muted]="!_showActivity['talvis']" (click)="toggleActivity('talvis')" ngbTooltip="Toggle TALVIS comments" i18n-ngbTooltip="@@i18n.comments.toggleTalvisComments">nexus</n>
                     @if (_hasActivity['GitLabPlugin']) {
                         <n class="pointer" [class.text-primary]="_showActivity['GitLabPlugin']" [class.text-muted]="!_showActivity['GitLabPlugin']" (click)="toggleActivity('GitLabPlugin')" ngbTooltip="Toggle Git activity" i18n-ngbTooltip="@@i18n.comments.toggleGitActivity">git</n>
                     }
@@ -45,9 +45,9 @@
                 <n>{{ getTargetIcon() }}</n>
             </button>
             <div ngbDropdownMenu>
-                <button ngbDropdownItem (click)="selectTarget('nexus')">
+                <button ngbDropdownItem (click)="selectTarget('talvis')">
                     <n class="me-2">nexus</n>
-                    <span i18n="@@i18n.comments.commentInNexus">comment in NEXUS</span>
+                    <span i18n="@@i18n.comments.commentInTalvis">comment in TALVIS</span>
                 </button>
                 @for (target of _availableChatTargets; track target) {
                     <button ngbDropdownItem (click)="selectTarget(target)">

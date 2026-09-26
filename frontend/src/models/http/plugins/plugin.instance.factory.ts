@@ -35,7 +35,7 @@ const PLUGIN_TYPES: Dictionary<TPluginAllocations> = {
 export class PluginInstanceFactory {
     currentId: number = 0;
     http = inject(HttpClient);
-    nexusTaskInstance: TaskService = inject(TaskService);
+    talvisTaskInstance: TaskService = inject(TaskService);
     instances: Dictionary<PluginInstance> = {};
 
     static async getModalComponentForPlugin(pluginInstance: PluginInstance): Promise<Type<INxModal<string>> | null> {
@@ -61,7 +61,7 @@ export class PluginInstanceFactory {
     }
 
     constructor() {
-        this.nexusTaskInstance.init.next();
+        this.talvisTaskInstance.init.next();
     }
 
     getPluginEncryptionsOfType = (type: string): Encryption[] => nx().global.encryptions.filter((_) => _.key === type);
@@ -71,7 +71,7 @@ export class PluginInstanceFactory {
             .filter((_) => _.key in PLUGIN_TYPES)
             .map((_) => this.instanceFor(_))
             .filter((_) => _ !== undefined) as PluginInstance[];
-        instances.unshift(this.nexusTaskInstance);
+        instances.unshift(this.talvisTaskInstance);
         return instances;
     };
     getRootPluginInstancesOfType = <T extends IPlugin>(interfaceType: Type<T>): (PluginInstance & T)[] => this.getPluginInstances().filter((_) => _ && _ instanceof interfaceType && _.isRootInstance()) as (PluginInstance & T)[];

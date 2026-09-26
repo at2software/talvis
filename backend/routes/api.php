@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Controllers\AssignmentController;
-use App\Http\Controllers\At2ConnectController;
 use App\Http\Controllers\CalDAVController;
 use App\Http\Controllers\CalendarController;
 use App\Http\Controllers\CardDAVController;
@@ -13,7 +12,7 @@ use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\CorsController;
 use App\Http\Controllers\DebriefController;
-use App\Http\Controllers\DeletionRequestController;
+use App\Http\Controllers\DeletionLogController;
 use App\Http\Controllers\EncryptionController;
 use App\Http\Controllers\ExpenseCategoryController;
 use App\Http\Controllers\ExpenseController;
@@ -33,7 +32,7 @@ use App\Http\Controllers\MarketingMetricController;
 use App\Http\Controllers\MarketingProspectController;
 use App\Http\Controllers\MarketingWorkflowController;
 use App\Http\Controllers\MilestoneController;
-use App\Http\Controllers\NexusController;
+use App\Http\Controllers\TalvisController;
 use App\Http\Controllers\ParamController;
 use App\Http\Controllers\PdfTemplateController;
 use App\Http\Controllers\PluginGitController;
@@ -53,7 +52,6 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\VacationController;
 use App\Http\Controllers\VaultController;
 use App\Http\Controllers\WidgetController;
-use App\Http\Middleware\At2ConnectAuthMiddleware;
 use App\Http\Middleware\WebDAVAuthMiddleware;
 use App\Models\Company;
 use App\Models\Connection;
@@ -86,18 +84,17 @@ Route::middleware('throttle:icons')->withoutMiddleware(ThrottleRequests::class.'
     Route::get('projects/{_}/icon', fn (Project $_) => $_->company->image());
     Route::get('users/{_}/icon', fn (User $_) => $_->image());
     Route::get('users/{_}/mailicon', fn (string $_) => User::findOrFail('email', $_)->image());    // for timetracker
-    Route::get('neuron/icon', [NexusController::class, 'icon']);
+    Route::get('neuron/icon', [TalvisController::class, 'icon']);
 });
 Route::get('qr', [WidgetController::class, 'getQrCode']);
 Route::middleware('apikey:X-Auth-Token,'.config('app.team_monitor_api_key'))->get('/team-monitor', [StatsController::class, 'apiTeamMonitor']);
-Route::post('at2-connect/init-support-thread', [At2ConnectController::class, 'initSupportThread']);
 
 Route::match(['GET', 'PROPFIND', 'OPTIONS', 'PROPPATCH', 'MKCOL', 'COPY', 'MOVE', 'LOCK', 'UNLOCK', 'REPORT'], '/carddav/{path?}', [CardDAVController::class, 'handleCardDAV'])->where('path', '.*')->middleware(WebDAVAuthMiddleware::class)->name('/backend/api/carddav');
 Route::match(['GET', 'PROPFIND', 'OPTIONS', 'PROPPATCH', 'MKCOL', 'COPY', 'MOVE', 'LOCK', 'UNLOCK', 'REPORT'], '/caldav/{path?}', [CalDAVController::class, 'handleCalDAV'])->where('path', '.*')->middleware(WebDAVAuthMiddleware::class)->name('/backend/api/caldav');
 
 Route::middleware('auth', 'release.session', 'cache.headers:no_cache;must_revalidate')->group(function () {
     Route::post('search', [SearchController::class, 'search']);
-    Route::post('populate-clipboard', [NexusController::class, 'populateClipboard']);
+    Route::post('populate-clipboard', [TalvisController::class, 'populateClipboard']);
 
     // NOTE: middleware must be declared before ->group(); chaining it after the
     // closure (as this previously did) silently applies to nothing.
@@ -115,6 +112,7 @@ Route::middleware('auth', 'release.session', 'cache.headers:no_cache;must_revali
         Route::post('execute', 'execute');
         Route::get('{command}', 'show');
     });
+
 
     Route::prefix('cors')->group(function () {
         Route::post('', [CorsController::class, 'curl']);
@@ -178,10 +176,6 @@ Route::middleware('auth', 'release.session', 'cache.headers:no_cache;must_revali
 
     Route::prefix('contacts')->group(function () {
         Route::prefix('{_}')->group(function () {
-            Route::get('at2-connect-qr', fn (Contact $_) => $_->getQrCodeAttribute());
-            Route::get('at2-connect-url', fn (Contact $_) => $_->getQrCodeContentAttribute());
-            Route::post('at2-connect-token', fn (Contact $_) => $_->createAt2ConnectToken());
-            Route::delete('at2-connect-token', fn (Contact $_) => $_->deleteAt2ConnectToken());
             Route::put('add-linkedin', [ContactController::class, 'updateAddLinkedIn']);
             Route::put('unlink/{company}', [ContactController::class, 'unlink']);
         });
@@ -374,7 +368,7 @@ Route::middleware('auth', 'release.session', 'cache.headers:no_cache;must_revali
     });
 
     Route::prefix('neuron')->group(function () {
-        Route::get('/attention', [NexusController::class, 'attention']);
+        Route::get('/attention', [TalvisController::class, 'attention']);
     });
 
     Route::prefix('params')->group(function () {
@@ -436,12 +430,14 @@ Route::middleware('auth', 'release.session', 'cache.headers:no_cache;must_revali
             Route::get('features', 'indexFeatures');
             Route::middleware('role:invoicing|project_manager')->group(function () {
                 Route::get('invoice-items', 'indexInvoiceItems');
+                Route::get('payment-plan', 'showPaymentPlan');
             });
             Route::get('milestones', 'indexMilestones');
             Route::post('milestones', 'storeMilestone');
             Route::post('convert-invoice-items-to-milestones', 'convertInvoiceItemsToMilestones');
             Route::put('move-regular-to-customer', 'moveRegularItemsToCustomer');
             Route::put('move-support-to-customer', 'moveSupportToCustomer');
+            Route::put('convert-support-to-regular', 'convertSupportItemsToRegular');
             Route::put('postpone', 'postpone');
             Route::post('duplicate', 'duplicate')->middleware('role:project_manager');
             Route::get('pdf', 'makeQuote');
@@ -540,6 +536,7 @@ Route::middleware('auth', 'release.session', 'cache.headers:no_cache;must_revali
         Route::get('quote-accuracy', 'showQuoteAccuracy');
         Route::get('project-product-mix', 'showProjectProductMix');
         Route::get('project-success-rate', 'showProjectSuccessRate');
+        Route::get('project-warranty-load', 'showProjectWarrantyLoad');
         Route::get('team-status', 'showTeamStatus');
         Route::get('focus-categories', 'indexFocusCategories');
 
@@ -711,31 +708,10 @@ Route::middleware('auth', 'release.session', 'cache.headers:no_cache;must_revali
         Route::delete('{gitlabAuditProject}', 'destroy');
     });
 
-    Route::post('deletion_requests', [DeletionRequestController::class, 'store']);
-    Route::prefix('deletion_requests')->controller(DeletionRequestController::class)->middleware('role:admin')->group(function () {
+    Route::prefix('deletion_logs')->controller(DeletionLogController::class)->middleware('role:admin')->group(function () {
         Route::get('', 'index');
-        Route::put('{deletionRequest}/approve', 'approve');
-        Route::delete('{deletionRequest}', 'destroy');
-    });
-});
-
-Route::prefix('at2-connect')->middleware('cache.headers:no_cache;must_revalidate')->middleware(At2ConnectAuthMiddleware::class)->controller(At2ConnectController::class)->group(function () {
-    Route::get('/user', 'showUser');
-    Route::get('/projects', 'indexProjects');
-    Route::prefix('{channel_id}')->group(function () {
-        Route::get('posts', 'indexPosts');
-        Route::get('members', 'indexMembers');
-        Route::post('file', 'createFile');
-        Route::post('post', 'createPost');
-    });
-    Route::prefix('{post_id}')->group(function () {
-        Route::post('reaction', 'createReaction');
-        Route::delete('reaction/{emoji_name}', 'deleteReaction');
-    });
-    Route::prefix('{file_id}')->group(function () {
-        Route::get('thumbnail', 'showThumbnail');
-        Route::get('preview', 'showPreview');
-        Route::get('', 'showFile');
+        Route::get('model-types', 'indexModelTypes');
+        Route::put('{deletionLog}/restore', 'restore');
     });
 });
 

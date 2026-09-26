@@ -6,6 +6,7 @@ use App\Models\Connection;
 use App\Models\InvoiceItem;
 use App\Models\Project;
 use App\Models\ProjectState;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 
 class ProjectDetailsService {
     public function build(Project $project): Project {
@@ -19,8 +20,8 @@ class ProjectDetailsService {
             'files',
             'projectManager',
             'product.invoiceItems',
-            'companysActiveProjects:projects.id,name,company_id,is_time_based,is_internal',
-            'companysBaseProjects:projects.id,name,company_id,is_time_based,is_internal',
+            'companysActiveProjects:projects.id,name,company_id,is_time_based,is_internal,projects.net',
+            'companysBaseProjects:projects.id,name,company_id,is_time_based,is_internal,projects.net',
             'parentProject',
             'states' => fn ($q) => $q->latest('pivot_id')->limit(1),
         ]);
@@ -28,13 +29,18 @@ class ProjectDetailsService {
         $project->setRelation('invoiceItems', $project->indexedItems()
             ->with([
                 'predictions',
+                'fociUserSums',
                 'milestones' => fn ($q) => $q->select('milestones.id', 'invoice_item_id', 'name', 'progress', 'state', 'flags', 'user_id')->without('invoiceItem'),
                 'milestones.user:id,name,color',
             ])
             ->withCount('billedFoci')
             ->withSum('billedFoci', 'duration')
+            ->withSum('foci', 'duration')
             ->get()
         );
+
+        EloquentCollection::make($project->invoiceItems->pluck('milestones')->collapse()->all())
+            ->load(['invoiceItems' => fn ($q) => $q->withSum('foci', 'duration')]);
 
         $project->connectionProjects->each(function ($cp) use ($project) {
             $cp->setAttribute('other_company', $cp->connection->getOtherCompany($project->company_id));
@@ -72,7 +78,7 @@ class ProjectDetailsService {
         ]);
         $project->setAttribute('quote_descriptions', $project->getQuoteDescriptions());
 
-        $project->append(['net', 'hours_invested', 'personalized', 'params', 'uninvoiced_hours', 'started_at', 'finished_at', 'timeline_chart']);
+        $project->append(['net', 'hours_invested', 'personalized', 'params', 'uninvoiced_hours', 'started_at', 'finished_at', 'warranty_until', 'timeline_chart']);
         $project->setAttribute('oldest_unbilled_focus_at', $project->foci_unbilled()->oldest('started_at')->value('started_at'));
         $project->setAttribute('invoiced_downpayments', (float)$project->invoiceItems()->where('stage', 2)->whereNotNull('invoice_id')->sum('net'));
 

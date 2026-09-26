@@ -9,7 +9,7 @@
         <span class="badge text-warning compact-warning" (click)="open(content)" (keyup.enter)="open(content)" tabindex="0" i18n="@@i18n.info.noDescriptionYet">no description yet</span>
     }
     <button class="btn btn-fancy btn-fancy-te" (click)="open(content)"><i>edit</i></button>
-    <div class="ql-editor ql-rendered" [innerHTML]="binding || '' | safe: 'html'"></div>
+    <div class="ql-editor ql-rendered" [innerHTML]="binding | safe: 'html'"></div>
 </div>
 
 <ng-template #content let-modal>

@@ -3,13 +3,13 @@ import { Dictionary } from '@constants/constants';
 import { mapVar, serialize } from '@constants/rxjs/rxjs-operators';
 import { Observable } from 'rxjs';
 import { Product } from './product.model';
-import { NexusHttpService } from '../http/http.nexus';
+import { TalvisHttpService } from '../http/http.talvis';
 import { Company } from '../company/company.model';
 import { ProductGroup } from './product-group.model';
 import { ProductCustomersDto, ProductSplitItemDto, ProductStatisticsDto } from '@models/_core/api-response';
 
 @Service()
-export class ProductService extends NexusHttpService<Product> {
+export class ProductService extends TalvisHttpService<Product> {
     public apiPath = 'products';
     override readonly model = Product;
 

@@ -20,6 +20,23 @@ export function sortSteps<T extends { trigger: string }>(steps: T[]): T[] {
     return [...steps].sort((a, b) => (TRIGGER_ORDER[a.trigger] ?? 99) - (TRIGGER_ORDER[b.trigger] ?? 99));
 }
 
+export function paymentPlanTriggerLabel(step: { trigger: string; months?: number | null; month_index?: number | null }): string {
+    switch (step.trigger) {
+        case 'project_start':
+            return $localize`:@@i18n.payment.triggerProjectStart:upon project start`;
+        case 'feature_complete':
+            return $localize`:@@i18n.payment.triggerFeatureComplete:upon feature complete`;
+        case 'acceptance':
+            return $localize`:@@i18n.payment.triggerAcceptance:upon acceptance`;
+        case 'monthly':
+            return step.month_index
+                ? $localize`:@@i18n.payment.triggerMonthlyNth:monthly prepayment ${step.month_index}:index: of ${step.months ?? 0}:total: after project start`
+                : $localize`:@@i18n.payment.triggerMonthly:${step.months ?? 0} monthly prepayments after project start`;
+        default:
+            return step.trigger;
+    }
+}
+
 @Component({
     changeDetection: ChangeDetectionStrategy.OnPush,
     selector: 'payment-plan-editor',
@@ -107,20 +124,7 @@ export class PaymentPlanEditorComponent {
         }
     }
 
-    getTriggerLabel(step: PaymentPlanStep): string {
-        switch (step.trigger) {
-            case 'project_start':
-                return $localize`:@@i18n.payment.triggerProjectStart:upon project start`;
-            case 'feature_complete':
-                return $localize`:@@i18n.payment.triggerFeatureComplete:upon feature complete`;
-            case 'acceptance':
-                return $localize`:@@i18n.payment.triggerAcceptance:upon acceptance`;
-            case 'monthly':
-                return $localize`:@@i18n.payment.triggerMonthly:${step.months ?? 0} monthly prepayments after project start`;
-            default:
-                return step.trigger;
-        }
-    }
+    getTriggerLabel = (step: PaymentPlanStep): string => paymentPlanTriggerLabel(step);
 
     get totalPercentage(): number {
         return this.editSteps.reduce((sum, s) => sum + (Number(s.percentage) || 0), 0);

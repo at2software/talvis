@@ -17,7 +17,7 @@ interface FieldPlan {
     transform?: (params: { value: unknown }) => unknown;
 }
 
-const FIELDS = Symbol('nexus.fields');
+const FIELDS = Symbol('talvis.fields');
 
 type Metadata = Record<PropertyKey, unknown>;
 

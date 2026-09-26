@@ -1,10 +1,10 @@
 import { Service } from '@angular/core';
 import { User } from '@models/user/user.model';
-import { NexusHttpService } from '../http/http.nexus';
+import { TalvisHttpService } from '../http/http.talvis';
 import { CalendarEntry } from './calendar-entry.model';
 
 @Service()
-export class VCalendarService extends NexusHttpService<User> {
+export class VCalendarService extends TalvisHttpService<User> {
     apiPath = 'calendar_entries';
 
     getCalendar = () => this.aget('calendar_entries', null, CalendarEntry);

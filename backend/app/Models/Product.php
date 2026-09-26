@@ -16,6 +16,8 @@ class Product extends BaseModel {
     use SoftDeletes;
 
     protected $appends  = ['icon', 'class', 'path', 'rootGroup'];
+    protected $hidden   = ['group'];
+    protected $with     = ['group.parent_group'];
     protected $fillable = ['name', 'item_number', 'is_active', 'is_discountable', 'time_based', 'price_multiplier', 'recurrence', 'minimum_amount', 'package_amount', 'minimum_price', 'weight', 'size_w', 'size_h', 'size_d', 'quote', 'product_group_id', 'created_at', 'updated_at'];
     protected $touches  = ['group'];
 
@@ -28,9 +30,9 @@ class Product extends BaseModel {
         return '../icons/product.jpg';
     }
     public function getRootGroupAttribute() {
-        $group = $this->group()->first();
-        while ($next = $group->parent_group()->first()) {
-            $group = $next;
+        $group = $this->group;
+        while ($group?->parent_group) {
+            $group = $group->parent_group;
         }
         return $group;
     }

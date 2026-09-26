@@ -1,6 +1,6 @@
 import { Service } from '@angular/core';
 import { Dictionary } from '@constants/constants';
-import { NexusHttpService } from '../http/http.nexus';
+import { TalvisHttpService } from '../http/http.talvis';
 import { File } from '@models/file/file.model';
 import { Company } from '@models/company/company.model';
 import { MarketingWorkflow } from './marketing-workflow.model';
@@ -14,7 +14,7 @@ import { map, Observable, Subject } from 'rxjs';
 import { InitiativeStatsDto, MarketingDashboardStatsDto, ProspectActivityCountDto, ProspectStatsDto, RemarketingDto, SankeyDataDto } from '@models/_core/api-response';
 
 @Service()
-export class MarketingService extends NexusHttpService<MarketingInitiative> {
+export class MarketingService extends TalvisHttpService<MarketingInitiative> {
     apiPath = 'marketing/initiatives';
     override readonly model = MarketingInitiative;
 

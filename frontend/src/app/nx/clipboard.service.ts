@@ -2,7 +2,7 @@ import { inject, Service } from '@angular/core';
 import { Subject } from 'rxjs';
 import { Dictionary } from '@constants/constants';
 import type { Serializable } from '@models/_core/serializable';
-import { NexusHttp } from '@models/http/http.nexus';
+import { TalvisHttp } from '@models/http/http.talvis';
 import { objectMap, objectRemoveEmpty } from '@constants/object/objectMap';
 import { getCookie } from '@constants/cookies';
 
@@ -10,7 +10,7 @@ type TClipDict<T> = Dictionary<T[]>;
 
 @Service()
 export class ClipboardService {
-    readonly #http = inject(NexusHttp);
+    readonly #http = inject(TalvisHttp);
 
     #clips: TClipDict<Serializable> = {};
     readonly #changed = new Subject<boolean>();

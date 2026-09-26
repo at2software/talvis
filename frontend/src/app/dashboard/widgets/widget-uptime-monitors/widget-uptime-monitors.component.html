@@ -11,7 +11,7 @@
 
     <widget-options [options]="defaultOptions()" (updated)="reload()" (deleted)="reload()"></widget-options>
 
-    <ul-compact revealList>
+    <ul-compact>
         @for (monitor of monitors(); track monitor.id) {
             <li class="list-group-item d-flex align-items-center">
                 <div class="flex-fill">{{ monitor.name }}</div>

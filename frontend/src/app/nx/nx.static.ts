@@ -5,7 +5,7 @@ import type { Serializable } from '@models/_core/serializable';
 import { BroadcastPayload, DeleteActionOptions, setNxBridge, TBroadcast } from '@models/_core/nx-bridge';
 import { NxAction } from '@models/_core/nx.actions';
 import { GlobalService } from '@models/global.service';
-import { NexusHttp } from '@models/http/http.nexus';
+import { TalvisHttp } from '@models/http/http.talvis';
 import { NxService } from './nx.service';
 import { HttpClient } from '@angular/common/http';
 import { Title } from '@angular/platform-browser';
@@ -18,12 +18,9 @@ import { ModalConfirmComponent } from '@app/_modals/modal-confirm/modal-confirm.
 import { ConfirmationService } from '@app/_modals/modal-confirm/confirmation.service';
 import { ModalBaseService } from '@app/_modals/modal-base-service';
 import { InputModalService } from '@app/_modals/modal-input/modal-input.service';
-import { ModalInputComponent, ModalInputArgs } from '@app/_modals/modal-input/modal-input.component';
 import { ModalInputResult } from '@models/_core/modal-results';
 import { ModalRef, resolveModal } from '@models/_core/modal-registry';
 import type { TableSchemaDto } from '@models/_core/api-response';
-import { Toast } from '@app/_shards/toast/toast';
-import { tap } from 'rxjs';
 
 /**
  * Memoized `tableName -> Set(columnField)` index for `payloadFor`. Keyed on the `tables` array
@@ -43,7 +40,7 @@ const columnsFor = (tables: TableSchemaDto[], tableName: string): Set<string> | 
 export { TBroadcast };
 
 export class NxStatic {
-    static service: NexusHttp;
+    static service: TalvisHttp;
     static http: HttpClient;
     static router: Router;
     static injector: Injector;
@@ -66,32 +63,16 @@ export class NxStatic {
 
     static get context(): Serializable | undefined { return this.getService(SelectionService).context; }
 
-    static deleteAction(self: Serializable, message: string, options?: DeleteActionOptions): NxAction {
-        const roles = (options?.roles ?? '').split('|').map((r) => r.trim()).filter(Boolean);
-        if (roles.length && !(NxStatic.global?.user?.hasAnyRole(roles) ?? false)) {
-            return {
-                title: $localize`:@@i18n.common.requestDeletion:request deletion`,
-                interrupt: {
-                    service: ModalInputComponent,
-                    args: {
-                        title: $localize`:@@i18n.common.requestDeletion:request deletion`,
-                        message: $localize`:@@i18n.common.requestDeletionReason:Why should this be deleted?`,
-                    } satisfies ModalInputArgs,
-                },
-                action: (_success?: (v: unknown) => void, _ctx?: unknown, result?: ModalInputResult) => {
-                    if (!result?.text) return undefined;
-                    return NxStatic.service
-                        .post('deletion_requests', { model_type: self.getModelName(), model_id: self.id, reason: result.text })
-                        .pipe(tap(() => Toast.success($localize`:@@i18n.common.deletionRequested:Deletion requested`)));
-                },
-                type: NxActionType.Destructive,
-                group: true,
-                ...(options?.on ? { on: options.on } : {}),
-            };
-        }
+    static deleteAction(self: Serializable, message: string | (() => string), options?: DeleteActionOptions): NxAction {
         return {
             title: $localize`:@@i18n.common.delete:delete`,
-            interrupt: { service: ModalConfirmComponent, args: { message, title: $localize`:@@i18n.common.attention:attention` } },
+            interrupt: {
+                service: ModalConfirmComponent,
+                args: {
+                    get message() { return typeof message === 'function' ? message() : message; },
+                    title: $localize`:@@i18n.common.attention:attention`,
+                },
+            },
             action: options?.action ?? (() => self.delete()),
             type: NxActionType.Destructive,
             group: true,
@@ -141,7 +122,7 @@ export class NxStatic {
         const fields = columnsFor(global.tables, c);
         if (!fields) {
             const _class = obj.class ?? 'unknown';
-            console.trace(`table "${c}" "${_class}" "${ctor.name}" not known to NEXUS - maybe not defined in environment update`);
+            console.trace(`table "${c}" "${_class}" "${ctor.name}" not known to TALVIS - maybe not defined in environment update`);
             return {};
         }
         const d: Dictionary = {};

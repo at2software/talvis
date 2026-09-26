@@ -67,7 +67,7 @@
         <p>This is a model prediction based on the project's current burn rate, not yet-logged hours — please review the project timeline and budget while there's still time to act.</p>
 
         <div class="footer">
-            <p>This is an automated notification from your Nexus system.</p>
+            <p>This is an automated notification from your TALVIS system.</p>
             <p>You are receiving this email because you are the project manager of <strong>{{ $project->name }}</strong>.</p>
         </div>
     </div>

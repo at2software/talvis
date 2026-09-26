@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\DAV\CapturingSapi;
 use App\DAV\OwnAddressBookRoot;
 use App\DAV\OwnCardDAVBackend;
 use App\DAV\OwnPDOBasicAuthBackend;
@@ -14,25 +15,12 @@ use Sabre\DAV;
 use Sabre\DAVACL;
 
 class CardDAVController extends Controller {
-    public function createResponseWithCorrectHeader(Request $request): Response {
-        $response = new Response;
-        if (! $request->isMethod('GET')) {
-            $response->header('Content-Type', 'application/xml');
-        }
-        // 207 Multi-Status is only for WebDAV responses, not for OPTIONS
-        if (! $request->isMethod('OPTIONS')) {
-            $response->setStatusCode(207, 'Multi-Status');
-        }
-        return $response;
-    }
-
     public function handleCardDAV(Request $request): Response {
-        $routeName = $request->route()->getName();
-        $this->startCardDAVServer($routeName);
-        return $this->createResponseWithCorrectHeader($request);
+        $server = $this->startCardDAVServer($request->route()->getName());
+        return CapturingSapi::toLaravelResponse($server->httpResponse);
     }
 
-    public function startCardDAVServer(string $rootUri): void {
+    public function startCardDAVServer(string $rootUri): DAV\Server {
         $pdo = DB::connection()->getPdo();
         $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
         $server = $this->createCardDAVServer($pdo);
@@ -43,16 +31,18 @@ class CardDAVController extends Controller {
         $aclPlugin = new DAVACL\Plugin;
         $server->addPlugin($aclPlugin);
         $server->start();
+        return $server;
     }
 
-    public function createCardDAVServer($pdo): DAV\Server {
+    public function createCardDAVServer(\PDO $pdo): DAV\Server {
         $principalBackend   = new OwnPrincipalBackend($pdo);
         $addressBookBackend = new OwnCardDAVBackend($pdo);
         $tree = [
             new DAVACL\PrincipalCollection($principalBackend),
             new OwnAddressBookRoot($principalBackend, $addressBookBackend),
         ];
-        $server = new DAV\Server($tree);
+        DAV\Server::$exposeVersion = false;
+        $server = new DAV\Server($tree, new CapturingSapi);
         $carddavPlugin = new CardDAV\Plugin;
         $server->addPlugin($carddavPlugin);
         $syncPlugin = new DAV\Sync\Plugin;
