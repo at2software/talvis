@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, effect, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { RouterModule } from '@angular/router';
 import { NxContextMenu } from '@app/nx/nx.contextmenu';
@@ -16,6 +16,7 @@ import { TabWidgetsComponent } from '@activity/tab-widgets/tab-widgets.component
 import { ToastsContainer } from '@shards/toast/toast.container';
 import { SpinnerComponent } from '@shards/spinner/spinner.component';
 import { RouteChangeListenerService } from '@app/routeChangeListener.service';
+import { BusyService } from '@app/busy.service';
 
 const BREAKPOINT_ACTIVITY = 1700;
 
@@ -30,7 +31,9 @@ export class AppComponent {
     #tooltipConfig = inject(NgbTooltipConfig);
 
     authResolved = inject(GlobalService).authResolved;
-    navigating = inject(RouteChangeListenerService).navigating;
+    #navigating = inject(RouteChangeListenerService).navigating;
+    #busy = inject(BusyService).active;
+    loading = computed(() => this.#navigating() || this.#busy());
 
     #narrow = toSignal(
         fromEvent<UIEvent>(window, 'resize').pipe(map(e => (e.target as Window).innerWidth < BREAKPOINT_ACTIVITY)),

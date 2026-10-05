@@ -172,7 +172,7 @@ class Mt940Parser {
 
     /** @return array<int, array{tag: string, value: string}> */
     private static function splitFields(string $mt940): array {
-        $fields = [];
+        $fields  = [];
         $pattern = '/^:(\w{1,5}):(.*?)(?=^:\w{1,5}:|\z)/ms';
         preg_match_all($pattern, $mt940, $matches, PREG_SET_ORDER);
         foreach ($matches as $m) {

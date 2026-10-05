@@ -32,7 +32,6 @@ use App\Http\Controllers\MarketingMetricController;
 use App\Http\Controllers\MarketingProspectController;
 use App\Http\Controllers\MarketingWorkflowController;
 use App\Http\Controllers\MilestoneController;
-use App\Http\Controllers\TalvisController;
 use App\Http\Controllers\ParamController;
 use App\Http\Controllers\PdfTemplateController;
 use App\Http\Controllers\PluginGitController;
@@ -45,6 +44,7 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SentinelController;
 use App\Http\Controllers\StatsController;
+use App\Http\Controllers\TalvisController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\TimetrackerController;
 use App\Http\Controllers\UptimeMonitorController;
@@ -55,7 +55,6 @@ use App\Http\Controllers\WidgetController;
 use App\Http\Middleware\WebDAVAuthMiddleware;
 use App\Models\Company;
 use App\Models\Connection;
-use App\Models\Contact;
 use App\Models\ExpenseCategory;
 use App\Models\File;
 use App\Models\Focus;
@@ -83,7 +82,7 @@ Route::middleware('throttle:icons')->withoutMiddleware(ThrottleRequests::class.'
     Route::get('companies/{_}/icon', fn (Company $_) => $_->image());
     Route::get('projects/{_}/icon', fn (Project $_) => $_->company->image());
     Route::get('users/{_}/icon', fn (User $_) => $_->image());
-    Route::get('users/{_}/mailicon', fn (string $_) => User::findOrFail('email', $_)->image());    // for timetracker
+    Route::get('users/{_}/mailicon', fn (string $_) => User::where('email', $_)->firstOrFail()->image());    // for timetracker
     Route::get('neuron/icon', [TalvisController::class, 'icon']);
 });
 Route::get('qr', [WidgetController::class, 'getQrCode']);
@@ -112,7 +111,6 @@ Route::middleware('auth', 'release.session', 'cache.headers:no_cache;must_revali
         Route::post('execute', 'execute');
         Route::get('{command}', 'show');
     });
-
 
     Route::prefix('cors')->group(function () {
         Route::post('', [CorsController::class, 'curl']);
@@ -191,8 +189,8 @@ Route::middleware('auth', 'release.session', 'cache.headers:no_cache;must_revali
     });
 
     Route::prefix('foci')->middleware('role:hr|project_manager')->group(function () {
-        Route::get('/uninvoiced/{path}/{id}', fn (string $path, string $id) => Focus::fromPath($path.'/'.$id)->foci_unbilled()->get());
-        Route::post('/create-items/{path}/{id}', fn (string $path, string $id) => Focus::fromPath($path.'/'.$id)->createInvoiceItemsFromFoci(request()));
+        Route::get('/uninvoiced/{path}/{id}', fn (string $path, string $id) => (Focus::fromPath($path.'/'.$id) ?? abort(404))->foci_unbilled()->get());
+        Route::post('/create-items/{path}/{id}', fn (string $path, string $id) => (Focus::fromPath($path.'/'.$id) ?? abort(404))->createInvoiceItemsFromFoci(request()));
     });
 
     Route::prefix('live-sharing')->controller(LiveSharingController::class)->group(function () {
@@ -637,8 +635,8 @@ Route::middleware('auth', 'release.session', 'cache.headers:no_cache;must_revali
     });
 
     Route::resource('calendar_entries', CalendarController::class)->only(['index', 'store', 'update', 'destroy']);
-    Route::resource('assignments', AssignmentController::class)->only(['update']);
-    Route::resource('assignments', AssignmentController::class)->only(['destroy'])->middleware('owner:assignee_id,project_manager');
+    Route::resource('assignments', AssignmentController::class)->only(['update'])->middleware('owner:assigned_user_id,hr|project_manager');
+    Route::resource('assignments', AssignmentController::class)->only(['destroy'])->middleware('owner:assigned_user_id,project_manager');
 
     Route::resource('comments', CommentController::class)->only(['store']);
     Route::resource('comments', CommentController::class)->only(['update', 'destroy'])->middleware('owner:user_id,admin');
@@ -704,6 +702,8 @@ Route::middleware('auth', 'release.session', 'cache.headers:no_cache;must_revali
     Route::prefix('gitlab-audit')->controller(GitlabAuditController::class)->group(function () {
         Route::get('', 'index');
         Route::post('', 'store');
+        Route::get('candidates', 'candidates');
+        Route::post('{gitlabAuditProject}/run', 'run');
         Route::put('{gitlabAuditProject}', 'update');
         Route::delete('{gitlabAuditProject}', 'destroy');
     });

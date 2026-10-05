@@ -25,6 +25,7 @@ class ProjectQuoteHistoryTest extends TestCase {
 
         return $project->refresh();
     }
+
     public function test_excludes_projects_decided_after_the_targets_decision_at(): void {
         $company = Company::factory()->create();
 

@@ -26,7 +26,6 @@ class InvoiceFactory extends Factory {
     public function createdAt(\DateTimeInterface $at): static {
         return $this->state(['created_at' => $at, 'updated_at' => $at]);
     }
-
     public function cancelled(): static {
         return $this->state(['is_cancelled' => true]);
     }

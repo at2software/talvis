@@ -37,9 +37,7 @@ class CustomerIntervalDataset {
         'tenure_days',
         'last_gap_days',
     ];
-
-    public const LABEL = 'next_gap_days';
-
+    public const LABEL               = 'next_gap_days';
     public const MIN_PRIOR_PURCHASES = 3;
 
     /**

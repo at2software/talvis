@@ -85,7 +85,6 @@ class CalculateUserWorkloadStats {
             'required' => $req,
         ];
     }
-
     private function expandVacationDays(Collection $vacations): array {
         $days = [];
         foreach ($vacations as $vacation) {

@@ -15,11 +15,9 @@ class ProjectCheckpointDataset {
         'pct_of_quote_used',
         'remaining_quote',
     ];
-    public const LABEL = 'remaining_hours';
-
+    public const LABEL                = 'remaining_hours';
     public const CHECKPOINT_FRACTIONS = [0.25, 0.5, 0.75];
-
-    public const MIN_DURATION_DAYS = 5;
+    public const MIN_DURATION_DAYS    = 5;
 
     public static function eligibleProjects(): Collection {
         return ProjectDataset::eligibleProjects()
@@ -68,7 +66,6 @@ class ProjectCheckpointDataset {
 
         return self::row($project, now(), $hoursSoFar, null);
     }
-
     private static function row(Project $project, Carbon $checkpointAt, float $hoursSoFar, ?float $remainingHours): array {
         $elapsedDays   = max($project->started_at->diffInDays($checkpointAt, true), 1 / 24);
         $workEstimated = (float)$project->work_estimated;
@@ -87,7 +84,6 @@ class ProjectCheckpointDataset {
         }
         return $row;
     }
-
     public static function logLabel(float $remainingHours): float {
         return log($remainingHours + 1);
     }

@@ -31,7 +31,6 @@ class DemoSeeder extends Seeder {
     private function demoSeederData(): DemoSeederData {
         return $this->_DemoSeederData ??= new DemoSeederData;
     }
-
     public function run(): void {
         $startDay = Carbon::now()->subYears(5)->startOfMonth();
 
@@ -349,7 +348,6 @@ class DemoSeeder extends Seeder {
             $monthsElapsed++;
         }
     }
-
     private function insertFloatParamHistory(int $paramId, float $value, Carbon $date): void {
         DB::table('float_params')->insert([
             'param_id'   => $paramId,

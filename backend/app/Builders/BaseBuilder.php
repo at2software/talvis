@@ -73,7 +73,6 @@ class BaseBuilder extends Builder {
             return is_numeric($binding) ? $binding : "'{$binding}'";
         })->toArray());
     }
-
     public function whereRequest() {
         $allowedFilters = $this->getModel()->allowedFilters ?? [];
 
@@ -105,7 +104,6 @@ class BaseBuilder extends Builder {
         }
         return $this;
     }
-
     public function whereMorph($obj, $key = 'parent') {
         return $this->where($key.'_type', $obj::class)->where($key.'_id', $obj->id);
     }
@@ -244,12 +242,10 @@ class BaseBuilder extends Builder {
         }
         return [$pivotTable, $groupByColumn];
     }
-
     private function generateAlias(string $tableName): string {
         $parts = explode('_', $tableName);
         return implode('', array_map(fn ($part) => substr($part, 0, 1), $parts));
     }
-
     private function wrapColumnOrExpression(string $column): string {
         if (preg_match('/[\s\(\)]/', $column)) {
             return $column;

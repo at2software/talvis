@@ -33,7 +33,6 @@ class ProjectQuoteDataset {
         'company_acceptance_rate',
         'company_prior_decided_count',
     ];
-
     public const LABEL = 'accepted';
 
     public static function eligibleQuery(): Builder {
@@ -42,11 +41,9 @@ class ProjectQuoteDataset {
             ->whereHas('firstDecisionState', fn ($q) => $q->where('is_in_stats', true))
             ->with(['states', 'company', 'invoiceItemsRaw']);
     }
-
     public static function eligibleProjects(): Collection {
         return static::eligibleQuery()->get();
     }
-
     public static function isAccepted(Project $project): bool {
         return $project->states->contains(fn (ProjectState $state) => $state->progress === ProjectState::Running);
     }
@@ -188,7 +185,7 @@ class ProjectQuoteDataset {
                 continue;
             }
             $localized             = Param::localizeI18nValue($rawValue, $project->company->getLanguage(), $project->company->getFormality());
-            $result[$project->id] = mb_strlen(is_string($localized) ? $localized : '');
+            $result[$project->id]  = mb_strlen(is_string($localized) ? $localized : '');
         }
         return $result;
     }

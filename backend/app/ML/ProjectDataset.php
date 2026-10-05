@@ -28,7 +28,6 @@ class ProjectDataset {
         'pm_history_overrun',
         'product_history_overrun',
     ];
-
     public const LABEL = 'hours_invested';
 
     public static function eligibleQuery(): Builder {
@@ -37,7 +36,6 @@ class ProjectDataset {
             ->where('work_estimated', '>', 0)
             ->with(['hoursInvestedSum', 'milestones', 'assignees']);
     }
-
     public static function eligibleProjects(): Collection {
         return static::eligibleQuery()->get()
             ->filter(fn (Project $project) => $project->hours_invested > 0)
@@ -91,7 +89,6 @@ class ProjectDataset {
     public static function logLabel(float $hoursInvested): float {
         return log($hoursInvested + 1);
     }
-
     private static function hoursPerDay(): float {
         return (float)(Param::get('INVOICE_HPD')->value ?? 8);
     }

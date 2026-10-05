@@ -25,7 +25,7 @@ $image-size: 9rem;
         margin-bottom: 1.25rem;
         box-shadow: shadow-down(5px, 12px);
 
-        background-image: url('../../../assets/empty-state/empty-projects.png');
+        background-image: url('../../../assets/empty-state/empty-projects.webp');
         background-size: contain;
         background-repeat: no-repeat;
         background-position: center center;
@@ -33,31 +33,19 @@ $image-size: 9rem;
         &.image-size-3 { $mod: 0.6;  width: $mod * $image-size; height: $mod * $image-size; }
         &.image-size-9 { $mod: 1.33; width: $mod * $image-size; height: $mod * $image-size; }
 
-        &.select     { background-image: url('../../../assets/empty-state/nothing-selected.png'); }
-        &.description     { background-image: url('../../../assets/empty-state/empty-description.png?2'); }
-        &.shrug      { background-image: url('../../../assets/empty-state/nothing-selected.png'); }
-        &.encryption { background-image: url('../../../assets/empty-state/empty-state-encryption.png'); }
-        &.get-well   { background-image: url('../../../assets/empty-state/get-well.png'); }
-        &.done       { background-image: url('../../../assets/empty-state/empty-state-done.jpg'); }
-        &.chart      { background-image: url('../../../assets/empty-state/empty-charts.jpeg'); }
-        &.check      { background-image: url('../../../assets/empty-state/checkmark.png'); }
-
-        &.projects, &.invoices, &.hr, &.customers, &.marketing,
-        &.products, &.profile, &.settings, &.dashboard, &.calendar, &.document {
-            background-size: cover;
-            opacity: 0.45;
+        @each $class, $file in (
+            select: 'empty-select', description: 'empty-description', shrug: 'empty-shrug',
+            encryption: 'empty-encryption', get-well: 'get-well', done: 'empty-done', chart: 'empty-charts',
+            check: 'check', filter: 'empty-filter', deleted: 'empty-deleted', location: 'empty-location',
+            projects: 'empty-projects', invoices: 'empty-invoices', hr: 'empty-hr', customers: 'empty-customers',
+            marketing: 'empty-marketing', products: 'empty-products', profile: 'empty-profile',
+            settings: 'empty-settings', dashboard: 'empty-dashboard', calendar: 'empty-calendar',
+            milestones: 'empty-milestones', uptime: 'empty-uptime', cash-register: 'empty-cash-register',
+            standing: 'empty-standing', workflows: 'empty-workflows', prospects: 'empty-prospects',
+            debriefing: 'empty-debriefing', sentinels: 'empty-sentinels', audit: 'empty-audit'
+        ) {
+            &.#{$class} { background-image: url('../../../assets/empty-state/#{$file}.webp'); }
         }
-        &.projects  { background-image: url('../../../assets/images/project.jpg'); }
-        &.invoices  { background-image: url('../../../assets/images/invoice.jpg'); }
-        &.hr        { background-image: url('../../../assets/images/hr.jpg'); }
-        &.customers { background-image: url('../../../assets/images/company.jpg'); }
-        &.marketing { background-image: url('../../../assets/images/marketing.jpg'); }
-        &.products  { background-image: url('../../../assets/images/product.jpg'); }
-        &.profile   { background-image: url('../../../assets/images/profile.jpg'); }
-        &.settings  { background-image: url('../../../assets/images/settings.jpg'); }
-        &.dashboard { background-image: url('../../../assets/images/dashboard.jpg'); }
-        &.calendar  { background-image: url('../../../assets/images/calendar.jpg'); }
-        &.document  { background-image: url('../../../assets/images/document.jpg'); }
     }
 
     .empty-state-title {

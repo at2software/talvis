@@ -31,7 +31,6 @@ class MarketingActivity extends BaseModel {
             'description'             => I18n::class,
         ];
     }
-
     public function marketingWorkflow(): BelongsTo {
         return $this->belongsTo(MarketingWorkflow::class, 'marketing_workflow_id');
     }
@@ -52,7 +51,6 @@ class MarketingActivity extends BaseModel {
     public function childActivities(): HasMany {
         return $this->hasMany(MarketingActivity::class, 'parent_activity_id');
     }
-
     public function scopeRequired($query) {
         return $query->where('is_required', true);
     }
@@ -62,7 +60,6 @@ class MarketingActivity extends BaseModel {
     public function scopeForDay($query, int $day) {
         return $query->where('day_offset', $day);
     }
-
     public function getActivityTypeLabel(): string {
         return match ($this->activity_type) {
             'like_post'          => 'Like Post',

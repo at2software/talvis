@@ -3,8 +3,14 @@ import { GitlabAuditProject } from "./gitlab-audit-project.model";
 
 export const GitlabAuditProjectActions = (that:GitlabAuditProject):NxAction[] => [
         {
+            title: 'run audit now',
+            type: NxActionType.Creative,
+            on: () => !!that.cron,
+            action: (s) => that.var.onRun?.(that, s),
+        },
+        {
             title: 'rename',
-            action: (s) => that.var.onRename?.(this, s),
+            action: (s) => that.var.onRename?.(that, s),
         },
         {
             title: 'link with company',
@@ -31,5 +37,11 @@ export const GitlabAuditProjectActions = (that:GitlabAuditProject):NxAction[] =>
             type: NxActionType.Creative,
             on: () => !!that.company_id && !that.invoice_item_id,
             action: (s) => that.var.onCreateInvoiceItem?.(that, s),
+        },
+        {
+            title: 'delete',
+            doubleClick: true,
+            type: NxActionType.Destructive,
+            action: (s) => that.var.onDelete?.(that, s),
         },
     ];

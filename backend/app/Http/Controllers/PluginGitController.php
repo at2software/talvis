@@ -67,8 +67,25 @@ class PluginGitController extends PluginController {
         return $this->get($url);
     }
     public function getPipelineJobs(int $projectId, int $pipelineId): ?array {
-        $url = $this->env('URL').'api/v4/projects/'.$projectId.'/pipelines/'.$pipelineId.'/jobs';
+        $url = $this->env('URL').'api/v4/projects/'.$projectId.'/pipelines/'.$pipelineId.'/jobs?per_page=100';
         return $this->get($url);
+    }
+    public function getProject(string $pathWithNamespace): ?array {
+        $url = $this->env('URL').'api/v4/projects/'.urlencode($pathWithNamespace);
+        return $this->get($url);
+    }
+    public function getEnvironments(int $projectId): ?array {
+        $url = $this->env('URL').'api/v4/projects/'.$projectId.'/environments?states=available&per_page=100';
+        return $this->get($url);
+    }
+    public function getLatestDeployment(int $projectId, string $environment): ?array {
+        $query = http_build_query(['environment' => $environment, 'status' => 'success', 'order_by' => 'id', 'sort' => 'desc', 'per_page' => 1]);
+        $url   = $this->env('URL').'api/v4/projects/'.$projectId.'/deployments?'.$query;
+        return $this->get($url)[0] ?? null;
+    }
+    public function retryJob(int $projectId, int $jobId): ?array {
+        $url = $this->env('URL').'api/v4/projects/'.$projectId.'/jobs/'.$jobId.'/retry';
+        return $this->post($url);
     }
     public function downloadTest() {
         $projectId = null; // Configure with your GitLab project ID

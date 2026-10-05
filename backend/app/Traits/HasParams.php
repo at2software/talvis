@@ -18,7 +18,6 @@ trait HasParams {
             $this->with = array_unique(array_merge($this->with ?? [], self::$WITH));
         }
     }
-
     public function floatParams() {
         return $this->hasMany(FloatParam::class, 'parent_id')->where('parent_type', $this::class);
     }
@@ -28,7 +27,6 @@ trait HasParams {
     public function textParams() {
         return $this->hasMany(TextParam::class, 'parent_id')->where('parent_type', $this::class);
     }
-
     public function latestFloatParams($orderBy = 'id') {
         return $this->floatParams()->pickLatestWithConditions('param_id', $this::class, $orderBy)->with('base');
     }

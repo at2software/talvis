@@ -49,7 +49,6 @@ class PdfTemplateController extends Controller {
         $r->file('logo')->move(public_path('pdf'), 'at2_logo.png');
         return ['success' => true, 'logoUrl' => asset(self::LOGO).'?t='.time()];
     }
-
     public function preview(Request $r) {
         $html = $r->input('html') ?: $this->read(self::FILES['html']);
         $css  = $r->input('css', '');
@@ -62,7 +61,6 @@ class PdfTemplateController extends Controller {
         $pdf = Pdf::loadHTML($html);
         return ['pdf' => base64_encode($pdf->output())];
     }
-
     private function read(string $rel): string {
         $path = public_path($rel);
         return file_exists($path) ? file_get_contents($path) : '';

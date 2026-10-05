@@ -117,10 +117,17 @@
                 <button type="button" title="Insert Image from Marketing Assets" (click)="openImageSelection()">
                     <i>collections</i>
                 </button>
+                <button type="button" title="Edit HTML code" [class.ql-active]="htmlMode()" (mousedown)="$event.preventDefault()" (click)="toggleHtmlMode()">
+                    <i>code</i>
+                </button>
             </span>
         </div>
         @if (editorReady()) {
-            <quill-editor [modules]="modules" [ngModel]="editorValue()" (ngModelChange)="editorValue.set($event)" [debounceTime]="300" (onEditorCreated)="onEditorCreated($event)"></quill-editor>
+            @if (htmlMode()) {
+                <textarea class="form-control font-monospace" rows="16" spellcheck="false" [ngModel]="editorValue()" (ngModelChange)="editorValue.set($event)"></textarea>
+            } @else {
+                <quill-editor [modules]="modules" [ngModel]="editorValue()" (ngModelChange)="editorValue.set($event)" [debounceTime]="300" (onEditorCreated)="onEditorCreated($event)"></quill-editor>
+            }
         }
     </div>
     <button type="button" class="btn btn-fancy btn-fancy-be" (click)="modal.close('Save click')" i18n="@@i18n.common.save">save</button>

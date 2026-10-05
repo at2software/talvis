@@ -21,6 +21,10 @@ class CompanyContactController extends Controller {
         return $company_contact;
     }
     public function store(Request $request) {
+        $request->validate([
+            'company_id' => 'required|integer|exists:companies,id',
+            'contact_id' => 'nullable|integer|exists:contacts,id',
+        ]);
         $new = new CompanyContact;
         $new->applyAndSave($request);
         $new->fresh();

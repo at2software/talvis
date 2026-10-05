@@ -97,23 +97,18 @@ class Company extends BaseModel {
     public function getUnpaidInvoiceValueAttribute() {
         return $this->invoicesUnpaid()->count();
     }
-
     public function getMlPredictedRevenue12mAttribute(): ?float {
         return $this->getFloatParam('ML_PREDICTED_REVENUE_12M');
     }
-
     public function getMlPredictedIntervalDaysAttribute(): ?float {
         return $this->getFloatParam('ML_PREDICTED_INTERVAL_DAYS');
     }
-
     public function getMlChurnProbability12mAttribute(): ?float {
         return $this->getFloatParam('ML_CHURN_PROBABILITY_12M');
     }
-
     public function getMlPredictedSupportHoursAttribute(): ?float {
         return $this->getFloatParam('ML_PREDICTED_SUPPORT_HOURS');
     }
-
     public function getMlPredictedNextPurchaseAtAttribute(): ?Carbon {
         $intervalDays = $this->ml_predicted_interval_days;
         if ($intervalDays === null) {
@@ -127,25 +122,20 @@ class Company extends BaseModel {
 
         return $lastInvoiceAt->copy()->addDays((int)round($intervalDays));
     }
-
     public function getLastInvoiceAtAttribute(): ?Carbon {
         return $this->latestInvoice?->created_at;
     }
-
     public function getAvgPaymentDelayDaysAttribute(): ?float {
         $avg = $this->invoices()->whereNotNull('paid_at')->avg(DB::raw('DATEDIFF(paid_at, due_at)'));
         return $avg === null ? null : (float)$avg;
     }
-
     public function getMlOverdueForContactAttribute(): bool {
         $predicted = $this->ml_predicted_next_purchase_at;
         return $predicted !== null && $predicted->isPast();
     }
-
     public function getMlPredictedNextPurchaseDateAttribute(): ?string {
         return $this->ml_predicted_next_purchase_at?->toDateString();
     }
-
     public function getFloatParam(string $key): ?float {
         $value = $this->param($key)->value;
         return $value === null ? null : (float)$value;
@@ -288,11 +278,9 @@ class Company extends BaseModel {
     public function getTimelineChartAttribute() {
         return (new FociTimelineQuery(fn () => $this->projectFoci()))->get();
     }
-
     public function isDraft(): bool {
         return ((int)$this->flags & self::FLAG_DRAFT) !== 0;
     }
-
     public function purgeDraft(): void {
         if (! $this->isDraft()) {
             return;
@@ -308,7 +296,6 @@ class Company extends BaseModel {
         }
         $this->delete();
     }
-
     public function createEmployee() {
         $contact = Contact::create(['vcard' => "FN:New Employee\nN:Employee;New;;;"]);
         return CompanyContact::create(['vcard' => "EMAIL:\nTEL;type=voice,work:\nTEL;type=cell,work:", 'company_id' => $this->id, 'contact_id' => $contact->id])->load('contact.companies');
@@ -358,11 +345,9 @@ class Company extends BaseModel {
     public function preparedInvoiceItems() {
         return $this->invoiceItems()->whereStage(0)->whereIn('type', [...Invoice::ITEMS_ADDING_TO_INVOICE, InvoiceItemType::Header])->whereInvoiceId(null)->oldest('position');
     }
-
     public function supportItems() {
         return $this->invoiceItems()->whereIn('stage', [0, 1])->whereIn('type', InvoiceItemType::TotalRemaining)->whereInvoiceId(null);
     }
-
     public static function scrapeWebpage(string $url, ?Company $original = null): string {
         NLog::info('ScrapeWebpage: Starting', ['url' => $url]);
 
@@ -466,7 +451,6 @@ class Company extends BaseModel {
         NLog::info('ScrapeWebpage: Final vcard generated', ['length' => strlen($vcard)]);
         return $vcard;
     }
-
     private static function optimizeVcard(string $vcard): string {
         $lines     = explode("\n", $vcard);
         $optimized = [];
@@ -518,7 +502,6 @@ class Company extends BaseModel {
         $result = preg_replace('/\n[\s\n]*\n/is', "\n", $result);
         return $result;
     }
-
     public function getWage($baseWage = null) {
         $baseWage || $baseWage = Param::get('HR_HOURLY_WAGE')->value;
         $discount              = $this->param('INVOICE_DISCOUNT')->value;

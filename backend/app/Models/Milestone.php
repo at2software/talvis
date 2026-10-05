@@ -14,8 +14,7 @@ class Milestone extends BaseModel {
     use HasTasksTrait;
     use SoftDeletes;
 
-    protected $touches = ['project'];
-
+    protected $touches  = ['project'];
     protected $fillable = [
         'name',
         'comments',

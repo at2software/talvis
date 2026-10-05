@@ -63,7 +63,6 @@ class CommandController extends Controller {
         }
         return $map;
     }
-
     public function execute(Request $request) {
         $data = $this->getBody();
 
@@ -104,7 +103,6 @@ class CommandController extends Controller {
             ], 500);
         }
     }
-
     public function show(Request $request, string $commandName) {
         if (! $this->isCommandAllowed($commandName)) {
             return response()->json(['error' => 'Command not allowed'], 403);
@@ -148,7 +146,6 @@ class CommandController extends Controller {
             return response()->json(['error' => $e->getMessage()], 404);
         }
     }
-
     private function isCommandAllowed(string $commandName): bool {
         $command = Artisan::all()[$commandName] ?? null;
         return $command && $this->isCustomCommand($command);

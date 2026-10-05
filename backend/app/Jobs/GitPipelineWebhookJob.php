@@ -22,6 +22,8 @@ class GitPipelineWebhookJob implements ShouldQueue {
     use Queueable;
     use SerializesModels;
 
+    public const VULN_SCAN_EXEMPT = 'vuln_scan_exempt';
+
     /**
      * @param Collection<int, PluginLink> $links
      * @param array{id: int, name: string, web_url: string} $project
@@ -40,12 +42,14 @@ class GitPipelineWebhookJob implements ShouldQueue {
             return;
         }
 
-        $emoji      = $this->emojiForStatus($this->objectAttributes['status']);
         $projectUrl = $this->project['web_url'];
         $ref        = $this->objectAttributes['ref'];
-        $message    = "[`$emoji ⎇ $ref`]($projectUrl): ";
+        $message    = "[{$this->statusLabel($this->objectAttributes['status'], "⎇ $ref")}]($projectUrl): ";
 
-        $message .= $this->pipelineJobList($this->builds, $projectUrl);
+        $builds     = collect($this->builds);
+        $vulnExempt = $builds->contains('name', self::VULN_SCAN_EXEMPT);
+
+        $message .= $this->pipelineJobList($builds->reject(fn (array $build) => $build['name'] === self::VULN_SCAN_EXEMPT)->values()->all(), $projectUrl);
 
         $cacheId                 = 'git_pipeline_'.$this->objectAttributes['id'];
         $props                   = $this->props($this->project['name']);
@@ -63,6 +67,13 @@ class GitPipelineWebhookJob implements ShouldQueue {
 
         if ($siblings->isEmpty()) {
             $this->notifyProjectManager("⚠️ **{$this->project['web_url']}** is building but has no chat channel configured.");
+        }
+
+        if (! $vulnExempt && ! $builds->contains('name', 'vuln_scan')) {
+            $this->notifyProjectManager(
+                "⚠️ **{$this->project['web_url']}** was pushed but the pipeline has no `vuln_scan` job configured.",
+                'git_vuln_scan_missing_'.$this->objectAttributes['id'],
+            );
         }
     }
 }

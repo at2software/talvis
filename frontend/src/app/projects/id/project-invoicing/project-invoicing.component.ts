@@ -35,11 +35,13 @@ import { QuoteAcceptanceSuggestionDto } from '@models/_core/api-response';
 import { MlReliabilityDirective } from '@directives/ml-reliability.directive';
 import { TInvoicing } from '@models/project/invoicing-type';
 import { AvatarComponent } from '@shards/avatar/avatar.component';
+import { SpinnerComponent } from '@shards/spinner/spinner.component';
+import { BusyService } from '@app/busy.service';
 
 @Component({
     changeDetection: ChangeDetectionStrategy.OnPush,
     selector: 'project-detail-quote',
-    imports: [AvatarComponent, FormsModule, DatePipe, DecimalPipe, PercentPipe, ToolbarComponent, InvoicePrepareWrapper, NComponent, NgbTooltipModule, NgbDropdownModule, SafePipe, MoneyPipe, MlReliabilityDirective],
+    imports: [AvatarComponent, FormsModule, DatePipe, DecimalPipe, PercentPipe, ToolbarComponent, InvoicePrepareWrapper, NComponent, NgbTooltipModule, NgbDropdownModule, SafePipe, MoneyPipe, MlReliabilityDirective, SpinnerComponent],
     templateUrl: './project-invoicing.component.html',
     styleUrl: './project-invoicing.component.scss',
 })
@@ -48,6 +50,7 @@ export class ProjectInvoicingComponent {
     #projectService = inject(ProjectService);
     #assignmentService = inject(AssignmentService);
     #global = inject(GlobalService);
+    #busy = inject(BusyService);
     #router = inject(Router);
     #toastService = inject(ToastService);
     #parent = inject(ProjectDetailGuard);
@@ -62,7 +65,7 @@ export class ProjectInvoicingComponent {
     currentBillingConsiderations = signal<BillingConsiderationDto[]>([]);
     budgetCurve: ProbabilityCurvePoint[] = [];
     timeMult: number = 1;
-    project = this.#parent.object();
+    get project() { return this.#parent.object(); }
 
     get global() { return this.#global; }
 
@@ -221,8 +224,16 @@ export class ProjectInvoicingComponent {
         const type = this.invoicingType();
         switch (type) {
             case 0:
-                this.#projectService.makePdf(project, PdfCreationType.Create, () => this.#parent.reload());
-                setTimeout(() => this.isCreatingInvoice.set(false), 500);
+                this.#busy.begin();
+                this.#projectService.makePdf(
+                    project,
+                    PdfCreationType.Create,
+                    () => this.#parent.reload(),
+                    () => {
+                        this.isCreatingInvoice.set(false);
+                        this.#busy.end();
+                    },
+                );
                 break;
             case 1:
             case 2:
@@ -282,6 +293,12 @@ export class ProjectInvoicingComponent {
         return p?.firstName ? `${p.salutation || ''} ${p.firstName} ${p.familyName || ''}`.trim()
                             : $localize`:@@i18n.project.selectCompanyContact:select company contact`;
     };
+
+    toggleQuoteDescription(key: string) {
+        const disabled = this.project.disabled_quote_sources ?? [];
+        const next = disabled.includes(key) ? disabled.filter((k) => k !== key) : [...disabled, key];
+        this.project.update({ disabled_quote_sources: next }).subscribe(() => this.#quoteDescriptions.reload());
+    }
 
     onChangePO() {
         const project = this.#parent.object();

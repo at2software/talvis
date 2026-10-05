@@ -49,7 +49,6 @@ class Authenticate extends Middleware {
             Auth::setUser($impersonated);
         }
     }
-
     protected function redirectTo($request): ?string {
         return null;
     }

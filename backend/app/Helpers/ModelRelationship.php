@@ -351,7 +351,6 @@ class ModelRelationship {
             ],
         ],
     ];
-
     public const ACCESSORS = [
         'companies' => [
             'name'                  => 'string',        // VcardTrait - shortcut to vcard.name

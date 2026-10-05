@@ -6809,6 +6809,12 @@
         <target>Firmenkontakt wählen</target>
       </segment>
     </unit>
+    <unit id="i18n.projects.setQuoteValidity">
+      <segment>
+        <source>Set quote validity in days</source>
+        <target>Bindefrist des Angebots in Tagen festlegen</target>
+      </segment>
+    </unit>
     <unit id="i18n.projects.setPaymentDuration">
       <segment>
         <source>Set payment duration in days</source>
@@ -9197,6 +9203,36 @@
       <segment>
         <source>monthly prepayment <ph id="0" equiv="index" disp="step.month_index"/> of <ph id="1" equiv="total" disp="step.months ?? 0"/> after project start</source>
         <target><ph id="0" equiv="index" disp="step.month_index"/>. von <ph id="1" equiv="total" disp="step.months ?? 0"/> monatlichen Vorauszahlungen nach Projektstart</target>
+      </segment>
+    </unit>
+    <unit id="i18n.payment.triggerYearlyOption">
+      <segment>
+        <source>yearly prepayments</source>
+        <target>jährliche Vorauszahlungen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.payment.years">
+      <segment>
+        <source>yr.</source>
+        <target>J.</target>
+      </segment>
+    </unit>
+    <unit id="i18n.payment.totalWarningAmount">
+      <segment>
+        <source>total: <ph id="0" equiv="INTERPOLATION" disp="{{ totalAmount | number: '1.2-2' }}"/> <ph id="1" equiv="INTERPOLATION_1" disp="{{ currency() }}"/> (must be <ph id="2" equiv="INTERPOLATION_2" disp="{{ net | number: '1.2-2' }}"/> <ph id="3" equiv="INTERPOLATION_1" disp="{{ currency() }}"/>)</source>
+        <target>Gesamt: <ph id="0" equiv="INTERPOLATION" disp="{{ totalAmount | number: '1.2-2' }}"/> <ph id="1" equiv="INTERPOLATION_1" disp="{{ currency() }}"/> (muss <ph id="2" equiv="INTERPOLATION_2" disp="{{ net | number: '1.2-2' }}"/> <ph id="3" equiv="INTERPOLATION_1" disp="{{ currency() }}"/> betragen)</target>
+      </segment>
+    </unit>
+    <unit id="i18n.payment.triggerYearly">
+      <segment>
+        <source><ph id="0" equiv="PH" disp="step.years ?? 0"/> yearly prepayments after project start</source>
+        <target><ph id="0" equiv="PH" disp="step.years ?? 0"/> jährliche Vorauszahlungen nach Projektstart</target>
+      </segment>
+    </unit>
+    <unit id="i18n.payment.triggerYearlyNth">
+      <segment>
+        <source>yearly prepayment <ph id="0" equiv="index" disp="step.year_index"/> of <ph id="1" equiv="total" disp="step.years ?? 0"/> after project start</source>
+        <target><ph id="0" equiv="index" disp="step.year_index"/>. von <ph id="1" equiv="total" disp="step.years ?? 0"/> jährlichen Vorauszahlungen nach Projektstart</target>
       </segment>
     </unit>
     <unit id="i18n.payment.stepPrepared">

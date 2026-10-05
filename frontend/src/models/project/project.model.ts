@@ -101,6 +101,7 @@ export class Project extends Serializable implements HasInvoiceItems, IHasFiles,
     lead_probability?: number;
     milestone_state_counts?: { todo: number; in_progress: number; done: number; total: number };
     quote_descriptions?: string[];
+    disabled_quote_sources: string[] | null = null;
     marker: number | null = null;
 
     readonly isOverdue               = computed(() => { const j = this.snapshotAsThis(); return j.state?.progress === ProjectState.ProgressRunning && !j.is_time_based && !j.is_internal && j.due_at ? dayjs(j.due_at).isBefore(dayjs()) : false; });

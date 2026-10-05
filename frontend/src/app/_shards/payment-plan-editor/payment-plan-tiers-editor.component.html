@@ -33,11 +33,18 @@
                     <option value="feature_complete" i18n="@@i18n.payment.triggerFeatureComplete">upon feature complete</option>
                     <option value="acceptance" i18n="@@i18n.payment.triggerAcceptance">upon acceptance</option>
                     <option value="monthly" i18n="@@i18n.payment.triggerMonthlyOption">monthly prepayments</option>
+                    <option value="yearly" i18n="@@i18n.payment.triggerYearlyOption">yearly prepayments</option>
                 </select>
                 @if (step.trigger === 'monthly') {
                     <div class="input-group" style="width: 120px; flex-shrink: 0">
                         <input [(ngModel)]="step.months" type="number" min="1" class="form-control text-end" placeholder="6" (change)="save()" />
                         <span class="input-group-text small" i18n="@@i18n.payment.months">mo.</span>
+                    </div>
+                }
+                @if (step.trigger === 'yearly') {
+                    <div class="input-group" style="width: 120px; flex-shrink: 0">
+                        <input [(ngModel)]="step.years" type="number" min="1" class="form-control text-end" placeholder="3" (change)="save()" />
+                        <span class="input-group-text small" i18n="@@i18n.payment.years">yr.</span>
                     </div>
                 }
                 <button class="btn btn-sm btn-plain p-0 text-danger" (click)="removeStep(tier, j); save()" tabindex="0"><i>close</i></button>

@@ -37,8 +37,7 @@ use Rubix\ML\Transformers\ZScaleStandardizer;
  */
 class ProjectQuoteModel {
     private const MODEL_PATH = 'ml/project_quote_acceptance.rbx';
-
-    public const ACCEPTED = 1;
+    public const ACCEPTED    = 1;
 
     /** @return array<string, callable(): Learner> */
     public static function candidates(): array {
@@ -69,7 +68,6 @@ class ProjectQuoteModel {
             (float)$row['company_prior_decided_count'],
         ];
     }
-
     public static function label(array $row): string {
         return (string)$row[ProjectQuoteDataset::LABEL];
     }
@@ -202,7 +200,6 @@ class ProjectQuoteModel {
 
         return $model;
     }
-
     public static function load(): ?PersistentModel {
         $path = storage_path('app/'.self::MODEL_PATH);
         if (! is_file($path)) {
@@ -210,7 +207,6 @@ class ProjectQuoteModel {
         }
         return PersistentModel::load(new Filesystem($path));
     }
-
     public static function probaForRow(array $row): ?float {
         return self::probaForRows([$row])[0] ?? null;
     }

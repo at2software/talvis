@@ -32,7 +32,7 @@
                     <ul class="dropdown-menu" ngbDropdownMenu (mouseleave)="dropdown.close()">
                         @for (p of _project.companys_active_projects; track 'activeProject:' + p.id) {
                             <li>
-                                <a class="dropdown-item hstack gap-2" [routerLink]="['/projects', p.id]">
+                                <a class="dropdown-item hstack gap-2 cursor-pointer" (click)="openProject(p)" (keyup.enter)="openProject(p)" tabindex="0">
                                     <project [project]="p" [noRouting]="true"></project>
                                     <span>{{ p.name }}</span>
                                 </a>

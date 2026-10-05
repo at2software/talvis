@@ -35,11 +35,9 @@ trait PrecomputedTrait {
             }
         }
     }
-
     public function getPrecomputedAttributes() {
         return array_filter(array_keys($this->casts), fn ($key) => is_a($this->casts[$key], Precomputed::class, true));
     }
-
     public function resetPrecomputedAttributes() {
         if ($this->isPropagating || ! PropagationState::$isPropagating) {
             return;

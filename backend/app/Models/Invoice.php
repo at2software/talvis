@@ -133,8 +133,8 @@ class Invoice extends BaseModel {
     public static function getCurrentInvoiceNumber($offset = 0) {
         $prefix  = Param::get('INVOICE_NO_PREFIX')->value;
         $suffix  = Param::get('INVOICE_NO_SUFFIX')->value;
-        $number  = Param::get('INVOICE_NO_DIGITS')->value;
-        $current = (string)(Param::get('INVOICE_NO_CURRENT'))->value + $offset;
+        $number  = (int)Param::get('INVOICE_NO_DIGITS')->value;
+        $current = (string)((int)Param::get('INVOICE_NO_CURRENT')->value + $offset);
         while (strlen($current) < $number) {
             $current = '0'.$current;
         }
@@ -231,7 +231,6 @@ class Invoice extends BaseModel {
         $company->propagateDirty();
         return response($zugferdPdf)->withHeaders(File::headers($filename, 'application/pdf'));
     }
-
     private static function makeDraftInvoiceFor($items, string $prefix, string $suffix, Company $company, string $documentType, ?Project $project) {
         [$pdf, $filename] = app(InvoicePdfService::class)->generateInvoicePdf(
             $items,
@@ -246,7 +245,6 @@ class Invoice extends BaseModel {
         );
         return response($pdf)->withHeaders(File::headers($filename, 'application/pdf'));
     }
-
     private static function extractContext($entity): array {
         if ($entity instanceof Project) {
             $project = $entity;

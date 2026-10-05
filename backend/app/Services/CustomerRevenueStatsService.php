@@ -110,7 +110,6 @@ class CustomerRevenueStatsService {
             'points' => $points,
         ];
     }
-
     private static function resolveRootGroup(int $groupId, Collection $allGroups): ?object {
         $current = $allGroups->get($groupId);
         if (! $current) {
@@ -126,7 +125,6 @@ class CustomerRevenueStatsService {
         }
         return $current;
     }
-
     private static function categorizeRevenue(
         Company $company,
         $earliestInvoice,
@@ -192,7 +190,6 @@ class CustomerRevenueStatsService {
             'initial_group_color' => $initialRootGroup?->color,
         ];
     }
-
     private static function computeXAxis(
         Company $company,
         string $xAxis,
@@ -215,7 +212,6 @@ class CustomerRevenueStatsService {
             default             => null,
         };
     }
-
     private static function crossSellRatio(
         Collection $companyItems,
         array $rootGroupMap,

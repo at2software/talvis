@@ -18,7 +18,6 @@ class CapturingSapiTest extends TestCase {
 
         $this->assertSame('', $leaked);
     }
-
     public function test_a_full_server_run_leaves_the_response_on_the_server(): void {
         $server               = new DAV\Server([], new CapturingSapi);
         $server->httpRequest  = new SabreRequest('OPTIONS', '/');
@@ -31,7 +30,6 @@ class CapturingSapiTest extends TestCase {
         $this->assertSame('', $leaked);
         $this->assertSame(200, $server->httpResponse->getStatus());
     }
-
     public function test_to_laravel_response_carries_status_headers_and_body(): void {
         $response = CapturingSapi::toLaravelResponse(
             new SabreResponse(207, ['Content-Type' => 'application/xml'], '<d:multistatus/>')
@@ -41,7 +39,6 @@ class CapturingSapiTest extends TestCase {
         $this->assertSame('application/xml', $response->headers->get('Content-Type'));
         $this->assertSame('<d:multistatus/>', $response->getContent());
     }
-
     public function test_to_laravel_response_reads_a_stream_body(): void {
         $stream = fopen('php://memory', 'r+');
         fwrite($stream, 'BEGIN:VCALENDAR');

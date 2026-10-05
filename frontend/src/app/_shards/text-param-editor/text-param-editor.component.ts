@@ -62,6 +62,7 @@ export class TextParamEditorComponent {
     currentFormality = signal('formal');
     i18nVariants = signal<I18nVariant[]>([]);
     editorValue = signal('');
+    htmlMode = signal(false);
 
     readonly editorReady = signal(false);
 
@@ -152,6 +153,7 @@ export class TextParamEditorComponent {
     open(content: TemplateRef<unknown>) {
         this.editorValue.set(this.isLocalized() ? this.#getCurrentVariantText() : ((this.param()?.value as string) ?? ''));
         this.editorReady.set(false);
+        this.htmlMode.set(false);
         afterNextRender(() => this.editorReady.set(true), { injector: this.#injector });
 
         this.#modalService.open(content, { size: 'lg' }).result.then(() => {
@@ -282,6 +284,11 @@ export class TextParamEditorComponent {
         const range = this.#quill.getSelection() ?? { index: this.#quill.getLength(), length: 0 };
         this.#quill.insertEmbed(range.index, 'image', url, 'user');
         this.#quill.setSelection(range.index + 1, 0);
+    }
+
+    toggleHtmlMode() {
+        if (!this.htmlMode() && this.#quill) this.editorValue.set(this.#quill.getSemanticHTML());
+        this.htmlMode.update((v) => !v);
     }
 
     toggleExpanded() {

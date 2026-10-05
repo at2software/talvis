@@ -49,8 +49,7 @@ class CustomerRevenueDataset {
     public const LABEL = 'revenue_next_12m';
 
     public const LABEL_WINDOW_MONTHS = 12;
-
-    public const MIN_PRIOR_INVOICES = 2;
+    public const MIN_PRIOR_INVOICES  = 2;
 
     /**
      * @return Collection<int, Company>

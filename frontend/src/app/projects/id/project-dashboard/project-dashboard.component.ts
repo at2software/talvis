@@ -21,6 +21,7 @@ import { PermissionsDirective } from '@directives/permissions.directive';
 import { CollapsibleDirective } from '@directives/collapsible.directive';
 import { ListGroupItemContactComponent } from '@app/customers/_shards/list-group-item-contact/list-group-item-contact.component';
 import { ProjectDefaultProductComponent } from '@app/projects/_shards/project-default-product/project-default-product.component';
+import { ProjectQuoteValidityComponent } from '@app/projects/_shards/project-quote-validity/project-quote-validity.component';
 import { ProjectPlanningComponent } from '@app/projects/id/project-planning/project-planning.component';
 import { RteComponent } from '@shards/rte/rte.component';
 import { ProjectInfoComponent } from '@app/projects/_shards/project-info/project-info.component';
@@ -45,7 +46,7 @@ import { AvatarComponent } from '@shards/avatar/avatar.component';
     templateUrl: './project-dashboard.component.html',
     styleUrls: ['./project-dashboard.component.scss'],
     providers: [{ provide: NgbDateAdapter, useClass: NgbDateCarbonAdapter }],
-    imports: [AvatarComponent, DatePipe, NgTemplateOutlet, PermissionsDirective, CollapsibleDirective, ListGroupItemContactComponent, Nx, NComponent, NgbTooltipModule, ProjectDefaultProductComponent, ParentProjectSelectorComponent, ProjectPlanningComponent, RteComponent, WorkloadTimelineChartComponent, MediaPreviewComponent, ProjectInfoComponent, ProjectFeaturesListComponent, ProjectTeamPlanningComponent, NgbDatepickerModule, FormsModule, AutosaveDirective, NgbDropdownModule, RouterLink],
+    imports: [AvatarComponent, DatePipe, NgTemplateOutlet, PermissionsDirective, CollapsibleDirective, ListGroupItemContactComponent, Nx, NComponent, NgbTooltipModule, ProjectDefaultProductComponent, ProjectQuoteValidityComponent, ParentProjectSelectorComponent, ProjectPlanningComponent, RteComponent, WorkloadTimelineChartComponent, MediaPreviewComponent, ProjectInfoComponent, ProjectFeaturesListComponent, ProjectTeamPlanningComponent, NgbDatepickerModule, FormsModule, AutosaveDirective, NgbDropdownModule, RouterLink],
 })
 export class ProjectDashboardComponent {
     #assignmentService  = inject(AssignmentService);

@@ -2,10 +2,8 @@
 @let _checking = checking();
 @let _error = error();
 @let _selectedCompany = selectedCompany();
-@let _branch = branch();
 @let _creating = creating();
-@let _stages = stages();
-@let _selectedList = selectedList();
+@let _candidates = candidates();
 @let _isCustomCron = isCustomCron();
 <div class="modal-header">
     <span class="modal-title" i18n="@@i18n.invoices.addAuditPipeline">add audit pipeline</span>
@@ -44,36 +42,49 @@
         }
     </div>
 
-    @if (checkedProject(); as project) {
+    @if (_candidates; as candidates) {
         <div class="d-flex align-items-center gap-2 mb-4 p-2 border rounded">
             <n class="text-primary">git</n>
             <div>
-                <div class="fw-semibold text-white">{{ project.name }}</div>
-                <small class="text-muted">{{ project.path_with_namespace }}</small>
+                <div class="fw-semibold text-white">{{ candidates.project.name }}</div>
+                <small class="text-muted">{{ candidates.project.path_with_namespace }}</small>
             </div>
         </div>
 
         <div class="mb-3">
-            <label for="pipelineBranch" class="form-label text-muted small" i18n="@@i18n.common.branch">branch</label>
-            <input id="pipelineBranch" class="form-control" [ngModel]="_branch" (ngModelChange)="branch.set($event)" />
+            <label for="auditEnvironment" class="form-label text-muted small">environment</label>
+            @if (candidates.environments.length) {
+                <select id="auditEnvironment" class="form-select" [ngModel]="candidates.environment" (ngModelChange)="check($event)" [disabled]="_checking">
+                    @for (env of candidates.environments; track env) {
+                        <option [value]="env">{{ env }}</option>
+                    }
+                </select>
+            } @else {
+                <div class="text-warning small">No environments found – the deploy job needs an <code>environment:</code> so its deployments can be audited.</div>
+            }
         </div>
 
-        @if (_stages.length) {
+        @if (!candidates.deployment) {
+            <div class="text-warning small mb-3">No successful deployment to {{ candidates.environment }} found.</div>
+        } @else if (candidates.deployment; as deployment) {
             <div class="mb-3">
-                <div class="form-label text-muted small" i18n="@@i18n.invoices.jobsFromGitlabCi">jobs from .gitlab-ci.yml</div>
-                <ul class="list-group">
-                    @for (stage of _stages; track stage) {
-                        <li class="list-group-item">
-                            <label class="d-flex align-items-center gap-2 mb-0 cursor-pointer">
-                                <input type="checkbox" class="form-check-input" [ngModel]="selectedStages()[stage]" (ngModelChange)="setStage(stage, $event)" />
-                                <span>{{ stage }}</span>
-                            </label>
-                        </li>
-                    }
-                </ul>
+                <div class="form-label text-muted small">audit jobs of pipeline #{{ deployment.deployable.pipeline.id }} <span class="text-muted">({{ deployment.ref }} · {{ deployment.sha.slice(0, 8) }})</span></div>
+                @if (candidates.jobs.length) {
+                    <ul class="list-group">
+                        @for (job of candidates.jobs; track job.id) {
+                            <li class="list-group-item">
+                                <label class="d-flex align-items-center gap-2 mb-0 cursor-pointer">
+                                    <input type="checkbox" class="form-check-input" [ngModel]="selectedJobs()[job.name]" (ngModelChange)="setJob(job.name, $event)" />
+                                    <span class="flex-fill">{{ job.name }}</span>
+                                    <small class="text-muted">{{ job.status }}</small>
+                                </label>
+                            </li>
+                        }
+                    </ul>
+                } @else {
+                    <div class="text-warning small">No audit jobs found in this pipeline.</div>
+                }
             </div>
-        } @else {
-            <div class="text-warning small mb-3" i18n="@@i18n.invoices.noJobsFound">No jobs found in .gitlab-ci.yml.</div>
         }
 
         <div class="mb-2">
@@ -99,10 +110,6 @@
         @if (_creating) {
             <spinner [size]="20" [inline]="true" class="me-1"></spinner>
         }
-        @if (_selectedList.length) {
-            add {{ _selectedList.length }} schedule{{ _selectedList.length !== 1 ? 's' : '' }}
-        } @else {
-            <ng-container i18n="@@i18n.invoices.addSchedules">add schedules</ng-container>
-        }
+        <ng-container>add audit</ng-container>
     </button>
 </div>

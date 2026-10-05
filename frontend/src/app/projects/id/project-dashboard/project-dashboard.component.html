@@ -71,6 +71,10 @@
 
                 <project-default-product [project]="_project"></project-default-product>
 
+                @if (_project.state.isPrepared()) {
+                <project-quote-validity [project]="_project"></project-quote-validity>
+                }
+
                 @if (!_project.is_internal && _project.company.requires_po) {
                 <li class="list-group-item hstack gap-2" roles="project_manager">
                     <div class="input-group">

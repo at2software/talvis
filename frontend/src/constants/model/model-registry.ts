@@ -31,7 +31,6 @@ import { Focus } from '@models/focus/focus.model';
 import { Framework } from '@models/project/framework.model';
 import { FrameworkLatest } from '@models/project/framework-latest.model';
 import { GitlabAuditProject } from '@models/gitlab-audit/gitlab-audit-project.model';
-import { GitlabSchedule } from '@models/gitlab-audit/gitlab-schedule.model';
 import { Invoice } from '@models/invoice/invoice.model';
 import { InvoiceItem } from '@models/invoice/invoice-item.model';
 import { InvoiceReminder } from '@models/invoice/invoice-reminder.model';
@@ -89,7 +88,6 @@ export const MODEL_REGISTRY: Record<string, any> = {
     'Framework': Framework,
     'FrameworkLatest': FrameworkLatest,
     'GitlabAuditProject': GitlabAuditProject,
-    'GitlabSchedule': GitlabSchedule,
     'Invoice': Invoice,
     'InvoiceItem': InvoiceItem,
     'InvoiceReminder': InvoiceReminder,

@@ -1,6 +1,6 @@
 <nx-contextmenu></nx-contextmenu>
 
-@if (navigating()) {
+@if (loading()) {
     <div class="route-loading" role="status" aria-live="polite">
         <spinner [size]="64" />
         <span class="visually-hidden" i18n="@@i18n.common.loading">loading</span>

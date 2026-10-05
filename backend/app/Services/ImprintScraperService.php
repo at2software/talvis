@@ -148,7 +148,6 @@ class ImprintScraperService {
         imagecopyresampled($dst_img, $src_img, $offsetX, $offsetY, 0, 0, $newWidth, $newHeight, $x, $y);
         return $dst_img;
     }
-
     private function detectBackgroundColor(\GdImage $img): array {
         $width  = imagesx($img);
         $height = imagesy($img);
@@ -197,7 +196,6 @@ class ImprintScraperService {
 
         return ['r' => 255, 'g' => 255, 'b' => 255];
     }
-
     private function autoCropImage(\GdImage $img, float $maxPaddingPercent = 0.05): \GdImage {
         $width  = imagesx($img);
         $height = imagesy($img);
@@ -234,7 +232,6 @@ class ImprintScraperService {
         imagecopy($cropped, $img, 0, 0, $cropLeft, $cropTop, $cropWidth, $cropHeight);
         return $cropped;
     }
-
     private function findContentBoundary(\GdImage $img, string $direction, array $bgColor, int $tolerance): int {
         $width  = imagesx($img);
         $height = imagesy($img);
@@ -292,7 +289,6 @@ class ImprintScraperService {
         }
         return 0;
     }
-
     private function getMaximumImageSizeFor($logos, string $sizeAttr = 'sizes'): ?string {
         $maxSize = 0;
         $maxUrl  = null;
@@ -463,7 +459,6 @@ class ImprintScraperService {
         $this->emitJson($rv);
         return $rv;
     }
-
     private function extractFromPageContent(string $response, string $url, array &$rv, ?string $existingVcard, array $schemaData = []): void {
         $this->log('<fg=yellow>🔎 Extracting contact information...</>');
 
@@ -482,7 +477,7 @@ class ImprintScraperService {
         $existingData = $this->parseExistingVcard($existingVcard);
 
         if (! empty($schemaData['address'])) {
-            $addr = $schemaData['address'];
+            $addr        = $schemaData['address'];
             $countryCode = 'DE'; // default
             if (! empty($addr['country'])) {
                 $countryMap  = ['Germany' => 'DE', 'United Kingdom' => 'GB', 'UK' => 'GB', 'United States' => 'US', 'USA' => 'US'];
@@ -593,7 +588,6 @@ class ImprintScraperService {
             $this->log('<fg=green>✓</> Found '.count($rv['SOCIAL_MEDIA']).' social media link(s) total');
         }
     }
-
     private function isWebmasterAddress(string $text): bool {
         $text = strtolower($text);
 
@@ -630,7 +624,6 @@ class ImprintScraperService {
         }
         return false;
     }
-
     private function isAddressDuplicate(array $newAddress, array $existingAddresses): bool {
         foreach ($existingAddresses as $existing) {
             if (strcasecmp($newAddress[2], $existing[2]) === 0 &&  // street address
@@ -641,7 +634,6 @@ class ImprintScraperService {
         }
         return false;
     }
-
     private function parseExistingVcard(?string $vcard): array {
         if (empty($vcard)) {
             return ['TEL' => [], 'EMAIL' => []];
@@ -660,7 +652,6 @@ class ImprintScraperService {
         }
         return $existing;
     }
-
     private function determineCountryContext(string $url, array $addresses = [], array $schemaData = []): string {
         $config = config('imprint');
 
@@ -695,7 +686,6 @@ class ImprintScraperService {
         }
         return $config['default_country'];
     }
-
     private function mapCountryNameToCode(string $countryName): ?string {
         $countryName = strtolower(trim($countryName));
 
@@ -798,7 +788,6 @@ class ImprintScraperService {
         }
         return $countryMap[$countryName] ?? null;
     }
-
     private function extractEmails(string $text, array $existingEmails = []): array {
         $emails  = [];
         $pattern = '/\b([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})\b/';
@@ -835,7 +824,6 @@ class ImprintScraperService {
         }
         return $emails;
     }
-
     private function extractPhoneNumbers(string $text, string $countryContext = 'DE', array $existingNumbers = []): array {
         $phoneNumbers = [];
 
@@ -893,7 +881,6 @@ class ImprintScraperService {
         }
         return $phoneNumbers;
     }
-
     private function detectPhoneType(string $phoneNumber): string {
         $digits = preg_replace('/[^\d]/', '', $phoneNumber);
 
@@ -903,7 +890,6 @@ class ImprintScraperService {
 
         return 'phone';
     }
-
     private function isPhoneNumberDuplicate(string $number, array $existingNumbers): bool {
         $normalized = preg_replace('/[^\d]/', '', $number);
 
@@ -993,23 +979,18 @@ class ImprintScraperService {
         if (strlen($number) >= 8) {
             if (in_array(substr($number, 0, 3), ['030', '040', '089', '069', '221', '211', '228', '231', '241'])) {
                 return substr($number, 0, 3).' '.$this->formatPhoneNumberPart(substr($number, 3));
-            }
-            elseif (strlen($number) >= 9 && $this->isValidGermanAreaCode(substr($number, 0, 4))) {
+            } elseif (strlen($number) >= 9 && $this->isValidGermanAreaCode(substr($number, 0, 4))) {
                 return substr($number, 0, 4).' '.$this->formatPhoneNumberPart(substr($number, 4));
-            }
-            elseif (strlen($number) >= 10 && $this->isValidGermanAreaCode(substr($number, 0, 5))) {
+            } elseif (strlen($number) >= 10 && $this->isValidGermanAreaCode(substr($number, 0, 5))) {
                 return substr($number, 0, 5).' '.$this->formatPhoneNumberPart(substr($number, 5));
-            }
-            elseif (strlen($number) >= 8 && in_array(substr($number, 0, 2), ['30', '40', '89', '69'])) {
+            } elseif (strlen($number) >= 8 && in_array(substr($number, 0, 2), ['30', '40', '89', '69'])) {
                 return substr($number, 0, 2).' '.$this->formatPhoneNumberPart(substr($number, 2));
-            }
-            else {
+            } else {
                 return substr($number, 0, 3).' '.$this->formatPhoneNumberPart(substr($number, 3));
             }
         }
         return $number;
     }
-
     private function isValidGermanAreaCode(string $code): bool {
         $common4DigitCodes = [
             '2171', '2173', '2174', '2175', '2181', '2182', '2183', '2191', '2192',
@@ -1025,7 +1006,6 @@ class ImprintScraperService {
         ];
         return in_array($code, $common4DigitCodes) || in_array($code, $common5DigitCodes);
     }
-
     private function formatPhoneNumberPart(string $numberPart): string {
         if (strlen($numberPart) > 8) {
             return preg_replace('/(\d{4})(\d{4})(.*)/', '$1 $2$3', $numberPart);
@@ -1035,7 +1015,6 @@ class ImprintScraperService {
         }
         return $numberPart;
     }
-
     private function formatInternationalNumber(string $number): string {
         return $this->formatPhoneNumberPart($number);
     }
@@ -1177,7 +1156,6 @@ class ImprintScraperService {
         }
         return null;
     }
-
     private function extractSchemaOrgData(DOMDocument $doc, DOMXPath $xpath): array {
         $data = [
             'name'        => null,
@@ -1268,7 +1246,6 @@ class ImprintScraperService {
         }
         return $data;
     }
-
     private function extractCompanyName(DOMDocument $doc, DOMXPath $xpath): ?string {
         $schemaData = $this->extractSchemaOrgData($doc, $xpath);
         if ($schemaData['name']) {
@@ -1289,7 +1266,7 @@ class ImprintScraperService {
         $title = $xpath->query('//title');
         if ($title->length > 0 && $title->item(0)) {
             $titleText = $title->item(0)->textContent;
-            $parts = preg_split('/[\-\|–—]/', $titleText);
+            $parts     = preg_split('/[\-\|–—]/', $titleText);
             if (count($parts) > 0) {
                 $name = trim($parts[0]);
                 if (strlen($name) > 2 && strlen($name) < 100 && preg_match('/[a-zA-Z]{2,}/', $name)) {
@@ -1307,7 +1284,6 @@ class ImprintScraperService {
         }
         return null;
     }
-
     private function extractSocialMediaUrls(string $html): array {
         $socialMedia = [];
         $platforms   = [
@@ -1331,7 +1307,6 @@ class ImprintScraperService {
         }
         return $socialMedia;
     }
-
     private function extractGermanAddresses(string $response, array &$rv): void {
         $regex = '\\n(?:D-)?(\\d{5})\\s+([^\\n]*?)\\n';
         $regex = str_repeat('\\n([^\\n]*?)', self::EMPTY_LINES_BEFORE).$regex;
@@ -1365,7 +1340,6 @@ class ImprintScraperService {
             }
         }
     }
-
     private function extractUkAddresses(string $response, array &$rv): void {
         $regex = '([A-Z]{1,2}\\d{1,2}[A-Z]?\\s*\\d[A-Z]{2})';
 
@@ -1451,7 +1425,6 @@ class ImprintScraperService {
             }
         }
     }
-
     private function extractUsAddresses(string $response, array &$rv): void {
         $regex = '\\n([A-Z]{2})\\s+(\\d{5}(?:-\\d{4})?)\\s*\\n';
         $regex = str_repeat('\\n([^\\n]*?)', 3).$regex;
@@ -1511,7 +1484,6 @@ class ImprintScraperService {
         }
         return false;
     }
-
     private function emitJson(array $payload): void {
         $json = json_encode($payload);
 
@@ -1522,7 +1494,6 @@ class ImprintScraperService {
 
         file_put_contents('php://stdout', $json.PHP_EOL);
     }
-
     private function log(string $message): void {
         $message = preg_replace('/<fg=\w+>|<\/>/', '', $message);
         file_put_contents('php://stderr', $message.PHP_EOL);

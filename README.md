@@ -23,6 +23,7 @@ TALVIS combines CRM, project management, invoicing, time tracking, HR, marketing
 | **AI Insights** | Machine-learning predictions — customer churn, revenue forecasts, project overrun risk |
 | **Sentinels** | Visual no-code automation — triggers, conditions, commands |
 | **Uptime Monitoring** | HTTP health checks with alerting via email and team chat |
+| **Security Audits** | Scheduled re-runs of the dependency, container and SAST scan jobs of each deployed GitLab pipeline, reported to team chat |
 | **Calendar** | CalDAV and CardDAV protocol support for universal device sync |
 
 ---

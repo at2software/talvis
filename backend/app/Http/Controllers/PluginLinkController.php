@@ -17,6 +17,7 @@ class PluginLinkController extends Controller {
         return PluginLink::create($data);
     }
     public function createPluginLinkWithChannel(Project $project) {
+        request()->validate(['type' => 'required|string', 'url' => 'required|string']);
         $data = (array)$this->getBody();
 
         $chatController = PluginController::getByKey($data['type'], PluginChatController::class);

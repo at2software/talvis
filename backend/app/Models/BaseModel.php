@@ -69,6 +69,9 @@ class BaseModel extends Model {
             return null;
         }
         $className = 'App\\Models\\'.Str::studly(Str::singular($parts[0]));
+        if (! is_subclass_of($className, Model::class)) {
+            return null;
+        }
         return $className::find($parts[1]);
     }
 }

@@ -138,7 +138,7 @@ return [
     // Must be the key Reverb registers its app under - config/reverb.php reads PUSHER_APP_KEY.
     // No fallback on purpose: a wrong key looks identical to a working one until the socket
     // is already open and Reverb answers 4001 "Application does not exist".
-    'reverb_key'  => env('PUSHER_APP_KEY', env('REVERB_APP_KEY')),
+    'reverb_key'   => env('PUSHER_APP_KEY', env('REVERB_APP_KEY')),
     'talvis_debug' => (bool)env('TALVIS_DEBUG', false),
 
     'cipher' => 'AES-256-CBC',

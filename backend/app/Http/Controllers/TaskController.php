@@ -69,7 +69,7 @@ class TaskController extends Controller {
         ])->load('assignee');
     }
     public function removeCoAssignee(Request $request, Task $task, Assignment $assignment) {
-        abort_unless($assignment->parent_type === Task::class && (int) $assignment->parent_id === (int) $task->id && ($assignment->flags & Assignment::FLAG_CO_ASSIGNEE), 404);
+        abort_unless($assignment->parent_type === Task::class && (int)$assignment->parent_id === (int)$task->id && ($assignment->flags & Assignment::FLAG_CO_ASSIGNEE), 404);
         $assignment->delete();
     }
 }

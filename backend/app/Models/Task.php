@@ -13,7 +13,6 @@ class Task extends BaseModel {
     protected function casts(): array {
         return ['status' => TaskState::class];
     }
-
     public function parent() {
         return $this->morphTo();
     }

@@ -67,21 +67,36 @@ trait HasPaymentPlanTrait {
             ->oldest('id')
             ->get();
     }
+    public function planStepTotal(array $step, float $net): float {
+        if (isset($step['amount'])) {
+            return (float)$step['amount'] * $this->planStepRepeats($step);
+        }
+        return $net * (float)($step['percentage'] ?? 0) / 100;
+    }
+    public function planStepRepeats(array $step): int {
+        $repeats = match ($step['trigger'] ?? '') {
+            'monthly' => (int)($step['months'] ?? 0),
+            'yearly'  => (int)($step['years'] ?? 0),
+            default   => 0,
+        };
+        return max(1, $repeats);
+    }
     private function expandPlanSteps(array $steps, float $net): array {
         $expanded = [];
         foreach ($steps as $step) {
-            $percentage = (float)($step['percentage'] ?? 0);
-            $trigger    = $step['trigger'] ?? '';
-            $months     = (int)($step['months'] ?? 0);
-            $total      = $net * $percentage / 100;
-            $count      = $trigger === 'monthly' && $months > 0 ? $months : 1;
+            $trigger = $step['trigger'] ?? '';
+            $total   = $this->planStepTotal($step, $net);
+            $count   = $this->planStepRepeats($step);
+            $share   = $net > 0 ? $total / $net * 100 : 0;
 
             for ($i = 1; $i <= $count; $i++) {
                 $expanded[] = [
                     'trigger'     => $trigger,
-                    'percentage'  => round($percentage / $count, 4),
-                    'months'      => $count > 1 ? $months : null,
-                    'month_index' => $count > 1 ? $i : null,
+                    'percentage'  => round($share / $count, 4),
+                    'months'      => $trigger === 'monthly' && $count > 1 ? $count : null,
+                    'month_index' => $trigger === 'monthly' && $count > 1 ? $i : null,
+                    'years'       => $trigger === 'yearly' && $count > 1 ? $count : null,
+                    'year_index'  => $trigger === 'yearly' && $count > 1 ? $i : null,
                     'amount'      => round($total / $count, 2),
                     'status'      => 'open',
                     'item'        => null,
@@ -125,7 +140,7 @@ trait HasPaymentPlanTrait {
         ];
     }
     private function sortPlanSteps(array $steps): array {
-        $order = ['project_start' => 0, 'monthly' => 1, 'feature_complete' => 2, 'acceptance' => 3];
+        $order = ['project_start' => 0, 'monthly' => 1, 'yearly' => 2, 'feature_complete' => 3, 'acceptance' => 4];
         usort($steps, fn ($a, $b) => ($order[$a['trigger'] ?? ''] ?? 99) <=> ($order[$b['trigger'] ?? ''] ?? 99));
         return $steps;
     }

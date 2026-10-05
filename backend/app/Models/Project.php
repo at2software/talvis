@@ -88,7 +88,7 @@ class Project extends BaseModel {
     protected $with            = ['latestStateRelation', 'company'];
     protected $hidden          = ['latestStateRelation'];
     protected $eagerLoadParams = true;
-    protected $fillable        = ['company_id', 'name', 'description', 'project_id', 'product_id', 'remind_at', 'due_at', 'deadline_at', 'lead_probability', 'project_manager_id', 'no_git_required', 'po_number', 'is_time_based', 'is_internal', 'individual_wage'];
+    protected $fillable        = ['company_id', 'name', 'description', 'project_id', 'product_id', 'remind_at', 'due_at', 'deadline_at', 'lead_probability', 'project_manager_id', 'no_git_required', 'po_number', 'is_time_based', 'is_internal', 'individual_wage', 'disabled_quote_sources'];
 
     protected function casts(): array {
         return [
@@ -103,6 +103,7 @@ class Project extends BaseModel {
             'decision_at'              => 'date',
             'is_ignored_from_prepared' => 'boolean',
             'no_git_required'          => 'boolean',
+            'disabled_quote_sources'   => 'array',
             'ml_predicted_hours'       => 'float',
             'ml_predicted_at'          => 'datetime',
         ];
@@ -225,14 +226,12 @@ class Project extends BaseModel {
         $w = $this->work_estimated;
         return $w > 0 ? $this->hours_invested / $w : 0;
     }
-
     public function getMlOverrunRatioAttribute(): ?float {
         if ($this->ml_predicted_hours === null || ! $this->work_estimated) {
             return null;
         }
         return $this->ml_predicted_hours / $this->work_estimated;
     }
-
     protected function hasTimeBudget(): Attribute {
         return Attribute::make(
             get: fn () => $this->hasTimeBudgetLogic()

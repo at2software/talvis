@@ -10,7 +10,6 @@
  * Usage: php deploy/reverb-health.php [host] [port]
  * Exits 0 when healthy, 1 otherwise.
  */
-
 $root = dirname(__DIR__);
 $host = $argv[1] ?? '127.0.0.1';
 $port = (int)($argv[2] ?? 6001);

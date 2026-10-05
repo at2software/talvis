@@ -13,7 +13,7 @@
     <div class="col-12 col-md-9">
         @if (isLoaded() && registers().length === 0) {
             <div class="card">
-                <empty-state [card]="false" class="invoices" i18n-title="@@i18n.invoices.noCashRegistersYet" title="No cash registers yet">
+                <empty-state [card]="false" class="cash-register" i18n-title="@@i18n.invoices.noCashRegistersYet" title="No cash registers yet">
                     <p i18n="@@i18n.invoices.cashRegistersEmptyDescription">Set up your first cash register to start tracking point-of-sale transactions with precision.</p>
                 </empty-state>
             </div>

@@ -40,7 +40,6 @@ class FociTimelineQueryTest extends TestCase {
         self::assertSame(5.0, $bobPeriods['2025-06-01']['value']);
         self::assertSame(0.0, $bobPeriods['2025-01-01']['value']);
     }
-
     public function test_gives_every_user_the_same_period_axis_in_chronological_order(): void {
         $project = Project::factory()->create();
         $alice   = User::factory()->create();
@@ -56,7 +55,6 @@ class FociTimelineQueryTest extends TestCase {
             self::assertSame($expected, $user['data']->pluck('period')->all());
         }
     }
-
     public function test_one_query_per_call_regardless_of_user_count(): void {
         $one  = $this->projectWithOneFocusPerUser(1);
         $five = $this->projectWithOneFocusPerUser(5);
@@ -75,7 +73,6 @@ class FociTimelineQueryTest extends TestCase {
         self::assertSame($oneUserQueries, $fiveUserQueries, 'the timeline must not issue queries per user');
         self::assertLessThanOrEqual(4, $fiveUserQueries);
     }
-
     private function projectWithOneFocusPerUser(int $userCount): Project {
         $project = Project::factory()->create();
 
@@ -84,7 +81,6 @@ class FociTimelineQueryTest extends TestCase {
         }
         return $project;
     }
-
     private function timelineQueryCount(array $sql): int {
         return count(preg_grep(self::TIMELINE_TABLES, $sql));
     }

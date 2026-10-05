@@ -23,14 +23,12 @@ class InvoiceMail extends Mailable {
         $this->_lang      = $invoice->company->getLanguage();
         $this->_formality = $invoice->company->getFormality();
     }
-
     public function envelope(): Envelope {
         $subject = Param::get('INVOICE_EMAIL_SUBJECT')->localizedValue($this->_lang, $this->_formality);
         return new Envelope(
             subject: str_replace('[invoiceName]', $this->_invoice->name, $subject),
         );
     }
-
     public function content(): Content {
         $text = null;
         if ($this->_invoice->company->has_direct_debit) {

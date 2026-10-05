@@ -95,7 +95,6 @@ class DetectFrameworks extends Command {
         $this->info("Updated: {$updated}");
         return 0;
     }
-
     private function colorizeFramework(string $framework, ?string $version): string {
         $colors = [
             'unknown' => 'gray',

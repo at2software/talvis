@@ -182,7 +182,6 @@ class ProjectHoursModel {
 
         return $model;
     }
-
     public static function load(): ?PersistentModel {
         $path = storage_path('app/'.self::MODEL_PATH);
         if (! is_file($path)) {
@@ -190,7 +189,6 @@ class ProjectHoursModel {
         }
         return PersistentModel::load(new Filesystem($path));
     }
-
     public static function predict(Project $project): ?float {
         $model = self::load();
         if (! $model) {

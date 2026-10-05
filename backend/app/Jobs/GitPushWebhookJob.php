@@ -6,7 +6,6 @@ use App\Helpers\NLog;
 use App\Http\Controllers\PluginGitController;
 use App\Models\Framework;
 use App\Models\PluginLink;
-use App\Models\Project;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -55,46 +54,5 @@ class GitPushWebhookJob implements ShouldQueue {
         } catch (\Exception $e) {
             NLog::warning("Framework detection failed on push: {$e->getMessage()}");
         }
-
-        $this->checkVulnScan();
-    }
-    private function checkVulnScan(): void {
-        $link = $this->links->first();
-        if (! $link) {
-            return;
-        }
-
-        try {
-            $controller = new PluginGitController($this->credentials);
-            $ciConfig   = $controller->getFileContent($link, '.gitlab-ci.yml');
-        } catch (\Exception) {
-            return;
-        }
-
-        if ($ciConfig === null || str_contains($ciConfig, 'vuln_scan')) {
-            return;
-        }
-
-        $projectModel = $link->parent;
-        if (! ($projectModel instanceof Project)) {
-            return;
-        }
-
-        $pm = $projectModel->projectManager;
-        if (! $pm) {
-            return;
-        }
-
-        $props = [
-            'from_webhook'         => 'true',
-            'webhook_display_name' => $this->project['name'],
-            'override_username'    => $this->project['name'],
-            'override_icon_url'    => asset('icons/icon.git.big.png'),
-        ];
-        ChatSendMessageJob::dispatch(
-            "⚠️ **{$this->project['web_url']}** was pushed but the pipeline has no `vuln_scan` job configured.",
-            $props,
-            user: $pm,
-        );
     }
 }

@@ -34,7 +34,7 @@
         <div class="col-12 col-md-9 d-flex flex-column gap-4">
         @if (!_debriefs.length) {
             <div class="card">
-                <empty-state [card]="false" class="projects" title="No debriefs yet. Create the first one." i18n-title="@@i18n.debrief.noDebriefs"></empty-state>
+                <empty-state [card]="false" class="debriefing" title="No debriefs yet. Create the first one." i18n-title="@@i18n.debrief.noDebriefs"></empty-state>
             </div>
         }
         @for (debrief of _debriefs; track debrief.id; let num = $index) {
@@ -166,7 +166,7 @@
                                 </div>
                             }
                             @if (debrief.problems.length === 0 && _isCompleted) {
-                                <empty-state [card]="false" class="projects" i18n-title="@@i18n.debrief.noProblems" title="no problems recorded"></empty-state>
+                                <empty-state [card]="false" class="debriefing" i18n-title="@@i18n.debrief.noProblems" title="no problems recorded"></empty-state>
                             }
                             @if (debrief.problems.length > 0) {
                                 <ul class="list-group list-group-flush">
@@ -234,7 +234,7 @@
                                 </div>
                             }
                             @if (debrief.positives.length === 0 && _isCompleted) {
-                                <empty-state [card]="false" class="projects" i18n-title="@@i18n.debrief.noPositives" title="no positives recorded"></empty-state>
+                                <empty-state [card]="false" class="debriefing" i18n-title="@@i18n.debrief.noPositives" title="no positives recorded"></empty-state>
                             }
                             @if (debrief.positives.length > 0) {
                                 <ul class="list-group list-group-flush">

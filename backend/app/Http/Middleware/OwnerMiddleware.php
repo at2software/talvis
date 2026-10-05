@@ -48,7 +48,6 @@ class OwnerMiddleware {
 
         abort(403, 'Unauthorized');
     }
-
     private function ownsResource(Request $request, string $column, mixed $userId): bool {
         $segments  = explode('.', $column);
         $attribute = array_pop($segments);
@@ -75,14 +74,12 @@ class OwnerMiddleware {
 
         return $ownerId !== null && (string)$ownerId === (string)$userId;
     }
-
     private function readValue(?Model $model, Request $request, string $key): mixed {
         if ($model) {
             return $model->getAttribute($key);
         }
         return $request->input($key);
     }
-
     private function routeModel(Request $request): ?Model {
         foreach ($request->route()->parameters() as $parameter) {
             if ($parameter instanceof Model) {

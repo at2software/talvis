@@ -1,0 +1,4 @@
+ignore:
+  - vulnerability: GHSA-86w9-cpqp-85rv
+    package:
+      name: node-forge

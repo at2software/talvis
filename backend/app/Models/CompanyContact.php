@@ -84,7 +84,6 @@ class CompanyContact extends BaseModel {
         $code[] = '&nbsp;';
         return implode('<br />', $code);
     }
-
     public function getGenderAttribute(): ?string {
         return $this->contact->gender;
     }

@@ -93,12 +93,10 @@ class OwnCalDAVBackend extends AbstractBackend {
         }
         return null;
     }
-
     private function makeEtag($id, $updatedAt): string {
         $stamp = $updatedAt ? $updatedAt->getTimestamp() : 0;
         return '"'.$id.'-'.$stamp.'"';
     }
-
     private function getCalendarDataFromVcard($name, $vcard, $uid, $updatedAt = null) {
         $birthday = $this->getBirthdayFromVCard($vcard);
         if ($birthday === null) {
@@ -237,7 +235,7 @@ class OwnCalDAVBackend extends AbstractBackend {
                     continue;
                 }
                 $calendarData = $this->getCalendarDataFromVacation($vacation, $isSick);
-                $result[] = [
+                $result[]     = [
                     'id'           => $vacation->id,
                     'uri'          => 'vacation_'.strval($vacation->id),
                     'lastmodified' => null,

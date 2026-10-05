@@ -27,6 +27,7 @@ Schedule::command('git:detect-frameworks')->daily();
 Schedule::command('git:detect-frameworks', ['--fresh'])->weekly();
 Schedule::command('git:fetch-latest-framework-versions')->daily();
 Schedule::command('cron:uptime-monitor')->everyFiveMinutes();
+Schedule::command('cron:gitlab-audits')->hourly();
 Schedule::command('cron:check-project-work-thresholds')->hourly();
 Schedule::command('chat:clean-pipeline-posts')->daily();
 Schedule::command('ml:train-all')->weekly();

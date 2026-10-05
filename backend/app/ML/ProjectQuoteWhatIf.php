@@ -20,10 +20,8 @@ use Illuminate\Support\Collection;
  * from a small, fixed per-feature template set.
  */
 class ProjectQuoteWhatIf {
-    private const MIN_DELTA = 0.02;
-
-    private const MAX_SUGGESTIONS = 4;
-
+    private const MIN_DELTA                    = 0.02;
+    private const MAX_SUGGESTIONS              = 4;
     private const REPRESENTATIVE_PREFIX_LENGTH = 628.0;
 
     /**

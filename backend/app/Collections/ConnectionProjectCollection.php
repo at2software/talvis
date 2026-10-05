@@ -33,7 +33,7 @@ class ConnectionProjectCollection extends BaseCollection {
         });
     }
     public function mapSimplified(Project $_, bool $includeProjectCount = true) {
-        if ($_ ->company === null) {
+        if ($_->company === null) {
             Log::warning('ConnectionProjectCollection: project has no company assigned', ['project_id' => $_->id]);
             return collect();
         }

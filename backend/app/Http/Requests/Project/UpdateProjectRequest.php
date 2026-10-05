@@ -10,8 +10,10 @@ class UpdateProjectRequest extends FormRequest {
     }
     public function rules(): array {
         return [
-            'state'     => 'nullable|exists:project_states,id',
-            'po_number' => 'nullable|string|max:255',
+            'state'                    => 'nullable|exists:project_states,id',
+            'po_number'                => 'nullable|string|max:255',
+            'disabled_quote_sources'   => 'nullable|array',
+            'disabled_quote_sources.*' => 'string',
         ];
     }
 }

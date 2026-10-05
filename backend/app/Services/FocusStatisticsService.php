@@ -215,7 +215,6 @@ class FocusStatisticsService {
         usort($result, fn ($a, $b) => strcmp($a['period'], $b['period']));
         return $result;
     }
-
     public static function calculateItemBiasFactor($item): ?array {
         if ($item->predictions->isEmpty() || $item->assumedWorkload() <= 0) {
             return null;
@@ -243,7 +242,6 @@ class FocusStatisticsService {
             'weight'        => $actualFocused,
         ];
     }
-
     private static function calculateBiasStatistics(array $biasFactors, float $weightedSum, float $totalWeight): array {
         if (empty($biasFactors)) {
             return [
@@ -260,7 +258,6 @@ class FocusStatisticsService {
             'max_bias_factor'     => round(max($biasFactors), 4),
         ];
     }
-
     public static function convertPredictionToHours($qty, $unitName) {
         if ($unitName === '%') {
             return 0;

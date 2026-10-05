@@ -15,7 +15,6 @@ class CapturingSapi extends Sapi {
     public static function sendResponse(ResponseInterface $response) {
         // noop - the response is read off the server instead
     }
-
     public static function toLaravelResponse(ResponseInterface $response): Response {
         $body = $response->getBody();
         if (is_resource($body)) {

@@ -103,12 +103,17 @@
 
     @if (_invoicingType === 0) {
         <button id="btnGroupDrop2" type="button" class="btn" [class.btn-primary]="!_warningMissingContact && !_isCreating" [class.btn-dark]="_isCreating" [class.btn-dark]="_warningMissingContact && !_isCreating" [disabled]="_warningMissingContact || _isCreating" [ngbTooltip]="_warningMissingContact ? 'requires contact person' : 'create quote'" i18n-ngbTooltip="@@i18n.project.createQuote" (click)="makeInvoice()" hotkey="CTRL+ALT+Q">
-            <i>{{ _isCreating ? 'progress_activity' : 'picture_as_pdf' }}</i>
+            @if (_isCreating) {
+                <spinner [size]="20" [inline]="true"></spinner>
+            } @else {
+                <i>picture_as_pdf</i>
+            }
             <span i18n="@@i18n.common.quote">quote</span>
         </button>
     }
 </toolbar>
 
+@for (current of [project]; track current.id) {
 <div class="row">
     <div class="col-md-3">
 
@@ -271,11 +276,18 @@
                 <!-- quote -->
                 <invoice-prepare-wrapper [parent]="project" [stageFilter]="0" [mode]="'quote'" [annotationType]="'invoice'" [allowedNewItems]="['item', 'group', 'discount']" [additionalBillingConsiderations]="_backendConsiderations" [additionalItems]="projectPaymentDetails" [projectPaymentDuration]="project.getParam('INVOICE_PAYMENT_DURATION')" [onChangeProjectPaymentDuration]="onChangePaymentDuration" [onRemoveProjectPaymentDuration]="removePaymentDuration" (considerationsChanged)="onConsiderationsChanged($event)">
                     @if (_quoteDescs.length) {
-                        @for (desc of _quoteDescs; track 'quoteDesc:' + desc) {
-                            <div class="card mb-3">
-                                <div class="card-body">
-                                    <div [innerHTML]="desc | safe: 'html'"></div>
+                        @for (desc of _quoteDescs; track desc.key) {
+                            <div class="card mb-3" [class.opacity-50]="desc.disabled">
+                                <div class="card-header d-flex justify-content-end py-1">
+                                    <button type="button" class="btn btn-plain text-primary p-0" (click)="toggleQuoteDescription(desc.key)" [ngbTooltip]="desc.disabled ? 'enable in this project' : 'disable in this project'">
+                                        <i>{{ desc.disabled ? 'undo' : 'close' }}</i>
+                                    </button>
                                 </div>
+                                @if (!desc.disabled) {
+                                    <div class="card-body">
+                                        <div [innerHTML]="desc.html | safe: 'html'"></div>
+                                    </div>
+                                }
                             </div>
                         }
                     }
@@ -284,6 +296,7 @@
         }
     </div>
 </div>
+}
 
 <ng-template #projectPaymentDetails>
     @if (project.company.requires_po) {

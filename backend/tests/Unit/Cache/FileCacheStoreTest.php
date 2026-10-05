@@ -13,12 +13,10 @@ class FileCacheStoreTest extends TestCase {
         parent::setUp();
         $this->directory = sys_get_temp_dir().'/talvis-file-cache-'.uniqid();
     }
-
     protected function tearDown(): void {
         (new Filesystem)->deleteDirectory($this->directory);
         parent::tearDown();
     }
-
     private function configuredStore(): FileStore {
         return new FileStore(
             new Filesystem,
@@ -26,7 +24,6 @@ class FileCacheStoreTest extends TestCase {
             config('cache.stores.file.permission'),
         );
     }
-
     public function test_the_configured_permission_allows_a_write_and_read_back(): void {
         $store = $this->configuredStore();
 
@@ -34,7 +31,6 @@ class FileCacheStoreTest extends TestCase {
 
         $this->assertSame('value', $store->get('probe'));
     }
-
     public function test_a_configured_permission_keeps_the_execute_bit(): void {
         $permission = config('cache.stores.file.permission');
 

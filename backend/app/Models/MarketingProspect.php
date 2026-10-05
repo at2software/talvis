@@ -74,7 +74,6 @@ class MarketingProspect extends BaseModel {
             ->where('status', 'pending')
             ->whereDate('scheduled_at', today());
     }
-
     public function scopeByStatus($query, string $status) {
         return $query->where('status', $status);
     }
@@ -87,7 +86,6 @@ class MarketingProspect extends BaseModel {
     public function scopeRecentlyAdded($query, int $days = 7) {
         return $query->where('created_at', '>=', now()->subDays($days));
     }
-
     public function getStatusLabel(): string {
         return match ($this->status) {
             'new'          => 'New',
@@ -167,7 +165,6 @@ class MarketingProspect extends BaseModel {
             $createdActivities[$activity->id] = $scheduledAt;
         }
     }
-
     private function topologicalSort($activities): array {
         $sorted         = [];
         $visited        = [];
@@ -196,11 +193,9 @@ class MarketingProspect extends BaseModel {
         }
         return $sorted;
     }
-
     public function getDaysInWorkflow(): int {
         return $this->created_at->diffInDays(now());
     }
-
     public function getLinkedinUrlAttribute(): ?string {
         return $this->vcard->getFirstValue('URL', null);
     }

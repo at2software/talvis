@@ -291,10 +291,10 @@ class LiquidityService {
             foreach ($plan as $step) {
                 $trigger     = $step['trigger'] ?? '';
                 $invoiceDate = match ($trigger) {
-                    'acceptance'       => $project->deadline_at ? Carbon::parse($project->deadline_at) : null,
-                    'feature_complete' => $project->deadline_at ? Carbon::parse($project->deadline_at)->subDays(14) : null,
-                    'monthly'          => $start->copy()->startOfMonth()->addDay(),
-                    default            => null,
+                    'acceptance'        => $project->deadline_at ? Carbon::parse($project->deadline_at) : null,
+                    'feature_complete'  => $project->deadline_at ? Carbon::parse($project->deadline_at)->subDays(14) : null,
+                    'monthly', 'yearly' => $start->copy()->startOfMonth()->addDay(),
+                    default             => null,
                 };
                 if ($invoiceDate && $invoiceDate->gte($start)) {
                     break;

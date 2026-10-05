@@ -2027,6 +2027,46 @@
         <source>monthly prepayment <ph id="0" equiv="index" disp="step.month_index"/> of <ph id="1" equiv="total" disp="step.months ?? 0"/> after project start</source>
       </segment>
     </unit>
+    <unit id="i18n.payment.triggerYearlyOption">
+      <notes>
+        <note category="location">src/app/_shards/payment-plan-editor/payment-plan-editor.component.html:52,53</note>
+      </notes>
+      <segment>
+        <source>yearly prepayments</source>
+      </segment>
+    </unit>
+    <unit id="i18n.payment.years">
+      <notes>
+        <note category="location">src/app/_shards/payment-plan-editor/payment-plan-editor.component.html:66,67</note>
+      </notes>
+      <segment>
+        <source>yr.</source>
+      </segment>
+    </unit>
+    <unit id="i18n.payment.totalWarningAmount">
+      <notes>
+        <note category="location">src/app/_shards/payment-plan-editor/payment-plan-editor.component.html:80,81</note>
+      </notes>
+      <segment>
+        <source>total: <ph id="0" equiv="INTERPOLATION" disp="{{ totalAmount | number: '1.2-2' }}"/> <ph id="1" equiv="INTERPOLATION_1" disp="{{ currency() }}"/> (must be <ph id="2" equiv="INTERPOLATION_2" disp="{{ net | number: '1.2-2' }}"/> <ph id="3" equiv="INTERPOLATION_1" disp="{{ currency() }}"/>)</source>
+      </segment>
+    </unit>
+    <unit id="i18n.payment.triggerYearly">
+      <notes>
+        <note category="location">src/app/_shards/payment-plan-editor/payment-plan-editor.component.ts:36</note>
+      </notes>
+      <segment>
+        <source><ph id="0" equiv="PH" disp="step.years ?? 0"/> yearly prepayments after project start</source>
+      </segment>
+    </unit>
+    <unit id="i18n.payment.triggerYearlyNth">
+      <notes>
+        <note category="location">src/app/_shards/payment-plan-editor/payment-plan-editor.component.ts:35</note>
+      </notes>
+      <segment>
+        <source>yearly prepayment <ph id="0" equiv="index" disp="step.year_index"/> of <ph id="1" equiv="total" disp="step.years ?? 0"/> after project start</source>
+      </segment>
+    </unit>
     <unit id="i18n.payment.stepPrepared">
       <notes>
         <note category="location">src/app/_modals/modal-invoice-add-instalment/modal-invoice-add-instalment.component.ts:123</note>
@@ -11450,6 +11490,14 @@
       </notes>
       <segment>
         <source>select company contact</source>
+      </segment>
+    </unit>
+    <unit id="i18n.projects.setQuoteValidity">
+      <notes>
+        <note category="location">src/app/projects/_shards/project-quote-validity/project-quote-validity.component.ts:28</note>
+      </notes>
+      <segment>
+        <source>Set quote validity in days</source>
       </segment>
     </unit>
     <unit id="i18n.projects.setPaymentDuration">

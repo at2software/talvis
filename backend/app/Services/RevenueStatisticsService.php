@@ -22,7 +22,6 @@ class RevenueStatisticsService {
             'expensesByMonth' => self::paramHistoryByMonth('CASHFLOW_ANNUAL_EXPENSES', $current),
         ];
     }
-
     private static function paramHistoryByMonth(string $key, Carbon $since) {
         return Param::get($key)->history()
             ?->whereBetween('created_at', [$since, now()])

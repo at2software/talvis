@@ -122,6 +122,13 @@
     </ul>
 </div>
 
+<div class="card mb-3">
+    <div class="card-header" i18n="@@i18n.common.quote">quote</div>
+    <ul class="list-group">
+        <project-quote-validity [project]="_project"></project-quote-validity>
+    </ul>
+</div>
+
 @if (global.user?.hasRole('invoicing')) {
     <div class="card mb-3">
         <div class="card-header">

@@ -3,7 +3,6 @@
 namespace App\Collections;
 
 use App\Models\BaseCollection;
-use Illuminate\Database\Eloquent\Collection;
 
 class ProjectCollection extends BaseCollection {
     public function appendProjectCollection() {

@@ -60,11 +60,9 @@ class CustomerSnapshots {
     public static function invoicesBefore(Collection $invoices, Carbon $cutoff): Collection {
         return $invoices->filter(fn ($invoice) => Carbon::parse($invoice->created_at)->lte($cutoff))->values();
     }
-
     public static function invoicesAfter(Collection $invoices, Carbon $cutoff): Collection {
         return $invoices->filter(fn ($invoice) => Carbon::parse($invoice->created_at)->gt($cutoff))->values();
     }
-
     public static function invoicesInWindow(Collection $invoices, Carbon $cutoff, int $months): Collection {
         $end = $cutoff->copy()->addMonths($months);
         return $invoices->filter(function ($invoice) use ($cutoff, $end) {
@@ -72,7 +70,6 @@ class CustomerSnapshots {
             return $at->gt($cutoff) && $at->lte($end);
         })->values();
     }
-
     public static function sumNet(Collection $invoices): float {
         return (float)$invoices->sum(fn ($invoice) => $invoice->net);
     }
@@ -118,11 +115,9 @@ class CustomerSnapshots {
     public static function fociBefore(Collection $foci, Carbon $cutoff): Collection {
         return $foci->filter(fn ($focus) => Carbon::parse($focus->started_at)->lte($cutoff))->values();
     }
-
     public static function fociAfter(Collection $foci, Carbon $cutoff): Collection {
         return $foci->filter(fn ($focus) => Carbon::parse($focus->started_at)->gt($cutoff))->values();
     }
-
     public static function fociInWindow(Collection $foci, Carbon $cutoff, int $months): Collection {
         $end = $cutoff->copy()->addMonthsNoOverflow($months);
         return $foci->filter(function ($focus) use ($cutoff, $end) {
@@ -130,7 +125,6 @@ class CustomerSnapshots {
             return $at->gt($cutoff) && $at->lte($end);
         })->values();
     }
-
     public static function sumDuration(Collection $foci): float {
         return (float)$foci->sum(fn ($focus) => $focus->duration);
     }

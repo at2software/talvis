@@ -20,7 +20,6 @@ class MarketingWorkflow extends BaseModel {
             'is_active' => 'boolean',
         ];
     }
-
     public function marketingInitiatives(): BelongsToMany {
         return $this->belongsToMany(MarketingInitiative::class, 'marketing_initiative_workflow')
             ->withPivot(['is_active'])
@@ -32,7 +31,6 @@ class MarketingWorkflow extends BaseModel {
     public function marketingActivities(): HasMany {
         return $this->hasMany(MarketingActivity::class, 'marketing_workflow_id');
     }
-
     public function prospectActivities(): HasManyThrough {
         return $this->hasManyThrough(
             MarketingProspectActivity::class,
@@ -46,11 +44,9 @@ class MarketingWorkflow extends BaseModel {
     public function orderedActivities(): HasMany {
         return $this->marketingActivities()->orderBy('day_offset');
     }
-
     public function scopeActive($query) {
         return $query->where('is_active', true);
     }
-
     public function getTotalDuration(): int {
         return $this->marketingActivities()->max('day_offset') ?: 0;
     }
@@ -118,7 +114,6 @@ class MarketingWorkflow extends BaseModel {
         }
         return $sorted;
     }
-
     public function duplicate(?string $newName = null): self {
         $copy       = $this->replicate();
         $copy->name = $newName ?: ($this->name.' (Copy)');

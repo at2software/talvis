@@ -26,21 +26,21 @@ export class KeycloakHandler {
                 return {
                     url: config['auth-server-url'] || environment.authenticationUrl,
                     realm: config.realm || environment.keycloakRealm || 'at2',
-                    clientId: config.resource || environment.keycloakClientId || 'neuron',
+                    clientId: config.resource || environment.keycloakClientId || 'talvis',
                 };
             } catch (error) {
                 console.error('Failed to load keycloak.json, using environment defaults:', error);
                 return {
                     url: environment.authenticationUrl,
                     realm: environment.keycloakRealm || 'at2',
-                    clientId: environment.keycloakClientId || 'neuron',
+                    clientId: environment.keycloakClientId || 'talvis',
                 };
             }
         }
         return {
             url: environment.authenticationUrl,
             realm: environment.keycloakRealm || 'at2',
-            clientId: environment.keycloakClientId || 'neuron',
+            clientId: environment.keycloakClientId || 'talvis',
         };
     }
 
@@ -68,7 +68,7 @@ export class KeycloakHandler {
                 config: {
                     url: keycloakUrl,
                     realm: environment.keycloakRealm || 'at2',
-                    clientId: environment.keycloakClientId || 'neuron',
+                    clientId: environment.keycloakClientId || 'talvis',
                 },
                 providers: [AutoRefreshTokenService, UserActivityService],
                 initOptions: {

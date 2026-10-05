@@ -181,7 +181,6 @@ class CustomerRevenueModel {
 
         return $model;
     }
-
     public static function load(): ?PersistentModel {
         $path = storage_path('app/'.self::MODEL_PATH);
         if (! is_file($path)) {
@@ -189,7 +188,6 @@ class CustomerRevenueModel {
         }
         return PersistentModel::load(new Filesystem($path));
     }
-
     public static function predict(Company $company): ?float {
         $model = self::load();
         if (! $model) {

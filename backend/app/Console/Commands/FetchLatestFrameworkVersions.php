@@ -57,7 +57,6 @@ class FetchLatestFrameworkVersions extends Command {
         $this->info('Completed fetching latest framework versions!');
         return 0;
     }
-
     private function fetchLatestVersion(string $frameworkName): ?string {
         return match ($frameworkName) {
             'laravel' => $this->fetchLaravelVersion(),
@@ -72,8 +71,8 @@ class FetchLatestFrameworkVersions extends Command {
         try {
             $response = Http::get('https://packagist.org/packages/laravel/framework.json');
             if ($response->successful()) {
-                $data     = $response->json();
-                $versions = array_keys($data['package']['versions'] ?? []);
+                $data           = $response->json();
+                $versions       = array_keys($data['package']['versions'] ?? []);
                 $stableVersions = array_filter($versions, fn ($v) => preg_match('/^v?\d+\.\d+\.\d+$/', $v));
                 if (! empty($stableVersions)) {
                     $stableVersions = array_map(fn ($v) => ltrim($v, 'v'), $stableVersions);

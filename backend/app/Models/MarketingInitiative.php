@@ -25,7 +25,6 @@ class MarketingInitiative extends BaseModel {
             'end_date'   => 'date',
         ];
     }
-
     public function parent(): BelongsTo {
         return $this->belongsTo(MarketingInitiative::class, 'parent_id');
     }
@@ -35,7 +34,6 @@ class MarketingInitiative extends BaseModel {
     public function allChildren(): HasMany {
         return $this->children()->with('allChildren');
     }
-
     public function channels(): BelongsToMany {
         return $this->belongsToMany(LeadSource::class, 'marketing_initiative_channels', 'marketing_initiative_id', 'lead_source_id')
             ->withPivot(['is_primary', 'custom_settings'])
@@ -44,13 +42,11 @@ class MarketingInitiative extends BaseModel {
     public function primaryChannel(): BelongsToMany {
         return $this->channels()->wherePivot('is_primary', true);
     }
-
     public function performanceMetrics(): BelongsToMany {
         return $this->belongsToMany(MarketingPerformanceMetric::class, 'marketing_initiative_metric')
             ->withPivot(['target_value'])
             ->withTimestamps();
     }
-
     public function workflows(): BelongsToMany {
         return $this->belongsToMany(MarketingWorkflow::class, 'marketing_initiative_workflow')
             ->withPivot(['is_active'])
@@ -59,18 +55,15 @@ class MarketingInitiative extends BaseModel {
     public function activeWorkflows(): BelongsToMany {
         return $this->workflows()->wherePivot('is_active', true);
     }
-
     public function prospects(): HasMany {
         return $this->hasMany(MarketingProspect::class);
     }
-
     public function initiativeActivities(): HasMany {
         return $this->hasMany(MarketingInitiativeActivity::class, 'marketing_initiative_id');
     }
     public function orderedInitiativeActivities(): HasMany {
         return $this->initiativeActivities()->orderBy('day_offset');
     }
-
     public function users(): BelongsToMany {
         return $this->belongsToMany(User::class, 'marketing_initiative_user')
             ->withPivot(['role', 'receives_notifications'])
@@ -82,14 +75,12 @@ class MarketingInitiative extends BaseModel {
     public function members(): BelongsToMany {
         return $this->users()->wherePivot('role', 'member');
     }
-
     public function scopeActive($query) {
         return $query->where('status', 'active');
     }
     public function scopeRootInitiatives($query) {
         return $query->whereNull('parent_id');
     }
-
     public function isActive(): bool {
         return $this->status === 'active';
     }

@@ -9,14 +9,14 @@ use PHPUnit\Framework\TestCase;
 class ProjectQuoteModelTest extends TestCase {
     private function row(array $overrides = []): array {
         return array_merge([
-            'company_id'                   => 1,
-            'item_count'                   => 3,
-            'net'                          => 2000.0,
-            'discount_pct'                 => 5.0,
-            'prefix_length'                => 0,
-            'days_pending'                 => 7,
-            'company_acceptance_rate'      => 0.6,
-            'company_prior_decided_count'  => 4,
+            'company_id'                    => 1,
+            'item_count'                    => 3,
+            'net'                           => 2000.0,
+            'discount_pct'                  => 5.0,
+            'prefix_length'                 => 0,
+            'days_pending'                  => 7,
+            'company_acceptance_rate'       => 0.6,
+            'company_prior_decided_count'   => 4,
             ProjectQuoteDataset::LABEL      => 0,
         ], $overrides);
     }
@@ -46,8 +46,8 @@ class ProjectQuoteModelTest extends TestCase {
             foreach ([0, 1, 2] as $k) {
                 $accepted = ($companyId <= 5) ? 1 : 0;
                 $rows[]   = $this->row([
-                    'company_id'                   => $companyId,
-                    'company_acceptance_rate'      => $accepted ? 0.9 : 0.1,
+                    'company_id'                    => $companyId,
+                    'company_acceptance_rate'       => $accepted ? 0.9 : 0.1,
                     ProjectQuoteDataset::LABEL      => $accepted,
                 ]);
             }
@@ -67,14 +67,14 @@ class ProjectQuoteModelTest extends TestCase {
         foreach (range(1, 10) as $companyId) {
             // High company acceptance rate AND actually accepted → baseline gets it right.
             $rows[] = $this->row([
-                'company_id'                   => $companyId,
-                'company_acceptance_rate'      => 0.9,
+                'company_id'                    => $companyId,
+                'company_acceptance_rate'       => 0.9,
                 ProjectQuoteDataset::LABEL      => 1,
             ]);
             // Low company acceptance rate AND actually rejected → baseline gets it right.
             $rows[] = $this->row([
-                'company_id'                   => $companyId,
-                'company_acceptance_rate'      => 0.1,
+                'company_id'                    => $companyId,
+                'company_acceptance_rate'       => 0.1,
                 ProjectQuoteDataset::LABEL      => 0,
             ]);
         }
@@ -96,22 +96,22 @@ class ProjectQuoteModelTest extends TestCase {
         // labelled accepted so a correct fallback is verifiable via recall.
         foreach (range(1, 20) as $companyId) {
             $rows[] = $this->row([
-                'company_id'                   => $companyId,
-                'company_acceptance_rate'      => 0.9,
+                'company_id'                    => $companyId,
+                'company_acceptance_rate'       => 0.9,
                 ProjectQuoteDataset::LABEL      => 1,
             ]);
         }
         foreach (range(21, 28) as $companyId) {
             $rows[] = $this->row([
-                'company_id'                   => $companyId,
-                'company_acceptance_rate'      => 0.1,
+                'company_id'                    => $companyId,
+                'company_acceptance_rate'       => 0.1,
                 ProjectQuoteDataset::LABEL      => 0,
             ]);
         }
         foreach ([29, 30] as $companyId) {
             $rows[] = $this->row([
-                'company_id'                   => $companyId,
-                'company_acceptance_rate'      => null,
+                'company_id'                    => $companyId,
+                'company_acceptance_rate'       => null,
                 ProjectQuoteDataset::LABEL      => 1, // majority class, so the fallback should get it right
             ]);
         }
@@ -128,8 +128,8 @@ class ProjectQuoteModelTest extends TestCase {
             foreach ([0, 1] as $k) {
                 $accepted = ($companyId + $k) % 3 === 0 ? 1 : 0;
                 $rows[]   = $this->row([
-                    'company_id'                   => $companyId,
-                    'company_acceptance_rate'      => $accepted ? 0.8 : 0.2,
+                    'company_id'                    => $companyId,
+                    'company_acceptance_rate'       => $accepted ? 0.8 : 0.2,
                     ProjectQuoteDataset::LABEL      => $accepted,
                 ]);
             }

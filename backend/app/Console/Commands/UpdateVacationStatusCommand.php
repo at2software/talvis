@@ -62,7 +62,6 @@ class UpdateVacationStatusCommand extends Command {
         }
         return 0;
     }
-
     private function updateUserStatus(User $user, string $status, string $action) {
         $chatControllers = PluginController::getPluginControllers(PluginChatController::class);
 

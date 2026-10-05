@@ -144,11 +144,9 @@ class User extends BaseAuthenticatable {
     public function getRoleNamesAttribute() {
         return $this->getRoleNames();
     }
-
     public function hasRole($roles, ?string $guard = null): bool {
         return $this->hasAnyRole($roles, $guard);
     }
-
     public function hasAnyRole($roles, ?string $guard = null): bool {
         if (is_string($roles)) {
             $roles = explode('|', $roles);
@@ -158,23 +156,18 @@ class User extends BaseAuthenticatable {
 
         return in_array('admin', $own, true) || (bool)array_intersect($own, (array)$roles);
     }
-
     public function assignRole(...$roles) {
         return tap($this->spatieAssignRole(...$roles), fn () => $this->forgetRoleNames());
     }
-
     public function removeRole($role) {
         return tap($this->spatieRemoveRole($role), fn () => $this->forgetRoleNames());
     }
-
     public function syncRoles(...$roles) {
         return tap($this->spatieSyncRoles(...$roles), fn () => $this->forgetRoleNames());
     }
-
     private function forgetRoleNames(): void {
         unset(self::$roleNames[$this->getKey()]);
     }
-
     private function roleNames(): array {
         if ($this->relationLoaded('roles')) {
             return $this->roles->pluck('name')->all();
@@ -184,7 +177,6 @@ class User extends BaseAuthenticatable {
         }
         return self::$roleNames[$key] ??= $this->roles()->pluck('name')->all();
     }
-
     public function comments() {
         return $this->hasMany(Comment::class);
     }

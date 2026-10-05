@@ -59,7 +59,6 @@ class MlReliabilitySummary {
         }
         return $r2 >= 0.4 ? 'high' : 'moderate';
     }
-
     public static function classificationBucket(bool $beatsBaseline, float $mcc): string {
         if (! $beatsBaseline) {
             return 'low';

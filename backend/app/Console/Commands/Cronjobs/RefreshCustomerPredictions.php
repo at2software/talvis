@@ -78,7 +78,6 @@ class RefreshCustomerPredictions extends Command {
         $this->info("Updated ML_PREDICTED_REVENUE_12M for {$revenueUpdated}, ML_PREDICTED_INTERVAL_DAYS for {$intervalUpdated}, ML_CHURN_PROBABILITY_12M for {$churnUpdated}, ML_PREDICTED_SUPPORT_HOURS for {$supportLoadUpdated} customers.");
         return 0;
     }
-
     private function storeIfPredicted(Company $company, string $key, ?float $value): int {
         if ($value === null) {
             return 0;

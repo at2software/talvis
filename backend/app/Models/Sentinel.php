@@ -213,7 +213,6 @@ class Sentinel extends BaseModel {
         }
         return true;
     }
-
     private function executeAction(object $command, ?Model $model, array $originalValues, ?Model $item = null, string $variable = 'item'): void {
         $action = $command->key;
         if (! isset($command->options)) {
@@ -398,7 +397,6 @@ class Sentinel extends BaseModel {
         }
         return null;
     }
-
     private function matchesNestedConditions(array $conditionGroups, Model $item, Model $model, array $originalValues, string $variable): bool {
         if (empty($conditionGroups)) {
             return true;
@@ -418,7 +416,6 @@ class Sentinel extends BaseModel {
         }
         return false;
     }
-
     private function matchesNestedCondition(object $condition, Model $item, Model $model, array $originalValues, string $variable): bool {
         $key = $condition->key ?? 'none';
         if ($key === 'none') {

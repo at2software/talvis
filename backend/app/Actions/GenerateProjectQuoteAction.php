@@ -90,10 +90,11 @@ class GenerateProjectQuoteAction {
 
         $rows = '';
         foreach ($steps as $step) {
-            $percentage = (int)($step['percentage'] ?? 0);
             $trigger    = $step['trigger'] ?? '';
             $months     = (int)($step['months'] ?? 0);
-            $amount     = $net * ($percentage / 100);
+            $years      = (int)($step['years'] ?? 0);
+            $amount     = $project->planStepTotal($step, $net);
+            $percentage = $net > 0 ? round($amount / $net * 100, 1) : 0;
             $formatted  = number_format($amount, 2, ',', '.');
 
             $label = match ($trigger) {
@@ -103,6 +104,9 @@ class GenerateProjectQuoteAction {
                 'monthly'          => $isDe
                     ? "{$months} monatliche Vorausrate(n) nach Projektstart"
                     : "{$months} monthly prepayment(s) after project start",
+                'yearly' => $isDe
+                    ? "{$years} jährliche Vorausrate(n) nach Projektstart"
+                    : "{$years} yearly prepayment(s) after project start",
                 default => $trigger,
             };
 

@@ -12,7 +12,7 @@
             @if (loading()) {
                 <spinner class="py-3"></spinner>
             } @else if (_monitors.length === 0) {
-                <empty-state [card]="false" class="projects" i18n-title="@@i18n.uptime.noMonitors" title="no uptime monitors yet">
+                <empty-state [card]="false" class="uptime" i18n-title="@@i18n.uptime.noMonitors" title="no uptime monitors yet">
                     <p class="text-muted small" i18n="@@i18n.uptime.noMonitorsBody">Click "add monitor" to start tracking the heartbeat of your services.</p>
                 </empty-state>
             } @else {

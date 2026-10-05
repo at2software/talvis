@@ -62,11 +62,10 @@ export class PaymentPlanTiersEditorComponent {
     }
 
     onTriggerChange(step: PaymentPlanStep) {
-        if (step.trigger === 'monthly' && !step.months) {
-            step.months = 6;
-        } else if (step.trigger !== 'monthly') {
-            delete step.months;
-        }
+        if (step.trigger === 'monthly' && !step.months) step.months = 6;
+        if (step.trigger === 'yearly' && !step.years) step.years = 3;
+        if (step.trigger !== 'monthly') delete step.months;
+        if (step.trigger !== 'yearly') delete step.years;
         this.#touch();
     }
 
@@ -88,6 +87,8 @@ export class PaymentPlanTiersEditorComponent {
                 return $localize`:@@i18n.payment.triggerAcceptance:upon acceptance`;
             case 'monthly':
                 return $localize`:@@i18n.payment.triggerMonthly:${step.months ?? 0} monthly prepayments after project start`;
+            case 'yearly':
+                return $localize`:@@i18n.payment.triggerYearly:${step.years ?? 0} yearly prepayments after project start`;
             default:
                 return step.trigger;
         }

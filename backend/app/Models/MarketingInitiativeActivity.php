@@ -32,7 +32,6 @@ class MarketingInitiativeActivity extends BaseModel {
             'description'             => I18n::class,
         ];
     }
-
     public function marketingInitiative(): BelongsTo {
         return $this->belongsTo(MarketingInitiative::class, 'marketing_initiative_id');
     }
@@ -61,7 +60,6 @@ class MarketingInitiativeActivity extends BaseModel {
             ->withPivot(['target_value'])
             ->withTimestamps();
     }
-
     public function scopeRequired($query) {
         return $query->where('is_required', true);
     }
@@ -71,7 +69,6 @@ class MarketingInitiativeActivity extends BaseModel {
     public function scopeOrderedByDay($query) {
         return $query->orderBy('day_offset');
     }
-
     public function getCompletionRate(): float {
         $total = $this->marketingProspectActivities()->count();
 

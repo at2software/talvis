@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Casts\PrecomputedAuth;
 use App\Traits\PrecomputedTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class ProductGroup extends BaseModel {
@@ -50,8 +51,7 @@ class ProductGroup extends BaseModel {
         }
         return $descendants;
     }
-
-    public static function buildRootGroupMap(): \Illuminate\Support\Collection {
+    public static function buildRootGroupMap(): Collection {
         $groups = self::query()->select('id', 'product_group_id', 'name', 'color')->get()->keyBy('id');
         return $groups->map(function ($group) use ($groups) {
             $current = $group;
@@ -66,7 +66,6 @@ class ProductGroup extends BaseModel {
             return $current;
         });
     }
-
     public static function _indexAll($id) {
         $results = [];
         $query   = ProductGroup::with([

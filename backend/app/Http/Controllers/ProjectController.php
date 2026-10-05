@@ -185,7 +185,7 @@ class ProjectController extends Controller {
         return $items;
     }
     public function indexQuoteDescriptions(Project $_) {
-        return $_->getQuoteDescriptions();
+        return $_->getQuoteDescriptionEntries();
     }
     public function indexFoci(Request $request, Project $_) {
         return $this->_indexFoci($request, $_);
@@ -226,6 +226,9 @@ class ProjectController extends Controller {
 
         $previousState = $project->state;
 
+        if ($request->has('disabled_quote_sources')) {
+            $project->disabled_quote_sources = $request->validated('disabled_quote_sources') ?? [];
+        }
         $project->applyAndSave($request);
         if ($request->has('state')) {
             $project->state = $request->state;
@@ -346,7 +349,6 @@ class ProjectController extends Controller {
             ->get()
             ->append(['net_remaining', 'hours_invested']);
     }
-
     public function indexOverrunRisk(Request $request) {
         return Project::whereRunning()
             ->whereBudgetBased()
@@ -360,7 +362,6 @@ class ProjectController extends Controller {
             ->sortByDesc('ml_overrun_ratio')
             ->values();
     }
-
     public function resolvePluginLinkUrls(Request $request) {
         return $this->projectPluginLinkResolverService->resolve((array)$request->input('urls', []));
     }

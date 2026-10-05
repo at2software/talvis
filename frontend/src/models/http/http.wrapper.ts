@@ -1,6 +1,6 @@
 import { HttpClient, HttpHeaders, HttpResponse } from '@angular/common/http';
 import { inject } from '@angular/core';
-import { Observable, catchError, map, tap, throwError } from 'rxjs';
+import { Observable, catchError, finalize, map, tap, throwError } from 'rxjs';
 import { NotificationCenter } from '../notification.service';
 import { Dictionary } from '@constants/constants';
 import { notifyHttpError, saveBlobResponse } from './file-download';
@@ -124,8 +124,11 @@ export abstract class HttpWrapper {
             .post(this.#getApiUrl(url), data, { responseType: 'blob', observe: 'response' })
             .subscribe((r) => saveBlobResponse(r, success));
     }
-    getFile(url: string, params?: Dictionary, success?: () => unknown): void {
-        this.http().get(this.#getApiUrl(url, params), { responseType: 'blob', observe: 'response' }).subscribe({
+    getFile(url: string, params?: Dictionary, success?: () => unknown, done?: () => unknown): void {
+        this.http()
+            .get(this.#getApiUrl(url, params), { responseType: 'blob', observe: 'response' })
+            .pipe(finalize(() => done?.()))
+            .subscribe({
             next: (r) => saveBlobResponse(r, success),
             error: notifyHttpError,
         });

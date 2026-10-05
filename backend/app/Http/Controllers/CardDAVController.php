@@ -19,7 +19,6 @@ class CardDAVController extends Controller {
         $server = $this->startCardDAVServer($request->route()->getName());
         return CapturingSapi::toLaravelResponse($server->httpResponse);
     }
-
     public function startCardDAVServer(string $rootUri): DAV\Server {
         $pdo = DB::connection()->getPdo();
         $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
@@ -33,17 +32,16 @@ class CardDAVController extends Controller {
         $server->start();
         return $server;
     }
-
     public function createCardDAVServer(\PDO $pdo): DAV\Server {
         $principalBackend   = new OwnPrincipalBackend($pdo);
         $addressBookBackend = new OwnCardDAVBackend($pdo);
-        $tree = [
+        $tree               = [
             new DAVACL\PrincipalCollection($principalBackend),
             new OwnAddressBookRoot($principalBackend, $addressBookBackend),
         ];
         DAV\Server::$exposeVersion = false;
-        $server = new DAV\Server($tree, new CapturingSapi);
-        $carddavPlugin = new CardDAV\Plugin;
+        $server                    = new DAV\Server($tree, new CapturingSapi);
+        $carddavPlugin             = new CardDAV\Plugin;
         $server->addPlugin($carddavPlugin);
         $syncPlugin = new DAV\Sync\Plugin;
         $server->addPlugin($syncPlugin);

@@ -22,7 +22,6 @@ class MarketingPerformanceMetric extends BaseModel {
             'target_value' => 'decimal:2',
         ];
     }
-
     public function marketingInitiatives(): BelongsToMany {
         return $this->belongsToMany(MarketingInitiative::class, 'marketing_initiative_metric')
             ->withPivot(['target_value'])
@@ -48,7 +47,6 @@ class MarketingPerformanceMetric extends BaseModel {
             $this->initiativeActivities()->select('marketing_initiative_activities.id')
         );
     }
-
     public function scopeByType($query, string $type) {
         return $query->where('metric_type', $type);
     }

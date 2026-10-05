@@ -33,7 +33,6 @@ class Vacation extends BaseModel {
     public function user() {
         return $this->hasOneThrough(User::class, VacationGrant::class, 'id', 'id', 'vacation_grant_id', 'user_id');
     }
-
     public function scopeWithUserAndGrant($query) {
         return $query
             ->join('vacation_grants', 'vacations.vacation_grant_id', '=', 'vacation_grants.id')

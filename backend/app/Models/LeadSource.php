@@ -19,7 +19,6 @@ class LeadSource extends BaseModel {
     public function marketingProspects(): HasMany {
         return $this->hasMany(MarketingProspect::class);
     }
-
     public function getActiveInitiatives() {
         return $this->marketingInitiatives()
             ->where('status', 'active')

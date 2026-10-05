@@ -33,8 +33,8 @@ class InvoiceItemController extends Controller {
         return InvoiceItem::findOrFail($id);
     }
     public function reorder(Request $request) {
-        $data = json_decode($request->getContent());
-        foreach ($data->order as $key => $id) {
+        $validated = $request->validate(['order' => 'required|array', 'order.*' => 'integer']);
+        foreach ($validated['order'] as $key => $id) {
             $invoiceItem = InvoiceItem::find($id);
             if ($invoiceItem && $invoiceItem->position != $key) {
                 $invoiceItem->position = $key;

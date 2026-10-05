@@ -33,7 +33,6 @@ class HbciSegment {
         }
         return self::escape((string)$value);
     }
-
     public static function escape(string $value): string {
         return str_replace(['?', '+', ':', "'"], ['??', '?+', '?:', "?'"], $value);
     }

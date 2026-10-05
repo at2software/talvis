@@ -33,7 +33,6 @@ class InvoiceItemFactory extends Factory {
     public function ofType(InvoiceItemType $type): static {
         return $this->state(['type' => $type]);
     }
-
     public function net(float $net): static {
         return $this->state(['price' => $net, 'qty' => 1, 'discount' => 0, 'unit_name' => 'h', 'vat_calculation' => 0]);
     }

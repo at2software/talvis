@@ -11,5 +11,4 @@ namespace App\Helpers;
  *
  * Output format: [timestamp] <ClassName.methodName:[line]>.LEVEL: message
  */
-class NLog extends LogHelper {
-}
+class NLog extends LogHelper {}

@@ -51,6 +51,11 @@ export class ProjectDetailComponent {
         });
     };
 
+    openProject(p: Project) {
+        const [path, suffix = ''] = this.#router.url.split(/(?=[?#])/, 2);
+        this.#router.navigateByUrl(path.replace(/^\/projects\/\d+/, '/projects/' + p.id) + suffix);
+    }
+
     prepareInvoice() {
         const object = this.parent.object();
         this.#projectService.moveRegularItemsToCustomer(object).subscribe((_) => {

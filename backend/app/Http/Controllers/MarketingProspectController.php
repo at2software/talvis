@@ -115,10 +115,14 @@ class MarketingProspectController extends Controller {
         return $result['prospect'];
     }
     public function indexProspectActivitiesForAddon(Request $request) {
+        $validated = $request->validate([
+            'lead_source_id'          => 'nullable|integer',
+            'marketing_initiative_id' => 'nullable|integer',
+        ]);
         return MarketingDashboardService::getOverdueActivitiesForAddon(
             $request->user()->id,
-            $request->get('lead_source_id'),
-            $request->get('marketing_initiative_id'),
+            isset($validated['lead_source_id']) ? (int)$validated['lead_source_id'] : null,
+            isset($validated['marketing_initiative_id']) ? (int)$validated['marketing_initiative_id'] : null,
             $request->boolean('count_only')
         );
     }

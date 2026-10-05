@@ -167,7 +167,6 @@ class CustomerIntervalModel {
 
         return $model;
     }
-
     public static function load(): ?PersistentModel {
         $path = storage_path('app/'.self::MODEL_PATH);
         if (! is_file($path)) {
@@ -175,7 +174,6 @@ class CustomerIntervalModel {
         }
         return PersistentModel::load(new Filesystem($path));
     }
-
     public static function predictIntervalDays(Company $company): ?float {
         $model = self::load();
         if (! $model) {
@@ -198,7 +196,6 @@ class CustomerIntervalModel {
 
         return max(0.0, exp($logPrediction) - 1);
     }
-
     public static function predictNextPurchaseAt(Company $company): ?Carbon {
         $days = self::predictIntervalDays($company);
         if ($days === null) {

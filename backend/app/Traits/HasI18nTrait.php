@@ -79,7 +79,6 @@ trait HasI18nTrait {
     public function getFormality(): string {
         return $this->vcard?->getFirstValue('X-FORMALITY') ?? 'formal';
     }
-
     public static function resolveI18nValue(mixed $value, string $language = 'de', string $formality = 'formal'): ?string {
         if (is_string($value)) {
             return $value;

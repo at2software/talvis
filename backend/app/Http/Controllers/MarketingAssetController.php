@@ -53,7 +53,6 @@ class MarketingAssetController extends Controller {
         });
         return response()->json($assets);
     }
-
     public function store(Request $request) {
         $uploadedFile = $request->file('file');
 
@@ -102,7 +101,6 @@ class MarketingAssetController extends Controller {
             'message'  => 'Asset uploaded successfully',
         ]);
     }
-
     public function destroy($id) {
         $file = File::findOrFail($id);
 
@@ -113,7 +111,6 @@ class MarketingAssetController extends Controller {
         $file->delete();
         return response()->json(['message' => 'Asset deleted successfully']);
     }
-
     public function updateTags($id, Request $request) {
         $file = File::findOrFail($id);
 
@@ -130,7 +127,6 @@ class MarketingAssetController extends Controller {
             'tags'    => $tags,
         ]);
     }
-
     public function updateCategory($id, Request $request) {
         $file = File::findOrFail($id);
 
@@ -143,7 +139,6 @@ class MarketingAssetController extends Controller {
             'category' => $file->category,
         ]);
     }
-
     private function categorizeFile($file): string {
         $extension = strtolower($file->getClientOriginalExtension());
         $mimeType  = $file->getMimeType();
@@ -172,7 +167,6 @@ class MarketingAssetController extends Controller {
         }
         return 'Documents';
     }
-
     private function getPreviewUrl($file): ?string {
         if (Str::startsWith($file->mime, 'image/')) {
             return route('files.show', $file->id);

@@ -33,11 +33,9 @@ use Rubix\ML\Transformers\ZScaleStandardizer;
  * headline metrics are F1 + MCC (imbalance-robust), not raw accuracy.
  */
 class CustomerChurnModel {
-    private const MODEL_PATH = 'ml/customer_churn.rbx';
-
+    private const MODEL_PATH           = 'ml/customer_churn.rbx';
     public const BASELINE_RECENCY_DAYS = 365;
-
-    public const CHURNED = 1;
+    public const CHURNED               = 1;
 
     /**
      * @return array<string, callable(): Learner>
@@ -72,7 +70,6 @@ class CustomerChurnModel {
             $row['recency_over_mean_gap'] === null ? NAN : (float)$row['recency_over_mean_gap'],
         ];
     }
-
     public static function label(array $row): string {
         return (string)$row[CustomerChurnDataset::LABEL];
     }
@@ -172,7 +169,7 @@ class CustomerChurnModel {
         }
         $precision = ($tp + $fp) > 0 ? $tp / ($tp + $fp) : 0.0;
         $recall    = ($tp + $fn) > 0 ? $tp / ($tp + $fn) : 0.0;
-        $f1 = ($precision + $recall) > 0 ? 2 * $precision * $recall / ($precision + $recall) : 0.0;
+        $f1        = ($precision + $recall) > 0 ? 2 * $precision * $recall / ($precision + $recall) : 0.0;
 
         return [
             'accuracy'  => (new Accuracy)->score($predictions, $actual),
@@ -199,7 +196,6 @@ class CustomerChurnModel {
 
         return $model;
     }
-
     public static function load(): ?PersistentModel {
         $path = storage_path('app/'.self::MODEL_PATH);
         if (! is_file($path)) {
@@ -207,7 +203,6 @@ class CustomerChurnModel {
         }
         return PersistentModel::load(new Filesystem($path));
     }
-
     public static function predict(Company $company): ?float {
         $model = self::load();
         if (! $model) {

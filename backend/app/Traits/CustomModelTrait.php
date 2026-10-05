@@ -116,7 +116,6 @@ trait CustomModelTrait {
         // === USERS ===
         'User' => ['create' => [], 'read' => ['user', 'project_manager'], 'update' => ['user', 'project_manager'], 'delete' => []],
     ];
-
     private static array $standardRoleAccess = [
         'create' => ['user', 'project_manager'],
         'read'   => ['user', 'project_manager'],
@@ -133,7 +132,6 @@ trait CustomModelTrait {
         }
         return $obj;
     }
-
     public function getValidFields($obj, array $ignore = []) {
         $virtualColumns = $this->getVirtualColumns();
         $fillable       = $this->getFillable();
@@ -167,14 +165,12 @@ trait CustomModelTrait {
         }
         return $this;
     }
-
     public function applyAndSave(Request $request, array $ignore = []) {
         $this->apply($request, $ignore);
         $this->save();
         $this->touch();
         return $this;
     }
-
     public function appendRequest() {
         if (! ($a = request('append'))) {
             return $this;

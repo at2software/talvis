@@ -21,7 +21,6 @@ trait HasFociTrait {
             $_->foci()->delete();
         });
     }
-
     public function hoursInvestedSum() {
         return $this->hasOne(Focus::class, 'parent_id')
             ->where('parent_type', $this::class)

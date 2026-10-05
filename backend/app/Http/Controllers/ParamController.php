@@ -53,7 +53,7 @@ class ParamController extends Controller {
         return response()->json($result);
     }
     public function show($key, $type = null, $id = null) {
-        return $this->paramFor($key, $type, $id)->append('value');
+        return ($this->paramFor($key, $type, $id) ?? abort(404))->append('value');
     }
     public function history($key, $type = null, $id = null) {
         return $this->multiKeyHistory($key, fn ($singleKey) => $this->paramFor($singleKey, $type, $id));

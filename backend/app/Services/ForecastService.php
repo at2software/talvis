@@ -6,7 +6,6 @@ use App\Models\Company;
 use App\Models\FloatParam;
 use App\Models\Invoice;
 use App\Models\Param;
-use App\Models\TextParam;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Console\Command;
@@ -315,7 +314,6 @@ class ForecastService {
             $this->generateCompanyForecasts($evaluationDate);
         }
     }
-
     public function runAnalysis(?Carbon $evaluationDate = null, bool $shouldStore = true): ?array {
         $evaluationDate = $evaluationDate ?: Carbon::now();
 
@@ -381,7 +379,6 @@ class ForecastService {
             'evaluation_date' => $evaluationDate,
         ];
     }
-
     private function generateFeatureCombinations(): array {
         $combinations = [];
 

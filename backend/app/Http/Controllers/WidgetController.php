@@ -89,7 +89,6 @@ class WidgetController extends Controller {
 
         return $responseData;
     }
-
     private function addAgeBadges(string $key, $objects) {
         if ($objects->isEmpty()) {
             return;
@@ -99,11 +98,10 @@ class WidgetController extends Controller {
 
         match ($key) {
             'PROJECTS_TIMEBASED', 'CUSTOMER_SUPPORT' => $this->addFociBadges($objects, $now, $key),
-            'INVOICES_PREPARED' => $this->addInvoiceBadges($objects, $now),
-            default             => null
+            'INVOICES_PREPARED'                      => $this->addInvoiceBadges($objects, $now),
+            default                                  => null
         };
     }
-
     private function addFociBadges($objects, $now, $key) {
         $ids        = $objects->pluck('id');
         $parentType = $key === 'PROJECTS_TIMEBASED' ? 'App\\Models\\Project' : 'App\\Models\\Company';
@@ -134,11 +132,9 @@ class WidgetController extends Controller {
 
             if ($item->relationLoaded('supportItems') && $item->supportItems->isNotEmpty()) {
                 $oldestInvoiceItem = $item->supportItems->first();
-            }
-            elseif ($item->relationLoaded('unbilledInvoiceItems') && $item->unbilledInvoiceItems->isNotEmpty()) {
+            } elseif ($item->relationLoaded('unbilledInvoiceItems') && $item->unbilledInvoiceItems->isNotEmpty()) {
                 $oldestInvoiceItem = $item->unbilledInvoiceItems->first();
-            }
-            elseif (method_exists($item, 'supportItems')) {
+            } elseif (method_exists($item, 'supportItems')) {
                 $oldestInvoiceItem = $item->supportItems()->orderBy('created_at', 'asc')->first();
             } elseif (method_exists($item, 'unbilledInvoiceItems')) {
                 $oldestInvoiceItem = $item->unbilledInvoiceItems()->orderBy('created_at', 'asc')->first();
@@ -185,31 +181,6 @@ class WidgetController extends Controller {
                 };
             }
         );
-    }
-    public function GET_CASHFLOW_INVOICES_PREPARED() {
-        return new class {
-            public function getAndAppend() {
-                $companies = Company::getAllWithSupportItems();
-
-                $projects = Project::getAllWithSupportItems()->load('company');
-
-                $finishedProjects = Project::whereFinishedSuccessfull()
-                    ->where('is_ignored_from_prepared', false)
-                    ->whereHas('unbilledInvoiceItems')
-                    ->withSum('unbilledInvoiceItems as net_remaining', 'net')
-                    ->with(['company', 'unbilledInvoiceItems' => function ($q) {
-                        $q->select('id', 'company_id', 'project_id', 'created_at', 'net', 'type')
-                            ->orderBy('created_at', 'asc')
-                            ->limit(1);
-                    }])
-                    ->get();
-                return collect()
-                    ->merge($companies)
-                    ->merge($projects)
-                    ->merge($finishedProjects)
-                    ->each(fn ($model) => $model->cashflow_value = (float)($model->net_remaining ?? 0));
-            }
-        };
     }
     public function GET_CASHFLOW_PROJECTS_ACQUISITIONS() {
         $builder = Project::wherePrepared()
@@ -376,5 +347,30 @@ class WidgetController extends Controller {
             $next->addYear();
         }
         return $next->startOfDay();
+    }
+    public function GET_CASHFLOW_INVOICES_PREPARED() {
+        return new class {
+            public function getAndAppend() {
+                $companies = Company::getAllWithSupportItems();
+
+                $projects = Project::getAllWithSupportItems()->load('company');
+
+                $finishedProjects = Project::whereFinishedSuccessfull()
+                    ->where('is_ignored_from_prepared', false)
+                    ->whereHas('unbilledInvoiceItems')
+                    ->withSum('unbilledInvoiceItems as net_remaining', 'net')
+                    ->with(['company', 'unbilledInvoiceItems' => function ($q) {
+                        $q->select('id', 'company_id', 'project_id', 'created_at', 'net', 'type')
+                            ->orderBy('created_at', 'asc')
+                            ->limit(1);
+                    }])
+                    ->get();
+                return collect()
+                    ->merge($companies)
+                    ->merge($projects)
+                    ->merge($finishedProjects)
+                    ->each(fn ($model) => $model->cashflow_value = (float)($model->net_remaining ?? 0));
+            }
+        };
     }
 }

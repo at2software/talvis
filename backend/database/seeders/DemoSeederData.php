@@ -19,7 +19,6 @@ class DemoSeederData extends Seeder {
         }
         return $this->_faker;
     }
-
     public function users(Carbon $startDay): array {
         $faker = $this->faker();
 
@@ -64,7 +63,6 @@ class DemoSeederData extends Seeder {
         }
         return $users;
     }
-
     public function product_groups(): array {
         return [
             'Beratung',

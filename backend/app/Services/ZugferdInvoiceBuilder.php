@@ -194,7 +194,6 @@ class ZugferdInvoiceBuilder {
 
         return (new ZugferdDocumentPdfMerger($document->getContent(), $pdf))->generateDocument()->downloadString('');
     }
-
     private static function isReverseCharge(string $sellerCountry, string $buyerCountry, bool $buyerInEu, ?string $buyerVatId): bool {
         if (! $buyerInEu || trim((string)$buyerVatId) === '') {
             return false;
@@ -206,13 +205,11 @@ class ZugferdInvoiceBuilder {
 
         return true;
     }
-
     private static function billableItems($items): Collection {
         return collect($items)
             ->filter(fn ($item) => in_array($item->type, Invoice::ITEMS_ADDING_TO_INVOICE))
             ->values();
     }
-
     private static function vatBreakdownFromItems($items): array {
         $breakdown = [];
 
@@ -230,7 +227,6 @@ class ZugferdInvoiceBuilder {
 
         return array_values($breakdown);
     }
-
     private static function assertTotalsAddUp(float $net, float $vat, float $gross): void {
         if (abs($net + $vat - $gross) > self::TOTALS_TOLERANCE) {
             throw new InvoiceDataException(sprintf(

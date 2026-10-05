@@ -16,8 +16,8 @@ class AssignmentController extends Controller {
         }
         return $assignment->delete();
     }
-    public function update(Request $request, int $id) {
-        $assignment = Assignment::with('assignee', 'parent')->find($id);
+    public function update(Request $request, Assignment $assignment) {
+        $assignment->load('assignee', 'parent');
 
         if ($request->has('hours_planned') && ! Assignment::canChangeHoursPlanned($assignment->parent)) {
             abort(403, 'You do not have permission to allocate time for this assignment.');
@@ -25,7 +25,7 @@ class AssignmentController extends Controller {
 
         $oldHoursPlanned = $assignment->hours_planned ?? 0;
 
-        $assignment->applyAndSave($request);
+        $assignment->applyAndSave($request, ['parent_id', 'parent_type', 'assignee_id', 'assignee_type', 'flags']);
 
         if ($request->has('hours_planned') && $oldHoursPlanned != $assignment->hours_planned) {
             $assignment->createHoursChangeComment($oldHoursPlanned, $assignment->hours_planned);

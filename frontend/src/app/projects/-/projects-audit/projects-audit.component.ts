@@ -1,18 +1,15 @@
 import { Company } from '@models/company/company.model';
 import { ChangeDetectionStrategy, Component, effect, inject, linkedSignal, signal } from '@angular/core';
 import { modelListResource, modelResource } from '@models/http/model-resource';
-import { HttpClient } from '@angular/common/http';
-import { catchError, of } from 'rxjs';
 import { ToolbarComponent } from '@app/app/toolbar/toolbar.component';
 import { EmptyStateComponent } from '@shards/empty-state/empty-state.component';
 import { AvatarComponent } from '@app/_shards/avatar/avatar.component';
 import { SearchInputComponent } from '@app/_shards/search-input/search-input.component';
 import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { RouterModule } from '@angular/router';
-import { PluginInstanceFactory } from '@models/http/plugins/plugin.instance.factory';
+import { DatePipe } from '@angular/common';
 import { GitlabAuditService } from '@models/gitlab-audit/gitlab-audit.service';
 import { GitlabAuditProject } from '@models/gitlab-audit/gitlab-audit-project.model';
-import { GitlabSchedule } from '@models/gitlab-audit/gitlab-schedule.model';
 import { ProductService } from '@models/product/product.service';
 import { ParamService } from '@models/param/param.service';
 import { Param } from '@models/param/param.model';
@@ -30,20 +27,16 @@ import { Product } from '@models/product/product.model';
 import { Serializable } from '@models/_core/serializable';
 import { Dictionary } from '@constants/constants';
 
-const TALVIS_PREFIX = '[NEXUS] ';
-
 @Component({
     changeDetection: ChangeDetectionStrategy.OnPush,
     selector: 'projects-audit',
-    imports: [RouterModule, ToolbarComponent, EmptyStateComponent, AvatarComponent, SearchInputComponent, NgbTooltipModule, Nx, NComponent, AvatarComponent, SpinnerComponent],
+    imports: [RouterModule, DatePipe, ToolbarComponent, EmptyStateComponent, AvatarComponent, SearchInputComponent, NgbTooltipModule, Nx, NComponent, AvatarComponent, SpinnerComponent],
     templateUrl: './projects-audit.component.html',
 })
 export class ProjectsAuditComponent {
     savingProduct = signal(false);
 
     #service = inject(GitlabAuditService);
-    #factory = inject(PluginInstanceFactory);
-    #http = inject(HttpClient);
     #modalBase = inject(ModalBaseService);
     #inputModal = inject(InputModalService);
     #ngbModal = inject(NgbModal);
@@ -64,7 +57,6 @@ export class ProjectsAuditComponent {
     constructor() {
         effect(() => {
             this.projects().forEach((p) => this.#bindCallbacks(p));
-            this.loadSchedules();
         });
     }
 
@@ -90,51 +82,24 @@ export class ProjectsAuditComponent {
         Param.write('params/AUDIT_DEFAULT_PRODUCT_ID', null).subscribe();
     }
 
-    #enc(project: GitlabAuditProject) {
-        return this.#factory.getPluginEncryptionsOfType('git').find((e) => project.gitlab_url.startsWith(e.value.url));
-    }
-
-    loadSchedules() {
-        const projects = this.projects();
-        projects.forEach((p) => {
-            const enc = this.#enc(p);
-            if (!enc) {
-                p.var.noToken = true;
-                return;
-            }
-            p.var.loading = true;
-            const encoded = encodeURIComponent(p.namespace_with_path);
-            this.#http
-                .get<GitlabSchedule[]>(`${enc.value.url}api/v4/projects/${encoded}/pipeline_schedules`)
-                .pipe(catchError(() => of([])))
-                .subscribe((raw) => {
-                    p.schedules = (raw ?? [])
-                        .filter((_) => _.description?.startsWith(TALVIS_PREFIX))
-                        .map((_) => this.#makeSchedule(_, p));
-                    p.var.loading = false;
-                });
-        });
-    }
-
-    #makeSchedule(raw: GitlabSchedule, project: GitlabAuditProject): GitlabSchedule {
-        const s = GitlabSchedule.fromJson(raw);
-        s.var.onDelete = (schedule: GitlabSchedule, done?: () => void) => {
-            const enc = this.#enc(project)!;
-            const encoded = encodeURIComponent(project.namespace_with_path);
-            this.#http.delete(`${enc.value.url}api/v4/projects/${encoded}/pipeline_schedules/${schedule.id}`).subscribe(() => {
-                project.schedules = project.schedules.filter((sc) => sc.id !== schedule.id);
-                done?.();
-                if (!project.schedules.length) {
-                    project.delete().subscribe(() => {
-                        this.projects.set(this.projects().filter((p) => p.id !== project.id));
-                    });
-                }
+    #bindCallbacks(p: GitlabAuditProject) {
+        p.var.onRun = (project: GitlabAuditProject) => {
+            project.var.running = true;
+            this.#service.post(`gitlab-audit/${project.id}/run`).subscribe({
+                next: (updated) => {
+                    project.last_run_at = updated.last_run_at;
+                    project.last_status = updated.last_status;
+                    project.last_pipeline_id = updated.last_pipeline_id;
+                    project.var.running = false;
+                },
+                error: () => (project.var.running = false),
             });
         };
-        return s;
-    }
 
-    #bindCallbacks(p: GitlabAuditProject) {
+        p.var.onDelete = (project: GitlabAuditProject) => {
+            project.delete().subscribe(() => this.projects.set(this.projects().filter((_) => _.id !== project.id)));
+        };
+
         p.var.onRename = async (project: GitlabAuditProject) => {
             const result = await this.#inputModal.open('rename audit', false, undefined, project.project_name).catch(() => null);
             if (!result?.text?.trim()) return;
@@ -198,10 +163,6 @@ export class ProjectsAuditComponent {
             });
     }
 
-    stageName(description: string): string {
-        return description.startsWith(TALVIS_PREFIX) ? description.slice(TALVIS_PREFIX.length) : description;
-    }
-
     cronLabel(cron: string): string {
         const labels: Dictionary<string> = {
             '0 0 * * *': 'daily',
@@ -209,5 +170,15 @@ export class ProjectsAuditComponent {
             '0 0 1 * *': 'monthly',
         };
         return labels[cron] ?? cron;
+    }
+
+    statusLabel(status: GitlabAuditProject['last_status']): string {
+        const labels: Record<NonNullable<GitlabAuditProject['last_status']>, string> = {
+            retried: 'audit jobs retried',
+            'no-deployment': 'no successful deployment found',
+            'no-jobs': 'no audit job could be retried',
+            'foreign-gitlab': 'project is not on the GitLab instance of the vault connector',
+        };
+        return status ? labels[status] : 'not run yet';
     }
 }

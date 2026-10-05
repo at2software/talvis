@@ -154,7 +154,6 @@ class ProjectEarlyWarningModel {
 
         return $model;
     }
-
     public static function load(): ?PersistentModel {
         $path = storage_path('app/'.self::MODEL_PATH);
         if (! is_file($path)) {
@@ -162,7 +161,6 @@ class ProjectEarlyWarningModel {
         }
         return PersistentModel::load(new Filesystem($path));
     }
-
     public static function predictRemaining(Project $project): ?float {
         $model = self::load();
         $row   = ProjectCheckpointDataset::currentRow($project);
@@ -175,7 +173,6 @@ class ProjectEarlyWarningModel {
 
         return max(0.0, exp($logPrediction) - 1);
     }
-
     public static function predictFinal(Project $project): ?float {
         $remaining = self::predictRemaining($project);
         if ($remaining === null) {

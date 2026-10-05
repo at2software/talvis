@@ -8,6 +8,7 @@
         "php": "^8.3",
         "barryvdh/laravel-dompdf": "^3.0",
         "composer/ca-bundle": "^1.5",
+        "dedoc/scramble": "^0.13.46",
         "guzzlehttp/guzzle": "^7.2",
         "horstoeko/zugferd": "^1.0",
         "intervention/image": "^3.8",

@@ -15,7 +15,8 @@ class ExpenseController extends Controller {
         return $expense;
     }
     public function store(ValidatePayloadRequest $request) {
-        $expense = Expense::create();
+        $request->validate(['name' => 'required|string']);
+        $expense = (new Expense)->forceFill(['starts_at' => now()->toDateString(), 'flags' => 0]);
         return $expense->applyAndSave($request);
     }
     public function update(ValidatePayloadRequest $request, Expense $expense) {

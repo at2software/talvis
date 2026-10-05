@@ -103,7 +103,6 @@ class Param extends BaseModel {
         $this->value;
         return $this->fallen_back;
     }
-
     protected function value(): Attribute {
         return Attribute::make(
             get: function () {
@@ -235,7 +234,6 @@ class Param extends BaseModel {
         }
         return $this->type::create($data);
     }
-
     public static function get($key, $attrs = [], $doNotCreate = false): ?Param {
         if (! empty(self::$paramCache[$key])) {
             return self::$paramCache[$key];
@@ -262,7 +260,6 @@ class Param extends BaseModel {
         self::$paramCache[$key] = $param;   // save for later use
         return $param;
     }
-
     public static function index($poly = null): array {
         if ($poly === null) {
             $poly = self::nullPoly();
@@ -318,11 +315,9 @@ class Param extends BaseModel {
             default: return null;
         }
     }
-
     public function localizedValue(?string $language = 'de', ?string $formality = 'formal'): ?string {
         return self::localizeI18nValue($this->value, $language, $formality);
     }
-
     public static function localizeI18nValue($value, ?string $language = 'de', ?string $formality = 'formal'): ?string {
         if (! is_array($value)) {
             return $value;

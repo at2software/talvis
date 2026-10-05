@@ -29,7 +29,6 @@ trait VcardTrait {
 
         return $this->_cached_vcard = new Vcard($this->attributes['vcard'] ?? '');
     }
-
     public function getNameAttribute() {
         return $this->vcard->getFirstValue('FN', 'unknown name');
     }
@@ -126,16 +125,13 @@ trait VcardTrait {
                     if (in_array(substr($digits, 0, 3), ['030', '040', '069', '089', '221', '211', '228', '231', '241', '228', '251', '261', '271', '281', '511', '611', '711', '811', '911'])) {
                         $cityCode    = substr($digits, 0, 3);
                         $localNumber = substr($digits, 3);
-                    }
-                    elseif (strlen($digits) >= 9) {
+                    } elseif (strlen($digits) >= 9) {
                         $cityCode    = substr($digits, 0, 4);
                         $localNumber = substr($digits, 4);
-                    }
-                    elseif (in_array(substr($digits, 0, 2), ['30', '40', '69', '89'])) {
+                    } elseif (in_array(substr($digits, 0, 2), ['30', '40', '69', '89'])) {
                         $cityCode    = substr($digits, 0, 2);
                         $localNumber = substr($digits, 2);
-                    }
-                    else {
+                    } else {
                         $cityCode    = substr($digits, 0, 3);
                         $localNumber = substr($digits, 3);
                     }

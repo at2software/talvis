@@ -38,14 +38,12 @@ class ProjectFactory extends Factory {
             );
         });
     }
-
     public function running(): static {
         return $this->withState(ProjectState::Running, false);
     }
     public function finished(bool $successful = true): static {
         return $this->withState(ProjectState::Finished, $successful);
     }
-
     public function workEstimated(float $hours): static {
         return $this->afterCreating(function (Project $project) use ($hours) {
             DB::table('projects')->where('id', $project->id)->update(['work_estimated' => $hours]);

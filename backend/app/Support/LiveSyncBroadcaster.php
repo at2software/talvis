@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use App\Events\DataChanged;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Auth;
 
 /**
@@ -15,9 +16,10 @@ use Illuminate\Support\Facades\Auth;
 class LiveSyncBroadcaster {
     /** @var array<string, array{class: string, id: string|int, event: string, actorId: int}> */
     private array $pending = [];
+
     private bool $flushRegistered = false;
 
-    /** @param \Illuminate\Database\Eloquent\Model $model any BaseModel instance */
+    /** @param Model $model any BaseModel instance */
     public static function dispatchFor($model, string $event): void {
         $actorId = Auth::id() ?? 0;
         app(self::class)->add($model->getClassAttribute(), $model->getKey(), $event, $actorId);
@@ -43,7 +45,6 @@ class LiveSyncBroadcaster {
             });
         }
     }
-
     public function flush(): void {
         foreach ($this->pending as $tuple) {
             event(new DataChanged($tuple['class'], $tuple['id'], $tuple['event'], $tuple['actorId']));

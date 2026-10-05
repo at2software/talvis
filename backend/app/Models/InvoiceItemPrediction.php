@@ -7,8 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class InvoiceItemPrediction extends BaseModel {
     use HasFactory;
 
-    protected $touches = ['invoiceItem'];
-
+    protected $touches  = ['invoiceItem'];
     protected $fillable = ['user_id', 'invoice_item_id', 'qty', 'flags'];
 
     public function user() {

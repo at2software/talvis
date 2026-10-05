@@ -26,18 +26,15 @@ class MarketingProspectActivity extends BaseModel {
             'performance_value' => 'decimal:2',
         ];
     }
-
     public function marketingProspect(): BelongsTo {
         return $this->belongsTo(MarketingProspect::class, 'marketing_prospect_id');
     }
     public function marketingInitiativeActivity(): BelongsTo {
         return $this->belongsTo(MarketingInitiativeActivity::class, 'marketing_initiative_activity_id');
     }
-
     public function marketingActivity(): BelongsTo {
         return $this->marketingInitiativeActivity();
     }
-
     public function scopePending($query) {
         return $query->where('status', 'pending');
     }
@@ -59,7 +56,6 @@ class MarketingProspectActivity extends BaseModel {
     public function scopeByActivityType($query, string $type) {
         return $query->whereHas('marketingActivity', fn ($q) => $q->where('activity_type', $type));
     }
-
     public function getStatusLabel(): string {
         return match ($this->status) {
             'pending'   => 'Pending',
@@ -111,7 +107,6 @@ class MarketingProspectActivity extends BaseModel {
         }
         return $this->update(['scheduled_at' => $newDate]);
     }
-
     public function shiftSucceedingActivities(): void {
         $now        = now();
         $daysOffset = $now->startOfDay()->diffInDays($this->scheduled_at->startOfDay());
@@ -127,7 +122,6 @@ class MarketingProspectActivity extends BaseModel {
                 ->update(['scheduled_at' => DB::raw("DATE_ADD(scheduled_at, INTERVAL {$daysDifference} DAY)")]);
         }
     }
-
     public function getDaysUntilDue(): int {
         return now()->diffInDays($this->scheduled_at, false);
     }
@@ -153,11 +147,11 @@ class MarketingProspectActivity extends BaseModel {
         }
 
         return match ($this->marketingActivity->activity_type) {
-            'connection_request' => $prospect->linkedin_url,
-            'send_message'       => $prospect->linkedin_url.'/overlay/contact-info/',
+            'connection_request'        => $prospect->linkedin_url,
+            'send_message'              => $prospect->linkedin_url.'/overlay/contact-info/',
             'like_post', 'comment_post' => $prospect->linkedin_url.'/recent-activity/',
-            'view_profile' => $prospect->linkedin_url,
-            default        => $prospect->linkedin_url
+            'view_profile'              => $prospect->linkedin_url,
+            default                     => $prospect->linkedin_url
         };
     }
 }

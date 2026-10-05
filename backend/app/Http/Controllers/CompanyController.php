@@ -34,7 +34,7 @@ class CompanyController extends Controller {
                     $lng = floatval($geoData[1]);
 
                     if (is_numeric($geoData[0]) && is_numeric($geoData[1]) && $lat != 0 && $lng != 0) {
-                        
+
                         $net      = floatval($company->net ?? 0);
                         $pinSize  = 'small';
                         $pinColor = 'grey';
@@ -281,6 +281,7 @@ class CompanyController extends Controller {
         return $company->toJson();
     }
     public function store(Request $request) {
+        $request->validate(['name' => 'required|string']);
         $data = $this->getBody();
         if (preg_match("/^https?:\/\//is", $data->name)) {
             $vcard = Company::scrapeWebpage($data->name);
@@ -298,13 +299,13 @@ class CompanyController extends Controller {
         return $new;
     }
     public function storeDraft(Request $request) {
-        $phone  = preg_replace('/\D/', '', (string)$request->input('phone_number', ''));
+        $phone   = preg_replace('/\D/', '', (string)$request->input('phone_number', ''));
         $company = Company::draftByPhone($phone);
         if (! $company) {
             $vcard  = "FN:\n";
             $vcard .= "ORG:\n";
             $vcard .= "URL;type=work:\n";
-            $vcard .= "X-KNOWNSEQ-DRAFT:".$phone."\n";
+            $vcard .= 'X-KNOWNSEQ-DRAFT:'.$phone."\n";
             $company        = new Company;
             $company->vcard = $vcard;
             $company->flags = Company::FLAG_DRAFT;
@@ -317,7 +318,6 @@ class CompanyController extends Controller {
         $company->append('address');
         return response()->json($company);
     }
-
     public function keep(Company $_) {
         $_->flags = (int)$_->flags & ~Company::FLAG_DRAFT;
         $_->vcard = preg_replace('/^X-KNOWNSEQ-DRAFT:.*\R?/m', '', (string)$_->vcard);
@@ -326,7 +326,6 @@ class CompanyController extends Controller {
         }
         return response()->json($_->fresh());
     }
-
     public function discardDraft(Company $_) {
         if (! $_->isDraft()) {
             return response()->make('not a draft', 403);
@@ -334,7 +333,6 @@ class CompanyController extends Controller {
         $_->purgeDraft();
         return response()->make('success', 202);
     }
-
     public function storeProject(Request $request, Company $_) {
         return $_->createProject(
             $request->input('name', 'New project'),

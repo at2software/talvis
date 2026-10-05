@@ -1,0 +1,11 @@
+<li class="list-group-item list-group-item-action d-flex py-1">
+    <div class="text-muted me-2" ngbTooltip="quote valid for" i18n-ngbTooltip="@@i18n.project.quoteValidFor">
+        <i>event_available</i>
+    </div>
+    <div (click)="change()" (keyup.enter)="change()" tabindex="0" class="pointer flex-fill" [class.text-muted]="!individual()">
+        {{ effective() }} <span i18n="@@i18n.common.days">days</span>
+    </div>
+    @if (individual()) {
+        <div><i class="text-primary pointer" (click)="remove()" (keyup.enter)="remove()" tabindex="0">close</i></div>
+    }
+</li>

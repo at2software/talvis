@@ -74,7 +74,8 @@ cp -r "$SCRIPT_DIR/backend" "$DIST/backend"
 ok "backend/ copied"
 
 # Pre-built Angular assets
-mv "$SCRIPT_DIR/frontend/dist/talvis/browser" "$DIST/frontend"
+cp -r "$SCRIPT_DIR/frontend/dist/talvis/browser" "$DIST/frontend"
+rm -rf "$SCRIPT_DIR/frontend/dist/talvis/browser" || true
 ok "frontend/ copied (pre-built Angular)"
 
 # Docker config — Dockerfile.prod is the prebuilt variant (no Node stage needed)

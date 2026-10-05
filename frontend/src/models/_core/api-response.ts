@@ -359,6 +359,8 @@ export interface PaymentPlanStepDto {
     percentage: number;
     months: number | null;
     month_index: number | null;
+    years: number | null;
+    year_index: number | null;
     amount: number;
     status: PaymentPlanStepStatus;
     item: PaymentPlanDownpaymentDto | null;
@@ -784,4 +786,10 @@ export type CompanyContactStoreDto = Omit<CompanyContact, 'company'> & { company
 export interface RoleManagementDto {
     roles?: Dictionary[];
     users?: Dictionary[];
+}
+
+export interface QuoteDescriptionDto {
+    key: string;
+    html: string;
+    disabled: boolean;
 }

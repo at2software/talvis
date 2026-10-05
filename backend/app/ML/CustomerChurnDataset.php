@@ -36,11 +36,8 @@ class CustomerChurnDataset {
         'tenure_days',
         'recency_over_mean_gap',
     ];
-
-    public const LABEL = 'churned';
-
+    public const LABEL               = 'churned';
     public const LABEL_WINDOW_MONTHS = 12;
-
     public const MIN_PRIOR_PURCHASES = 3;
 
     /**

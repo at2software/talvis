@@ -12,8 +12,8 @@ use App\Models\Param;
 use App\Models\Project;
 use App\Models\User;
 use App\Traits\VcardTrait;
-use Illuminate\Support\Facades\Storage;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Storage;
 
 class FileController extends Controller {
     public function show(int $id) {
@@ -31,13 +31,14 @@ class FileController extends Controller {
     }
     public function uploadTravelExpenses() {
         $request = request();
-        $me      = Company::find(Param::get('ME_ID')->value);
-        $total   = 0;
-        $data    = json_decode($request->data);
-        foreach (@$data->days as $_) {
+        $request->validate(['data' => 'required|json']);
+        $me    = Company::find(Param::get('ME_ID')->value);
+        $total = 0;
+        $data  = json_decode($request->data);
+        foreach ($data->days ?? [] as $_) {
             $total += $_->sum;
         }
-        foreach (@$data->expenses as $_) {
+        foreach ($data->expenses ?? [] as $_) {
             $total += $_->sum;
         }
         $headers = [];

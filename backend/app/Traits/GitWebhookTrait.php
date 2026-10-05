@@ -7,6 +7,7 @@ use App\Http\Controllers\PluginGitController;
 use App\Jobs\ChatSendMessageJob;
 use App\Models\Param;
 use App\Models\Project;
+use App\Support\PipelineJobKind;
 
 trait GitWebhookTrait {
     private function pipelineJobs(): array {
@@ -39,11 +40,11 @@ trait GitWebhookTrait {
         }
 
         [$securityMessage, $securityProps] = match ($jobConfig['type']) {
-            'sast'     => [$this->formatSast($data),          $this->securityProps($this->project['name'], 'SAST', 'icon-sast.png')],
-            'npm'      => [$this->formatNpmAudit($data),      $this->securityProps($this->project['name'], 'NPM', 'icon-npm.png')],
-            'composer' => [$this->formatComposerAudit($data), $this->securityProps($this->project['name'], 'Composer', 'icon-composer.png')],
-            'cargo'    => [$this->formatCargoAudit($data),    $this->securityProps($this->project['name'], 'Cargo', 'icon-cargo.png')],
-            'grype'    => [$this->formatGrype($data),         $this->securityProps($this->project['name'], 'Grype', 'icon-grype.png')],
+            'sast'     => [$this->formatSast($data),          $this->securityProps($this->project['name'], 'SAST', 'job-sast.png')],
+            'npm'      => [$this->formatNpmAudit($data),      $this->securityProps($this->project['name'], 'NPM', 'job-npm-audit.png')],
+            'composer' => [$this->formatComposerAudit($data), $this->securityProps($this->project['name'], 'Composer', 'job-composer-audit.png')],
+            'cargo'    => [$this->formatCargoAudit($data),    $this->securityProps($this->project['name'], 'Cargo', 'job-cargo-audit.png')],
+            'grype'    => [$this->formatGrype($data),         $this->securityProps($this->project['name'], 'Grype', 'job-vuln.png')],
             default    => [null, null],
         };
 
@@ -58,11 +59,15 @@ trait GitWebhookTrait {
             ChatSendMessageJob::dispatch($securityMessage, $securityProps, channelId: $chatInfo['channelId'], cacheId: $cacheId);
         }
     }
-    private function notifyProjectManager(string $message): void {
+    private function notifyProjectManager(string $message, ?string $cacheId = null): void {
         foreach ($this->links as $link) {
             $project = $link->parent;
             if ($project instanceof Project && $pm = $project->projectManager) {
-                ChatSendMessageJob::dispatch($message, $this->props($this->project['name']), user: $pm);
+                $props = $this->props($this->project['name']);
+                if ($cacheId) {
+                    $props['nexus_cache_id'] = $cacheId;
+                }
+                ChatSendMessageJob::dispatch($message, $props, cacheId: $cacheId, user: $pm);
                 return;
             }
         }
@@ -156,13 +161,39 @@ trait GitWebhookTrait {
         uasort($stages, fn ($a, $b) => $a[0]['id'] <=> $b[0]['id']);
 
         $rendered = array_map(fn ($group) => implode(' ', array_map(function (array $build) use ($projectUrl) {
-            $emoji = $this->emojiForStatus($build['status']);
-            return "[`$emoji {$build['name']}`]({$projectUrl}/-/jobs/{$build['id']})";
+            ['name' => $name, 'status' => $status] = $build;
+
+            $url  = "{$projectUrl}/-/jobs/{$build['id']}";
+            $kind = PipelineJobKind::of($name);
+
+            if ($kind && $badge = $this->iconUrl("badges/{$this->iconStatus($status)}-$kind")) {
+                $remainder = PipelineJobKind::remainder($name);
+                $label     = $remainder === '' ? '' : " `$remainder`";
+                return "[![$name]($badge =44x22 \"$name ($status)\")$label]($url)";
+            }
+            return "[{$this->statusLabel($status, $name)}]($url)";
         }, $group)), $stages);
 
         return implode(' · ', $rendered);
     }
 
+    private function statusLabel(string $status, string $text): string {
+        if ($statusIcon = $this->iconUrl("status-{$this->iconStatus($status)}")) {
+            return "![$status]($statusIcon =16x16 \"$status\") `$text`";
+        }
+        return "`{$this->emojiForStatus($status)} $text`";
+    }
+    private function iconStatus(string $status): string {
+        return match ($status) {
+            'preparing', 'waiting_for_resource', 'waiting_for_callback' => 'pending',
+            'scheduled'                                                 => 'created',
+            default                                                     => $status,
+        };
+    }
+    private function iconUrl(string $name): ?string {
+        $file = "icons/$name.png";
+        return is_file(public_path($file)) ? asset($file) : null;
+    }
     private function emojiForStatus(string $status): string {
         return match ($status) {
             'manual', 'skipped' => '⚫',
@@ -170,6 +201,7 @@ trait GitWebhookTrait {
             'success'           => '✅',
             'failed'            => '❌',
             'canceled'          => '⚪',
+            'canceling'         => '🔷',
             'pending'           => '⏳',
             'running'           => '🔵',
             default             => "❓ (unknown $status)",

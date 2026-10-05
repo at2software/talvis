@@ -19,7 +19,6 @@ class CalDAVController extends Controller {
         $server = $this->startCalDAVServer($request->route()->getName());
         return CapturingSapi::toLaravelResponse($server->httpResponse);
     }
-
     public function startCalDAVServer(string $rootUri): DAV\Server {
         $pdo = DB::connection()->getPdo();
         $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
@@ -39,7 +38,6 @@ class CalDAVController extends Controller {
         $server->start();
         return $server;
     }
-
     public function createCalDAVServer(\PDO $pdo): DAV\Server {
         $principalBackend = new OwnPrincipalBackend($pdo);
         $calendarBackend  = new OwnCalDAVBackend($pdo);
@@ -50,7 +48,7 @@ class CalDAVController extends Controller {
         ];
 
         DAV\Server::$exposeVersion = false;
-        $server = new DAV\Server($tree, new CapturingSapi);
+        $server                    = new DAV\Server($tree, new CapturingSapi);
 
         $caldavPlugin = new CalDAV\Plugin;
         $server->addPlugin($caldavPlugin);

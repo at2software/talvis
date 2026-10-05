@@ -15,7 +15,7 @@ import { Milestone } from '@models/milestone/milestone.model';
 import { Task } from '@models/task/task.model';
 import { Serializable } from '@models/_core/serializable';
 import { InvoiceItem } from '@models/invoice/invoice-item.model';
-import { MilestonesDto, ConvertDto, ParticipatingCompanyDto, PaymentPlanOverviewDto, PredictionStatsDto, QuoteAcceptancePredictionDto } from '@models/_core/api-response';
+import { MilestonesDto, ConvertDto, ParticipatingCompanyDto, PaymentPlanOverviewDto, PredictionStatsDto, QuoteAcceptancePredictionDto, QuoteDescriptionDto } from '@models/_core/api-response';
 
 export interface ProjectPluginLinkResolution {
     url: string;
@@ -50,7 +50,7 @@ export class ProjectService extends TalvisHttpService<Project> {
     moveRegularItemsToCustomer = (_: Project) => this.put(`projects/${_.id}/move-regular-to-customer`);
     moveSupportToCustomer = (_: Project) => this.put(`projects/${_.id}/move-support-to-customer`, {}, Object);
     convertSupportItemsToRegular = (_: Project) => this.put(`projects/${_.id}/convert-support-to-regular`, {}, Object);
-    makePdf = (parent: Serializable, type: PdfCreationType = PdfCreationType.Preview, success?: () => unknown) => this.getFile(parent.apiPathWithId() + '/pdf', { type: type }, success);
+    makePdf = (parent: Serializable, type: PdfCreationType = PdfCreationType.Preview, success?: () => unknown, done?: () => unknown) => this.getFile(parent.apiPathWithId() + '/pdf', { type: type }, success, done);
 
     indexMissingGit = () => this.aget('projects/missing-git', {}, Project);
     resolveProjectsByPluginLinkUrls = (urls: string[]): Observable<ProjectPluginLinkResolution[]> => {
@@ -62,7 +62,7 @@ export class ProjectService extends TalvisHttpService<Project> {
     indexPaginated = (filters?: Dictionary) => this.paginate(this.apiPath, filters);
     indexForCompany = (_: Company | string | number, filters?: Dictionary): Observable<Project[]> => this.aget(`companies/${idOf(_)}/projects`, filters);
     indexCoParticipatedProjects = (company: Company, filters?: Dictionary): Observable<Project[]> => this.aget(`companies/${company.id}/co-participated-projects`, filters);
-    indexQuoteDescriptions = (projectId: string): Observable<string[]> => this.aget(`projects/${projectId}/quote-descriptions`, {}, Object);
+    indexQuoteDescriptions = (projectId: string): Observable<QuoteDescriptionDto[]> => this.aget(`projects/${projectId}/quote-descriptions`, {}, Object);
     indexFrameworks = (): Observable<Framework[]> => this.aget('projects/frameworks', {}, Framework);
     indexLatestFrameworks = (): Observable<FrameworkLatest[]> => this.aget('projects/frameworks/latest', {}, FrameworkLatest);
     indexReporting = (params: Dictionary) => this.aget('projects/reporting', params, Project);

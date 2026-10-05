@@ -51,9 +51,7 @@ class SupportLoadDataset {
         'days_since_last_support',
         'accepts_support',
     ];
-
-    public const LABEL = 'support_hours_next_window';
-
+    public const LABEL         = 'support_hours_next_window';
     public const WINDOW_MONTHS = 3;
 
     /** Minimum pre-cutoff support foci for a snapshot to be usable (mirrors CustomerRevenueDataset::MIN_PRIOR_INVOICES). */
@@ -120,7 +118,7 @@ class SupportLoadDataset {
 
         $firstFocusAt   = Carbon::parse($foci->first()->started_at);
         $firstInvoiceAt = $invoices->isNotEmpty() ? Carbon::parse($invoices->first()->created_at) : null;
-        $tenureStart = ($firstInvoiceAt && $firstInvoiceAt->lt($firstFocusAt)) ? $firstInvoiceAt : $firstFocusAt;
+        $tenureStart    = ($firstInvoiceAt && $firstInvoiceAt->lt($firstFocusAt)) ? $firstInvoiceAt : $firstFocusAt;
 
         $lastBeforeFocusAt = Carbon::parse($before->last()->started_at);
 

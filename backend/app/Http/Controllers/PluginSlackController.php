@@ -114,14 +114,12 @@ class PluginSlackController extends PluginChatController {
     public function env(string $key): ?string {
         return config('services.slack.'.strtolower($key)) ?: null;
     }
-    public function updatePosition(string $position, string $userId): void {
-    }
+    public function updatePosition(string $position, string $userId): void {}
     public function updateStatus(string $status, string $userId): void {
         $payload = ['user' => $userId, 'status_text' => $status];
         $this->post('users.profile.set', $payload);
     }
-    public function deletePost(string $id): void {
-    }
+    public function deletePost(string $id): void {}
     public function getChannelPosts(string $channelId, int $page = 0, int $perPage = 200): array {
         return [];
     }
