@@ -30,10 +30,7 @@
                         <tbody>
                             @for (delivery of deliveries(); track delivery.uuid) {
                                 <tr>
-                                    <td>
-                                        <div>{{ eventLabel(delivery.event) }}</div>
-                                        <code class="text-muted small notranslate">{{ delivery.event }}</code>
-                                    </td>
+                                    <td><code class="notranslate">{{ delivery.event }}</code></td>
                                     <td class="text-nowrap" [ngbTooltip]="delivery.created_at | date: 'medium'">{{ delivery.created_at | relativeTime }}</td>
                                     <td class="text-end">{{ delivery.attempts }}</td>
                                     <td class="w-50" style="max-width: 0">

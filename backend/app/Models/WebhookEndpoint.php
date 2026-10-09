@@ -2,22 +2,19 @@
 
 namespace App\Models;
 
-use App\Enums\WebhookEvent;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class WebhookEndpoint extends BaseModel {
     private const SECRET_PREFIX = 'whsec_';
 
-    protected $fillable = ['name', 'url', 'events', 'is_active', 'created_by_id'];
+    protected $fillable = ['name', 'url', 'is_active', 'created_by_id'];
     protected $hidden   = ['secret'];
     protected $appends  = ['class'];
 
     protected function casts(): array {
         return [
             'secret'            => 'encrypted',
-            'events'            => 'array',
             'is_active'         => 'boolean',
             'last_delivered_at' => 'datetime',
             'last_failed_at'    => 'datetime',
@@ -32,27 +29,15 @@ class WebhookEndpoint extends BaseModel {
     public static function newSecret(): string {
         return self::SECRET_PREFIX.base64_encode(random_bytes(32));
     }
-    public static function dispatch(WebhookEvent $event, array $data): void {
-        DB::afterCommit(function () use ($event, $data) {
-            self::query()
-                ->where('is_active', true)
-                ->get()
-                ->filter(fn (self $endpoint) => $endpoint->subscribesTo($event))
-                ->each(fn (self $endpoint) => $endpoint->queue($event, $data));
-        });
-    }
     public function deliveries(): HasMany {
         return $this->hasMany(WebhookDelivery::class);
     }
-    public function subscribesTo(WebhookEvent $event): bool {
-        return in_array($event->value, $this->events ?? [], true);
-    }
-    public function queue(WebhookEvent $event, array $data): WebhookDelivery {
+    public function queue(string $event, array $data): WebhookDelivery {
         $uuid = (string)Str::uuid();
         return $this->deliveries()->create([
             'uuid'            => $uuid,
-            'event'           => $event->value,
-            'payload'         => ['id' => $uuid, 'type' => $event->value, 'timestamp' => now()->toIso8601String(), 'data' => $data],
+            'event'           => Str::limit($event, 64, ''),
+            'payload'         => ['id' => $uuid, 'type' => $event, 'timestamp' => now()->toIso8601String(), 'data' => $data],
             'next_attempt_at' => now(),
         ]);
     }

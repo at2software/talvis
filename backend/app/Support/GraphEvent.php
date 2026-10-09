@@ -11,6 +11,7 @@ use DateTimeZone;
  * @see https://learn.microsoft.com/en-us/graph/api/resources/patternedrecurrence
  */
 final class GraphEvent {
+    private const ORDINALS = ['1' => 'first', '2' => 'second', '3' => 'third', '4' => 'fourth', '-1' => 'last'];
     private const WEEKDAYS = ['MO' => 'monday', 'TU' => 'tuesday', 'WE' => 'wednesday', 'TH' => 'thursday', 'FR' => 'friday', 'SA' => 'saturday', 'SU' => 'sunday'];
 
     public static function fromEvent(CalendarEvent $event): array {
@@ -29,24 +30,41 @@ final class GraphEvent {
 
     /** @return array{dateTime: string, timeZone: string} */
     private static function moment(DateTimeImmutable $moment, bool $allDay): array {
-        return $allDay
-            ? ['dateTime' => $moment->format('Y-m-d').'T00:00:00', 'timeZone' => 'UTC']
-            : ['dateTime' => $moment->setTimezone(new DateTimeZone('UTC'))->format('Y-m-d\TH:i:s'), 'timeZone' => 'UTC'];
+        if ($allDay) {
+            return ['dateTime' => $moment->format('Y-m-d').'T00:00:00', 'timeZone' => 'UTC'];
+        }
+        $zone = $moment->getTimezone()->getName();
+        if (! in_array($zone, DateTimeZone::listIdentifiers(), true)) {
+            [$moment, $zone] = [$moment->setTimezone(new DateTimeZone('UTC')), 'UTC'];
+        }
+        return ['dateTime' => $moment->format('Y-m-d\TH:i:s'), 'timeZone' => $zone];
     }
 
     private static function recurrence(array $rule, DateTimeImmutable $start): ?array {
         $frequency = $rule['FREQ'] ?? null;
-        if (isset($rule['BYSETPOS']) || (isset($rule['BYDAY']) && $frequency !== 'WEEKLY')) {
+        $interval  = max(1, (int)($rule['INTERVAL'] ?? 1));
+        $byDay     = array_map(fn (string $day) => preg_match('/^([+-]?\d)?(MO|TU|WE|TH|FR|SA|SU)$/', $day, $match) ? ['ordinal' => $match[1] ?? '', 'day' => self::WEEKDAYS[$match[2]]] : null, (array)($rule['BYDAY'] ?? []));
+        if (in_array(null, $byDay, true)) {
             return null;
         }
-        $interval = max(1, (int)($rule['INTERVAL'] ?? 1));
-        $days     = array_values(array_filter(array_map(fn ($day) => self::WEEKDAYS[substr($day, -2)] ?? null, (array)($rule['BYDAY'] ?? []))));
-        $pattern  = match ($frequency) {
-            'DAILY'   => ['type' => 'daily', 'interval' => $interval],
-            'WEEKLY'  => ['type' => 'weekly', 'interval' => $interval, 'daysOfWeek' => $days ?: [strtolower($start->format('l'))], 'firstDayOfWeek' => 'monday'],
-            'MONTHLY' => ['type' => 'absoluteMonthly', 'interval' => $interval, 'dayOfMonth' => (int)($rule['BYMONTHDAY'] ?? $start->format('j'))],
-            'YEARLY'  => ['type' => 'absoluteYearly', 'interval' => $interval, 'month' => (int)($rule['BYMONTH'] ?? $start->format('n')), 'dayOfMonth' => (int)($rule['BYMONTHDAY'] ?? $start->format('j'))],
-            default   => null,
+        $days     = array_column($byDay, 'day');
+        $ordinals = array_unique([...array_filter(array_column($byDay, 'ordinal'), 'strlen'), ...(array)($rule['BYSETPOS'] ?? [])]);
+        $index    = count($ordinals) === 1 ? (self::ORDINALS[(string)(int)reset($ordinals)] ?? null) : null;
+        $relative = $days && in_array($frequency, ['MONTHLY', 'YEARLY'], true);
+        if (($relative && ! $index) || (! $relative && $ordinals)) {
+            return null;
+        }
+        $month   = (int)($rule['BYMONTH'] ?? $start->format('n'));
+        $pattern = match (true) {
+            $frequency === 'DAILY'   => ['type' => 'daily', 'interval' => $interval],
+            $frequency === 'WEEKLY'  => ['type' => 'weekly', 'interval' => $interval, 'daysOfWeek' => $days ?: [strtolower($start->format('l'))], 'firstDayOfWeek' => 'monday'],
+            $frequency === 'MONTHLY' => $relative
+                ? ['type' => 'relativeMonthly', 'interval' => $interval, 'daysOfWeek' => $days, 'index' => $index]
+                : ['type' => 'absoluteMonthly', 'interval' => $interval, 'dayOfMonth' => (int)($rule['BYMONTHDAY'] ?? $start->format('j'))],
+            $frequency === 'YEARLY'  => $relative
+                ? ['type' => 'relativeYearly', 'interval' => $interval, 'daysOfWeek' => $days, 'index' => $index, 'month' => $month]
+                : ['type' => 'absoluteYearly', 'interval' => $interval, 'month' => $month, 'dayOfMonth' => (int)($rule['BYMONTHDAY'] ?? $start->format('j'))],
+            default                  => null,
         };
         if (! $pattern) {
             return null;

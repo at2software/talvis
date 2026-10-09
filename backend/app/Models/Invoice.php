@@ -10,7 +10,6 @@ use App\Casts\CurrencyFormatCast;
 use App\Casts\Precomputed;
 use App\Casts\PrecomputedAuth;
 use App\Enums\InvoiceItemType;
-use App\Enums\WebhookEvent;
 use App\Jobs\SendInvoiceMailJob;
 use App\Jobs\SendInvoiceReminderJob;
 use App\Services\InvoiceItemEnhancementService;
@@ -64,30 +63,6 @@ class Invoice extends BaseModel {
     }
     public function unmaskedNet(): float {
         return (float)(new Precomputed)->get($this, 'net', $this->getRawOriginal('net'), $this->getAttributes());
-    }
-    protected static function booted() {
-        parent::booted();
-        static::updated(function (self $invoice) {
-            if (! $invoice->isPropagating && $invoice->wasChanged('paid_at') && $invoice->getOriginal('paid_at') === null && $invoice->paid_at && ! $invoice->is_cancelled) {
-                WebhookEndpoint::dispatch(WebhookEvent::InvoicePaid, $invoice->toWebhookPayload());
-            }
-        });
-    }
-    public function toWebhookPayload(): array {
-        $precomputed = new Precomputed;
-        return [
-            'id'                      => $this->id,
-            'number'                  => $this->name,
-            'company'                 => $this->company?->toWebhookReference(),
-            'net'                     => $this->unmaskedNet(),
-            'gross'                   => (float)$precomputed->get($this, 'gross', $this->getRawOriginal('gross'), $this->getAttributes()),
-            'gross_remaining'         => $this->unmaskedGrossRemaining(),
-            'created_at'              => $this->created_at?->toIso8601String(),
-            'due_at'                  => $this->due_at?->toIso8601String(),
-            'paid_at'                 => $this->paid_at?->toIso8601String(),
-            'is_cancelled'            => (bool)$this->is_cancelled,
-            'cancellation_invoice_id' => $this->cancellation_invoice_id,
-        ];
     }
     public function unmaskedGrossRemaining(): float {
         return (float)(new Precomputed)->get($this, 'gross_remaining', $this->getRawOriginal('gross_remaining'), $this->getAttributes());
@@ -273,7 +248,6 @@ class Invoice extends BaseModel {
         Invoice::batchAssign($items, $invoice->id, null);
         $invoice->stage = $stage;
         $invoice->save();
-        WebhookEndpoint::dispatch(WebhookEvent::InvoiceCreated, $invoice->fresh()->toWebhookPayload());
 
         $company->invoice_correction = '';
         $company->save();

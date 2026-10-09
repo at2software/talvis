@@ -11,6 +11,7 @@ use Sabre\VObject\Reader;
  */
 final class GraphContact {
     private const MAX_EMAILS = 3;
+    private const MAX_PHONES = 2;
 
     public static function fromVCard(string $vcard): ?array {
         try {
@@ -69,8 +70,8 @@ final class GraphContact {
             'jobTitle'         => trim((string)$card->TITLE),
             'emailAddresses'   => $emails,
             'mobilePhone'      => $phones['mobilePhone'],
-            'businessPhones'   => array_values(array_unique($phones['businessPhones'])),
-            'homePhones'       => array_values(array_unique($phones['homePhones'])),
+            'businessPhones'   => array_slice(array_values(array_unique($phones['businessPhones'])), 0, self::MAX_PHONES),
+            'homePhones'       => array_slice(array_values(array_unique($phones['homePhones'])), 0, self::MAX_PHONES),
             'businessHomePage' => trim((string)$card->URL),
             'birthday'         => $birthday ? $birthday.'T00:00:00Z' : null,
             'personalNotes'    => trim((string)$card->NOTE),

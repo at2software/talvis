@@ -2,9 +2,10 @@
 
 namespace Tests\Feature\Http;
 
-use App\Enums\WebhookEvent;
+use App\Enums\SentinelTriggerType;
 use App\Models\Company;
 use App\Models\Invoice;
+use App\Models\Sentinel;
 use App\Models\User;
 use App\Models\WebhookDelivery;
 use App\Models\WebhookEndpoint;
@@ -32,14 +33,31 @@ class WebhookEndpointTest extends TestCase {
             $mock->shouldReceive('pinnedCurlOptions')->andReturn([]);
         });
     }
-    private function endpoint(array $events = ['invoice.paid'], bool $active = true): WebhookEndpoint {
-        return WebhookEndpoint::create(['name' => 'n8n', 'url' => self::URL, 'events' => $events, 'is_active' => $active]);
+    private function endpoint(bool $active = true): WebhookEndpoint {
+        return WebhookEndpoint::create(['name' => 'n8n', 'url' => self::URL, 'is_active' => $active]);
+    }
+    private function sentinel(WebhookEndpoint $endpoint, array $options = []): Sentinel {
+        $options = [['key' => 'endpoint', 'value' => (string)$endpoint->id], ...$options];
+        return Sentinel::create([
+            'name'             => 'Invoice paid',
+            'trigger'          => SentinelTriggerType::OnUpdated,
+            'table_name'       => 'invoices',
+            'trigger_variable' => 'invoice',
+            'condition'        => '[]',
+            'result'           => json_encode([['key' => 'webhook', 'options' => $options]]),
+        ]);
+    }
+    private function payInvoice(): Invoice {
+        $invoice          = Invoice::factory()->for(Company::factory())->create(['paid_at' => null, 'is_cancelled' => false]);
+        $invoice->paid_at = now();
+        $invoice->save();
+        return $invoice;
     }
     public function test_admins_create_endpoints_and_see_the_secret_only_on_request(): void {
         $this->trustUrls();
         $this->actingAs($this->admin());
 
-        $created = $this->postJson('/api/webhook-endpoints', ['name' => 'n8n', 'url' => self::URL, 'events' => ['invoice.created', 'project.state_changed']])
+        $created = $this->postJson('/api/webhook-endpoints', ['name' => 'n8n', 'url' => self::URL])
             ->assertCreated()
             ->json();
 
@@ -48,39 +66,59 @@ class WebhookEndpointTest extends TestCase {
         $this->assertSame($created['secret'], $this->getJson("/api/webhook-endpoints/{$created['id']}/secret")->json('secret'));
         $this->assertNotSame($created['secret'], $this->postJson("/api/webhook-endpoints/{$created['id']}/secret")->json('secret'));
     }
-    public function test_endpoints_need_https_a_public_host_and_known_events(): void {
+    public function test_endpoints_need_https_and_a_public_host(): void {
         $this->actingAs($this->admin());
 
-        $this->postJson('/api/webhook-endpoints', ['name' => 'x', 'url' => 'http://hooks.example.com', 'events' => ['invoice.paid']])->assertJsonValidationErrors('url');
-        $this->postJson('/api/webhook-endpoints', ['name' => 'x', 'url' => 'https://127.0.0.1/hook', 'events' => ['invoice.paid']])->assertJsonValidationErrors('url');
-        $this->postJson('/api/webhook-endpoints', ['name' => 'x', 'url' => self::URL, 'events' => ['ping']])->assertJsonValidationErrors('events.0');
+        $this->postJson('/api/webhook-endpoints', ['name' => 'x', 'url' => 'http://hooks.example.com'])->assertJsonValidationErrors('url');
+        $this->postJson('/api/webhook-endpoints', ['name' => 'x', 'url' => 'https://127.0.0.1/hook'])->assertJsonValidationErrors('url');
     }
     public function test_only_admins_manage_endpoints(): void {
         $this->actingAs(User::factory()->create());
 
         $this->getJson('/api/webhook-endpoints')->assertForbidden();
     }
-    public function test_events_are_queued_for_active_subscribed_endpoints_only(): void {
-        $subscribed = $this->endpoint(['invoice.paid']);
-        $other      = $this->endpoint(['company.created']);
-        $inactive   = $this->endpoint(['invoice.paid'], active: false);
+    public function test_a_sentinel_webhook_sends_the_record_and_its_old_values(): void {
+        $endpoint = $this->endpoint();
+        $this->sentinel($endpoint);
 
-        $invoice = Invoice::factory()->for(Company::factory())->create(['paid_at' => null, 'is_cancelled' => false]);
-        $invoice->paid_at = now();
-        $invoice->save();
+        $invoice = $this->payInvoice();
 
-        $this->assertSame(1, $subscribed->deliveries()->count());
-        $this->assertSame(0, $other->deliveries()->count());
-        $this->assertSame(0, $inactive->deliveries()->count());
-        $delivery = $subscribed->deliveries()->sole();
+        $delivery = $endpoint->deliveries()->sole();
         $this->assertSame('invoice.paid', $delivery->payload['type']);
-        $this->assertSame($invoice->name, $delivery->payload['data']['number']);
+        $this->assertSame('Invoice paid', $delivery->payload['data']['sentinel']);
+        $this->assertSame($invoice->id, $delivery->payload['data']['model']['id']);
+        $this->assertArrayHasKey('paid_at', $delivery->payload['data']['old']);
+        $this->assertNull($delivery->payload['data']['old']['paid_at']);
+    }
+    public function test_a_payload_template_and_event_name_are_interpolated(): void {
+        $endpoint = $this->endpoint();
+        $this->sentinel($endpoint, [
+            ['key' => 'event', 'value' => 'billing.paid'],
+            ['key' => 'payload', 'value' => '{"number": "{{invoice.name}}", "meta": {"source": "talvis"}}'],
+        ]);
+
+        $invoice = $this->payInvoice();
+
+        $payload = $endpoint->deliveries()->sole()->payload;
+        $this->assertSame('billing.paid', $payload['type']);
+        $this->assertSame(['number' => $invoice->name, 'meta' => ['source' => 'talvis']], $payload['data']);
+    }
+    public function test_inactive_endpoints_and_broken_templates_send_nothing(): void {
+        $inactive = $this->endpoint(active: false);
+        $broken   = $this->endpoint();
+        $this->sentinel($inactive);
+        $this->sentinel($broken, [['key' => 'payload', 'value' => '{not json']]);
+
+        $this->payInvoice();
+
+        $this->assertSame(0, $inactive->deliveries()->count());
+        $this->assertSame(0, $broken->deliveries()->count());
     }
     public function test_delivery_is_signed_per_standard_webhooks(): void {
         $this->trustUrls();
         Http::fake([self::URL => Http::response('', 204)]);
         $endpoint = $this->endpoint();
-        $delivery = $endpoint->queue(WebhookEvent::InvoicePaid, ['id' => 1]);
+        $delivery = $endpoint->queue('invoice.paid', ['id' => 1]);
 
         $this->artisan('cron:deliver-webhooks')->assertSuccessful();
 
@@ -98,7 +136,7 @@ class WebhookEndpointTest extends TestCase {
         $this->trustUrls();
         Http::fake([self::URL => Http::response('nope', 500)]);
         $endpoint = $this->endpoint();
-        $delivery = $endpoint->queue(WebhookEvent::InvoicePaid, ['id' => 1]);
+        $delivery = $endpoint->queue('invoice.paid', ['id' => 1]);
 
         $this->artisan('cron:deliver-webhooks')->assertSuccessful();
 

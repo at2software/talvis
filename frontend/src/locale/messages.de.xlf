@@ -4496,6 +4496,18 @@
         <target>inaktiv</target>
       </segment>
     </unit>
+    <unit id="i18n.common.default">
+      <segment>
+        <source>default</source>
+        <target>Standard</target>
+      </segment>
+    </unit>
+    <unit id="i18n.common.example">
+      <segment>
+        <source>example</source>
+        <target>Beispiel</target>
+      </segment>
+    </unit>
     <unit id="i18n.marketing.no_workflows_assigned">
       <segment>
         <source>no workflows assigned</source>
@@ -5967,6 +5979,24 @@
       <segment>
         <source>unsupported field type</source>
         <target>nicht unterstützter Feldtyp</target>
+      </segment>
+    </unit>
+    <unit id="i18n.profile.webhookEventHint">
+      <segment>
+        <source>sent as type — empty uses the sentinel name</source>
+        <target>wird als type gesendet — leer nimmt den Namen des Sentinels</target>
+      </segment>
+    </unit>
+    <unit id="i18n.profile.webhookPayloadHint">
+      <segment>
+        <source>JSON template, strings are interpolated — empty sends the default payload, invalid JSON sends nothing</source>
+        <target>JSON-Vorlage, Strings werden interpoliert — leer sendet den Standard-Payload, ungültiges JSON sendet nichts</target>
+      </segment>
+    </unit>
+    <unit id="i18n.profile.selectWebhookEndpoint">
+      <segment>
+        <source>select webhook…</source>
+        <target>Webhook auswählen…</target>
       </segment>
     </unit>
     <unit id="i18n.profile.egProjectassignees">
@@ -13955,58 +13985,16 @@
         <target>noch keine Webhooks</target>
       </segment>
     </unit>
-    <unit id="i18n.webhooks.events">
+    <unit id="i18n.webhooks.sentinelHelp">
       <segment>
-        <source>events</source>
-        <target>Ereignisse</target>
+        <source>Webhooks are delivery targets. What is sent and when is defined with Sentinels, using the action "Webhook".</source>
+        <target>Webhooks sind Zustellziele. Was wann gesendet wird, legst du in Sentinels mit der Aktion "Webhook" fest.</target>
       </segment>
     </unit>
     <unit id="i18n.webhooks.event">
       <segment>
         <source>event</source>
         <target>Ereignis</target>
-      </segment>
-    </unit>
-    <unit id="i18n.webhooks.event.invoiceCreated">
-      <segment>
-        <source>invoice created</source>
-        <target>Rechnung erstellt</target>
-      </segment>
-    </unit>
-    <unit id="i18n.webhooks.event.invoicePaid">
-      <segment>
-        <source>invoice paid</source>
-        <target>Rechnung bezahlt</target>
-      </segment>
-    </unit>
-    <unit id="i18n.webhooks.event.invoiceCancelled">
-      <segment>
-        <source>invoice cancelled</source>
-        <target>Rechnung storniert</target>
-      </segment>
-    </unit>
-    <unit id="i18n.webhooks.event.projectStateChanged">
-      <segment>
-        <source>project state changed</source>
-        <target>Projektstatus geändert</target>
-      </segment>
-    </unit>
-    <unit id="i18n.webhooks.event.companyCreated">
-      <segment>
-        <source>company created</source>
-        <target>Firma angelegt</target>
-      </segment>
-    </unit>
-    <unit id="i18n.webhooks.event.vacationApproved">
-      <segment>
-        <source>vacation approved</source>
-        <target>Urlaub genehmigt</target>
-      </segment>
-    </unit>
-    <unit id="i18n.webhooks.event.ping">
-      <segment>
-        <source>test event</source>
-        <target>Testereignis</target>
       </segment>
     </unit>
     <unit id="i18n.webhooks.ping">

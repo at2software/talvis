@@ -231,12 +231,6 @@ class Company extends BaseModel {
         ];
     }
 
-    public function toWebhookReference(): array {
-        return ['id' => $this->id, 'name' => $this->name, 'customer_number' => $this->customer_number];
-    }
-    public function toWebhookPayload(): array {
-        return [...$this->toWebhookReference(), 'vat_id' => $this->vat_id, 'created_at' => $this->created_at?->toIso8601String()];
-    }
     public function getHasDirectDebitAttribute(): bool {
         return $this->directDebitMandate() !== null;
     }

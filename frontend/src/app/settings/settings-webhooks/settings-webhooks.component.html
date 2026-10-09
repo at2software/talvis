@@ -21,11 +21,6 @@
                             <span class="fw-semibold text-truncate" [class.text-muted]="!endpoint.is_active">{{ endpoint.name }}</span>
                             <code class="text-muted small text-truncate notranslate">{{ endpoint.url }}</code>
                         </div>
-                        <div class="d-flex flex-wrap gap-1 mt-1">
-                            @for (event of endpoint.events; track event) {
-                                <span class="badge bg-dark text-muted fw-normal" [ngbTooltip]="event">{{ eventLabel(event) }}</span>
-                            }
-                        </div>
                     </div>
                     <div class="small text-end text-nowrap">
                         @if (endpoint.last_delivered_at) {
@@ -62,6 +57,7 @@
         </ul>
     }
     <div class="card-body text-muted small">
+        <div class="mb-1" i18n="@@i18n.webhooks.sentinelHelp">Webhooks are delivery targets. What is sent and when is defined with Sentinels, using the action "Webhook".</div>
         <div class="mb-1">
             <ng-container i18n="@@i18n.webhooks.signatureHelp">Every delivery is a signed JSON POST. Receivers verify it with the signing secret as described in the Standard Webhooks specification:</ng-container>
             <a class="notranslate" [href]="specUrl" target="_blank" rel="noopener noreferrer">standardwebhooks.com</a>

@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class Sentinel extends BaseModel {
@@ -302,7 +303,42 @@ class Sentinel extends BaseModel {
                     ChatSendMessageJob::dispatch($message, channelId: $channel_id, chatKey: strstr($action, '_post', true));
                 }
                 break;
+
+            case 'webhook':
+                $endpoint = WebhookEndpoint::where('is_active', true)->find($options->firstWhere('key', 'endpoint')->value ?? null);
+                $template = trim((string)($options->firstWhere('key', 'payload')->value ?? ''));
+                $data     = $template !== ''
+                    ? $this->interpolateJson(json_decode($template, true), $interpolate)
+                    : $this->webhookPayload($item ?? $model, $originalValues);
+                if (! $endpoint || $data === null) {
+                    break;
+                }
+                $event = trim($interpolate((string)($options->firstWhere('key', 'event')->value ?? ''))) ?: Str::slug($this->name, '.');
+                DB::afterCommit(fn () => $endpoint->queue($event, $data));
+                break;
         }
+    }
+    private function interpolateJson(mixed $template, callable $interpolate): ?array {
+        if (! is_array($template)) {
+            return null;
+        }
+        array_walk_recursive($template, function (&$value) use ($interpolate) {
+            if (is_string($value)) {
+                $value = $interpolate($value);
+            }
+        });
+        return $template;
+    }
+    private function webhookPayload(?Model $model, array $originalValues): array {
+        $current = $model?->getAttributes() ?? [];
+        $old     = array_filter($originalValues, fn ($value, $key) => (is_scalar($value) || $value === null) && (string)$value !== (string)(is_scalar($current[$key] ?? null) ? $current[$key] : ''), ARRAY_FILTER_USE_BOTH);
+        return array_filter([
+            'sentinel' => $this->name,
+            'trigger'  => $this->trigger->name,
+            'table'    => $this->table_name,
+            'model'    => $model?->toArray(),
+            'old'      => $this->trigger === SentinelTriggerType::OnUpdated ? $old : null,
+        ], fn ($value) => $value !== null);
     }
 
     /**

@@ -52,6 +52,38 @@ export const SENTINEL_COMMANDS: SentinelCommand[] = [
     chatPostCommand('Mattermost Post', 'mattermost_post'),
     chatPostCommand('Slack Post', 'slack_post'),
     {
+        label: 'Webhook',
+        key: 'webhook',
+        allowedTriggerTypes: ALL_TRIGGERS,
+        options: [
+            {
+                key: 'endpoint',
+                label: 'Endpoint',
+                type: SentinelOptionFieldType.WebhookEndpoint,
+                default: '',
+            },
+            {
+                key: 'event',
+                label: 'Event',
+                type: SentinelOptionFieldType.String,
+                default: '',
+                placeholder: 'invoice.paid',
+                hint: $localize`:@@i18n.profile.webhookEventHint:sent as type — empty uses the sentinel name`,
+            },
+            {
+                key: 'payload',
+                label: 'Payload',
+                type: SentinelOptionFieldType.Text,
+                default: '',
+                hint: $localize`:@@i18n.profile.webhookPayloadHint:JSON template, strings are interpolated — empty sends the default payload, invalid JSON sends nothing`,
+                examples: [
+                    { label: $localize`:@@i18n.common.default:default`, code: '{ sentinel, trigger, table, model, old }' },
+                    { label: $localize`:@@i18n.common.example:example`, code: '{"number": "{{invoice.name}}", "paid": "{{invoice.paid_at}}"}' },
+                ],
+            },
+        ],
+    },
+    {
         label: 'Setting Value',
         key: 'set_value',
         allowedTriggerTypes: MODEL_BASED_TRIGGERS,

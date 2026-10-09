@@ -26,7 +26,6 @@ export class ModalWebhookDeliveriesComponent extends ModalBaseComponent<void> {
     );
     readonly deliveries = this.#deliveries.value;
     readonly loading = this.#deliveries.isLoading;
-    readonly eventLabel = WebhookEndpoint.eventLabel;
 
     init(endpoint: WebhookEndpoint): void {
         this.endpoint.set(endpoint);

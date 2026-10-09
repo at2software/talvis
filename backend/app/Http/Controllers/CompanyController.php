@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Enums\InvoiceItemType;
-use App\Enums\WebhookEvent;
 use App\Helpers\NLog;
 use App\Http\Controllers\Traits\HasFociController;
 use App\Http\Requests\Company\StoreConnectionRequest;
@@ -11,7 +10,6 @@ use App\Http\Requests\PhoneLookupRequest;
 use App\Models\Company;
 use App\Models\Connection;
 use App\Models\Param;
-use App\Models\WebhookEndpoint;
 use App\Services\FocusStatisticsService;
 use App\Traits\HasParams;
 use Illuminate\Http\JsonResponse;
@@ -301,9 +299,7 @@ class CompanyController extends Controller {
         $new->vcard = $vcard;
         $new->save();
         Company::assignMissingCustomerNumbers();
-        $new = $new->fresh();
-        WebhookEndpoint::dispatch(WebhookEvent::CompanyCreated, $new->toWebhookPayload());
-        return $new;
+        return $new->fresh();
     }
     public function storeDraft(Request $request) {
         $phone   = preg_replace('/\D/', '', (string)$request->input('phone_number', ''));

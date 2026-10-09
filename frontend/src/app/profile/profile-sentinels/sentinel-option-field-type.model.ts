@@ -8,5 +8,6 @@ export enum SentinelOptionFieldType {
     Table = 'table',
     Relation = 'relation',
     ModelFields = 'model_fields', // Dynamic field editor for model columns
+    WebhookEndpoint = 'webhook_endpoint',
     None = 'none',
 }

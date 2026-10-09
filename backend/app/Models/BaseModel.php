@@ -30,7 +30,9 @@ class BaseModel extends Model {
         });
 
         static::updated(function ($model) {
-            SentinelTriggerService::handleModelBasedTrigger(SentinelTriggerType::OnUpdated, $model);
+            if (! $model->isPropagating) {
+                SentinelTriggerService::handleModelBasedTrigger(SentinelTriggerType::OnUpdated, $model);
+            }
         });
 
         static::deleted(function ($model) {

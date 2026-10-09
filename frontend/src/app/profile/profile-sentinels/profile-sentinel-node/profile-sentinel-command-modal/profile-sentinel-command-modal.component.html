@@ -111,8 +111,21 @@
                 <div class="text-muted" i18n="@@i18n.profile.selectAModelFirst">select a model first</div>
             }
         }
+        @case ('webhook_endpoint') {
+            <webhook-endpoint-select [option]="opt"></webhook-endpoint-select>
+        }
         @default {
             <div class="text-muted" i18n="@@i18n.profile.unsupportedFieldType">unsupported field type</div>
         }
+    }
+
+    @if (opt.hint) {
+        <div class="text-muted small mt-1">{{ opt.hint }}</div>
+    }
+    @for (example of opt.examples; track example.label) {
+        <div class="small mt-1">
+            <span class="text-muted">{{ example.label }}:</span>
+            <code class="notranslate ms-1">{{ example.code }}</code>
+        </div>
     }
 </ng-template>

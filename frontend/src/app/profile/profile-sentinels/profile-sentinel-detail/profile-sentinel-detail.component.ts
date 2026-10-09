@@ -17,6 +17,7 @@ import { SENTINEL_CONDITIONS, SentinelConditionInstance } from '../sentinel-cond
 import { CHAT_POST_COMMAND_KEYS, SENTINEL_COMMANDS, SentinelCommandInstance } from '../sentinel-command.model';
 import { PermissionsDirective } from '@directives/permissions.directive';
 import { AutosaveDirective } from '@directives/autosave.directive';
+import { WebhookEndpointService } from '@models/webhook/webhook-endpoint.service';
 
 const parseJson = <T>(json: string | undefined): T => {
     try { return JSON.parse(json || '[]'); } catch { return [] as T; }
@@ -34,6 +35,7 @@ export class ProfileSentinelDetailComponent {
     #route = inject(ActivatedRoute);
     #sentinelService = inject(SentinelService);
     #global = inject(GlobalService);
+    #webhookEndpointService = inject(WebhookEndpointService);
 
     readonly #routeId = toSignal(this.#route.params.pipe(map((params) => params['id'] as string | undefined)));
 
@@ -45,6 +47,12 @@ export class ProfileSentinelDetailComponent {
 
     readonly conditions = linkedSignal<SentinelConditionInstance[][]>(() => parseJson(this.#sentinel()?.condition));
     readonly commands = linkedSignal<SentinelCommandInstance[]>(() => parseJson(this.#sentinel()?.result));
+
+    readonly #usesWebhooks = computed(() => this.#containsCommand(this.commands(), 'webhook'));
+    readonly #webhookEndpoints = modelListResource(
+        () => this.#usesWebhooks() || undefined,
+        () => this.#webhookEndpointService.index(),
+    );
 
     readonly circularWarning = computed(() => {
         const s = this.#sentinel();
@@ -64,6 +72,8 @@ export class ProfileSentinelDetailComponent {
         }
         return null;
     });
+
+    #containsCommand = (commands: SentinelCommandInstance[], key: string): boolean => commands.some((c) => c.key === key || this.#containsCommand(c.actions ?? [], key));
 
     #getActionTargetTables(commands: SentinelCommandInstance[]): string[] {
         const tables: string[] = [];
@@ -104,6 +114,10 @@ export class ProfileSentinelDetailComponent {
     getCommandTarget(cmd: SentinelCommandInstance): string {
         if (['create_new', 'create_for_each'].includes(cmd.key)) return cmd.options?.find((o) => o.key === 'table')?.value || '';
         if (CHAT_POST_COMMAND_KEYS.includes(cmd.key)) return cmd.options?.find((o) => o.key === 'channel_id')?.value || '';
+        if (cmd.key === 'webhook') {
+            const id = cmd.options?.find((o) => o.key === 'endpoint')?.value || '';
+            return this.#webhookEndpoints.value().find((e) => e.id == id)?.name || id;
+        }
         return '';
     }
 
@@ -116,6 +130,11 @@ export class ProfileSentinelDetailComponent {
         if (CHAT_POST_COMMAND_KEYS.includes(cmd.key)) {
             const message = cmd.options?.find((o) => o.key === 'message')?.value || '';
             return message ? [{ key: 'message', value: String(message) }] : [];
+        }
+        if (cmd.key === 'webhook') {
+            return ['event', 'payload']
+                .map((key) => ({ key, value: cmd.options?.find((o) => o.key === key)?.value || '' }))
+                .filter((detail) => detail.value);
         }
         if (cmd.key === 'set_value') {
             const column = cmd.options?.find((o) => o.key === 'column')?.value || '';

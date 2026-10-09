@@ -13,4 +13,6 @@ export interface SentinelOptionField {
     default?: string | boolean | number;
     placeholder?: string;
     enumValues?: { label: string; value: string }[];
+    hint?: string;
+    examples?: { label: string; code: string }[];
 }

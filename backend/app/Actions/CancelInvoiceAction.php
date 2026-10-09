@@ -2,10 +2,8 @@
 
 namespace App\Actions;
 
-use App\Enums\WebhookEvent;
 use App\Models\Invoice;
 use App\Models\Param;
-use App\Models\WebhookEndpoint;
 use horstoeko\zugferd\codelists\ZugferdInvoiceType;
 
 class CancelInvoiceAction {
@@ -47,10 +45,6 @@ class CancelInvoiceAction {
 
         $this->updateStatisticsAction->execute($invoice->company);
         $this->updateStatisticsAction->execute();
-        WebhookEndpoint::dispatch(WebhookEvent::InvoiceCancelled, [
-            'invoice'      => $invoice->fresh()->toWebhookPayload(),
-            'cancellation' => $cancellationInvoice->fresh()->toWebhookPayload(),
-        ]);
         return [$zugferdPdf, $filename];
     }
 }

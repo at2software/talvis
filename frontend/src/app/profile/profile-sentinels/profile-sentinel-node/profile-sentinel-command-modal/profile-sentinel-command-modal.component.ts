@@ -12,13 +12,14 @@ import { NgTemplateOutlet } from '@angular/common';
 import { ModelFieldEditorComponent } from './model-field-editor/model-field-editor.component';
 import { RelationPathAutocompleteComponent } from './relation-path-autocomplete/relation-path-autocomplete.component';
 import { VariableAutocompleteComponent } from './variable-autocomplete/variable-autocomplete.component';
+import { WebhookEndpointSelectComponent } from './webhook-endpoint-select/webhook-endpoint-select.component';
 
 @Component({
     changeDetection: ChangeDetectionStrategy.OnPush,
     selector: 'sentinel-command-edit-modal',
     templateUrl: './profile-sentinel-command-modal.component.html',
     styleUrls: ['./profile-sentinel-command-modal.component.scss'],
-    imports: [FormsModule, NgTemplateOutlet, NgbDropdownModule, ModelFieldEditorComponent, RelationPathAutocompleteComponent, VariableAutocompleteComponent],
+    imports: [FormsModule, NgTemplateOutlet, NgbDropdownModule, ModelFieldEditorComponent, RelationPathAutocompleteComponent, VariableAutocompleteComponent, WebhookEndpointSelectComponent],
 })
 export class ProfileSentinelCommandModalComponent extends ModalBaseComponent<boolean> {
     sentinel!: Sentinel;

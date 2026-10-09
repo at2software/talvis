@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\WebhookEvent;
 use App\Http\Requests\WebhookEndpointRequest;
 use App\Models\WebhookEndpoint;
 use App\Services\SafeUrlGuard;
@@ -10,9 +9,6 @@ use App\Services\SafeUrlGuard;
 class WebhookEndpointController extends Controller {
     public function index() {
         return WebhookEndpoint::latest()->get();
-    }
-    public function indexEvents() {
-        return WebhookEvent::subscribable();
     }
     public function store(WebhookEndpointRequest $request) {
         $endpoint = WebhookEndpoint::create([...$request->validated(), 'created_by_id' => $request->user()->id]);
@@ -36,7 +32,7 @@ class WebhookEndpointController extends Controller {
         return $webhook->deliveries()->latest('id')->limit(50)->get();
     }
     public function ping(WebhookEndpoint $webhook, SafeUrlGuard $guard) {
-        $delivery = $webhook->queue(WebhookEvent::Ping, ['endpoint' => $webhook->name]);
+        $delivery = $webhook->queue('ping', ['endpoint' => $webhook->name]);
         $delivery->send($guard);
         return $delivery->refresh();
     }

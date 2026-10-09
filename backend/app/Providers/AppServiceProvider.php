@@ -2,11 +2,8 @@
 
 namespace App\Providers;
 
-use App\Enums\WebhookEvent;
-use App\Events\ProjectStateTransitioned;
 use App\Models\MarketingProspect;
 use App\Models\User;
-use App\Models\WebhookEndpoint;
 use App\Observers\MarketingProspectObserver;
 use App\Services\DatabaseSchemaService;
 use App\Support\LiveSyncBroadcaster;
@@ -33,13 +30,6 @@ class AppServiceProvider extends ServiceProvider {
     }
     public function boot(): void {
         MarketingProspect::observe(MarketingProspectObserver::class);
-        Event::listen(fn (ProjectStateTransitioned $event) => WebhookEndpoint::dispatch(WebhookEvent::ProjectStateChanged, [
-            'project' => ['id' => $event->project->id, 'name' => $event->project->name, 'company' => $event->project->company?->toWebhookReference()],
-            'from'    => $event->from->name,
-            'to'      => $event->to->name,
-            'actor'   => ['id' => $event->actor->id, 'name' => $event->actor->name],
-            'reason'  => $event->reason,
-        ]));
 
         RateLimiter::for('api', function (Request $request) {
             return Limit::perMinute(config('app.api_rate_limit'))->by($request->user()?->id ?: $request->ip());

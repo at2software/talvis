@@ -42,16 +42,6 @@ class Vacation extends BaseModel {
     public function user() {
         return $this->hasOneThrough(User::class, VacationGrant::class, 'id', 'id', 'vacation_grant_id', 'user_id');
     }
-    public function toWebhookPayload(): array {
-        return [
-            'id'          => $this->id,
-            'user'        => $this->user ? ['id' => $this->user->id, 'name' => $this->user->name, 'email' => $this->user->email] : null,
-            'started_at'  => $this->started_at?->toDateString(),
-            'ended_at'    => $this->ended_at?->toDateString(),
-            'hours'       => abs((float)$this->amount),
-            'approved_by' => $this->approved_by ? ['id' => $this->approved_by->id, 'name' => $this->approved_by->name] : null,
-        ];
-    }
     public function scopeWithUserAndGrant($query) {
         return $query
             ->join('vacation_grants', 'vacations.vacation_grant_id', '=', 'vacation_grants.id')

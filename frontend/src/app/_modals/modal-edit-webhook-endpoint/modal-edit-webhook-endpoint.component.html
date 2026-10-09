@@ -31,21 +31,6 @@
                     </div>
                     <div class="text-muted small mb-3" i18n="@@i18n.webhooks.urlHint">Only https URLs on publicly reachable hosts are accepted.</div>
 
-                    <div class="mb-2" i18n="@@i18n.webhooks.events">events</div>
-                    <ul class="list-group mb-3">
-                        @for (event of availableEvents(); track event) {
-                            <li class="list-group-item">
-                                <div class="form-check mb-0">
-                                    <input type="checkbox" class="form-check-input" [id]="'webhook-event-' + event" [checked]="hasEvent(event)" (change)="toggleEvent(event, $any($event.target).checked)" />
-                                    <label class="form-check-label d-flex gap-2" [for]="'webhook-event-' + event">
-                                        <span>{{ eventLabel(event) }}</span>
-                                        <code class="text-muted small notranslate ms-auto">{{ event }}</code>
-                                    </label>
-                                </div>
-                            </li>
-                        }
-                    </ul>
-
                     <div class="form-check form-switch mb-3">
                         <input type="checkbox" class="form-check-input" id="webhook-active" [ngModel]="isActive()" (ngModelChange)="isActive.set($event)" />
                         <label class="form-check-label" for="webhook-active" i18n="@@i18n.common.active">active</label>

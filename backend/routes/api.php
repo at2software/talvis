@@ -730,7 +730,6 @@ Route::middleware('auth', 'release.session', 'cache.headers:no_cache;must_revali
     Route::prefix('webhook-endpoints')->middleware('role:admin')->controller(WebhookEndpointController::class)->group(function () {
         Route::get('', 'index');
         Route::post('', 'store');
-        Route::get('events', 'indexEvents');
         Route::prefix('{webhook}')->group(function () {
             Route::put('', 'update');
             Route::delete('', 'destroy');

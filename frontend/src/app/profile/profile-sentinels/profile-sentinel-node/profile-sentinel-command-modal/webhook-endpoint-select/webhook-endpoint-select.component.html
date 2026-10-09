@@ -1,0 +1,26 @@
+@let _selected = selected();
+<div ngbDropdown class="sentinel-dropdown">
+    <button type="button" class="btn btn-dark w-100 text-start" ngbDropdownToggle>
+        @if (_selected) {
+            <span class="sentinel-table">{{ _selected.name }}</span>
+            <span class="text-muted small ms-2">{{ _selected.url }}</span>
+        } @else if (selectedId()) {
+            <span class="text-muted">{{ selectedId() }}</span>
+        } @else {
+            <span class="text-muted" i18n="@@i18n.profile.selectWebhookEndpoint">select webhook…</span>
+        }
+    </button>
+    <div ngbDropdownMenu class="w-100 dropdown-menu-scroll">
+        @for (endpoint of endpoints(); track endpoint.id) {
+            <button ngbDropdownItem (click)="select(endpoint)" class="d-flex align-items-center gap-2">
+                <span class="sentinel-table" [class.text-muted]="!endpoint.is_active">{{ endpoint.name }}</span>
+                <span class="text-muted small text-truncate">{{ endpoint.url }}</span>
+                @if (!endpoint.is_active) {
+                    <span class="badge bg-dark text-muted fw-normal ms-auto" i18n="@@i18n.common.inactive">inactive</span>
+                }
+            </button>
+        } @empty {
+            <div class="dropdown-item-text text-muted" i18n="@@i18n.webhooks.noEndpoints">no webhooks yet</div>
+        }
+    </div>
+</div>

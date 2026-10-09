@@ -37,10 +37,10 @@ final class CalendarEvent {
             return null;
         }
 
-        $allDay = ! $event->DTSTART->hasTime();
-        $start  = DateTimeImmutable::createFromInterface($event->DTSTART->getDateTime());
+        $allDay = ! $event->DTSTART->hasTime() || self::isDateOnly($event->DTSTART->getValue());
+        $start  = self::moment($event->DTSTART->getValue(), $event->DTSTART->getDateTime());
         $end    = match (true) {
-            isset($event->DTEND)    => DateTimeImmutable::createFromInterface($event->DTEND->getDateTime()),
+            isset($event->DTEND)    => self::moment($event->DTEND->getValue(), $event->DTEND->getDateTime()),
             isset($event->DURATION) => $start->add($event->DURATION->getDateInterval()),
             default                 => $start->modify($allDay ? '+1 day' : '+1 hour'),
         };
@@ -57,6 +57,12 @@ final class CalendarEvent {
             description: trim((string)$event->DESCRIPTION) ?: null,
             location: trim((string)$event->LOCATION) ?: null,
         );
+    }
+    private static function isDateOnly(string $value): bool {
+        return (bool)preg_match('/^\d{8}$/', $value);
+    }
+    private static function moment(string $value, DateTimeInterface $parsed): DateTimeImmutable {
+        return self::isDateOnly($value) ? DateTimeImmutable::createFromFormat('!Ymd', $value) : DateTimeImmutable::createFromInterface($parsed);
     }
     public function overlaps(?DateTimeInterface $from, ?DateTimeInterface $until): bool {
         if ($this->recurrence) {

@@ -7859,6 +7859,22 @@
         <source>inactive</source>
       </segment>
     </unit>
+    <unit id="i18n.common.default">
+      <notes>
+        <note category="location">src/app/profile/profile-sentinels/sentinel-command.model.ts:80</note>
+      </notes>
+      <segment>
+        <source>default</source>
+      </segment>
+    </unit>
+    <unit id="i18n.common.example">
+      <notes>
+        <note category="location">src/app/profile/profile-sentinels/sentinel-command.model.ts:81</note>
+      </notes>
+      <segment>
+        <source>example</source>
+      </segment>
+    </unit>
     <unit id="i18n.marketing.no_workflows_create_first">
       <notes>
         <note category="location">src/app/marketing/marketing-initiatives/marketing-initiative-detail/marketing-initiative-detail.component.html:274,276</note>
@@ -10078,6 +10094,30 @@
       </notes>
       <segment>
         <source>unsupported field type</source>
+      </segment>
+    </unit>
+    <unit id="i18n.profile.webhookEventHint">
+      <notes>
+        <note category="location">src/app/profile/profile-sentinels/sentinel-command.model.ts:71</note>
+      </notes>
+      <segment>
+        <source>sent as type — empty uses the sentinel name</source>
+      </segment>
+    </unit>
+    <unit id="i18n.profile.webhookPayloadHint">
+      <notes>
+        <note category="location">src/app/profile/profile-sentinels/sentinel-command.model.ts:78</note>
+      </notes>
+      <segment>
+        <source>JSON template, strings are interpolated — empty sends the default payload, invalid JSON sends nothing</source>
+      </segment>
+    </unit>
+    <unit id="i18n.profile.selectWebhookEndpoint">
+      <notes>
+        <note category="location">src/app/profile/profile-sentinels/profile-sentinel-node/profile-sentinel-command-modal/webhook-endpoint-select/webhook-endpoint-select.component.html:10</note>
+      </notes>
+      <segment>
+        <source>select webhook…</source>
       </segment>
     </unit>
     <unit id="i18n.profile.egProjectassignees">
@@ -17043,12 +17083,12 @@
         <source>no webhooks yet</source>
       </segment>
     </unit>
-    <unit id="i18n.webhooks.events">
+    <unit id="i18n.webhooks.sentinelHelp">
       <notes>
-        <note category="location">src/app/_modals/modal-edit-webhook-endpoint/modal-edit-webhook-endpoint.component.html:34</note>
+        <note category="location">src/app/settings/settings-webhooks/settings-webhooks.component.html:60</note>
       </notes>
       <segment>
-        <source>events</source>
+        <source>Webhooks are delivery targets. What is sent and when is defined with Sentinels, using the action "Webhook".</source>
       </segment>
     </unit>
     <unit id="i18n.webhooks.event">
@@ -17057,62 +17097,6 @@
       </notes>
       <segment>
         <source>event</source>
-      </segment>
-    </unit>
-    <unit id="i18n.webhooks.event.invoiceCreated">
-      <notes>
-        <note category="location">src/models/webhook/webhook-endpoint.model.ts:13</note>
-      </notes>
-      <segment>
-        <source>invoice created</source>
-      </segment>
-    </unit>
-    <unit id="i18n.webhooks.event.invoicePaid">
-      <notes>
-        <note category="location">src/models/webhook/webhook-endpoint.model.ts:14</note>
-      </notes>
-      <segment>
-        <source>invoice paid</source>
-      </segment>
-    </unit>
-    <unit id="i18n.webhooks.event.invoiceCancelled">
-      <notes>
-        <note category="location">src/models/webhook/webhook-endpoint.model.ts:15</note>
-      </notes>
-      <segment>
-        <source>invoice cancelled</source>
-      </segment>
-    </unit>
-    <unit id="i18n.webhooks.event.projectStateChanged">
-      <notes>
-        <note category="location">src/models/webhook/webhook-endpoint.model.ts:16</note>
-      </notes>
-      <segment>
-        <source>project state changed</source>
-      </segment>
-    </unit>
-    <unit id="i18n.webhooks.event.companyCreated">
-      <notes>
-        <note category="location">src/models/webhook/webhook-endpoint.model.ts:17</note>
-      </notes>
-      <segment>
-        <source>company created</source>
-      </segment>
-    </unit>
-    <unit id="i18n.webhooks.event.vacationApproved">
-      <notes>
-        <note category="location">src/models/webhook/webhook-endpoint.model.ts:18</note>
-      </notes>
-      <segment>
-        <source>vacation approved</source>
-      </segment>
-    </unit>
-    <unit id="i18n.webhooks.event.ping">
-      <notes>
-        <note category="location">src/models/webhook/webhook-endpoint.model.ts:19</note>
-      </notes>
-      <segment>
-        <source>test event</source>
       </segment>
     </unit>
     <unit id="i18n.webhooks.ping">

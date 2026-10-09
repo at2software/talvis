@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Enums\VacationState;
-use App\Enums\WebhookEvent;
 use App\Flow\ApprovalService;
 use App\Flow\Models\Approval;
 use App\Http\Requests\Vacation\ApproveRequest;
@@ -16,7 +15,6 @@ use App\Models\Holiday;
 use App\Models\User;
 use App\Models\Vacation;
 use App\Models\VacationGrant;
-use App\Models\WebhookEndpoint;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Mail;
@@ -134,9 +132,6 @@ class VacationController extends Controller {
             $vacation->save();
         });
         Mail::to($vacation->user->email)->send(new VacationMail($vacation, $vacation->state, @$data->reason, request()->user()));
-        if ($state === VacationState::Approved) {
-            WebhookEndpoint::dispatch(WebhookEvent::VacationApproved, $vacation->toWebhookPayload());
-        }
         return $vacation;
     }
     public function acknowledge(Vacation $_) {

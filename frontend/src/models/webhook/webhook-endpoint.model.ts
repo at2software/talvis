@@ -1,6 +1,5 @@
 import { Serializable } from '@models/_core/serializable';
 import { Model } from '@constants/model/type-discriminators';
-import { Dictionary } from '@constants/constants';
 import { NxAction } from '@models/_core/nx.actions';
 import { MODAL } from '@models/_core/modal-registry';
 import { nx } from '@models/_core/nx-bridge';
@@ -9,28 +8,16 @@ import { firstValueFrom, map, Observable, tap } from 'rxjs';
 import { WebhookDelivery } from './webhook-delivery.model';
 import { getWebhookEndpointActions } from './webhook-endpoint.actions';
 
-const EVENT_LABELS: Dictionary<string> = {
-    'invoice.created': $localize`:@@i18n.webhooks.event.invoiceCreated:invoice created`,
-    'invoice.paid': $localize`:@@i18n.webhooks.event.invoicePaid:invoice paid`,
-    'invoice.cancelled': $localize`:@@i18n.webhooks.event.invoiceCancelled:invoice cancelled`,
-    'project.state_changed': $localize`:@@i18n.webhooks.event.projectStateChanged:project state changed`,
-    'company.created': $localize`:@@i18n.webhooks.event.companyCreated:company created`,
-    'vacation.approved': $localize`:@@i18n.webhooks.event.vacationApproved:vacation approved`,
-    ping: $localize`:@@i18n.webhooks.event.ping:test event`,
-};
-
 const toDelivery = (json: unknown): WebhookDelivery => WebhookDelivery.fromJson(json);
 
 @Model('WebhookEndpoint')
 export class WebhookEndpoint extends Serializable {
     static API_PATH = (): string => 'webhook-endpoints';
-    static eventLabel = (event: string): string => EVENT_LABELS[event] ?? event;
 
     protected override buildActions(): NxAction[] { return getWebhookEndpointActions(this) }
 
     name: string = '';
     url: string = '';
-    events: string[] = [];
     is_active: boolean = true;
     failure_count: number = 0;
     last_delivered_at: string | null = null;

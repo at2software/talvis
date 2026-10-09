@@ -20,7 +20,6 @@ import { RelativeTimePipe } from '@pipes/relative-time.pipe';
 })
 export class SettingsWebhooksComponent {
     readonly specUrl = 'https://www.standardwebhooks.com/';
-    readonly eventLabel = WebhookEndpoint.eventLabel;
 
     #service = inject(WebhookEndpointService);
     #modalService = inject(ModalBaseService);
