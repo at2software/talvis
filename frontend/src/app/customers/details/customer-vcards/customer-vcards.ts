@@ -31,6 +31,15 @@ export class CustomerVcards {
 
     company = tracked(this.#parent.object);
 
+    readonly registerTypes = ['HRA', 'HRB', 'GnR', 'PR', 'VR'];
+
+    saveRegister = (type: string, number: string, court: string) => {
+        const company = this.company();
+        const current = company.commercialRegisterParts();
+        if (current.type === type && current.number === number.trim() && current.court === court.trim()) return;
+        company.setCommercialRegister({ type, number, court }).subscribe();
+    };
+
     constructor() {
         NxStatic.broadcast$.pipe(takeUntilDestroyed()).subscribe((event) => {
             if (event.type === TBroadcast.Delete && event.data instanceof CompanyContact) this.#parent.reload();
@@ -38,8 +47,7 @@ export class CustomerVcards {
     }
 
     onAddEmployee = () =>
-        this.#companyService.createEmployee(this.company().id).subscribe((created) => {
-            this.company().employees.push(created);
+        this.#companyService.promptAddEmployee(this.company(), (created) => {
             this.#parent.touch();
             this.#router.navigate([created.id], { relativeTo: this.#route });
             setTimeout(() => this.#host.nativeElement.querySelector('list-group-item-contact.active')?.scrollIntoView({ block: 'nearest', behavior: 'smooth' }), 0);

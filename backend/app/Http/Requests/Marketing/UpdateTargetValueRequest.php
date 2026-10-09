@@ -10,7 +10,7 @@ class UpdateTargetValueRequest extends FormRequest {
     }
     public function rules(): array {
         return [
-            'target_value' => 'nullable|numeric|min:0',
+            'target_value' => 'nullable|numeric|min:0|max:99999999.99',
         ];
     }
 }

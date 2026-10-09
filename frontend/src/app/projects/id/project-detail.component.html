@@ -1,25 +1,38 @@
 @let _project = object();
+@let _nextStates = _project.state ? global.getAllowedSucceedingProjectStatesFor(_project) : [];
 <app-header>
-    <div class="logo cursor-pointer" [style.background-image]="'url(' + _project.getAvatar() + ')'" smartLink="/customers/{{ _project.company!.id }}">
-        <div ngbDropdown>
-            <div class="dropdown-toggle dropdown-toggle-simple bg-transparent" (click)="$event.stopPropagation()" tabindex="0" (keydown.enter)="$event.stopPropagation()" style="font-weight: normal" ngbDropdownToggle>
-                <project [project]="_project" [noRouting]="true"></project>
-            </div>
-            <ul class="dropdown-menu" ngbDropdownMenu>
-                @for (state of global.getAllowedSucceedingProjectStatesFor(_project); track 'state:' + state.id) {
-                    <li class="cursor-pointer">
-                        <a class="dropdown-item hstack gap-2" (click)="setState($event, state.id)" (keyup.enter)="setState($event, state.id)" tabindex="0">
-                            <span i18n="@@i18n.project.changeTo">change to</span> <span class="font-monospace" [style.color]="state.color">{{ state.name }}</span>
-                        </a>
-                    </li>
-                }
-            </ul>
-        </div>
-    </div>
-    <div class="h1 d-flex align-items-end">
-        <div class="me-1 text-truncate">
+    <div class="logo cursor-pointer" [style.background-image]="'url(' + _project.getAvatar() + ')'" smartLink="/customers/{{ _project.company!.id }}"></div>
+    <div class="h1 d-flex align-items-center gap-3">
+        <div class="text-truncate">
             {{ _project.name }}
         </div>
+        @if (_nextStates.length) {
+            <div ngbDropdown container="body" class="fs-6 flex-shrink-0">
+                <button type="button" class="btn btn-plain btn-sm px-0 hstack gap-2 text-primary dropdown-toggle" ngbDropdownToggle i18n-ngbTooltip="@@i18n.project.changeState" ngbTooltip="change project state">
+                    <span class="state-dot" [style.background-color]="_project.state.color"></span>
+                    {{ _project.state.name }}
+                </button>
+                <ul class="dropdown-menu" ngbDropdownMenu>
+                    @for (state of _nextStates; track 'state:' + state.id) {
+                        <li class="cursor-pointer">
+                            <a class="dropdown-item hstack gap-2" (click)="setState($event, state.id)" (keyup.enter)="setState($event, state.id)" tabindex="0">
+                                @if (state.isQuoteAcceptanceFrom(_project.state)) {
+                                    <span i18n="@@i18n.project.quoteAccepted">quote accepted</span> <span class="text-muted">→</span>
+                                } @else {
+                                    <span i18n="@@i18n.project.changeTo">change to</span>
+                                }
+                                <span class="font-monospace" [style.color]="state.color">{{ state.name }}</span>
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </div>
+        } @else if (_project.state) {
+            <div class="fs-6 flex-shrink-0 hstack gap-2 text-muted">
+                <span class="state-dot" [style.background-color]="_project.state.color"></span>
+                {{ _project.state.name }}
+            </div>
+        }
     </div>
     @if (_project.company.id) {
         <ul class="nav">
@@ -50,7 +63,7 @@
 </div>
 
 <ng-container>
-    <activity-tab class="list-group list-group-accent" icon="chat">
+    <activity-tab class="list-group list-group-accent" icon="chat" i18n-label="@@i18n.common.comments" label="comments">
         <app-tab-comments path="projects/{{ _project.id }}" [projects]="_project.companys_active_projects" [currentProject]="_project"></app-tab-comments>
     </activity-tab>
 </ng-container>

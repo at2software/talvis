@@ -25,6 +25,12 @@ export const SETTINGS_ROUTES: Routes = [
                     { path: 'leads', loadComponent: () => import('./settings-projects/settings-projects-leads/settings-projects-leads.component').then((m) => m.SettingsProjectsLeadsComponent) },
                     { path: 'milestones', loadComponent: () => import('./settings-projects/settings-projects-milestones/settings-projects-milestones.component').then((m) => m.SettingsProjectsMilestonesComponent) },
                     { path: 'states', loadComponent: () => import('./settings-projects/settings-projects-states/settings-projects-states.component').then((m) => m.SettingsProjectsStatesComponent) },
+                    {
+                        path: 'state-machine',
+                        loadComponent: () => import('./settings-projects/settings-projects-flow/settings-projects-flow.component').then((m) => m.SettingsProjectsFlowComponent),
+                        canActivate: [PermissionsGuard],
+                        data: { roles: 'admin', fallback: ['settings', 'projects'] },
+                    },
                     { path: '**', redirectTo: 'quote' },
                 ],
                 title: $localize`:@@i18n.settings.projectSettings:project settings`,

@@ -295,10 +295,11 @@ class Sentinel extends BaseModel {
                 break;
 
             case 'mattermost_post':
+            case 'slack_post':
                 $channel_id = $options->firstWhere('key', 'channel_id')->value ?? null;
                 $message    = $interpolate($options->firstWhere('key', 'message')->value ?? '');
                 if ($channel_id && $message) {
-                    ChatSendMessageJob::dispatch($message, channelId: $channel_id);
+                    ChatSendMessageJob::dispatch($message, channelId: $channel_id, chatKey: strstr($action, '_post', true));
                 }
                 break;
         }

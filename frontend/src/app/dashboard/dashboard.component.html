@@ -25,15 +25,15 @@
 @if (global && global.dashboards) {
     <scrollbar>
         @if (global.dashboards.length === 0) {
-            <empty-state class="dashboard" title="No dashboard found" description="Please create a dashboard"></empty-state>
+            <empty-state [card]="true" class="dashboard" title="No dashboard found" description="Please create a dashboard"></empty-state>
         }
         @if (global.dashboards.length > 0) {
             @let board = global.dashboards[currentDashboard()];
             <div class="row" cdkDropListGroup data-tour="dashboard-zone">
                 @for (i of [0, 1, 2, 3]; track i) {
-                    <div cdkDropList [id]="'col-' + i" [cdkDropListConnectedTo]="['col-0', 'col-1', 'col-2', 'col-3', 'widget-list']" class="col-12 col-md-6 col-xl-3" [cdkDropListData]="board.cols[i]" (cdkDropListDropped)="drop($event)" [cdkDropListDisabled]="!_is_editing" [class.cursor-move]="_is_editing">
+                    <div cdkDropList [id]="'col-' + i" [cdkDropListConnectedTo]="['col-0', 'col-1', 'col-2', 'col-3', 'widget-list']" class="col-12 col-md-6 col-xl-3 dashboard-col" [cdkDropListData]="board.cols[i]" (cdkDropListDropped)="drop($event)" [cdkDropListDisabled]="!_is_editing" [class.cursor-move]="_is_editing">
                         @if (i === 0) {
-                            <widget-superadmin-warning></widget-superadmin-warning>
+                            <widget-getting-started [is_editing]="_is_editing"></widget-getting-started>
                         }
                         @for (_ of board.cols[i]; track _.widget; let j = $index) {
                             @if (hasAccess(_.widget)) {
@@ -41,6 +41,9 @@
                                     <ng-container *ngComponentOutlet="componentFor(_.widget); inputs: { options: _.options, widget: _, is_editing: _is_editing, i: i, j: j }"> </ng-container>
                                 </div>
                             }
+                        }
+                        @if (_is_editing && board.cols[i].length === 0) {
+                            <div class="drop-hint" i18n="@@i18n.dashboard.dropWidgetHere">drag widget here</div>
                         }
                     </div>
                 }

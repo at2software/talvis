@@ -3,6 +3,7 @@
 use App\Http\Controllers\AssignmentController;
 use App\Http\Controllers\CalDAVController;
 use App\Http\Controllers\CalendarController;
+use App\Http\Controllers\CalendarFeedController;
 use App\Http\Controllers\CardDAVController;
 use App\Http\Controllers\CashController;
 use App\Http\Controllers\CommandController;
@@ -31,11 +32,13 @@ use App\Http\Controllers\MarketingInitiativeController;
 use App\Http\Controllers\MarketingMetricController;
 use App\Http\Controllers\MarketingProspectController;
 use App\Http\Controllers\MarketingWorkflowController;
+use App\Http\Controllers\Microsoft365AccountController;
 use App\Http\Controllers\MilestoneController;
 use App\Http\Controllers\ParamController;
 use App\Http\Controllers\PdfTemplateController;
 use App\Http\Controllers\PluginGitController;
 use App\Http\Controllers\PluginLinkController;
+use App\Http\Controllers\PluginM365Controller;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductGroupController;
 use App\Http\Controllers\ProjectController;
@@ -43,14 +46,17 @@ use App\Http\Controllers\ProjectStateController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\SentinelController;
+use App\Http\Controllers\SetupController;
 use App\Http\Controllers\StatsController;
 use App\Http\Controllers\TalvisController;
 use App\Http\Controllers\TaskController;
+use App\Http\Controllers\TeamsBotController;
 use App\Http\Controllers\TimetrackerController;
 use App\Http\Controllers\UptimeMonitorController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\VacationController;
 use App\Http\Controllers\VaultController;
+use App\Http\Controllers\WebhookEndpointController;
 use App\Http\Controllers\WidgetController;
 use App\Http\Middleware\WebDAVAuthMiddleware;
 use App\Models\Company;
@@ -85,10 +91,12 @@ Route::middleware('throttle:icons')->withoutMiddleware(ThrottleRequests::class.'
     Route::get('users/{_}/mailicon', fn (string $_) => User::where('email', $_)->firstOrFail()->image());    // for timetracker
     Route::get('neuron/icon', [TalvisController::class, 'icon']);
 });
-Route::get('qr', [WidgetController::class, 'getQrCode']);
+Route::post('/teams/messages', [TeamsBotController::class, 'receive'])->middleware('throttle:120,1');
+Route::get('/microsoft365/callback', [Microsoft365AccountController::class, 'callback'])->middleware('throttle:30,1');
 Route::middleware('apikey:X-Auth-Token,'.config('app.team_monitor_api_key'))->get('/team-monitor', [StatsController::class, 'apiTeamMonitor']);
 
 Route::match(['GET', 'PROPFIND', 'OPTIONS', 'PROPPATCH', 'MKCOL', 'COPY', 'MOVE', 'LOCK', 'UNLOCK', 'REPORT'], '/carddav/{path?}', [CardDAVController::class, 'handleCardDAV'])->where('path', '.*')->middleware(WebDAVAuthMiddleware::class)->name('/backend/api/carddav');
+Route::get('/caldav/feed/{token}.ics', [CalendarFeedController::class, 'show'])->where('token', '[A-Za-z0-9]{48}')->middleware('throttle:60,1');
 Route::match(['GET', 'PROPFIND', 'OPTIONS', 'PROPPATCH', 'MKCOL', 'COPY', 'MOVE', 'LOCK', 'UNLOCK', 'REPORT'], '/caldav/{path?}', [CalDAVController::class, 'handleCalDAV'])->where('path', '.*')->middleware(WebDAVAuthMiddleware::class)->name('/backend/api/caldav');
 
 Route::middleware('auth', 'release.session', 'cache.headers:no_cache;must_revalidate')->group(function () {
@@ -101,6 +109,7 @@ Route::middleware('auth', 'release.session', 'cache.headers:no_cache;must_revali
         Route::get('', [CashController::class, 'indexRegisters']);
         Route::get('{_}', [CashController::class, 'indexEntries']);
         Route::post('{_}', [CashController::class, 'storeEntry']);
+        Route::put('entries/{_}', [CashController::class, 'updateEntry']);
         Route::delete('entries/{_}', [CashController::class, 'destroyEntry']);
     });
 
@@ -169,7 +178,7 @@ Route::middleware('auth', 'release.session', 'cache.headers:no_cache;must_revali
     Route::prefix('connections')->group(function () {
         Route::get('/', [CompanyController::class, 'indexAllConnections']);
         Route::post('/', [CompanyController::class, 'storeConnection'])->middleware('role:project_manager|marketing');
-        Route::delete('/{_}', fn (Connection $_) => $_->delete());
+        Route::delete('/{_}', fn (Connection $_) => response()->json($_->delete()))->middleware('role:project_manager|marketing');
     });
 
     Route::prefix('contacts')->group(function () {
@@ -206,10 +215,12 @@ Route::middleware('auth', 'release.session', 'cache.headers:no_cache;must_revali
 
     Route::prefix('invoices')->middleware('role:invoicing')->group(function () {
         Route::get('/current_no', fn () => Invoice::getCurrentInvoiceNumber());
-        Route::get('/current_no_int', fn () => Invoice::getCurrentInvoiceNumberInt());
+        Route::get('/current_no_int', fn () => response()->json(Invoice::getCurrentInvoiceNumberInt()));
         Route::get('/last-payments', fn () => Invoice::whereNotNull('paid_at')->latest('paid_at')->with('company')->take(20)->get());
         Route::get('/monthly-revenue-ranges', [InvoiceController::class, 'indexMonthlyRevenueRanges']);
         Route::get('/monthly-spiral-revenue', [InvoiceController::class, 'indexMonthlySpiralRevenue']);
+        Route::get('/sepa-direct-debits', [InvoiceController::class, 'indexSepaDirectDebits']);
+        Route::post('/sepa-direct-debits', [InvoiceController::class, 'storeSepaDirectDebit']);
 
         Route::prefix('{_}')->controller(InvoiceController::class)->group(function () {
             Route::get('invoice-items', 'indexInvoiceItems');
@@ -239,7 +250,7 @@ Route::middleware('auth', 'release.session', 'cache.headers:no_cache;must_revali
                 return response()->json(['error' => 'Invoice not found (may be deleted)', 'reminder_id' => $_->id, 'invoice_id' => $_->invoice_id], 404);
             }
             if (! $_->file_dir) {
-                return response()->json(['error' => 'Reminder has no file path stored', 'reminder_id' => $_->id], 500);
+                return response()->json(['error' => 'Reminder has no file path stored', 'reminder_id' => $_->id], 404);
             }
             if (! Storage::exists($_->file_dir)) {
                 return response()->json(['error' => 'PDF file not found in storage', 'reminder_id' => $_->id, 'file_dir' => $_->file_dir], 404);
@@ -386,6 +397,7 @@ Route::middleware('auth', 'release.session', 'cache.headers:no_cache;must_revali
         Route::post('preview', 'preview');
         Route::post('revert', 'revert');
         Route::post('logo', 'uploadLogo');
+        Route::delete('logo', 'destroyLogo');
     });
 
     Route::prefix('products')->middleware('role:product_manager')->group(function () {
@@ -524,6 +536,17 @@ Route::middleware('auth', 'release.session', 'cache.headers:no_cache;must_revali
         Route::post('', 'storeDebrief');
     });
 
+    Route::prefix('setup')->middleware('role:admin')->controller(SetupController::class)->group(function () {
+        Route::get('status', 'showStatus');
+        Route::post('owner', 'storeOwner');
+        Route::get('company', 'showCompany');
+        Route::put('company', 'updateCompany');
+        Route::get('invoicing', 'showInvoicing');
+        Route::put('invoicing', 'updateInvoicing');
+        Route::get('working-time', 'showWorkingTime');
+        Route::put('working-time', 'updateWorkingTime');
+    });
+
     Route::prefix('sentinels')->group(function () {
         Route::get('/active', [SentinelController::class, 'indexActive']);
     });
@@ -562,13 +585,13 @@ Route::middleware('auth', 'release.session', 'cache.headers:no_cache;must_revali
         Route::post('/subscribe', 'subscribe');
         Route::post('/unsubscribe', 'unsubscribe');
         Route::post('/status', 'updateStatus');
-        Route::post('/join', 'join');
         Route::put('/current_focus', 'updateCurrentFocus');
         Route::put('/status', 'updateStatus');
     });
 
     Route::prefix('users')->group(function () {
         Route::get('/me', fn () => Auth::user());
+        Route::post('/me/revoke-token', [UserController::class, 'revokeToken']);
         Route::get('/environment', [UserController::class, 'showEnvironment']);
         Route::post('travel-expenses', [FileController::class, 'uploadTravelExpenses']);
 
@@ -635,6 +658,8 @@ Route::middleware('auth', 'release.session', 'cache.headers:no_cache;must_revali
     });
 
     Route::resource('calendar_entries', CalendarController::class)->only(['index', 'store', 'update', 'destroy']);
+    Route::get('calendar-feed', [CalendarFeedController::class, 'showUrl']);
+    Route::post('calendar-feed', [CalendarFeedController::class, 'rotate']);
     Route::resource('assignments', AssignmentController::class)->only(['update'])->middleware('owner:assigned_user_id,hr|project_manager');
     Route::resource('assignments', AssignmentController::class)->only(['destroy'])->middleware('owner:assigned_user_id,project_manager');
 
@@ -665,39 +690,56 @@ Route::middleware('auth', 'release.session', 'cache.headers:no_cache;must_revali
 
     Route::resource('invoices', InvoiceController::class)->only(['index', 'show', 'store', 'update', 'destroy'])->middleware('role:invoicing');
 
-    Route::resource('invoice_items', InvoiceItemController::class)->only(['show'])->middleware('role:invoicing|project_manager');
-    Route::resource('invoice_items', InvoiceItemController::class)->only(['update'])->middleware('permission_invoiceItem');
-    Route::resource('invoice_items', InvoiceItemController::class)->only(['store', 'destroy'])->middleware(['role:invoicing|project_manager', 'permission_invoiceItem']);
+    Route::resource('invoice_items', InvoiceItemController::class)->only(['show'])->whereNumber('invoice_item')->middleware('role:invoicing|project_manager');
+    Route::resource('invoice_items', InvoiceItemController::class)->only(['update'])->whereNumber('invoice_item')->middleware('permission_invoiceItem');
+    Route::resource('invoice_items', InvoiceItemController::class)->only(['store', 'destroy'])->whereNumber('invoice_item')->middleware(['role:invoicing|project_manager', 'permission_invoiceItem']);
 
     Route::resource('lead_sources', LeadSourceController::class);
-    Route::resource('project_states', ProjectStateController::class)->only(['index', 'update']);
+    Route::resource('project_states', ProjectStateController::class)->only(['index']);
+    Route::resource('project_states', ProjectStateController::class)->only(['update'])->middleware('role:admin');
     Route::resource('milestones', MilestoneController::class)->only(['index', 'show', 'store', 'update', 'destroy']);
     Route::resource('plugin_links', PluginLinkController::class)->only(['store', 'update', 'destroy']);
 
     Route::resource('products', ProductController::class)->only(['index', 'show']);
     Route::resource('products', ProductController::class)->only(['store', 'update', 'destroy'])->middleware('role:product_manager');
 
-    Route::resource('product_groups', ProductGroupController::class)->only(['index', 'show']);
-    Route::resource('product_groups', ProductGroupController::class)->only(['store', 'update', 'destroy'])->middleware('role:product_manager');
+    Route::resource('product_groups', ProductGroupController::class)->only(['index', 'show'])->whereNumber('product_group');
+    Route::resource('product_groups', ProductGroupController::class)->only(['store', 'update', 'destroy'])->whereNumber('product_group')->middleware('role:product_manager');
 
     Route::resource('projects', ProjectController::class)->only(['index', 'show']);
     Route::resource('projects', ProjectController::class)->only(['store', 'update'])->middleware('role:project_manager');
     Route::resource('projects', ProjectController::class)->only(['destroy'])->middleware('role:admin');
 
-    Route::resource('sentinels', SentinelController::class)->only(['index', 'show', 'store', 'update', 'destroy'])->middleware('role:admin');
+    Route::resource('sentinels', SentinelController::class)->only(['index', 'show', 'store', 'update', 'destroy'])->whereNumber('sentinel')->middleware('role:admin');
     Route::resource('tasks', TaskController::class);
     Route::post('tasks/{task}/co-assignees', [TaskController::class, 'addCoAssignee']);
     Route::delete('tasks/{task}/co-assignees/{assignment}', [TaskController::class, 'removeCoAssignee']);
     Route::resource('users', UserController::class)->only(['show'])->middleware('owner:id,project_manager|hr');
     Route::resource('users', UserController::class)->only(['update'])->middleware('owner:id,hr');
     Route::delete('users/{user}', [UserController::class, 'destroy'])->middleware('role:admin');
+    Route::get('microsoft365/connect', [Microsoft365AccountController::class, 'connect']);
+    Route::delete('users/{user}/microsoft365', [Microsoft365AccountController::class, 'destroy']);
     Route::post('users', [UserController::class, 'store'])->middleware('role:hr');
     Route::get('users', [UserController::class, 'index'])->middleware('hr_permission');
     Route::resource('vacations', VacationController::class)->only(['show', 'store'])->middleware('owner:vacation_grant.user_id,hr');
     Route::resource('vacations', VacationController::class)->only(['destroy'])->middleware('role:admin');
     Route::post('vaults/tan', [VaultController::class, 'submitTan'])->middleware('role:admin');
     Route::get('vaults/bank-lookup', [VaultController::class, 'bankLookup'])->middleware('role:admin');
+    Route::get('vaults/m365/teams-app-package', [PluginM365Controller::class, 'downloadTeamsAppPackage'])->middleware('role:admin');
     Route::resource('vaults', VaultController::class)->middleware('role:admin');
+    Route::prefix('webhook-endpoints')->middleware('role:admin')->controller(WebhookEndpointController::class)->group(function () {
+        Route::get('', 'index');
+        Route::post('', 'store');
+        Route::get('events', 'indexEvents');
+        Route::prefix('{webhook}')->group(function () {
+            Route::put('', 'update');
+            Route::delete('', 'destroy');
+            Route::get('secret', 'showSecret');
+            Route::post('secret', 'rotateSecret');
+            Route::get('deliveries', 'indexDeliveries');
+            Route::post('ping', 'ping');
+        })->whereNumber('webhook');
+    });
 
     Route::prefix('gitlab-audit')->controller(GitlabAuditController::class)->group(function () {
         Route::get('', 'index');
@@ -719,3 +761,5 @@ Route::prefix('gitlab')->controller(PluginGitController::class)->group(function 
     Route::post('', 'onWebhook');
     Route::put('', 'onWebhook');
 });
+
+require __DIR__.'/flow.php';

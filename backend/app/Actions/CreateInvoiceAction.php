@@ -38,16 +38,11 @@ class CreateInvoiceAction {
             $project
         );
 
-        $this->incrementInvoiceNumber();
+        Param::incrementNumber('INVOICE_NO_CURRENT');
 
         $invoice = $this->createInvoiceRecord($invoiceNumber, $company, $project, $filename);
         File::saveTo('invoices/'.$filename, $zugferdPdf, $invoice, 'invoices.values');
         return [$invoice, $zugferdPdf, $filename];
-    }
-    private function incrementInvoiceNumber(): void {
-        $invoiceNoParam        = Param::get('INVOICE_NO_CURRENT');
-        $invoiceNoParam->value = $invoiceNoParam->value + 1;
-        $invoiceNoParam->save();
     }
     private function createInvoiceRecord(
         string $invoiceNumber,

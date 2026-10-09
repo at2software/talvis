@@ -33,17 +33,21 @@ class ImprintScraperService {
     ];
     private ?Command $console = null;
 
-    private function loadUrl($url): string {
+    public function __construct(private SafeUrlGuard $guard) {}
+
+    private function fetch(string $url, int $hopsLeft = 5): string {
+        $pinned = $this->guard->pinnedCurlOptions($url);
+
         $ch = curl_init();
-        curl_setopt_array($ch, [
+        curl_setopt_array($ch, $pinned + [
             CURLOPT_URL            => $url,
             CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_FOLLOWLOCATION => false,
+            CURLOPT_PROTOCOLS      => CURLPROTO_HTTP | CURLPROTO_HTTPS,
             CURLOPT_TIMEOUT        => 30,
             CURLOPT_CONNECTTIMEOUT => 10,
             CURLOPT_USERAGENT      => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
             CURLOPT_ENCODING       => '',
-            CURLOPT_MAXREDIRS      => 5,
             CURLOPT_HTTPHEADER     => [
                 'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
                 'Accept-Language: en-US,en;q=0.9',
@@ -59,6 +63,7 @@ class ImprintScraperService {
 
         $response = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $redirect = curl_getinfo($ch, CURLINFO_REDIRECT_URL);
         $error    = curl_error($ch);
         curl_close($ch);
 
@@ -66,10 +71,22 @@ class ImprintScraperService {
             throw new \Exception("cURL error: $error");
         }
 
+        if ($redirect && $httpCode >= 300 && $httpCode < 400) {
+            if ($hopsLeft === 0) {
+                throw new \Exception('Too many redirects');
+            }
+
+            return $this->fetch($redirect, $hopsLeft - 1);
+        }
+
         if ($httpCode >= 400) {
             throw new \Exception("HTTP error $httpCode");
         }
 
+        return $response;
+    }
+    private function loadUrl(string $url): string {
+        $response = $this->fetch($url);
         $encoding = mb_detect_encoding($response, mb_detect_order(), true);
 
         if (strtoupper($encoding) === 'UTF-8' || strtoupper($encoding) === 'UTF8' || strtoupper($encoding) === 'ASCII') {
@@ -104,21 +121,13 @@ class ImprintScraperService {
         $url_plain = preg_replace('/[?&#].*$/', '', $url);
         $parts     = explode('.', $url_plain);
         $type      = array_pop($parts);
-        $file      = file_get_contents($url);
-        switch ($type) {
-            case 'jpg':
-            case 'jpeg':
-            case 'png':
-            case 'gif':
-            case 'bmp':
-            case 'wbmp':
-                return imagecreatefromstring($file);
-            case 'webp':
-                return @imagecreatefromwebp($url);
-            case 'svg':
-                return null;
-            default:
-                return null;
+        if (! in_array(strtolower($type), ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'wbmp', 'webp'], true)) {
+            return null;
+        }
+        try {
+            return @imagecreatefromstring($this->fetch($url)) ?: null;
+        } catch (\Exception) {
+            return null;
         }
     }
     private function createThumbnail(\GdImage $src_img, int $newSize): ?\GdImage {

@@ -2,13 +2,14 @@ import { Service } from '@angular/core';
 import { Company } from '@models/company/company.model';
 import { CompanyContact } from '@models/company/company-contact.model';
 import { PdfCreationType } from '@enums/PdfCreationType';
-import { Observable } from 'rxjs';
+import { Observable, map, switchMap, tap } from 'rxjs';
 import { TalvisHttpService, idOf } from '../http/http.talvis';
 import { notifyHttpError } from '@models/http/file-download';
 import { Connection } from './connection.model';
 import { Dictionary } from '@constants/constants';
 import { nx } from '@models/_core/nx-bridge';
 import { CustomerLocationDto, MonthlyBiasDataDto } from '@models/_core/api-response';
+import { Param } from '@models/param/param.model';
 
 @Service()
 export class CompanyService extends TalvisHttpService<Company> {
@@ -23,7 +24,25 @@ export class CompanyService extends TalvisHttpService<Company> {
     showConnections = (_: Company | string | number) => this.aget(`companies/${idOf(_)}/connections`, {}, Connection);
     indexAllConnections = (): Observable<Connection[]> => this.aget(`connections`, {}, Connection);
     create = (name: string = 'New company') => this.post('companies', { name: name });
-    createEmployee = (id: string) => this.post(`companies/${id}/employees`, {}, CompanyContact);
+    createOwnCompany = (name: string): Observable<Company> =>
+        this.create(name).pipe(
+            switchMap((company: Company) => Param.write('params/ME_ID', company.id).pipe(map(() => company))),
+            tap((company) => {
+                nx().global.settings['ME_ID'] = company.id;
+                nx().global.me_id = company.id;
+            }),
+        );
+    createEmployee = (id: string, name?: string) => this.post(`companies/${id}/employees`, { name }, CompanyContact);
+    promptAddEmployee = (company: Company, onCreated: (created: CompanyContact) => void) =>
+        nx()
+            .promptInput($localize`:@@i18n.contacts.contactPersonName:name of the contact person`)
+            .confirmed(({ text }) =>
+                text?.trim() &&
+                this.createEmployee(company.id, text.trim()).subscribe((created) => {
+                    company.employees.push(created);
+                    onCreated(created);
+                }),
+            );
     updateGeneric = (id: string, api: string, data: object) => this.put(api + '/' + id, data);
     importImprint = (_: Company) => this.get(`companies/${_.id}/import_imprint`);
     getByPhone = (phone_number: string) => this.get(`companies/by-phone`, { phone_number: phone_number });

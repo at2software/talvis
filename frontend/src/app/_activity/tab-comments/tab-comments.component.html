@@ -17,17 +17,26 @@
 
         <div class="header d-flex align-items-center">
             <span class="flex-fill" i18n="@@i18n.common.comments">comments</span>
-            @if (_hasActivity['GitLabPlugin'] || _hasActivity['MantisPlugin'] || _hasActivity['MattermostPlugin']) {
+            @if (_hasActivity['gitlab'] || _hasActivity['mantisbt'] || _hasActivity['jira'] || _hasActivity['github'] || _hasActivity['mattermost'] || _hasActivity['slack']) {
                 <div class="d-flex gap-2 align-items-center">
                     <n class="pointer" [class.text-primary]="_showActivity['talvis']" [class.text-muted]="!_showActivity['talvis']" (click)="toggleActivity('talvis')" ngbTooltip="Toggle TALVIS comments" i18n-ngbTooltip="@@i18n.comments.toggleTalvisComments">nexus</n>
-                    @if (_hasActivity['GitLabPlugin']) {
-                        <n class="pointer" [class.text-primary]="_showActivity['GitLabPlugin']" [class.text-muted]="!_showActivity['GitLabPlugin']" (click)="toggleActivity('GitLabPlugin')" ngbTooltip="Toggle Git activity" i18n-ngbTooltip="@@i18n.comments.toggleGitActivity">git</n>
+                    @if (_hasActivity['gitlab']) {
+                        <n class="pointer" [class.text-primary]="_showActivity['gitlab']" [class.text-muted]="!_showActivity['gitlab']" (click)="toggleActivity('gitlab')" ngbTooltip="Toggle Git activity" i18n-ngbTooltip="@@i18n.comments.toggleGitActivity">git</n>
                     }
-                    @if (_hasActivity['MantisPlugin']) {
-                        <n class="pointer" [class.text-primary]="_showActivity['MantisPlugin']" [class.text-muted]="!_showActivity['MantisPlugin']" (click)="toggleActivity('MantisPlugin')" ngbTooltip="Toggle MantisBT activity" i18n-ngbTooltip="@@i18n.comments.toggleMantisActivity">mantis</n>
+                    @if (_hasActivity['mantisbt']) {
+                        <n class="pointer" [class.text-primary]="_showActivity['mantisbt']" [class.text-muted]="!_showActivity['mantisbt']" (click)="toggleActivity('mantisbt')" ngbTooltip="Toggle MantisBT activity" i18n-ngbTooltip="@@i18n.comments.toggleMantisActivity">mantis</n>
                     }
-                    @if (_hasActivity['MattermostPlugin']) {
-                        <n class="pointer" [class.text-primary]="_showActivity['MattermostPlugin']" [class.text-muted]="!_showActivity['MattermostPlugin']" (click)="toggleActivity('MattermostPlugin')" ngbTooltip="Toggle Mattermost activity" i18n-ngbTooltip="@@i18n.comments.toggleMattermostActivity">mattermost</n>
+                    @if (_hasActivity['jira']) {
+                        <n class="pointer" [class.text-primary]="_showActivity['jira']" [class.text-muted]="!_showActivity['jira']" (click)="toggleActivity('jira')" ngbTooltip="Toggle Jira activity" i18n-ngbTooltip="@@i18n.comments.toggleJiraActivity">jira</n>
+                    }
+                    @if (_hasActivity['github']) {
+                        <n class="pointer" [class.text-primary]="_showActivity['github']" [class.text-muted]="!_showActivity['github']" (click)="toggleActivity('github')" ngbTooltip="Toggle GitHub activity" i18n-ngbTooltip="@@i18n.comments.toggleGitHubActivity">github</n>
+                    }
+                    @if (_hasActivity['mattermost']) {
+                        <n class="pointer" [class.text-primary]="_showActivity['mattermost']" [class.text-muted]="!_showActivity['mattermost']" (click)="toggleActivity('mattermost')" ngbTooltip="Toggle Mattermost activity" i18n-ngbTooltip="@@i18n.comments.toggleMattermostActivity">mattermost</n>
+                    }
+                    @if (_hasActivity['slack']) {
+                        <n class="pointer" [class.text-primary]="_showActivity['slack']" [class.text-muted]="!_showActivity['slack']" (click)="toggleActivity('slack')" ngbTooltip="Toggle Slack activity" i18n-ngbTooltip="@@i18n.comments.toggleSlackActivity">slack</n>
                     }
                 </div>
             }
@@ -41,7 +50,7 @@
     </scrollbar>
     <div class="input-container p-2 border-top d-flex gap-2 align-items-start">
         <div ngbDropdown placement="top-start" class="d-inline-block">
-            <button type="button" class="btn btn-sm btn-outline-primary" ngbDropdownToggle>
+            <button type="button" class="btn btn-sm btn-plain text-primary" ngbDropdownToggle>
                 <n>{{ getTargetIcon() }}</n>
             </button>
             <div ngbDropdownMenu>

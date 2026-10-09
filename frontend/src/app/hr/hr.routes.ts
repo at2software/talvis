@@ -1,6 +1,8 @@
-import { Routes } from '@angular/router';
+import { inject } from '@angular/core';
+import { Router, Routes } from '@angular/router';
+import { map, take } from 'rxjs';
+import { GlobalService } from '@models/global.service';
 import { HrDetailGuard } from './hr-details.guard';
-import { NxStatic } from '@app/nx/nx.static';
 
 export const HR_ROUTES: Routes = [
     {
@@ -32,7 +34,20 @@ export const HR_ROUTES: Routes = [
                     { path: '**', redirectTo: 'contact' },
                 ],
             },
-            { path: '**', redirectTo: () => (NxStatic.global?.user?.id ?? '') + '/contact' },
+            {
+                path: '**',
+                children: [],
+                canActivate: [
+                    () => {
+                        const global = inject(GlobalService);
+                        const router = inject(Router);
+                        return global.init.pipe(
+                            take(1),
+                            map(() => router.createUrlTree(global.user ? ['/hr', global.user.id, 'contact'] : ['/'])),
+                        );
+                    },
+                ],
+            },
         ],
     },
 ];

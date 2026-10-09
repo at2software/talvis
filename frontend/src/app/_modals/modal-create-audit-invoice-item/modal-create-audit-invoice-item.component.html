@@ -43,7 +43,7 @@
 </div>
 
 <div class="modal-footer">
-    <button class="btn btn-outline-primary" (click)="decline()" i18n="@@i18n.common.cancel">cancel</button>
+    <button class="btn" (click)="decline()" i18n="@@i18n.common.cancel">cancel</button>
     <button class="btn btn-primary" (click)="save()" [disabled]="!canSave() || saving()">
         @if (saving()) {
             <spinner [size]="20" [inline]="true" class="me-1"></spinner>

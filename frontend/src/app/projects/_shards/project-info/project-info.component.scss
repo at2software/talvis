@@ -9,8 +9,8 @@
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%) rotate(-90deg);
-        width: 190px;
-        height: 190px;
+        width: 136px;
+        height: 136px;
         border-radius: 50%;
         background: conic-gradient(
             var(--budget-danger-color, #dc3545) 0deg,
@@ -18,8 +18,8 @@
             transparent var(--budget-over-percentage, 0deg),
             transparent 360deg
         );
-        -webkit-mask: radial-gradient(circle, transparent 0%, transparent 82%, black 82%, black 100%);
-        mask: radial-gradient(circle, transparent 0%, transparent 82%, black 82%, black 100%);
+        -webkit-mask: radial-gradient(circle closest-side, transparent 91%, black 91%);
+        mask: radial-gradient(circle closest-side, transparent 91%, black 91%);
         pointer-events: none;
         z-index: 10;
     }

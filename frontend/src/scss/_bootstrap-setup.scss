@@ -3,70 +3,93 @@
 @use 'colors';
 @use 'var';
 @use 'bootstrap/scss/bootstrap' with (
-    $border-radius             : var.$border-radius,
-    $card-border-radius        : var.$border-radius,
-    $btn-border-width          : var.$btn-border-width,
-    $card-bg                   : var.$card-bg,
-    $card-cap-bg               : var.$card-cap-bg,
-    $card-border-width         : var.$card-border-width,
-    $dropdown-bg               : var.$dropdown-bg,
-    $form-select-padding-y     : var.$form-select-padding-y,
-    $input-padding-y           : var.$input-padding-y,
-    $input-border-width        : var.$input-border-width,
-    $list-group-bg             : var.$list-group-bg,
-    $list-group-border-width   : var.$list-group-border-width,
-    $list-group-color          : var.$list-group-color,
-    $list-group-action-color   : var.$list-group-action-color,
-    $list-group-item-padding-y : var.$list-group-item-padding-y,
+    $blue                          : colors.$blue,
+    $indigo                        : colors.$indigo,
+    $purple                        : colors.$purple,
+    $pink                          : colors.$pink,
+    $red                           : colors.$red,
+    $orange                        : colors.$orange,
+    $yellow                        : colors.$yellow,
+    $green                         : colors.$green,
+    $teal                          : colors.$teal,
+    $cyan                          : colors.$cyan,
+    $primary                       : colors.$primary,
+    $secondary                     : colors.$secondary,
+    $success                       : map.get(colors.$custom-colors, 'success'),
+    $danger                        : map.get(colors.$custom-colors, 'danger'),
+    $warning                       : map.get(colors.$custom-colors, 'warning'),
+    $info                          : map.get(colors.$custom-colors, 'info'),
+    $body-bg-dark                  : colors.$bg-body,
+    $body-tertiary-bg-dark         : transparent,
+    $font-family-sans-serif        : ('SourceSans', Arial, Helvetica, sans-serif),
+    $border-radius                 : var.$border-radius,
+    $border-radius-sm              : var.$border-radius,
+    $border-radius-lg              : var.$border-radius,
+    $border-radius-xl              : var.$border-radius,
+    $border-radius-xxl             : var.$border-radius,
+    $card-border-radius            : var.$border-radius,
+    $modal-content-border-radius   : var.$border-radius,
+    $dropdown-border-radius        : var.$border-radius,
+    $popover-border-radius         : var.$border-radius,
+    $toast-border-radius           : var.$border-radius,
+    $btn-border-width              : 0,
+    $card-bg                       : color.adjust(colors.$bg-card, $lightness: -1%),
+    $card-cap-bg                   : color.adjust(colors.$bg-card, $lightness: -3%),
+    $card-border-width             : 0,
+    $dropdown-bg                   : rgba(colors.$bg-darker, .95),
+    $dropdown-border-color         : rgba(black, .3),
+    $dropdown-border-width         : 2px,
+    $dropdown-divider-bg           : var(--bs-border-color-translucent),
+    $input-padding-y               : .125rem,
+    $input-border-width            : 0,
+    $form-select-padding-y         : .125rem,
+    $form-floating-height          : 58px,
+    $form-floating-transition      : none,
+    $list-group-bg                 : transparent,
+    $list-group-border-width       : 0,
+    $list-group-color              : white,
+    $list-group-action-color       : white,
+    $list-group-item-padding-y     : 5px,
     $list-group-active-bg          : transparent,
     $list-group-active-border-color: transparent,
     $list-group-active-color       : colors.$primary,
-    $modal-backdrop-bg         : var.$modal-backdrop-bg,
-    $modal-backdrop-opacity    : var.$modal-backdrop-opacity,
-    $modal-content-border-width: var.$modal-content-border-width,
-    $table-bg                  : var.$table-bg,
-    $table-border-color        : var.$table-border-color,
-    $tooltip-bg                : var.$tooltip-bg,
-    $tooltip-color             : var.$tooltip-color,
-    $primary                   : colors.$primary,
-    $secondary                 : colors.$secondary,
-    $success                   : map.get(colors.$custom-colors, 'success'),
-    $danger                    : map.get(colors.$custom-colors, 'danger'),
-    $warning                   : map.get(colors.$custom-colors, 'warning'),
-    $info                      : map.get(colors.$custom-colors, 'info'),
+    $modal-backdrop-bg             : #0009,
+    $modal-backdrop-opacity        : 1,
+    $modal-content-border-width    : 0,
+    $table-bg                      : transparent,
+    $table-border-color            : #fff1,
+    $tooltip-bg                    : #000c,
+    $tooltip-color                 : white,
+    $tooltip-opacity               : 1,
 );
 
-app-root {
-    > router-outlet + * {
-        @extend .d-block, .container;
+:root {
+    @each $key, $value in colors.$custom-colors {
+        --color-#{$key}: #{$value};
+        --bs-#{$key}: #{$value};
     }
+    --color-primary-filter: invert(0.5) sepia(1) saturate(5) hue-rotate(130deg);
+    --color-success-soft: #{colors.$success};
+    --color-danger-soft: #{colors.$danger};
+    --color-warning-soft: #{colors.$warning};
+    --color-info-soft: #{colors.$info};
+
+    --tv-surface-darker: #{colors.$bg-darker};
+    --tv-surface-card: #{colors.$bg-card};
+    --tv-surface-body: #{colors.$bg-body};
+    --tv-surface-hover: #{colors.$bg-hover};
+    --tv-surface-muted: #{colors.$bg-muted};
+    --tv-modules-width: #{var.$m-modules};
+    --tv-activity-width: #{var.$m-activity};
+    --tv-activity-rail-width: #{var.$m-activity-rail};
+    --tv-header-height: #{var.$header-height};
+    --tv-container-max: #{var.$container-app};
+    --tv-liquid-glass: #{var.liquid-glass()};
 }
-[data-bs-theme='dark'] {
-    --bs-body-bg: #{colors.$bg-body};
-    --bs-dropdown-bg: #{colors.$bg-card};
-    --bs-tertiary-bg: transparent;
-}
 
-.form-switch .form-check-input {
-    box-shadow: var.light-bottom(), var.dark-top(), inset var.light-top(), inset var.dark-bottom();
-}
-.btn {
-    box-shadow: var.light-bottom(1px), var.dark-top(1px), var.liquid-glass();
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    position: relative;
-    overflow: hidden;
-
-    &.btn-icon {
-        box-shadow: var.inset-shadow-up(1px);
-        border-radius: 100%;
-        width: 24px;
-        height: 24px;
-        padding: 0;
-    }
-
-
+@each $key, $value in colors.$custom-colors {
+    .bg-#{$key}   { background-color: #{$value} !important; color: colors.readable-on($value); }
+    .text-#{$key} { color: #{$value} !important; }
 }
 
 .bg-primary,
@@ -74,11 +97,22 @@ app-root {
     color: black !important;
 }
 
+app-root > router-outlet + * {
+    @extend .d-block, .container;
+}
+
+.btn {
+    box-shadow: var.light-bottom(1px), var.dark-top(1px), var(--tv-liquid-glass);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    position: relative;
+    overflow: hidden;
+}
+
 .card {
-    box-shadow: var.liquid-glass();
-    transition: box-shadow 0.3s ease, transform 0.3s ease, background-position 1s ease;
-    background: gradient(colors.$bg-card);
-    background-position: top left;
+    box-shadow: var(--tv-liquid-glass);
+    transition: box-shadow 0.3s ease;
 
     &:hover {
         box-shadow:
@@ -86,13 +120,9 @@ app-root {
             inset 0 10px 20px -6px #fff1,
             inset 0 -6px 12px -4px #0005,
             0 6px 20px -4px #0004;
-        //transform: translateY(-2px);
-        background-position: -3rem top -3rem left;
-        .card-header {
-            n, i {
-                transition: color 0.3s ease;
-                color: #999;
-            }
+        .card-header :is(n, i):not([class*='text-'], button *, a *) {
+            transition: color 0.3s ease;
+            color: #999;
         }
     }
     & > table:last-child > tr:last-child > td:last-child {
@@ -105,6 +135,30 @@ app-root {
         border-bottom-right-radius: var(--bs-border-radius);
     }
 }
+
+:is(.card, .logo)[data-backlight]::after {
+    $reach: 1.5rem;
+    content: '';
+    position: absolute;
+    inset: -$reach;
+    z-index: -1;
+    pointer-events: none;
+    opacity: 0.225;
+    animation: backlight-in 1.5s ease-out;
+    background:
+        radial-gradient($reach 40% at calc(100% - #{$reach}) 60%, var(--backlight-0), transparent),
+        radial-gradient($reach $reach at calc(100% - #{$reach}) calc(100% - #{$reach}), color-mix(in srgb, var(--backlight-1) 45%, transparent), transparent),
+        radial-gradient(45% $reach at 50% calc(100% - #{$reach}), var(--backlight-2), transparent),
+        radial-gradient($reach $reach at $reach calc(100% - #{$reach}), color-mix(in srgb, var(--backlight-3) 45%, transparent), transparent),
+        radial-gradient($reach 40% at $reach 60%, var(--backlight-4), transparent);
+}
+
+@keyframes backlight-in {
+    from {
+        opacity: 0;
+    }
+}
+
 .card-header {
     --bs-card-cap-bg: transparent;
     text-shadow: 1px 1px 2px #000;
@@ -121,78 +175,72 @@ ul.list-group:not(:last-child) > li.list-group-item:last-child {
     border-bottom-right-radius: 0;
 }
 
-.badge {
+.badge,
+.form-control,
+.form-select {
     box-shadow: inset var.light-top(), inset var.dark-bottom();
 }
+
+.form-control .form-control {
+    box-shadow: none;
+}
+
+.form-switch .form-check-input {
+    box-shadow: var.light-bottom(), var.dark-top(), inset var.light-top(), inset var.dark-bottom();
+}
+
 .input-group-text {
     box-shadow: inset var.dark-top(1px), inset var.light-bottom(1px);
 }
+
 .input-group-text-darker {
     background-color: #0006;
 }
 
-.list-group-dir {
-    .list-group-item {
-        padding: 0 !important;
-        border-radius: 0 !important;
-        & > div {
-            @extend .px-2;
-        }
-        & > ul.list-group {
-            @extend .ps-3;
-        }
+.dropdown {
+    position: relative !important;
+}
+
+.dropdown-menu {
+    position: absolute !important;
+    z-index: 1060 !important;
+    box-shadow: var(--tv-liquid-glass);
+}
+
+body > :is(.dropdown, .dropup) {
+    position: absolute !important;
+
+    > .dropdown-menu {
+        position: static !important;
     }
 }
 
-.form-control,
-.form-select {
-    box-shadow: inset var.light-top(), inset var.dark-bottom();
-
-    .form-control {
-        box-shadow: none;
-    }
+.dropdown-menu li:hover {
+    background-color: rgba(colors.$primary, 20%);
 }
 
-.form-floating {
-    > .form-control,
-    > .form-select {
-        height: 58px;
-        padding-top: 1.625rem;
-        padding-bottom: 0.625rem;
-        
-        &:focus,
-        &:not(:placeholder-shown) {
-            padding-top: 1.625rem;
-            padding-bottom: 0.625rem;
-        }
-    }
-    
-    > label {
-        transition: none;
-    }
+.dropdown-toggle-simple::after {
+    display: none !important;
 }
 
-.form-select {
-    height: 27px !important;
-
-    .form-floating & {
-        height: 58px !important;
-    }
+.tooltip-inner,
+.echarts-tooltip {
+    backdrop-filter: blur(8px) !important;
+    box-shadow: var(--tv-liquid-glass) !important;
+    word-break: keep-all;
 }
 
-.modal-backdrop {
-    background-color: #0009;
-    box-shadow: var.shadow() !important;
+.echarts-tooltip {
+    background-color: #000c !important;
+    border-radius: var(--bs-border-radius);
+    color: #fff !important;
 }
 
-.flexible-tooltip {
-    max-width: fit-content;
-}
-
+.flexible-tooltip,
 .flexible-tooltip .tooltip-inner {
     max-width: fit-content;
 }
 
 .progress {
-    box-shadow: var.liquid-glass(), var.shadow-down(2px, 4px) !important;
+    box-shadow: var(--tv-liquid-glass), var.shadow-down(2px, 4px);
 }

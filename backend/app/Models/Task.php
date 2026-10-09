@@ -8,10 +8,10 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class Task extends BaseModel {
     use HasFactory;
 
-    protected $fillable = ['parent_type', 'parent_id', 'name', 'description', 'link', 'status', 'due_date'];
+    protected $fillable = ['parent_type', 'parent_id', 'name', 'description', 'link', 'state'];
 
     protected function casts(): array {
-        return ['status' => TaskState::class];
+        return ['state' => TaskState::class];
     }
     public function parent() {
         return $this->morphTo();

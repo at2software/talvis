@@ -51,10 +51,9 @@ class GitPipelineWebhookJob implements ShouldQueue {
 
         $message .= $this->pipelineJobList($builds->reject(fn (array $build) => $build['name'] === self::VULN_SCAN_EXEMPT)->values()->all(), $projectUrl);
 
-        $cacheId                 = 'git_pipeline_'.$this->objectAttributes['id'];
-        $props                   = $this->props($this->project['name']);
-        $props['nexus_cache_id'] = $cacheId;
-        $siblings                = $this->links->siblingsOfType(PluginChatController::class)->unique('channelId')->values();
+        $cacheId  = 'git_pipeline_'.$this->objectAttributes['id'];
+        $props    = $this->props($this->project['name']);
+        $siblings = $this->links->siblingsOfType(PluginChatController::class)->unique('channelId')->values();
 
         foreach ($siblings as $chatInfo) {
             ChatSendMessageJob::dispatch(
@@ -62,6 +61,7 @@ class GitPipelineWebhookJob implements ShouldQueue {
                 $props,
                 channelId: $chatInfo['channelId'],
                 cacheId: $cacheId,
+                chatKey: $chatInfo['controller']::getKey(),
             );
         }
 

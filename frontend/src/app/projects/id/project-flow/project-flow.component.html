@@ -1,0 +1,132 @@
+@let _phase = phase();
+@let _jobs = jobs();
+@let _isPm = isProjectManager();
+
+<div class="row">
+    <div class="col-12 col-md-4">
+        <div class="card">
+            <div class="card-header" i18n="@@i18n.flow.phase">phase</div>
+            @if (!_phase) {
+                <spinner class="p-4"></spinner>
+            } @else if (!_phase.phase) {
+                <div class="card-body text-muted" i18n="@@i18n.flow.noPhase">This project state is not mapped to a phase.</div>
+            } @else {
+                <div class="card-body">
+                    <div class="fs-5">{{ _phase.phase.name }}</div>
+                    @if (_phase.next_phase) {
+                        <small class="text-muted"><span i18n="@@i18n.flow.nextPhase">next phase</span>: {{ _phase.next_phase.name }}</small>
+                    }
+                    <div class="mt-3">
+                        <label class="form-label text-muted" for="flow-risk-class" i18n="@@i18n.flow.riskClass">risk class</label>
+                        <select id="flow-risk-class" class="form-select form-select-sm" [disabled]="!_isPm" (change)="setRiskClass($any($event.target).value)">
+                            <option value="" [selected]="!_phase.risk_class">–</option>
+                            @for (_ of riskClasses(); track _.id) {
+                                <option [value]="_.id" [selected]="_phase.risk_class?.id === _.id">{{ _.name }} ({{ _.level }})</option>
+                            }
+                        </select>
+                    </div>
+                </div>
+                <ul class="list-group list-group-flush">
+                    @for (gate of _phase.gates; track gate.key) {
+                        <li class="list-group-item d-flex align-items-center gap-2" [class.text-muted]="!gate.applies">
+                            <i [class]="gateClass(gate)">{{ gateIcon(gate) }}</i>
+                            <div class="flex-fill">
+                                <div>{{ gate.name }}</div>
+                                <small class="text-muted">
+                                    @if (gate.applies) {
+                                        {{ gate.required_role }} · {{ gate.required_approvals }}×
+                                    } @else {
+                                        <span i18n="@@i18n.flow.gateNotRequired">not required for this risk class</span>
+                                    }
+                                </small>
+                            </div>
+                            @if (_isPm && gate.applies && !gate.satisfied && !gate.pending_approval_id) {
+                                <i class="text-primary pointer" tabindex="0" i18n-ngbTooltip="@@i18n.flow.requestApproval" ngbTooltip="request approval" (click)="requestGate(gate)" (keyup.enter)="requestGate(gate)">how_to_reg</i>
+                            }
+                        </li>
+                    }
+                </ul>
+            }
+        </div>
+    </div>
+
+    <div class="col-12 col-md-8">
+        <div class="card">
+            <div class="card-header d-flex align-items-center">
+                <span class="flex-fill" i18n="@@i18n.flow.jobs">development jobs</span>
+                @if (_isPm) {
+                    <i class="text-primary pointer" tabindex="0" i18n-ngbTooltip="@@i18n.flow.newJob" ngbTooltip="new job" (click)="toggleCreate()" (keyup.enter)="toggleCreate()">{{ creating() ? 'close' : 'add' }}</i>
+                }
+            </div>
+
+            @if (creating()) {
+                @let _type = selectedType();
+                <div class="card-body border-bottom">
+                    <label class="form-label text-muted" for="flow-job-type" i18n="@@i18n.common.type">type</label>
+                    <select id="flow-job-type" class="form-select mb-3" (change)="selectType($any($event.target).value)">
+                        <option value="" [selected]="!_type">–</option>
+                        @for (_ of jobTypes(); track _.key) {
+                            <option [value]="_.key">{{ _.name }}</option>
+                        }
+                    </select>
+                    @if (_type) {
+                        @if (_type.description) {
+                            <p class="text-muted">{{ _type.description }}</p>
+                        }
+                        <div class="row">
+                            <div class="col-12 col-lg-7">
+                                @for (field of _type.input_schema.fields; track field.key) {
+                                    <div class="mb-3">
+                                        <label class="form-label" [for]="'flow-field-' + field.key">{{ fieldLabel(field) }}@if (field.required) {<span class="text-danger"> *</span>}</label>
+                                        @if (field.type === 'text' || field.type === 'object' || field.type === 'list') {
+                                            <textarea class="form-control" rows="3" [id]="'flow-field-' + field.key" [class.is-invalid]="invalidFields().includes(field.key)" [value]="values()[field.key] ?? ''" (input)="setValue(field.key, $any($event.target).value)"></textarea>
+                                        } @else {
+                                            <input class="form-control" [type]="field.type === 'url' ? 'url' : 'text'" [id]="'flow-field-' + field.key" [value]="values()[field.key] ?? ''" (input)="setValue(field.key, $any($event.target).value)" />
+                                        }
+                                        @if (field.description) {
+                                            <small class="text-muted">{{ field.description }}</small>
+                                        }
+                                    </div>
+                                }
+                            </div>
+                            <div class="col-12 col-lg-5">
+                                <label class="form-label text-muted" i18n="@@i18n.flow.jsonPreview">JSON preview</label>
+                                <pre class="small mb-0">{{ jsonPreview() }}</pre>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-outline-primary" [disabled]="!canSubmit()" (click)="submit()" i18n="@@i18n.flow.createJob">create job</button>
+                    }
+                </div>
+            }
+
+            @if (jobsLoading() && !_jobs.length) {
+                <spinner class="p-4"></spinner>
+            } @else if (!_jobs.length) {
+                <empty-state class="workflows" i18n-title="@@i18n.flow.noJobs" title="no development jobs yet"></empty-state>
+            } @else {
+                <ul class="list-group list-group-flush">
+                    @for (job of _jobs; track job.id) {
+                        <li class="list-group-item d-flex align-items-center gap-3">
+                            <span class="text-muted">#{{ job.id }}</span>
+                            <div class="flex-fill">
+                                <div>{{ job.type }}</div>
+                                <small class="text-muted">
+                                    @if (job.claimed_by) {
+                                        {{ job.claimed_by }} · {{ job.claimed_at | date: 'short' }}
+                                    }
+                                    @if (job.last_event) {
+                                        · {{ job.last_event.action }} {{ job.last_event.created_at | date: 'short' }}
+                                    }
+                                </small>
+                            </div>
+                            @if (job.mrUrl(); as mr) {
+                                <a class="text-primary" [href]="mr" target="_blank" rel="noopener" i18n-ngbTooltip="@@i18n.flow.mergeRequest" ngbTooltip="merge request"><i>merge</i></a>
+                            }
+                            <span class="badge" [class]="job.stateClass()">{{ job.state }}</span>
+                        </li>
+                    }
+                </ul>
+            }
+        </div>
+    </div>
+</div>

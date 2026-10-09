@@ -5,13 +5,13 @@
   padding: 0px;
   z-index: 1050;
   min-width: 150px;
-  border-radius: 5px;
+  border-radius: var(--bs-border-radius);
 }
 
 .month-picker {
   background-color: #212529;
   padding: 0px;
-  border-radius: 0.25rem;
+  border-radius: var(--bs-border-radius);
   color: #fff;
 }
 .month-grid {
@@ -130,7 +130,7 @@
   background-color: var(--bs-primary);
   color: white;
   font-size: 12px;
-  border-radius: 3px;
+  border-radius: var(--bs-border-radius);
   pointer-events: auto;
   cursor: pointer;
   overflow: hidden;
@@ -155,11 +155,11 @@
 }
 
 .single-day {
-  border-radius: 3px;
+  border-radius: var(--bs-border-radius);
 }
 
 .multi-day {
-  border-radius: 3px;
+  border-radius: var(--bs-border-radius);
 }
 .time {
   font-size: 10px;

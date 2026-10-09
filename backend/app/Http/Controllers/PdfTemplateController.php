@@ -2,99 +2,89 @@
 
 namespace App\Http\Controllers;
 
-use Barryvdh\DomPDF\Facade\Pdf;
+use App\Enums\InvoiceItemType;
+use App\Models\Document;
+use App\Models\Invoice;
+use App\Support\Letterhead;
 use Illuminate\Http\Request;
 
 class PdfTemplateController extends Controller {
-    private const FILES = [
-        'html' => 'pdf/template.html',
-        'css'  => 'pdf/styles.css',
-    ];
-    private const LOGO = 'pdf/at2_logo.png';
+    private const SAMPLE_LANG = 'de';
 
     public function show() {
         return [
-            'html'        => $this->read(self::FILES['html']),
-            'css'         => $this->read(self::FILES['css']),
-            'baseUrl'     => rtrim(asset('/'), '/').'/',
-            'pdfBase'     => rtrim(asset('pdf'), '/').'/',
-            'logoUrl'     => asset(self::LOGO).'?t='.@filemtime(public_path(self::LOGO)),
-            'hasOriginal' => file_exists(public_path(self::FILES['html'].'.original')),
+            'html'           => Letterhead::html(),
+            'css'            => Letterhead::css(),
+            'baseUrl'        => rtrim(asset('/'), '/').'/',
+            'pdfBase'        => rtrim(asset('pdf'), '/').'/',
+            'logoUrl'        => Letterhead::logoDataUri(),
+            'logoSources'    => Letterhead::LOGO_SOURCES,
+            'hasCustomLogo'  => Letterhead::customLogo() !== null,
+            'customized'     => Letterhead::isCustomized(),
+            'senderTokens'   => Letterhead::SENDER_TOKENS,
+            'documentTokens' => Letterhead::DOCUMENT_TOKENS,
+            'tokens'         => Letterhead::tokens(self::SAMPLE_LANG) + $this->sampleTokens() + ['pageCount' => '1'],
         ];
     }
     public function update(Request $r) {
         $data = $r->validate([
             'html' => 'required|string',
-            'css'  => 'required|string',
+            'css'  => 'present|nullable|string',
         ]);
-
-        foreach (self::FILES as $key => $rel) {
-            $this->snapshotOriginal($rel);
-            file_put_contents(public_path($rel), $data[$key]);
-        }
+        Letterhead::save($data['html'], $data['css'] ?? '');
         return ['success' => true];
     }
     public function revert() {
-        foreach ([...array_values(self::FILES), self::LOGO] as $rel) {
-            $orig = public_path($rel.'.original');
-            if (file_exists($orig)) {
-                copy($orig, public_path($rel));
-            }
-        }
-        return $this->show() + ['reverted' => true];
+        Letterhead::reset();
+        return $this->show();
     }
     public function uploadLogo(Request $r) {
-        $r->validate(['logo' => 'required|image']);
-        $this->snapshotOriginal(self::LOGO);
-        $r->file('logo')->move(public_path('pdf'), 'at2_logo.png');
-        return ['success' => true, 'logoUrl' => asset(self::LOGO).'?t='.time()];
+        $r->validate(['logo' => 'required|image|mimes:png,jpg,jpeg,gif']);
+        Letterhead::storeLogo($r->file('logo'));
+        return ['logoUrl' => Letterhead::logoDataUri(), 'hasCustomLogo' => true];
+    }
+    public function destroyLogo() {
+        Letterhead::removeLogo();
+        return ['logoUrl' => Letterhead::logoDataUri(), 'hasCustomLogo' => false];
     }
     public function preview(Request $r) {
-        $html = $r->input('html') ?: $this->read(self::FILES['html']);
-        $css  = $r->input('css', '');
-
-        if ($css !== '') {
-            $html = str_ireplace('</head>', "<style>\n{$css}\n</style>\n</head>", $html);
-        }
-        $html = strtr($html, $this->dummyTokens());
-
-        $pdf = Pdf::loadHTML($html);
-        return ['pdf' => base64_encode($pdf->output())];
+        $sample   = $this->sampleTokens();
+        $template = Document::getPdfTemplate($sample['documentTitle'], lang: self::SAMPLE_LANG, html: $r->input('html') ?: null, css: $r->input('css'));
+        $template = strtr($template, Letterhead::bracketed($sample));
+        return ['pdf' => base64_encode(Document::renderPdf($template))];
     }
-    private function read(string $rel): string {
-        $path = public_path($rel);
-        return file_exists($path) ? file_get_contents($path) : '';
-    }
-    private function snapshotOriginal(string $rel): void {
-        $path = public_path($rel);
-        $orig = $path.'.original';
-        if (! file_exists($orig) && file_exists($path)) {
-            copy($path, $orig);
-        }
-    }
-    private function dummyTokens(): array {
-        $row = fn ($k, $v) => '<div style="display:block;width:100%;"><div style="float:right;display:inline-block;">'.$v.'</div>'
-            .'<div style="display:inline-block;font-weight:bold;">'.$k.'</div></div>';
-
-        $content = '<p>Sehr geehrte Damen und Herren,</p>'
-            .'<p>vielen Dank für Ihr Vertrauen. Nachfolgend stellen wir Ihnen die vereinbarten Leistungen in Rechnung.</p>'
-            .'<table class="content-table"><thead><tr><th class="text-start">Position</th><th class="text-end">Menge</th>'
-            .'<th class="text-end">Einzelpreis</th><th class="text-end">Gesamt</th></tr></thead><tbody>'
-            .'<tr><td>Beratung &amp; Konzeption</td><td class="text-end">8,00 h</td><td class="text-end">120,00 €</td><td class="text-end">960,00 €</td></tr>'
-            .'<tr><td>Entwicklung</td><td class="text-end">24,00 h</td><td class="text-end">120,00 €</td><td class="text-end">2.880,00 €</td></tr>'
-            .'</tbody><tfoot><tr class="net-row"><td colspan="3" class="text-end">Netto</td><td class="text-end">3.840,00 €</td></tr>'
-            .'<tr><td colspan="3" class="text-end">zzgl. 19% USt.</td><td class="text-end">729,60 €</td></tr>'
-            .'<tr class="gross-row"><td colspan="3" class="text-end">Gesamtbetrag</td><td class="text-end">4.569,60 €</td></tr></tfoot></table>'
-            .'<p>Bitte überweisen Sie den Betrag innerhalb von 14 Tagen.</p>';
-
+    private function sampleTokens(): array {
+        $label = fn (string $key) => __('pdf.'.$key, [], self::SAMPLE_LANG);
+        $title = __('pdf.draft_invoice', [], self::SAMPLE_LANG);
         return [
-            '[documentTitle]' => 'Rechnung 2026-0042',
-            '[address]'       => 'Musterfirma GmbH<br>Herr Max Mustermann<br>Musterstraße 1<br>12345 Musterstadt',
-            '[headerInfo]'    => $row('Kundennummer', '10042').'<br>'.$row('Ansprechpartner', 'Erika Beispiel')
-                .'<br>'.$row('Telefon', '+49 (0)123 456789'),
-            '[dayNow]'        => date('d.m.Y'),
-            '[pageLabel]'     => 'Seite',
-            '[content]'       => $content,
+            'documentTitle' => $title,
+            'footerContext' => $title,
+            'address'       => 'Musterfirma GmbH<br>Herr Max Mustermann<br>Musterstraße 1<br>12345 Musterstadt',
+            'headerInfo'    => Document::pdfBlockRow($label('contact_person'), 'Erika Beispiel')
+                .Document::pdfBlockRow($label('phone'), '+49 (0)123 456789')
+                .'<br>'.Document::pdfBlockRow($label('customer_number'), '10042'),
+            'dayNow'      => date('d.m.Y'),
+            'pageLabel'   => $label('page'),
+            'pageOfLabel' => $label('page_of'),
+            'content'     => $this->sampleContent($label),
         ];
+    }
+    private function sampleContent(callable $label): string {
+        $item = fn (int $pos, string $text, string $price, string $qty, string $total) => (object)[
+            'type' => InvoiceItemType::from(0), 'sPosition' => $pos, 'text' => $text, 'eprice' => $price,
+            'eqty' => $qty, 'unit_name' => 'h', 'ehandling' => '', 'etotal' => $total,
+        ];
+        $items = [
+            $item(1, 'Beratung &amp; Konzeption', '120,00 EUR', '8', '960,00 EUR'),
+            $item(2, 'Entwicklung', '120,00 EUR', '24', '2.880,00 EUR'),
+        ];
+        $footers = [
+            [$label('net_value'), '3.840,00 EUR', ''],
+            [__('pdf.vat_on_net', ['rate' => 19], self::SAMPLE_LANG), '729,60 EUR', ''],
+            [$label('gross_value'), '4.569,60 EUR', ''],
+        ];
+        return '<p>Sehr geehrte Damen und Herren,</p><p>vielen Dank für Ihren Auftrag. Wir berechnen Ihnen folgende Leistungen:</p>'
+            .Invoice::getInvoiceBlade($items, $footers, [], self::SAMPLE_LANG)
+            .'<p>Bitte überweisen Sie den Betrag innerhalb von 14 Tagen.</p>';
     }
 }

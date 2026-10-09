@@ -27,6 +27,6 @@ class CommentController extends Controller {
         return $comment->applyAndSave($request);
     }
     public function destroy(Comment $comment) {
-        return $comment->delete();
+        return response()->json($comment->delete());
     }
 }

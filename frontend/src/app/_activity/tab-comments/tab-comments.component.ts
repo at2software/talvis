@@ -88,10 +88,10 @@ export class TabCommentsComponent {
         this.availableChatTargets.set(instances.filter((i) => i instanceof ChatPluginInstance && i.enc && this.#globalService.getEnc(i.enc.key).length > 0) as ChatPluginInstance[]);
 
         instances.forEach((instance) => {
-            const ctorName = instance.constructor?.name;
-            if (ctorName && instance.enc && this.#globalService.getEnc(instance.enc.key).length > 0) {
-                this.hasActivity.update((h) => ({ ...h, [ctorName]: true }));
-                this.showActivity.update((s) => ({ ...s, [ctorName]: s[ctorName] ?? true }));
+            const source = instance.getPluginTypeName();
+            if (instance.enc && this.#globalService.getEnc(instance.enc.key).length > 0) {
+                this.hasActivity.update((h) => ({ ...h, [source]: true }));
+                this.showActivity.update((s) => ({ ...s, [source]: s[source] ?? true }));
             }
         });
 

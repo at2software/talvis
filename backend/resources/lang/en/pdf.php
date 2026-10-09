@@ -39,6 +39,14 @@ return [
     'quarterly_recurring' => 'Quarterly recurring',
     'yearly_recurring'    => 'Yearly recurring',
 
+    // Letterhead
+    'web'             => 'Web',
+    'fax'             => 'Fax',
+    'register_number' => 'Commercial register',
+    'company_owners'  => 'Managing directors',
+    'vat_id'          => 'VAT ID',
+    'tax_id'          => 'Tax number',
+
     // Page counter
     'page'    => 'Page',
     'page_of' => 'of',
@@ -52,4 +60,5 @@ return [
     // Document titles
     'quote'         => 'Quote',
     'draft_invoice' => 'Draft Invoice',
+    'quote_preview' => 'Quote Preview',
 ];

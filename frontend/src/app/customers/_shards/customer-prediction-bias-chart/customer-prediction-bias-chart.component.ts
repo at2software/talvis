@@ -13,10 +13,21 @@ import type { EChartsOption } from 'echarts';
 @Component({
     selector: 'customer-prediction-bias-chart',
     imports: [NgxEchartsDirective],
-    template: `<div echarts [options]="chartOptions()" [initOpts]="{ height: 100 }" style="height: 100px;"></div>`,
+    template: `
+        @if (hasData()) {
+            <div class="card chart-card mb-3">
+                <div class="card-header hstack gap-2">
+                    <span i18n="@@i18n.widget-prediction-bias" class="flex-fill text-truncate">prediction bias</span>
+                </div>
+                <div echarts [options]="chartOptions()" [initOpts]="{ height: 100 }" style="height: 100px;"></div>
+            </div>
+        }
+    `,
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CustomerPredictionBiasChartComponent {
+    static readonly MIN_MONTHS = 3;
+
     readonly company = input.required<Company>();
     readonly trackedCompany = tracked(this.company);
     readonly #companyService = inject(CompanyService);
@@ -25,6 +36,7 @@ export class CustomerPredictionBiasChartComponent {
         () => this.company()?.id || undefined,
         (companyId) => this.#companyService.getPredictionAccuracy(companyId),
     );
+    readonly hasData = computed(() => this.#accuracy.value().length >= CustomerPredictionBiasChartComponent.MIN_MONTHS);
     readonly chartOptions = computed<EChartsOption>(() => this.#buildChart(this.#accuracy.value()));
 
     #buildChart(data: MonthlyBiasDataDto[]): EChartsOption {

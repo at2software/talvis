@@ -45,6 +45,6 @@ class SentinelController extends Controller {
     }
     public function destroy(Request $request, Sentinel $sentinel) {
         $sentinel->delete();
-        return response()->make('success', 202);
+        return response()->json(true, 202);
     }
 }

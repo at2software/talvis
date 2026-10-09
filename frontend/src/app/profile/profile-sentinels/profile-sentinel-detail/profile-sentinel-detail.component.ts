@@ -14,7 +14,7 @@ import { ProfileSentinelCommandModalComponent } from '../profile-sentinel-node/p
 import { ProfileSentinelConditionModalComponent } from '../profile-sentinel-node/profile-sentinel-condition-modal/profile-sentinel-condition-modal.component';
 import { ObserverTrigger } from '@enums/observer-trigger';
 import { SENTINEL_CONDITIONS, SentinelConditionInstance } from '../sentinel-condition.model';
-import { SENTINEL_COMMANDS, SentinelCommandInstance } from '../sentinel-command.model';
+import { CHAT_POST_COMMAND_KEYS, SENTINEL_COMMANDS, SentinelCommandInstance } from '../sentinel-command.model';
 import { PermissionsDirective } from '@directives/permissions.directive';
 import { AutosaveDirective } from '@directives/autosave.directive';
 
@@ -103,7 +103,7 @@ export class ProfileSentinelDetailComponent {
 
     getCommandTarget(cmd: SentinelCommandInstance): string {
         if (['create_new', 'create_for_each'].includes(cmd.key)) return cmd.options?.find((o) => o.key === 'table')?.value || '';
-        if (cmd.key === 'mattermost_post') return cmd.options?.find((o) => o.key === 'channel_id')?.value || '';
+        if (CHAT_POST_COMMAND_KEYS.includes(cmd.key)) return cmd.options?.find((o) => o.key === 'channel_id')?.value || '';
         return '';
     }
 
@@ -113,7 +113,7 @@ export class ProfileSentinelDetailComponent {
             try { return Object.entries(JSON.parse(fieldsJson)).map(([k, v]) => ({ key: k, value: String(v) })); }
             catch { return []; }
         }
-        if (cmd.key === 'mattermost_post') {
+        if (CHAT_POST_COMMAND_KEYS.includes(cmd.key)) {
             const message = cmd.options?.find((o) => o.key === 'message')?.value || '';
             return message ? [{ key: 'message', value: String(message) }] : [];
         }

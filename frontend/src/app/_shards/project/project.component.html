@@ -1,6 +1,6 @@
 @let p = project();
-@let state = p.state;
-@let color = state.color;
+@let state = stateOf(p);
+@let color = state?.color || '#666666';
 
 <div class="background"></div>
 
@@ -29,23 +29,23 @@
 }
 
 <div class="icon">
-    @if (state.isPrepared()) {
+    @if (state?.isPrepared()) {
         <i [style.color]="color">search</i>
     }
-    @if (state.isRunning()) {
+    @if (state?.isRunning()) {
         @if (p.is_time_based) {
              <i class="text-cyan">schedule</i>
         } @else {
              <i class="text-white">attach_money</i>
         }
     }
-    @if (state.isFinishedSuccessful()) {
+    @if (state?.isFinishedSuccessful()) {
         <i [style.color]="color">check_circle</i>
     }
-    @if (state.isFinishedFailed()) {
+    @if (state?.isFinishedFailed()) {
         <i [style.color]="color">cancel</i>
     }
-    @if (state.isFinishedIgnored()) {
+    @if (state?.isFinishedIgnored()) {
         <i [style.color]="color">swap_horiz</i>
     }
 </div>
@@ -55,7 +55,7 @@
     <div class="link cursor-pointer" [ngbTooltip]="tooltip()" smartLink="/projects/{{ p.id }}"></div>
 }
 @if (!click() && noRouting()) {
-    <div class="link cursor-pointer" [ngbTooltip]="tooltip()"></div>
+    <div class="link" [ngbTooltip]="tooltip()"></div>
 }
 @if (click()) {
     <div class="link cursor-pointer" [ngbTooltip]="tooltip()" (click)="click()" tabindex="0" (keydown.enter)="click()"></div>

@@ -1,4 +1,4 @@
-<div class="card mb-3 node node-card position-relative" [class]="getNodeTypeClass(trackedNode().type)" [style.width.px]="width()" [style.height.px]="height()" (click)="editNode.emit()" tabindex="0" (keydown.enter)="editNode.emit()">
+<div class="card mb-3 node node-card position-relative cursor-pointer" [class]="getNodeTypeClass(trackedNode().type)" [style.width.px]="width()" [style.height.px]="height()" (click)="editNode.emit()" tabindex="0" (keydown.enter)="editNode.emit()">
     @if (isCondition()) {
         <div role="button" class="delete-button text-danger cursor-pointer" (click)="deleteNode.emit(); $event.stopPropagation()" tabindex="0" (keydown.enter)="deleteNode.emit()">
             <i>delete</i>

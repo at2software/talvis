@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, inject, resource } from '
 import { Company } from '@models/company/company.model';
 import { InvoiceService } from '@models/invoice/invoice.service';
 import { StatsService } from '@models/stats.service';
-import { ECHARTS_DEFAULT_TOOLTIP_OPTIONS, ECHARTS_DONUT_ITEM_STYLE } from '@charts/echarts-presets';
+import { ECHARTS_DEFAULT_TOOLTIP_OPTIONS, ECHARTS_DONUT_CENTER_TEXT, ECHARTS_DONUT_ITEM_STYLE, ECHARTS_DONUT_SERIES_LABELED, ECHARTS_DONUT_TRACK_COLOR } from '@charts/echarts-presets';
 import { Color } from '@constants/Color';
 import { GlobalService } from '@models/global.service';
 import { dayjs } from '@constants/date/dates';
@@ -85,15 +85,15 @@ export class CustomersStatisticsComponent {
                     return `${params.name}: ${this.#eur(params.value)}`;
                 },
             },
-            graphic: [{ type: 'text', left: 'center', top: 'center', style: { text: this.#eur(total), fill: '#fff', fontSize: 12 } }],
+            graphic: [{ type: 'text', left: 'center', top: 'center', style: { ...ECHARTS_DONUT_CENTER_TEXT, text: this.#eur(total), fontSize: 12 } }],
             series: [
                 {
                     type: 'pie',
-                    radius: ['40%', '70%'],
+                    radius: ECHARTS_DONUT_SERIES_LABELED.radius,
                     data: reduced.map((_) => ({
                         value: _.value,
                         name: _.name,
-                        itemStyle: { color: _.id !== '0' ? Color.uniqueColorFromString('' + _.id) : '#333333', ...ECHARTS_DONUT_ITEM_STYLE },
+                        itemStyle: { color: _.id !== '0' ? Color.uniqueColorFromString('' + _.id) : ECHARTS_DONUT_TRACK_COLOR, ...ECHARTS_DONUT_ITEM_STYLE },
                     })),
                     label: { show: true, formatter: (rawP: unknown) => {
                         const p = rawP as { name: string; percent?: number };

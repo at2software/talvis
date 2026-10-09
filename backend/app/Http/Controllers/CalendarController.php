@@ -55,6 +55,6 @@ class CalendarController extends Controller {
         return $calendarEntry;
     }
     public function destroy(CalendarEntry $calendarEntry) {
-        return $calendarEntry->delete();
+        return response()->json($calendarEntry->delete());
     }
 }

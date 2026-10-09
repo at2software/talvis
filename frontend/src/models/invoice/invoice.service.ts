@@ -1,10 +1,11 @@
 import { Dictionary } from '@constants/constants';
 import { Service } from '@angular/core';
-import { map } from 'rxjs';
+import { map, tap } from 'rxjs';
 import { PdfCreationType } from '@enums/PdfCreationType';
 import { Invoice } from '@models/invoice/invoice.model';
 import { TalvisHttpService } from '../http/http.talvis';
 import { Expense } from '@models/expense/expense.model';
+import { saveBlobResponse } from '@models/http/file-download';
 import { CustomerStatsDto, LiquidityDto, TimeValuePointDto } from '@models/_core/api-response';
 
 @Service()
@@ -24,4 +25,8 @@ export class InvoiceService extends TalvisHttpService<Invoice> {
     getMonthlyRevenueRanges = () => this.get('invoices/monthly-revenue-ranges', {}, Object);
     getMonthlySpiralRevenue = () => this.aget<TimeValuePointDto>('invoices/monthly-spiral-revenue');
     getLiquidity = () => this.get<LiquidityDto>('invoices/liquidity');
+
+    sepaDirectDebitCandidates = () => this.aget('invoices/sepa-direct-debits');
+    downloadSepaDirectDebit = (invoices: Invoice[], collectionDate: string) =>
+        this.postBlobResponse('invoices/sepa-direct-debits', { invoice_ids: invoices.map((_) => _.id), collection_date: collectionDate }).pipe(tap((r) => saveBlobResponse(r)));
 }

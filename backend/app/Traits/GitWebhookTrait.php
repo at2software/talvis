@@ -7,6 +7,7 @@ use App\Http\Controllers\PluginGitController;
 use App\Jobs\ChatSendMessageJob;
 use App\Models\Param;
 use App\Models\Project;
+use App\Support\ChatProps;
 use App\Support\PipelineJobKind;
 
 trait GitWebhookTrait {
@@ -52,22 +53,17 @@ trait GitWebhookTrait {
             return;
         }
 
-        $cacheId                         = 'git_security_'.$jobName.'_'.$jobId;
-        $securityProps['nexus_cache_id'] = $cacheId;
+        $cacheId = 'git_security_'.$jobName.'_'.$jobId;
 
         foreach ($this->links->siblingsOfType(PluginChatController::class) as $chatInfo) {
-            ChatSendMessageJob::dispatch($securityMessage, $securityProps, channelId: $chatInfo['channelId'], cacheId: $cacheId);
+            ChatSendMessageJob::dispatch($securityMessage, $securityProps, channelId: $chatInfo['channelId'], cacheId: $cacheId, chatKey: $chatInfo['controller']::getKey());
         }
     }
     private function notifyProjectManager(string $message, ?string $cacheId = null): void {
         foreach ($this->links as $link) {
             $project = $link->parent;
             if ($project instanceof Project && $pm = $project->projectManager) {
-                $props = $this->props($this->project['name']);
-                if ($cacheId) {
-                    $props['nexus_cache_id'] = $cacheId;
-                }
-                ChatSendMessageJob::dispatch($message, $props, cacheId: $cacheId, user: $pm);
+                ChatSendMessageJob::dispatch($message, $this->props($this->project['name']), cacheId: $cacheId, user: $pm);
                 return;
             }
         }
@@ -208,22 +204,9 @@ trait GitWebhookTrait {
         };
     }
     private function securityProps(string $repoName, string $label, string $icon): array {
-        $displayName = "$repoName [$label]";
-        return [
-            'from_webhook'         => 'true',
-            'webhook_display_name' => $displayName,
-            'override_username'    => $displayName,
-            'override_icon_url'    => asset("icons/$icon"),
-            'nexus_type'           => 'git_security',
-        ];
+        return ChatProps::sender("$repoName [$label]", asset("icons/$icon"), 'git_security');
     }
     private function props(string $name): array {
-        return [
-            'from_webhook'         => 'true',
-            'webhook_display_name' => $name,
-            'override_username'    => $name,
-            'override_icon_url'    => asset('icons/icon.git.big.png'),
-            'nexus_type'           => 'git_pipeline',
-        ];
+        return ChatProps::sender($name, asset('icons/icon.git.big.png'), 'git_pipeline');
     }
 }

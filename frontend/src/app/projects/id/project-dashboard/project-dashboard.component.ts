@@ -9,10 +9,6 @@ import { NgbDateCarbonAdapter } from '@directives/ngb-date.adapter';
 import { ProjectDetailGuard } from '@app/projects/project-details.guard';
 import { PluginInstanceFactory } from '@models/http/plugins/plugin.instance.factory';
 import { PluginInstance } from '@models/http/plugins/plugin.instance';
-import { InputModalService } from '@app/_modals/modal-input/modal-input.service';
-import { MantisPlugin } from '@models/http/plugins/plugin.mantis';
-import { ModalBaseService } from '@app/_modals/modal-base-service';
-import { MantisProjectSelectionComponent } from '@app/_modals/mantis-project-selection/mantis-project-selection.component';
 import { Encryption } from '@models/encryption/encryption.model';
 import { Toast } from '@shards/toast/toast';
 import { DatePipe, NgTemplateOutlet } from '@angular/common';
@@ -50,8 +46,6 @@ import { AvatarComponent } from '@shards/avatar/avatar.component';
 })
 export class ProjectDashboardComponent {
     #assignmentService  = inject(AssignmentService);
-    #inputModalService  = inject(InputModalService);
-    #modalService       = inject(ModalBaseService);
     #uptimeService      = inject(UptimeMonitorService);
     #uptimeModalService = inject(UptimeMonitorModalService);
     parent              = inject(ProjectDetailGuard);
@@ -162,33 +156,16 @@ export class ProjectDashboardComponent {
     });
 
     onNewPluginLink(pluginInstance: PluginInstance) {
-        if (pluginInstance instanceof MantisPlugin) {
-            this.#modalService
-                .open(MantisProjectSelectionComponent, pluginInstance)
-                .then((response) => {
-                    if (response) {
-                        const object = this.parent.object();
-                        pluginInstance.toPluginLink(response).storeUnder(object, true).subscribe((_) => {
-                            object.plugin_links.push(_);
-                            this.parent.touch();
-                        });
-                    }
-                })
-                .catch(() => void 0);
-        } else {
-            this.#inputModalService
-                .open(pluginInstance.newPluginText)
-                .then((response) => {
-                    if (response && 'text' in response) {
-                        const object = this.parent.object();
-                        pluginInstance.toPluginLink(response!.text).storeUnder(object, true).subscribe((_) => {
-                            object.plugin_links.push(_);
-                            this.parent.touch();
-                        });
-                    }
-                })
-                .catch(() => void 0);
-        }
+        PluginInstanceFactory.promptLinkId(pluginInstance)
+            .then((id) => {
+                if (!id) return;
+                const object = this.parent.object();
+                pluginInstance.toPluginLink(id).storeUnder(object, true).subscribe((_) => {
+                    object.plugin_links.push(_);
+                    this.parent.touch();
+                });
+            })
+            .catch(() => void 0);
     }
 
     createBlank(enc: Encryption) {

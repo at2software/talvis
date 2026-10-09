@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Invoice;
 use App\Models\Project;
 use App\Models\ProjectState;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 
 class TalvisController extends Controller {
@@ -41,26 +42,22 @@ class TalvisController extends Controller {
         return $return;
     }
     public function icon() {
-        $d  = file_get_contents(resource_path('icons/synapse.png'));
-        $im = imagecreatefromstring($d);
-        imagepng($im);
-        $photo        = ob_get_clean();
         $browserCache = 60 * 60 * 24 * 7;
-        return response($photo)
-            ->header('Content-type', 'image/png')
-            ->header('Cache-Control', 'private, max-age='.$browserCache)
-            ->header('Expires', gmdate('D, d M Y H:i:s', time() + $browserCache).' GMT')
-            ->header('Content-Length', strlen($photo))
-            ->header('Last-Modified', gmdate('D, d M Y H:i:s', filemtime(resource_path('icons/synapse.png'))).' GMT')
-            ->header('ETag', hash('sha256', $photo));
+        return response()->file(resource_path('icons/synapse.png'), [
+            'Cache-Control' => 'private, max-age='.$browserCache,
+            'Expires'       => gmdate('D, d M Y H:i:s', time() + $browserCache).' GMT',
+        ])->setAutoEtag();
     }
     public function populateClipboard(Request $request) {
         $data     = (array)$this->getBody();
         $response = [];
         foreach ($data as $class => $ids) {
+            $model = 'App\\Models\\'.$class;
+            if (! preg_match('/^[A-Za-z]+$/', $class) || ! is_subclass_of($model, Model::class) || ! method_exists($model, 'canBeAccessedByUser')) {
+                continue;
+            }
             $response[$class] = [];
-            foreach ($ids as $id) {
-                $model = app('App\\Models\\'.$class);
+            foreach ((array)$ids as $id) {
                 if ($obj = $model::find($id)) {
                     if ($obj->canBeAccessedByUser()) {
                         $response[$class][] = $obj;

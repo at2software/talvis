@@ -2,6 +2,8 @@ import { Service } from '@angular/core';
 import { User } from '@models/user/user.model';
 import { TalvisHttpService } from '../http/http.talvis';
 import { CalendarEntry } from './calendar-entry.model';
+import { CalendarFeedDto } from '@models/_core/api-response';
+import { Observable } from 'rxjs';
 
 @Service()
 export class VCalendarService extends TalvisHttpService<User> {
@@ -11,4 +13,6 @@ export class VCalendarService extends TalvisHttpService<User> {
     createCalendarEvent = (calendarEntry: CalendarEntry) => this.post<CalendarEntry>('calendar_entries', calendarEntry);
     updateCalendarEvent = (calendarEntry: CalendarEntry) => this.put<CalendarEntry>(`calendar_entries/${calendarEntry.id}`, calendarEntry);
     deleteEvent = (calendarEntry: CalendarEntry) => this.delete<CalendarEntry>(`calendar_entries/${calendarEntry.id}`);
+    showFeedUrl = (): Observable<CalendarFeedDto> => this.get('calendar-feed', null, Object);
+    rotateFeedUrl = (): Observable<CalendarFeedDto> => this.post('calendar-feed', null, Object);
 }

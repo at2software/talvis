@@ -27,6 +27,13 @@ import { Model } from '@constants/model/type-discriminators';
 import { computed } from '@angular/core';
 import { recurrenceOf, RecurrenceOption } from '@enums/recurrence.type';
 import type { BillingConsiderationDto, ProjectTimelineEntryDto } from '@models/_core/api-response';
+import type { Observable } from 'rxjs';
+
+export interface CommercialRegisterParts {
+    type: string;
+    number: string;
+    court: string;
+}
 
 @Model('Company')
 export class Company extends VcardClass implements HasInvoiceItems, IHasFiles, IHasFoci, IHasAssignees, IHasMarker {
@@ -39,6 +46,8 @@ export class Company extends VcardClass implements HasInvoiceItems, IHasFiles, I
     override readonly getAvatar = computed(() => { this.snapshot(); return environment.envApi + `companies/${this.id}/icon`; });
 
     isDraft = (): boolean => this.hasFlag(Company.FLAG_DRAFT);
+    hasSepaMandate = (): boolean => !!this.getParam('INVOICE_DD_IBAN') && !!this.getParam('INVOICE_DD_MANDATE');
+    isSepaMandateDateMissing = (): boolean => this.hasSepaMandate() && !this.getParam('INVOICE_DD_MANDATE_DATE');
 
     default_product_id: string = '';
     customer_number: string = '';
@@ -46,6 +55,7 @@ export class Company extends VcardClass implements HasInvoiceItems, IHasFiles, I
     project_count: number = 0;
     running_project_count: number = 0;
     unpaid_invoice_count: number = 0;
+    unpaid_invoice_value?: number;
     invoice_count: number = 0;
     revenue: number = 0;
     address: string = '';
@@ -65,6 +75,7 @@ export class Company extends VcardClass implements HasInvoiceItems, IHasFiles, I
     has_nda: boolean = false;
     accepts_support: boolean = false;
     needs_vat_handling?: boolean = true;
+    is_domestic?: boolean = true;
     foci_unbilled_sum_duration?: number;
     cashflow_value?: number;
     invoices_last12m_sum_net?: number;
@@ -142,6 +153,23 @@ export class Company extends VcardClass implements HasInvoiceItems, IHasFiles, I
     mlChurnHigh = computed((): boolean => (this.mlChurnProbability12m() ?? 0) >= Company.ML_CHURN_HIGH);
     mlChurnColor = computed((): string => { const p = this.mlChurnProbability12m() ?? 0; return p >= Company.ML_CHURN_HIGH ? 'text-danger' : p >= Company.ML_CHURN_ELEVATED ? 'text-warning' : 'text-white'; });
     mlNeedsAttention = computed((): boolean => this.mlOverdueForContact() || this.mlChurnHigh());
+    hasMlInsights = computed((): boolean => [this.mlPredictedRevenue12m(), this.mlPredictedNextPurchaseAt(), this.mlChurnProbability12m(), this.mlPredictedSupportHours()].some((_) => _ !== undefined));
+    hasBusinessHistory = computed((): boolean => {
+        const company = this.snapshotAsThis();
+        return (company.net ?? 0) > 0 || this.revenue12m() > 0 || !!company.last_invoice_at;
+    });
+
+    commercialRegisterParts = computed((): CommercialRegisterParts => {
+        const register = this.snapshotAsThis().commercial_register ?? '';
+        if (!register.includes('|')) return { type: '', number: register, court: '' };
+        const [type = '', number = '', court = ''] = register.split('|');
+        return { type, number, court };
+    });
+
+    setCommercialRegister = (parts: CommercialRegisterParts): Observable<this> => {
+        const values = [parts.type, parts.number, parts.court].map((_) => _.trim());
+        return this.update({ commercial_register: values.some((_) => _) ? values.join('|') : null });
+    };
 
     protected override buildActions(): NxAction[] { return getCompanyActions(this) }
 

@@ -4,7 +4,7 @@
     <div class="hstack gap-2 mb-3">
         @if (trackers().length > 1) {
             <div ngbDropdown class="d-inline-block">
-                <button type="button" class="btn btn-sm btn-outline-primary dropdown-toggle-simple" ngbDropdownToggle>
+                <button type="button" class="btn btn-sm btn-plain text-primary dropdown-toggle-simple" ngbDropdownToggle>
                     <n>{{ activeTracker()?.instance?.icon() }}</n>
                     <span class="ms-1">{{ activeTracker()?.link?.name || activeTracker()?.instance?.getName() }}</span>
                 </button>
@@ -60,7 +60,7 @@
                             <i class="text-muted" ngbTooltip="open" i18n-ngbTooltip="@@i18n.common.open">radio_button_unchecked</i>
                         }
                         @if (isSelected(task)) {
-                            <i class="text-primary ms-2">check</i>
+                            <i class="text-success ms-2">check</i>
                         }
                     </div>
                 </div>

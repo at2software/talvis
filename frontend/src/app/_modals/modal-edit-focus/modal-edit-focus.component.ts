@@ -13,7 +13,7 @@ import { Dictionary } from '@constants/constants';
     imports: [SearchInputComponent, FormsModule],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ModalEditFocusComponent extends ModalBaseComponent<Focus> {
+export class ModalEditFocusComponent extends ModalBaseComponent<Dictionary> {
 
     private readonly project = viewChild.required(SearchInputComponent);
 
@@ -34,7 +34,6 @@ export class ModalEditFocusComponent extends ModalBaseComponent<Focus> {
     }
 
     onSuccess() {
-        const focus = this.focus();
         const payload: Dictionary = {
             started_at: dayjs(this.dateTimeText(), 'DD.MM.YYYY HH:mm').format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
             duration: parseFloat(this.durationText()),
@@ -42,8 +41,7 @@ export class ModalEditFocusComponent extends ModalBaseComponent<Focus> {
         };
         const selected = this.project().selected();
         if (selected) payload['parent_path'] = selected.apiPathWithId();
-        focus.update(payload).subscribe();
-        return focus;
+        return payload;
     }
 
     override decline = () => this.#activeModal.close(undefined);

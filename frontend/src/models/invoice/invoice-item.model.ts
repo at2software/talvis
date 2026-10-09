@@ -112,7 +112,10 @@ export class InvoiceItem extends Serializable implements IHasMarker, IHasExtIssu
     hasNumbering = () => this.willAddToSum() || this.type === InvoiceItemType.Optional;
 
     hasVatExceptionWithoutId = (company?: Company) => this.vat_rate === 0 && company?.needs_vat_handling && !(company ?? this.company).vat_id;
-    hasVatDespiteId = (company?: Company) => this.vat_rate > 0 && ((company ?? this.company)?.vat_id ?? false);
+    hasVatDespiteId = (company?: Company) => {
+        const c = company ?? this.company;
+        return this.vat_rate > 0 && !!c?.vat_id && !!c.needs_vat_handling && !c.is_domestic;
+    };
     hasVatWhenNotNeeded = (company?: Company) => this.vat_rate > 0 && !(company ?? this.company)?.needs_vat_handling;
     hasImplausibleVat = (company?: Company) => this.hasVatDespiteId(company) || this.hasVatExceptionWithoutId(company) || this.hasVatWhenNotNeeded(company);
     frontendEqualsBackend = (): boolean => this._total == this.total;
@@ -151,7 +154,7 @@ export class InvoiceItem extends Serializable implements IHasMarker, IHasExtIssu
         const editItem = InvoiceItem.fromJson(this.snapshot());
         switch (editItem.type) {
             case InvoiceItemType.Header: {
-                nx().promptInput('@i18n.common.title').confirmed(({ text }) => {
+                nx().promptInput($localize`:@@i18n.common.title:title`).confirmed(({ text }) => {
                     editItem.text = text;
                     if (!this.isNonPersistantRecord) {
                         editItem?.update().subscribe(() => {

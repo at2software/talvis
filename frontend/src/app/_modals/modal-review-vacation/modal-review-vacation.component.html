@@ -84,10 +84,10 @@
             <div class="modal-footer">
                 <button type="button" class="btn" (click)="decline()" data-bs-dismiss="modal" i18n="@@i18n.common.close">close</button>
                 @if (canWithdraw()) {
-                    <button type="button" class="btn btn-outline-danger" (click)="onWithdraw()" i18n="@@i18n.vacation.withdraw">withdraw</button>
+                    <button type="button" class="btn btn-plain text-danger" (click)="onWithdraw()" i18n="@@i18n.vacation.withdraw">withdraw</button>
                 }
                 @if (canDecide()) {
-                    <button type="button" class="btn btn-outline-danger" (click)="onDecline()" i18n="@@i18n.common.reject">reject</button>
+                    <button type="button" class="btn btn-plain text-danger" (click)="onDecline()" i18n="@@i18n.common.reject">reject</button>
                     @if (!showDeclineReason()) {
                         <button type="button" class="btn btn-success" (click)="onApprove()" hotkey="CTRL+ENTER" i18n="@@i18n.common.approve">approve</button>
                     }

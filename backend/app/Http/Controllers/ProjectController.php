@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Actions\Project\HandleProjectStateTransitionAction;
 use App\Enums\InvoiceItemType;
+use App\Enums\PdfCreationType;
 use App\Http\Controllers\Traits\HasFociController;
 use App\Http\Requests\MilestoneRequest;
 use App\Http\Requests\Project\DuplicateProjectRequest;
@@ -26,6 +28,7 @@ use App\Services\Project\ProjectPluginLinkResolverService;
 use App\Services\Project\ProjectQuoteAcceptanceService;
 use App\Services\Project\ProjectReportingService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ProjectController extends Controller {
     use HasFociController;
@@ -213,49 +216,49 @@ class ProjectController extends Controller {
     }
     public function moveSupportToCustomer(Project $_) {
         $_->moveItemsToCustomer($_->invoiceItems()->whereStage(1), ['stage' => 0]);
-        return true;
+        return response()->json(true);
     }
     public function moveRegularItemsToCustomer(Project $_) {
         $_->moveItemsToCustomer($_->invoiceItems()->orderBy('position'));
-        return true;
+        return response()->json(true);
     }
     public function convertSupportItemsToRegular(Project $_) {
         return ['converted' => $_->convertSupportItemsToRegular()];
     }
-    public function update(UpdateProjectRequest $request, Project $project) {
+    public function update(UpdateProjectRequest $request, Project $project, HandleProjectStateTransitionAction $transition) {
+        return DB::transaction(function () use ($request, $project, $transition) {
+            $previousState = $project->state;
 
-        $previousState = $project->state;
-
-        if ($request->has('disabled_quote_sources')) {
-            $project->disabled_quote_sources = $request->validated('disabled_quote_sources') ?? [];
-        }
-        $project->applyAndSave($request);
-        if ($request->has('state')) {
-            $project->state = $request->state;
-            $project        = $project->fresh('states');
-        }
-
-        if ($project->hasStateChangedTo(ProjectState::Prepared, $previousState)) {
-            if (request()->user()->hasAnyRole(['admin', 'invoicing'])) {
-                return;
+            if ($request->has('disabled_quote_sources')) {
+                $project->disabled_quote_sources = $request->validated('disabled_quote_sources') ?? [];
             }
-        }
+            $project->applyAndSave($request);
+            if ($request->filled('state') && (int)$request->state !== $previousState->id) {
+                $project = $transition->transition($project, ProjectState::findOrFail($request->state), $request->user(), $request->validated('reason'));
+            }
 
-        if ($request->has('state') && $project->state->progress !== $previousState->progress) {
-            $project->handleStateTransition($previousState, $request->user()->id);
-        }
+            if ($project->hasStateChangedTo(ProjectState::Prepared, $previousState)) {
+                if (request()->user()->hasAnyRole(['admin', 'invoicing'])) {
+                    return $project;
+                }
+            }
 
-        if ($request->has('project_id')) {
-            $project->setParent($request->project_id);
-            $project->save();
-            $project->load('parentProject');
-            $project->load('assignees');
-        }
+            if ($request->filled('state') && $project->state->progress !== $previousState->progress) {
+                $project->handleStateTransition($previousState, $request->user()->id);
+            }
 
-        return $project;
+            if ($request->has('project_id')) {
+                $project->setParent($request->project_id);
+                $project->save();
+                $project->load('parentProject');
+                $project->load('assignees');
+            }
+
+            return $project;
+        });
     }
     public function destroy(Request $request, Project $project) {
-        return $project->delete();
+        return response()->json($project->delete());
     }
     public function postpone(PostponeRequest $request, Project $_) {
         return $_->postpone($request->validated('duration'), $request->validated('comment'));
@@ -317,8 +320,8 @@ class ProjectController extends Controller {
     public function convertInvoiceItemsToMilestones(Request $request, Project $_) {
         return response()->json($_->convertItemsToMilestones());
     }
-    public function makeQuote(Project $_) {
-        return $_->makeQuote();
+    public function makeQuote(Request $request, Project $_) {
+        return $_->makeQuote($request->integer('type', PdfCreationType::Create->value) === PdfCreationType::Preview->value);
     }
     public function indexFrameworks(Request $request) {
         return $this->projectFrameworksService->index();

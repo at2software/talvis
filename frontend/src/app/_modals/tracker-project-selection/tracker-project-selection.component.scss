@@ -1,0 +1,8 @@
+.project-card.selected {
+    background-color: rgba(var(--bs-primary-rgb), 0.15);
+}
+
+.project-list {
+    max-height: 400px;
+    overflow-y: auto;
+}

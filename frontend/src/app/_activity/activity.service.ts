@@ -30,6 +30,7 @@ export class ActivityService {
     removeTab(tab: ActivityTabComponent): void {
         this.#onContainer.then((c) => {
             this.tabs.update(t => t.filter(x => x !== tab));
+            this.tabs().forEach((_, k) => _.prepare(k));
             c.re.removeChild(c.content().nativeElement, tab.el.nativeElement);
             this.activateLatestTab();
         });
@@ -39,12 +40,10 @@ export class ActivityService {
         clearTimeout(this.#timeout);
         this.#timeout = setTimeout(() => {
             this.#timeout = undefined;
-            const o = this.#container.buttons().filter((_) => !_.nativeElement.classList.contains('d-none')).at(-1);
-            o?.nativeElement.click();
+            const latest = this.tabs().filter((tab) => !tab.hidden()).at(-1);
+            if (latest) this.focus(latest);
         }, 250);
     }
-
-    buttonFor = (tab: ActivityTabComponent) => this.#container.buttons().find((button) => button.nativeElement.dataset.bsTarget === '#' + tab.el.nativeElement.id);
 
     focus(tab: ActivityTabComponent) {
         const index = this.tabs().indexOf(tab);

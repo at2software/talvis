@@ -11,7 +11,7 @@ class ValidatePayloadRequest extends FormRequest {
     }
     public function rules(): array {
         return [
-            'category_id'     => 'numeric',
+            'category_id'     => 'nullable|integer|exists:expense_categories,id',
             'name'            => 'string',
             'price'           => 'numeric',
             'repeat'          => 'in:'.implode(',', array_column(InvoiceItemType::Repeating, 'value')),

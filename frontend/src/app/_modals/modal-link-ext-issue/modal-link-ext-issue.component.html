@@ -19,7 +19,7 @@
             </div>
             <div class="modal-footer">
                 @if (hadLink()) {
-                    <button type="button" class="btn btn-outline-danger me-auto" (click)="unlink()" i18n="@@i18n.issues.removeLink">remove link</button>
+                    <button type="button" class="btn btn-plain text-danger me-auto" (click)="unlink()" i18n="@@i18n.issues.removeLink">remove link</button>
                 }
                 <button type="button" class="btn" (click)="decline()" tabindex="0" (keydown.enter)="decline()" i18n="@@i18n.common.cancel">cancel</button>
                 <button type="button" class="btn btn-primary" (click)="accept()" [disabled]="!canSubmit()" hotkey="CTRL+ENTER" i18n="@@i18n.common.ok">ok</button>

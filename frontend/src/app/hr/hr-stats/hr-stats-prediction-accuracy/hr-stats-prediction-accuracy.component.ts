@@ -5,7 +5,7 @@ import { StatsService } from '@models/stats.service';
 import { GlobalService } from '@models/global.service';
 import { NgxEchartsModule } from 'ngx-echarts';
 import { Color } from '@constants/Color';
-import { EChartsSimpleOptions, ECHARTS_DONUT_ITEM_STYLE } from '@charts/echarts-presets';
+import { EChartsSimpleOptions, ECHARTS_DONUT_ITEM_STYLE, ECHARTS_DONUT_SERIES, ECHARTS_DONUT_TRACK_COLOR } from '@charts/echarts-presets';
 import { EmptyStateComponent } from '@shards/empty-state/empty-state.component';
 import type { EChartsOption, SeriesOption } from 'echarts';
 import { ChartAxisTooltipParamDto } from '@models/_core/api-response';
@@ -79,9 +79,9 @@ export class HrStatsPredictionAccuracyComponent {
                     tooltipContent += `<div class="d-flex justify-content-between"><span>Predictions:</span><span class="ms-2">${monthData.items_count}</span></div><br/>`;
 
                     const cyanColor = Color.fromVar('cyan').toHexString();
-                    const tealColor = Color.fromVar('teal').toHexString();
+                    const primaryColor = Color.fromVar('primary').toHexString();
 
-                    tooltipContent += `<strong style="color: ${tealColor};">With Overhead:</strong><br/>`;
+                    tooltipContent += `<strong style="color: ${primaryColor};">With Overhead:</strong><br/>`;
                     tooltipContent += `<div class="d-flex justify-content-between"><span>Average:</span><span class="ms-2">${monthData.unfocused.average_bias_factor.toFixed(2)}x</span></div>`;
                     tooltipContent += `<div class="d-flex justify-content-between"><span>Range:</span><span class="ms-2">${monthData.unfocused.min_bias_factor.toFixed(2)}x to ${monthData.unfocused.max_bias_factor.toFixed(2)}x</span></div><br/>`;
 
@@ -123,7 +123,7 @@ export class HrStatsPredictionAccuracyComponent {
                 data: rangeArea,
                 lineStyle: { opacity: 0 },
                 symbol: 'none',
-                areaStyle: { color: Color.fromVar('teal').toHexString(), opacity: 0.3 },
+                areaStyle: { color: Color.fromVar('primary').toHexString(), opacity: 0.3 },
                 stack: 'range',
                 z: 2,
                 tooltip: { show: false },
@@ -142,8 +142,8 @@ export class HrStatsPredictionAccuracyComponent {
                 name: $localize`:@@i18n.hr.unfocusedAverage:Unfocused Average`,
                 type: 'line',
                 data: unfocusedAverage,
-                lineStyle: { color: Color.fromVar('teal').toHexString(), width: 2 },
-                itemStyle: { color: Color.fromVar('teal').toHexString() },
+                lineStyle: { color: Color.fromVar('primary').toHexString(), width: 2 },
+                itemStyle: { color: Color.fromVar('primary').toHexString() },
                 symbol: 'circle',
                 symbolSize: 4,
                 z: 10,
@@ -186,7 +186,7 @@ export class HrStatsPredictionAccuracyComponent {
             series: [
                 {
                     type: 'pie',
-                    radius: ['75%', '90%'],
+                    radius: ECHARTS_DONUT_SERIES.radius,
                     center: ['50%', '50%'],
                     startAngle: 90,
                     endAngle: 450,
@@ -203,7 +203,7 @@ export class HrStatsPredictionAccuracyComponent {
                             value: maxDeviation - deviation,
                             name: $localize`:@@i18n.hr.perfectRange:Perfect Range`,
                             itemStyle: {
-                                color: 'transparent',
+                                color: ECHARTS_DONUT_TRACK_COLOR,
                             },
                             label: { show: false },
                             labelLine: { show: false },
@@ -213,8 +213,8 @@ export class HrStatsPredictionAccuracyComponent {
                         show: true,
                         position: 'center',
                         formatter: `${overallAverage.toFixed(2)}x`,
-                        fontSize: 18,
-                        fontWeight: 'bold',
+                        fontSize: 16,
+                        fontWeight: 300,
                         color: '#ccc',
                     },
                     labelLine: {

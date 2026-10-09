@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Helpers\NLog;
 use App\Http\Requests\Cors\CurlIdRequest;
 use App\Http\Requests\Cors\CurlRequest;
 use App\Services\SafeUrlGuard;
+use GuzzleHttp\Psr7\Uri;
+use GuzzleHttp\Psr7\UriResolver;
+use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 
@@ -13,80 +16,60 @@ class CorsController extends Controller {
     public function __construct(private SafeUrlGuard $guard) {}
 
     public function curlId(CurlIdRequest $request, int $id) {
-        $url = $request->validated('url').'?'.$request->validated('idKey').'='.$id;
-        $this->guard->validate($url);
+        $url       = $request->validated('url');
+        $separator = str_contains($url, '?') ? '&' : '?';
 
-        return $this->send($url);
+        return $this->send($request, $url.$separator.http_build_query([$request->validated('idKey') => $id]));
     }
     public function curl(CurlRequest $request) {
-        $url = $request->validated('url');
-        $this->guard->validate($url);
-
-        return $this->send($url);
+        return $this->send($request, $request->validated('url'));
     }
-    private function send(string $url, int $hopsLeft = 3): mixed {
-        $method  = Str::upper(request('method'));
-        $headers = $this->parseHeaders(request('headers', []));
-        $timeout = (int)request('timeout', 5);
-        $data    = request('data');
+    private function send(CurlRequest $request, string $url, int $hopsLeft = 3): JsonResponse {
+        $pinned = $this->guard->pinnedCurlOptions($url);
 
-        $options = ['allow_redirects' => false];
-        $body    = [];
+        $method  = Str::upper($request->validated('method'));
+        $headers = $this->parseHeaders($request->validated('headers') ?? []);
+        $timeout = $request->validated('timeout') ?? 5;
+        $data    = $request->validated('data');
+
+        $body = [];
         if ($data) {
             $body = in_array($method, ['POST', 'PUT', 'PATCH'])
                 ? ['json' => $data]
                 : ['query' => $data];
         }
 
-        $response = Http::withHeaders($headers)
-            ->timeout($timeout)
-            ->connectTimeout(2)
-            ->withOptions($options)
-            ->send($method, $url, $body);
+        try {
+            $response = Http::withHeaders($headers)
+                ->timeout($timeout)
+                ->connectTimeout(2)
+                ->withOptions(['allow_redirects' => false, 'curl' => $pinned])
+                ->send($method, $url, $body);
+        } catch (ConnectionException $e) {
+            return response()->json(['error' => $e->getMessage()], 502);
+        }
 
         if ($response->redirect() && $hopsLeft > 0) {
             $location = $response->header('Location');
             if (! $location) {
                 return response()->json(['error' => 'Redirect without Location header'], 502);
             }
-            $location = $this->resolveLocation($url, $location);
-            $this->guard->validate($location);
 
-            return $this->send($location, $hopsLeft - 1);
+            return $this->send($request, (string)UriResolver::resolve(new Uri($url), new Uri($location)), $hopsLeft - 1);
         }
 
-        $body    = $response->body();
-        $decoded = json_decode($body);
+        $decoded = json_decode($response->body());
+        $payload = json_last_error() === JSON_ERROR_NONE ? $decoded : ['raw_response' => trim($response->body())];
 
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            if (is_string($body)) {
-                return response()->json(['raw_response' => trim($body)]);
-            }
-            NLog::error("JSON decode error for {$url}");
-
-            return response()->json(['error' => 'Invalid JSON response'], 500);
-        }
-
-        return $decoded;
+        return response()->json($payload, 200, [], JSON_INVALID_UTF8_SUBSTITUTE);
     }
     private function parseHeaders(array $rawHeaders): array {
         $headers = [];
         foreach ($rawHeaders as $line) {
-            $parts = explode(':', $line, 2);
-            if (count($parts) === 2) {
-                $headers[trim($parts[0])] = trim($parts[1]);
-            }
+            [$name, $value]        = explode(':', $line, 2);
+            $headers[trim($name)]  = trim($value);
         }
 
         return $headers;
-    }
-    private function resolveLocation(string $baseUrl, string $location): string {
-        if (preg_match('#^https?://#i', $location)) {
-            return $location;
-        }
-        $parts = parse_url($baseUrl);
-        $port  = isset($parts['port']) ? ':'.$parts['port'] : '';
-
-        return $parts['scheme'].'://'.$parts['host'].$port.$location;
     }
 }

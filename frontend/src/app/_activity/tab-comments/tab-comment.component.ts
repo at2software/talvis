@@ -43,7 +43,7 @@ export class TabCommentComponent {
             const isClosed = comment.var.isClosed;
             const state = comment.var.state;
 
-            const stateColor = isClosed ? 'text-success' : 'text-primary';
+            const stateColor = isClosed ? 'text-success' : 'text-warning';
 
             const linkedIssue = `<a href="${webUrl}" target="_blank">${issueNumber}</a>`;
             text = text.replace(issueNumber, linkedIssue);

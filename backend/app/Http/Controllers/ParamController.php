@@ -59,18 +59,25 @@ class ParamController extends Controller {
         return $this->multiKeyHistory($key, fn ($singleKey) => $this->paramFor($singleKey, $type, $id));
     }
     public function store(StoreRequest $request, $key, $type = null, $id = null) {
+        $this->authorizeWrite($key);
         return $this->saveParam($key, $type, $id, $request->validated('value'));
     }
     public function update($key, $type = null, $id = null) {
+        $this->authorizeWrite($key);
         $value = request('value');
         if ($value === null) {
-            $model = $this->paramFor($key, $type, $id);
-            if ($model) {
-                $model->delete();
-            }
-            return $this->paramFor($key, $type, $id)?->append('value');
+            $this->paramFor($key, $type, $id)?->delete();
+            return ($this->paramFor($key, $type, $id) ?? abort(404))->append('value');
         }
         return $this->saveParam($key, $type, $id, $value);
+    }
+    public function destroy($key, $type = null, $id = null) {
+        $this->authorizeWrite($key);
+        ($this->paramFor($key, $type, $id) ?? abort(404))->delete();
+        return response()->noContent();
+    }
+    private function authorizeWrite(string $key): void {
+        abort_unless(Param::isWritableBy($key, request()->user()), 403);
     }
     private function saveParam($key, $type, $id, $value) {
         if ($type === null) {
@@ -83,11 +90,9 @@ class ParamController extends Controller {
                 $type = TextParam::class;
             }
         }
-        $model = $this->paramFor($key, $type, $id);
-        if ($model) {
-            $model->value = $value;
-            $model->save();
-        }
+        $model        = $this->paramFor($key, $type, $id) ?? abort(404);
+        $model->value = $value;
+        $model->save();
         return $model;
     }
     public static function getRoute($c) {
@@ -120,7 +125,7 @@ class ParamController extends Controller {
                 }
                 return $model->param($key, true)->append('value')->append('fallback');
             })->where('key', '[^,]+');
-            Route::delete('{key}', fn ($_, $key) => $c::findOrFail($_)->param($key, request('fallback', false))->delete())->where('key', '[^,]+');
+            Route::delete('{key}', fn ($_, $key) => response()->json($c::findOrFail($_)->param($key, request('fallback', false))->delete()))->where('key', '[^,]+');
         });
     }
 }

@@ -72,9 +72,9 @@
         @if (lastPage() > 1) {
             <div class="card-footer d-flex align-items-center gap-2">
                 <span class="flex-fill text-muted">{{ total() }}</span>
-                <button type="button" class="btn btn-sm btn-secondary" [disabled]="page() <= 1" (click)="turnPage(-1)" i18n="@@i18n.common.back">back</button>
+                <button type="button" class="btn btn-sm btn-plain text-primary" [disabled]="page() <= 1" (click)="turnPage(-1)" i18n="@@i18n.common.back">back</button>
                 <span>{{ page() }} / {{ lastPage() }}</span>
-                <button type="button" class="btn btn-sm btn-secondary" [disabled]="page() >= lastPage()" (click)="turnPage(1)" i18n="@@i18n.common.next">next</button>
+                <button type="button" class="btn btn-sm btn-plain text-primary" [disabled]="page() >= lastPage()" (click)="turnPage(1)" i18n="@@i18n.common.next">next</button>
             </div>
         }
     }

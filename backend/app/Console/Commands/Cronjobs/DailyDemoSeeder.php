@@ -18,6 +18,7 @@ class DailyDemoSeeder extends Command {
     protected $description = 'Simulates the DemoSeeder for the current day';
 
     public function handle() {
+        DemoSeeder::ensureAllowedEnvironment();
         $demoSeeder = new DemoSeeder;
         $demoSeeder->dailyActivity(Carbon::now());
     }

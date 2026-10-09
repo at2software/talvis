@@ -11,14 +11,14 @@ class InvoiceItemsRequest extends FormRequest {
     public function rules(): array {
         return [
             'items'                      => 'required|array|min:1',
-            'items.*.company_id'         => 'nullable|exists:companies,id',
+            'items.*.company_id'         => 'nullable|exists:companies,id,deleted_at,NULL',
             'items.*.discount'           => 'nullable|numeric|min:0|max:100',
             'items.*.is_discountable'    => 'nullable|boolean',
             'items.*.next_recurrence_at' => 'nullable|date',
             'items.*.price'              => 'required|numeric|min:0',
-            'items.*.product_id'         => 'nullable|exists:products,id',
-            'items.*.product_source_id'  => 'nullable|exists:products,id',
-            'items.*.project_id'         => 'nullable|exists:projects,id',
+            'items.*.product_id'         => 'nullable|exists:products,id,deleted_at,NULL',
+            'items.*.product_source_id'  => 'nullable|exists:products,id,deleted_at,NULL',
+            'items.*.project_id'         => 'nullable|exists:projects,id,deleted_at,NULL',
             'items.*.qty'                => 'required|numeric|min:0',
             'items.*.text'               => 'required|string|max:255',
             'items.*.unit_name'          => 'nullable|string|max:50',

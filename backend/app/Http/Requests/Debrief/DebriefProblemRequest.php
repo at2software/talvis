@@ -17,7 +17,7 @@ class DebriefProblemRequest extends FormRequest {
         ];
 
         if ($isStore) {
-            $rules['debrief_problem_id'] = 'required|exists:debrief_problems,id';
+            $rules['debrief_problem_id'] = 'required|exists:debrief_problems,id,deleted_at,NULL';
         }
 
         return $rules;

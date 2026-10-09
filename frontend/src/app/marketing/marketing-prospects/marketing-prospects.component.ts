@@ -2,6 +2,7 @@ import { Dictionary } from '@constants/constants';
 import { ChangeDetectionStrategy, Component, computed, effect, ElementRef, inject, linkedSignal, signal, viewChild } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { from, mergeMap, toArray } from 'rxjs';
+import { Toast } from '@shards/toast/toast';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { NgbDropdownModule, NgbModal, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
@@ -85,8 +86,15 @@ export class MarketingProspectsComponent {
     selectedUserName  = computed(() => this.selectedUser()?.fullName() ?? this.userFilter());
     totalOverdueCount = computed(() => this.initiatives().reduce((sum, i) => sum + (i.overdue_prospects_count ?? 0), 0));
 
-    selectedInitiativeName         = computed(() => this.initiatives().find(i => String(i.id) === this.initiativeFilter())?.name ?? '');
-    selectedInitiativeOverdueCount = computed(() => this.initiatives().find(i => String(i.id) === this.initiativeFilter())?.overdue_prospects_count ?? 0);
+    selectedInitiative             = computed(() => this.initiatives().find(i => String(i.id) === this.initiativeFilter()));
+    selectedInitiativeName         = computed(() => this.selectedInitiative()?.name ?? '');
+    selectedInitiativeOverdueCount = computed(() => this.selectedInitiative()?.overdue_prospects_count ?? 0);
+    createProspectBlocker          = computed(() => {
+        const initiative = this.selectedInitiative();
+        if (!initiative) return $localize`:@@i18n.marketing.selectInitiativeFirst:select an initiative in the panel title first`;
+        if (!initiative.leadSourceId()) return $localize`:@@i18n.marketing.noLeadSourceConfigured:no lead source configured for this initiative – add a channel to the initiative first`;
+        return undefined;
+    });
 
     statusCounts = computed(() => {
         const counts: Dictionary<number> = {};
@@ -161,16 +169,9 @@ export class MarketingProspectsComponent {
     }
 
     createNewProspect() {
-        const initiative = this.initiatives().find(i => String(i.id) === this.initiativeFilter());
-        if (!initiative) return;
-
-        const primaryChannel = initiative.channels?.find((c) => c.pivot?.is_primary);
-        const leadSourceId: number | null = primaryChannel?.id ?? initiative.channels?.[0]?.id ?? null;
-
-        if (!leadSourceId) {
-            alert('No lead source configured for this initiative');
-            return;
-        }
+        const blocker = this.createProspectBlocker();
+        if (blocker) return Toast.warn(blocker);
+        const leadSourceId = this.selectedInitiative()?.leadSourceId();
 
         this.#inputModalService.open('Prospect Name').then(result => {
             const prospectName = result?.text?.trim();

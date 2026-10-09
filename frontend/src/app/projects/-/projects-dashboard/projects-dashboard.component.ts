@@ -18,6 +18,9 @@ import { FormsModule } from '@angular/forms';
 import { NgxDaterangepickerMd } from 'ngx-daterangepicker-material';
 import { EmptyStateComponent } from '@shards/empty-state/empty-state.component';
 import { WidgetProjectManagerComponent } from '@dashboard/widgets/widget-project-manager/widget-project-manager.component';
+import { SearchInputComponent } from '@shards/search-input/search-input.component';
+import { Serializable } from '@models/_core/serializable';
+import { Company } from '@models/company/company.model';
 
 const COOKIE_ID = 'project/dashboard';
 
@@ -25,13 +28,13 @@ const COOKIE_ID = 'project/dashboard';
     changeDetection: ChangeDetectionStrategy.OnPush,
     selector: 'projects-dashboard',
     templateUrl: './projects-dashboard.component.html',
-    imports: [ProjectStateFilterComponent, ContinuousMarkerComponent, ProjectsTableComponent, FormsModule, NgxDaterangepickerMd, EmptyStateComponent, WidgetProjectManagerComponent],
+    imports: [ProjectStateFilterComponent, ContinuousMarkerComponent, ProjectsTableComponent, FormsModule, NgxDaterangepickerMd, EmptyStateComponent, WidgetProjectManagerComponent, SearchInputComponent],
 })
 export class ProjectsDashboardComponent {
     private readonly stateFilter = viewChild.required(ProjectStateFilterComponent);
 
-    observer!: Observable<Page<Project>>;
-    projects: Project[] = [];
+    observer = signal<Observable<Page<Project>> | undefined>(undefined);
+    projects = signal<Project[]>([]);
     hasLoaded = signal(false);
 
     selCreated?: StartEnd = undefined;
@@ -119,9 +122,9 @@ export class ProjectsDashboardComponent {
     }
     reload() {
         const filters = this.filters();
-        this.projects = [];
+        this.projects.set([]);
         this.hasLoaded.set(false);
-        this.observer = this.#projectService.indexPaginated(filters);
+        this.observer.set(this.#projectService.indexPaginated(filters));
     }
     updateCookie() {
         const cookieData = this.#cookieData();
@@ -133,7 +136,7 @@ export class ProjectsDashboardComponent {
 
     onResult = (x: Project[]) => {
         this.hasLoaded.set(true);
-        this.projects = this.projects.concat(x);
+        this.projects.update((projects) => projects.concat(x));
         this.#isInitialReload = true;
     };
     onIconClicked = () => this.reload;
@@ -144,6 +147,11 @@ export class ProjectsDashboardComponent {
     };
 
     filtersUpdated = () => this.reload();
+
+    onCustomerSelected = (selected: Serializable) => {
+        const company = selected.assert(Company);
+        if (company) this.#projectService.promptAddProject(company.id);
+    };
 
     showStartedAtFilter = (): boolean => this.stateFilter().filters().inProgress.var.enabled || this.stateFilter().filters().finished.var.enabled || false;
 

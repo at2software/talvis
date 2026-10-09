@@ -7,7 +7,6 @@ use App\Models\Document;
 use App\Models\File;
 use App\Models\Invoice;
 use App\Models\Project;
-use Barryvdh\DomPDF\Facade\Pdf;
 use horstoeko\zugferd\codelists\ZugferdInvoiceType;
 
 class InvoicePdfService {
@@ -106,7 +105,7 @@ class InvoicePdfService {
             }
         }
 
-        $template = Document::getPdfTemplate($pdfTitle);
+        $template = Document::getPdfTemplate($pdfTitle, lang: $company->getLanguage());
         $template = str_replace('[content]', $content, $template);
         $template = Document::personalized($template, $company, $headers, true, $project);
 
@@ -114,8 +113,7 @@ class InvoicePdfService {
             $template = Document::replaceInvoiceInformation($template, $invoice);
         }
 
-        $pdf       = Pdf::loadHTML($template);
-        $pdfString = $pdf->stream()->getContent();
+        $pdfString = Document::renderPdf($template);
 
         if ($draft) {
             return $pdfString;

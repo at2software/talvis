@@ -1,0 +1,33 @@
+<div class="modal d-block" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-title">{{ item.description }}</span>
+            </div>
+            <div class="modal-body">
+                <div class="input-group mb-3">
+                    <label class="input-group-text col-3" for="occurence" i18n="@@i18n.common.occurence">occurence</label>
+                    <input id="occurence" class="form-control" placeholder="yyyy-mm-dd" name="dp" ngbDatepicker [(ngModel)]="item.occured_at" #dp="ngbDatepicker" />
+                    <button class="btn btn-outline-primary input-group-text" (click)="dp.toggle()" type="button"><i>event</i></button>
+                </div>
+                <div class="input-group flex-nowrap mb-3">
+                    <label class="input-group-text col-3" for="amount" i18n="@@i18n.common.amount">amount</label>
+                    <input type="number" class="form-control" id="amount" [(ngModel)]="item.value" />
+                    <div class="input-group-text">{{ global.currencySymbol() ?? '€' }}</div>
+                </div>
+                <div class="input-group mb-3">
+                    <label class="input-group-text col-3" for="description" i18n="@@i18n.common.description">description</label>
+                    <input type="text" class="form-control" id="description" [(ngModel)]="item.description" />
+                </div>
+                <div class="input-group mb-3">
+                    <label class="input-group-text col-3" for="approver" i18n="@@i18n.common.approver">approver</label>
+                    <input type="text" class="form-control" id="approver" [(ngModel)]="item.approver" />
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn" (click)="decline()" data-bs-dismiss="modal" i18n="@@i18n.common.cancel">cancel</button>
+                <button type="button" class="btn btn-primary" (click)="accept()" hotkey="CTRL+ENTER" i18n="@@i18n.common.ok">ok</button>
+            </div>
+        </div>
+    </div>
+</div>

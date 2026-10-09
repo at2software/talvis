@@ -1,0 +1,91 @@
+<div class="modal-header">
+    <span class="modal-title" i18n="@@i18n.m365Guide.title">Microsoft 365 setup guide</span>
+    <button type="button" class="btn-close" i18n-aria-label="@@i18n.common.close" aria-label="Close" (click)="dismiss()"></button>
+</div>
+<div class="modal-body">
+    <p class="text-muted small" i18n="@@i18n.m365Guide.prerequisites">You need the Entra role Global Administrator (or Cloud Application Administrator plus Exchange Administrator), Teams admin rights and, for Teams only, an Azure subscription — pay-as-you-go is enough, the F0 bot tier is free. One app registration serves automatic replies, the TALVIS calendar, the TALVIS address book and Teams.</p>
+
+    <ol class="list-group list-group-numbered">
+        <li class="list-group-item">
+            <span class="fw-semibold" i18n="@@i18n.m365Guide.step1Title">Register the app</span>
+            <div class="small mt-1">
+                <ng-container i18n="@@i18n.m365Guide.step1Text">Entra admin center → App registrations → New registration. Name it TALVIS, choose "Accounts in this organizational directory only" (single tenant) and leave the redirect URI empty. Copy the Directory (tenant) ID and the Application (client) ID from the overview page into "tenant id" and "client id" of this connector.</ng-container>
+                <a class="ms-1 text-nowrap" [href]="entraUrl" target="_blank" rel="noopener noreferrer"><span i18n="@@i18n.m365Guide.openEntra">open Entra admin center</span><i class="ms-1">open_in_new</i></a>
+            </div>
+        </li>
+
+        <li class="list-group-item">
+            <span class="fw-semibold" i18n="@@i18n.m365Guide.step2Title">Grant Graph permissions</span>
+            <div class="small mt-1" i18n="@@i18n.m365Guide.step2Text">API permissions → Add a permission → Microsoft Graph → Application permissions:</div>
+            <table class="table table-sm small my-2">
+                <tbody>
+                    @for (permission of permissions; track permission.name) {
+                        <tr>
+                            <td class="text-nowrap"><code class="notranslate">{{ permission.name }}</code></td>
+                            <td class="text-muted">{{ permission.purpose }}</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+            <div class="small" i18n="@@i18n.m365Guide.step2Consent">Then click "Grant admin consent" — every row must show a green check mark. Mailbox settings, calendars and contacts are deliberately not granted here; step 4 restricts them to a group.</div>
+        </li>
+
+        <li class="list-group-item">
+            <span class="fw-semibold" i18n="@@i18n.m365Guide.step3Title">Create a client secret</span>
+            <div class="small mt-1" i18n="@@i18n.m365Guide.step3Text">Certificates &amp; secrets → New client secret, expiry 24 months. Copy the Value — not the Secret ID, and it is shown only once — into "client secret" and enter its expiry date into "secret expires at". Once the secret expires, the integration stops until a new one is saved.</div>
+        </li>
+
+        <li class="list-group-item">
+            <span class="fw-semibold" i18n="@@i18n.m365Guide.step4Title">Restrict mailbox access to a group</span>
+            <div class="small mt-1" i18n="@@i18n.m365Guide.step4Group">Automatic replies, the TALVIS calendar and the TALVIS address book use Exchange Online RBAC for Applications, limited to the members of one group. Create a mail-enabled security group in the Exchange admin center and add everyone whose mailbox TALVIS should write to. The three role assignments grant MailboxSettings for the automatic reply, Calendars for the TALVIS calendar and Contacts for the TALVIS address book.</div>
+            <div class="small mt-1" i18n="@@i18n.m365Guide.step4ObjectId">The object id is under Entra → Enterprise applications → TALVIS → Object ID. It differs from the object id of the app registration.</div>
+            <div class="small mt-1">
+                <ng-container i18n="@@i18n.m365Guide.step4Module">Run in PowerShell — install the module once with</ng-container>
+                <code class="notranslate">Install-Module ExchangeOnlineManagement</code>
+            </div>
+            <div class="position-relative mt-2">
+                <pre class="small bg-dark rounded p-2 pe-5 mb-0 notranslate"><code>{{ powershell() }}</code></pre>
+                <button type="button" class="btn btn-sm btn-plain text-primary position-absolute top-0 end-0" (click)="copy(powershell())" i18n-ngbTooltip="@@i18n.common.copyToClipboard" ngbTooltip="copy to clipboard"><i>content_copy</i></button>
+            </div>
+            <div class="small mt-2" i18n="@@i18n.m365Guide.step4Check">The last command must report InScope = True for a group member. It can take up to 2 hours until the assignment takes effect. New colleagues later only need to be added to the group.</div>
+        </li>
+
+        <li class="list-group-item">
+            <span class="fw-semibold" i18n="@@i18n.m365Guide.step5Title">Connect Microsoft Teams (optional)</span>
+            <div class="small mt-1">
+                <ng-container i18n="@@i18n.m365Guide.step5Bot">Azure portal → Create a resource → Azure Bot: pricing tier F0, type single tenant, creation type "Use existing app registration" with the client id from step 1. Under Channels, add Microsoft Teams with the default settings. Under Configuration, set the messaging endpoint to:</ng-container>
+                <a class="ms-1 text-nowrap" [href]="azureBotUrl" target="_blank" rel="noopener noreferrer"><span i18n="@@i18n.m365Guide.openAzure">open Azure portal</span><i class="ms-1">open_in_new</i></a>
+            </div>
+            <div class="hstack gap-2 mt-1">
+                <code class="small text-break notranslate">{{ messagingEndpoint }}</code>
+                <button type="button" class="btn btn-sm btn-plain text-primary" (click)="copy(messagingEndpoint)" i18n-ngbTooltip="@@i18n.common.copyToClipboard" ngbTooltip="copy to clipboard"><i>content_copy</i></button>
+            </div>
+            <div class="small mt-1" i18n="@@i18n.m365Guide.step5Proxy">If TALVIS runs behind a login proxy, this endpoint must be reachable without it — TALVIS verifies the Bot Framework token itself.</div>
+            <div class="small mt-1" i18n="@@i18n.m365Guide.step5Team">In Teams, create or pick the team for the project channels and copy its id — the groupId value from "Get link to team" — into "team id". Optionally enter a channel id for company-wide announcements into "town square". A team holds at most 1000 channels; TALVIS archives channels of completed projects instead of deleting them.</div>
+        </li>
+
+        <li class="list-group-item">
+            <span class="fw-semibold" i18n="@@i18n.m365Guide.step6Title">Install the Teams app</span>
+            <div class="small mt-1">
+                <ng-container i18n="@@i18n.m365Guide.step6Text">Save this connector first, then download the app package. Upload it in the Teams admin center → Teams apps → Manage apps → Upload and add the app to the team — without that, the bot cannot post there. To let the bot send direct messages, pre-install the app for the users via a setup policy.</ng-container>
+                <a class="ms-1 text-nowrap" [href]="teamsAdminUrl" target="_blank" rel="noopener noreferrer"><span i18n="@@i18n.m365Guide.openTeamsAdmin">open Teams admin center</span><i class="ms-1">open_in_new</i></a>
+            </div>
+            <button type="button" class="btn btn-sm btn-plain text-primary mt-1 px-0" (click)="downloadTeamsAppPackage()" [disabled]="downloading()">
+                @if (downloading()) {
+                    <spinner [size]="16" [inline]="true" class="me-1"></spinner>
+                } @else {
+                    <i class="me-1">download</i>
+                }
+                <span i18n="@@i18n.m365Guide.downloadPackage">download Teams app package</span>
+            </button>
+        </li>
+
+        <li class="list-group-item">
+            <span class="fw-semibold" i18n="@@i18n.m365Guide.step7Title">Connect and enable per person</span>
+            <div class="small mt-1" i18n="@@i18n.m365Guide.step7Text">Each person connects their own Microsoft 365 account in their profile (vCard page → "Connect Microsoft 365") by signing in with Microsoft, then switches on the features they want: automatic reply, TALVIS calendar and TALVIS address book. Admins can disconnect an account in HR → contact.</div>
+        </li>
+    </ol>
+</div>
+<div class="modal-footer">
+    <button type="button" class="btn" (click)="dismiss()" i18n="@@i18n.common.close">Close</button>
+</div>

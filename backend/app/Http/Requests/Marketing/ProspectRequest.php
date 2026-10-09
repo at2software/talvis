@@ -13,11 +13,11 @@ class ProspectRequest extends FormRequest {
         $req     = $isStore ? 'required' : 'sometimes';
 
         $rules = [
-            'marketing_initiative_id' => "$req|exists:marketing_initiatives,id",
-            'lead_source_id'          => ($isStore ? 'nullable|' : '').'exists:lead_sources,id',
-            'user_id'                 => 'nullable|exists:users,id',
-            'company_id'              => 'nullable|exists:companies,id',
-            'company_contact_id'      => 'nullable|exists:company_contacts,id',
+            'marketing_initiative_id' => "$req|integer|exists:marketing_initiatives,id",
+            'lead_source_id'          => ($isStore ? 'nullable|' : '').'integer|exists:lead_sources,id',
+            'user_id'                 => 'nullable|integer|exists:users,id',
+            'company_id'              => 'nullable|integer|exists:companies,id,deleted_at,NULL',
+            'company_contact_id'      => 'nullable|integer|exists:company_contacts,id',
             'name'                    => ($isStore ? 'nullable|' : '').'string|max:255',
             'vcard'                   => 'nullable|string',
             'email'                   => 'nullable|email|max:255',

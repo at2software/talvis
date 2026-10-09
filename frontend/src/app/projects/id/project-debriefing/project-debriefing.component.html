@@ -34,7 +34,12 @@
         <div class="col-12 col-md-9 d-flex flex-column gap-4">
         @if (!_debriefs.length) {
             <div class="card">
-                <empty-state [card]="false" class="debriefing" title="No debriefs yet. Create the first one." i18n-title="@@i18n.debrief.noDebriefs"></empty-state>
+                <empty-state [card]="false" class="debriefing" title="No debriefs yet. Create the first one." i18n-title="@@i18n.debrief.noDebriefs">
+                    <button type="button" class="btn btn-plain text-primary" (click)="createDebrief()" [disabled]="_creating">
+                        <i>add</i>
+                        <span i18n="@@i18n.debrief.newDebrief">new debrief</span>
+                    </button>
+                </empty-state>
             </div>
         }
         @for (debrief of _debriefs; track debrief.id; let num = $index) {
@@ -75,7 +80,7 @@
                     }
                     <div class="card-header-actions d-flex align-items-center gap-2">
                         @if (_isDraft) {
-                            <button class="btn btn-sm btn-primary" (click)="markAsCompleted(debrief)">
+                            <button class="btn btn-sm btn-plain text-primary" (click)="markAsCompleted(debrief)">
                                 <span i18n="@@i18n.debrief.markComplete">mark as complete</span>
                             </button>
                         }
@@ -113,7 +118,7 @@
                             <!-- Local AI Section -->
                             @if (_isDraft && localAiPlugin) {
                                 <div class="d-flex align-items-start gap-2 flex-wrap mt-2">
-                                    <button class="btn btn-sm btn-outline-primary" (click)="runLocalAI(debrief)" [disabled]="_aiLoadingMap[debrief.id]">
+                                    <button class="btn btn-sm btn-plain text-primary" (click)="runLocalAI(debrief)" [disabled]="_aiLoadingMap[debrief.id]">
                                         @if (_aiLoadingMap[debrief.id]) {
                                             <spinner [size]="20" [inline]="true" class="me-1"></spinner>
                                         } @else {

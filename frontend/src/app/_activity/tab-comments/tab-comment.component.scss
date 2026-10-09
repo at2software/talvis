@@ -10,7 +10,7 @@
 .callout {
     background-color: $bg-muted;
     padding: 2px 10px; margin: 0;
-    border-radius: 5px;
+    border-radius: var(--bs-border-radius);
     box-shadow: var.liquid-glass();
     position: relative;
     min-width: 0;
@@ -44,7 +44,7 @@
 .attachment-image {
     display: block;
     width: 100%;
-    border-radius: 4px;
+    border-radius: var(--bs-border-radius);
     margin-top: 0.15rem;
 }
 .attachment-file {
@@ -77,7 +77,7 @@
 .reaction {
     font-size: 0.75em;
     padding: 0.05rem 0.35rem;
-    border-radius: 1rem;
+    border-radius: var(--bs-border-radius-pill);
     cursor: default;
     user-select: none;
 }

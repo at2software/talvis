@@ -3,10 +3,11 @@ import { Serializable } from '@models/_core/serializable';
 import { Vcard } from './vcard';
 import { nx } from '@models/_core/nx-bridge';
 import type { PluginInstanceFactory } from '../http/plugins/plugin.instance.factory';
-import { computed, signal, type Type } from '@angular/core';
+import { computed, signal, untracked, type Type } from '@angular/core';
 import type { PluginInstance } from '../http/plugins/plugin.instance';
 import { VcardRow } from './vcard-row';
 import { Dictionary } from '@constants/constants';
+import { type Observable, tap } from 'rxjs';
 
 let _pluginFactoryClass: Type<PluginInstanceFactory> | null = null;
 import('../http/plugins/plugin.instance.factory').then(({ PluginInstanceFactory }) => (_pluginFactoryClass = PluginInstanceFactory)).catch();
@@ -22,9 +23,14 @@ export abstract class VcardClass extends Serializable {
     get gender(): string { return this.#gender; }
     set gender(v: string) { this.#gender = v; }
 
-    card = signal<Vcard|undefined>(undefined);
+    card = signal<Vcard|undefined>(undefined, { equal: () => false });
     getVcardString = computed(() => this.card()?.toString() ?? '');
-    set vcard(val: string) { if (val) this.card.set(new Vcard(val)); }
+    set vcard(val: string) { if (val && !untracked(this.card)?.equals(val)) this.card.set(new Vcard(val)); }
+
+    saveCard = (silent = false): Observable<this> => {
+        const card = this.card();
+        return this.update({ vcard: card?.toString() }, silent).pipe(tap(() => this.card.set(card)));
+    };
 
 
     static readonly #descAdr = ['post office box', 'apartment or suite number', 'street address', 'locality (e.g., city)', 'region (e.g., state or province)', 'postal code', 'country name'];
@@ -36,7 +42,10 @@ export abstract class VcardClass extends Serializable {
     static readonly #VCARD_ATTR_MAP: Dictionary<string> = {
         mantis: 'X-NEXUS-MANTISBT',
         git: 'X-NEXUS-GIT',
+        jira: 'X-NEXUS-JIRA',
+        github: 'X-NEXUS-GITHUB',
         mattermost: 'X-NEXUS-MATTERMOST',
+        slack: 'X-NEXUS-SLACK',
     };
 
     #getKeys = (key: string) => computed(() => this.getPersonal()?.card()?.get(key))();
@@ -49,6 +58,10 @@ export abstract class VcardClass extends Serializable {
     honorarySuffix    = computed(() => this.#getFirstValue('N', 4));
     fullName          = computed(() => this.#getFirst('FN').join(''));
     url               = computed(() => this.#getKeys('URL')?.map((_) => _.vals[0]));
+    websites          = computed(() => (this.#getKeys('URL') ?? []).filter((_) => !!_.val().trim() && !/^https?:\/*$/i.test(_.val().trim())));
+    phones            = computed(() => (this.#getKeys('TEL') ?? []).filter((_) => !!_.val().trim()));
+    emails            = computed(() => (this.#getKeys('EMAIL') ?? []).filter((_) => !!_.val().trim()));
+    hasAddress        = computed(() => (this.#getKeys('ADR') ?? []).some((_) => _.vals.slice(0, 6).some((v) => !!v?.trim())));
     role              = computed(() => this.#getFirst('ROLE').join(''));
     countryCode       = computed(() => this.#getFirstValue('ADR', 6));
     getFormality      = computed(() => this.#getFirstValue('X-FORMALITY', 0, 'formal'));

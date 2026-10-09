@@ -14,12 +14,15 @@ import { Type } from '@models/_core/hydrate';
 import { Model } from '@constants/model/type-discriminators';
 import { computed } from '@angular/core';
 import { environment } from '@environments/environment';
+import type { InvoiceSepaDto } from '@models/_core/api-response';
 
 
 @Model('Invoice')
 export class Invoice extends Serializable implements HasInvoiceItems, IHasMarker {
     static API_PATH = (): string => 'invoices';
     static WEBSOCKET_KEY = (): string => 'Invoice';
+    static readonly FLAG_DATEV = 0x01;
+    static readonly FLAG_SEPA_COLLECTED = 0x02;
 
     override readonly getBadge = computed(() => this.is_overdue() ? ['bg-danger', 'overdue'] as Badge : undefined);
     override readonly getAvatar = computed(() => { this.snapshot(); return this.company?.getAvatar() ?? environment.envApi + 'nexus/icon'; });
@@ -42,6 +45,7 @@ export class Invoice extends Serializable implements HasInvoiceItems, IHasMarker
     is_booked: boolean = false;
     stage: number = 0;
     sent: number = 0;
+    sepa?: InvoiceSepaDto;
 
     is_overdue = computed(() => dayjs(this.snapshot().remind_at).isBefore(dayjs()) && !this.snapshot().paid_at);
     needs_reminder = computed(() => !this.snapshot().paid_at && dayjs(this.snapshot().remind_at).isBefore(dayjs()));
@@ -61,6 +65,10 @@ export class Invoice extends Serializable implements HasInvoiceItems, IHasMarker
 
     override frontendUrl = (): string => `/financial/${this.id}`;
     companyId = () => this.company_id;
+    isUploadedToDatev = (): boolean => this.hasFlag(Invoice.FLAG_DATEV);
+    isSepaCollected = (): boolean => this.hasFlag(Invoice.FLAG_SEPA_COLLECTED) || !!this.sepa?.collected;
+    isSepaCollectable = (): boolean => !!this.sepa && !this.sepa.issues.length;
+    canSepaDirectDebit = (): boolean => !this.paid_at && !this.is_cancelled && !!(this.company?.has_direct_debit || this.company?.hasSepaMandate());
     setPaid = () => this.update({ paid: true });
     setUnpaid = () => this.update({ paid: false });
     time_due = (): Dayjs => dayjs(this.due_at);
@@ -74,12 +82,11 @@ export class Invoice extends Serializable implements HasInvoiceItems, IHasMarker
     }
 
     static formattedInvoiceNumber = (current?: string): string => {
-        const prefix = nx().global.setting('INVOICE_NO_PREFIX');
-        const suffix = nx().global.setting('INVOICE_NO_SUFFIX');
-        const digits = nx().global.setting('INVOICE_NO_DIGITS');
-        if (!current) current = '' + nx().global.setting('INVOICE_NO_CURRENT');
-        while (current!.length < digits) current = '0' + current;
-        return prefix + current + suffix;
+        const prefix = nx().global.setting('INVOICE_NO_PREFIX') ?? '';
+        const suffix = nx().global.setting('INVOICE_NO_SUFFIX') ?? '';
+        const digits = parseInt(nx().global.setting('INVOICE_NO_DIGITS')) || 0;
+        const number = current || `${nx().global.setting('INVOICE_NO_CURRENT') ?? ''}` || '1';
+        return prefix + number.padStart(digits, '0') + suffix;
     };
 
     isLatestInvoice(): boolean {
@@ -107,6 +114,10 @@ export class Invoice extends Serializable implements HasInvoiceItems, IHasMarker
     updateValues = () => nx().service.put(`invoices/${this.id}/update-values`);
     sendToDatev = () => nx().service.post(`invoices/${this.id}/datev`).pipe(map((d) => this.fromJson(d as Dictionary)));
     sendMail = () => nx().service.post(`invoices/${this.id}/send-mail`).pipe(map((d) => this.fromJson(d as Dictionary)));
+    openSepaDirectDebit = async () => {
+        const [{ ModalBaseService }, { ModalSepaDirectDebitComponent }] = await Promise.all([import('@app/_modals/modal-base-service'), import('@app/_modals/modal-sepa-direct-debit/modal-sepa-direct-debit.component')]);
+        return ModalBaseService.open(ModalSepaDirectDebitComponent, this.id);
+    };
     sendReminder = () => nx().service.post(`invoices/${this.id}/send-reminder`).pipe(map((d) => this.fromJson(d as Dictionary)));
 
     static aggregate = (_: Invoice[], format: string = 'YYYY'): Dictionary<number> =>

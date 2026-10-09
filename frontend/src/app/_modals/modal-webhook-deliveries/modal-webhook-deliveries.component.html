@@ -1,0 +1,74 @@
+@let _expanded = expanded();
+<div class="modal d-block" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header hstack gap-2">
+                <span class="modal-title flex-fill">
+                    <ng-container i18n="@@i18n.webhooks.deliveries">deliveries</ng-container>
+                    <span class="text-muted ms-2">{{ endpoint()?.name }}</span>
+                </span>
+                <button type="button" class="btn btn-plain text-primary" (click)="reload()" i18n-ngbTooltip="@@i18n.common.refresh" ngbTooltip="refresh"><i>refresh</i></button>
+                <button type="button" class="btn-close" i18n-aria-label="@@i18n.common.close" aria-label="Close" (click)="dismiss()"></button>
+            </div>
+            <div class="modal-body">
+                @if (loading()) {
+                    <spinner class="py-4"></spinner>
+                } @else if (!deliveries().length) {
+                    <empty-state [card]="true" class="shrug" i18n-title="@@i18n.webhooks.noDeliveries" title="no deliveries yet"></empty-state>
+                } @else {
+                    <div class="text-muted small mb-2"><ng-container i18n="@@i18n.webhooks.deliveriesHint">the last 50 deliveries</ng-container> · <ng-container i18n="@@i18n.webhooks.retryHelp">Failed deliveries are retried up to 8 times, from after 1 minute up to after 1 day.</ng-container></div>
+                    <table class="table table-sm align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th i18n="@@i18n.webhooks.event">event</th>
+                                <th i18n="@@i18n.common.created_at">created at</th>
+                                <th class="text-end" i18n="@@i18n.webhooks.attempts">attempts</th>
+                                <th i18n="@@i18n.common.status">status</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (delivery of deliveries(); track delivery.uuid) {
+                                <tr>
+                                    <td>
+                                        <div>{{ eventLabel(delivery.event) }}</div>
+                                        <code class="text-muted small notranslate">{{ delivery.event }}</code>
+                                    </td>
+                                    <td class="text-nowrap" [ngbTooltip]="delivery.created_at | date: 'medium'">{{ delivery.created_at | relativeTime }}</td>
+                                    <td class="text-end">{{ delivery.attempts }}</td>
+                                    <td class="w-50" style="max-width: 0">
+                                        @if (delivery.isDelivered()) {
+                                            <span class="text-success" [ngbTooltip]="delivery.delivered_at | date: 'medium'"><i class="align-middle">check</i> <ng-container i18n="@@i18n.webhooks.delivered">delivered</ng-container> {{ delivery.delivered_at | relativeTime }}</span>
+                                        } @else if (delivery.isPending()) {
+                                            <span class="text-warning" [ngbTooltip]="delivery.next_attempt_at | date: 'medium'"><i class="align-middle">schedule</i> <ng-container i18n="@@i18n.webhooks.nextAttempt">next attempt</ng-container> {{ delivery.next_attempt_at | relativeTime }}</span>
+                                        } @else {
+                                            <span class="text-danger"><i class="align-middle">error</i> <ng-container i18n="@@i18n.webhooks.failed">failed</ng-container></span>
+                                        }
+                                        @if (!delivery.isDelivered() && delivery.hasError()) {
+                                            <div class="small text-muted text-truncate notranslate" [ngbTooltip]="delivery.errorSummary()" container="body">{{ delivery.errorSummary() }}</div>
+                                        }
+                                    </td>
+                                    <td class="text-end">
+                                        <button type="button" class="btn btn-sm btn-plain text-primary" (click)="toggle(delivery)" i18n-ngbTooltip="@@i18n.webhooks.payload" ngbTooltip="payload">
+                                            <i>{{ _expanded === delivery.uuid ? 'expand_less' : 'data_object' }}</i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                @if (_expanded === delivery.uuid) {
+                                    <tr>
+                                        <td colspan="5">
+                                            <pre class="mb-0 font-monospace small notranslate" style="max-height: 300px; overflow: auto; white-space: pre-wrap">{{ delivery.prettyPayload() }}</pre>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                }
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn" (click)="dismiss()" i18n="@@i18n.common.close">Close</button>
+            </div>
+        </div>
+    </div>
+</div>

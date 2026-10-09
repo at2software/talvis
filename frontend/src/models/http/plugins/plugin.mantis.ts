@@ -109,11 +109,11 @@ export class MantisPlugin extends PluginInstance implements ITaskPlugin {
     toPluginLink = (id: string) => PluginLink.fromJson({ type: 'mantis', name: this.projects.find((_) => String(_.id) === String(id))?.name ?? '', url: this.enc.value.url + 'projects/' + id + '/' });
 
     create = (_: Task) => this.post('issues', this.toMantisIssue(_));
-    close = (_: Task) => this.patch('index.php/issues/' + _.id, { status: { name: 'resolved' } });
+    close = (_: Task) => this.patch('issues/' + _.id, { status: { name: 'resolved' } });
     reopen = (_: Task) => this.patch('issues/' + _.id, { status: { name: 'new' } });
     destroy = (_: Task) => this.delete('issues/' + _.id);
     assign = (_: Task) => this.patch(`issues/${_.id}`, { handler: { name: this.myUser().getName() }, status: { name: 'assigned' } });
-    addLabel = (_: Task, label: string): Observable<Task> => this.patch(`issues/${_.project_id}`, { id: _.id, target_version: this.getLabelFor(label)?.id }) as unknown as Observable<Task>;
+    addLabel = (_: Task, label: string): Observable<Task> => this.patch(`issues/${_.id}`, { target_version: { name: label } }) as unknown as Observable<Task>;
     removeLabel = () => of(Task.fromJson());
 
     toState = (status: { name: string } | undefined) => {
@@ -148,13 +148,11 @@ export class MantisPlugin extends PluginInstance implements ITaskPlugin {
     };
 
     toMantisIssue = (_: Task) => ({
-        data: {
-            summary: _.name,
-            description: _.name,
-            category: { name: this.categories[0].name },
-            status: { name: 'new' },
-            project: { id: _.project_id },
-        },
+        summary: _.name,
+        description: _.description || _.name,
+        category: { name: this.categories[0]?.name ?? 'General' },
+        status: { name: 'new' },
+        project: { id: _.project_id },
     });
 
     toUser = (data: MantisUser) => {
@@ -242,7 +240,7 @@ export class MantisPlugin extends PluginInstance implements ITaskPlugin {
                             user_id: resolvedUser?.id,
                             is_mini: true,
                             icon: resolvedUser?.getAvatar?.(),
-                            var: { source: 'mantis', ...(resolvedUser ? {} : { nicon: 'mantis' }) },
+                            var: { source: 'mantisbt', ...(resolvedUser ? {} : { nicon: 'mantis' }) },
                             itemCount: tasks.length,
                             pageSize: pageSize,
                         };

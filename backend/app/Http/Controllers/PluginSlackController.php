@@ -2,132 +2,240 @@
 
 namespace App\Http\Controllers;
 
-use App\Helpers\NLog;
 use App\Models\Project;
 use App\Models\User;
-use Exception;
+use App\Support\SlackMrkdwn;
+use App\Traits\HasVaultCredentials;
 use Illuminate\Support\Facades\Cache;
 
 class PluginSlackController extends PluginChatController {
+    use HasVaultCredentials;
+
+    private const API             = 'https://slack.com/api/';
+    private const METADATA_EVENT  = 'talvis_post';
+    private const STATUS_PROFILES = [
+        'online'  => ['status_text' => '', 'status_emoji' => ''],
+        'away'    => ['status_text' => 'Away', 'status_emoji' => ':clock3:'],
+        'dnd'     => ['status_text' => 'Do not disturb', 'status_emoji' => ':no_entry:'],
+        'offline' => ['status_text' => 'Offline', 'status_emoji' => ':zzz:'],
+    ];
+
     public static function getKey(): string {
         return 'slack';
     }
+    public function vaultPrefix(): string {
+        return 'SLACK';
+    }
     public static function createInstance(): ?static {
-        if ($endpoint = config('services.slack.api_endpoint')) {
-            $instance = new static;
-            $instance->init($endpoint);
-            return $instance;
+        $instance              = new static;
+        $instance->credentials = $instance->getCredentials();
+        if (! $instance->env('TOKEN')) {
+            return null;
         }
-        return null;
+        $instance->init(self::API);
+        return $instance;
     }
-    public function __construct() {}
+    public function __construct(?array $credentials = null) {
+        if ($credentials !== null) {
+            $this->credentials = $credentials;
+            $this->init(self::API);
+        }
+    }
+    public function checkCredentials(): bool {
+        return $this->checkResponse(fn () => $this->workspace(true));
+    }
     protected function getToken(): string {
-        $token = Cache::get('slack_api_token');
-        if (! $token) {
-            $token = config('services.slack.access_token');
-            Cache::put('slack_api_token', $token, now()->addMinutes(59));
-        }
-        return $token;
+        return $this->env('TOKEN') ?? '';
     }
+
+    // ###### Slack Web API transport
+
+    private function call(string $method, array $payload = []): ?array {
+        $data = $this->post($method, $payload);
+        return ($data['ok'] ?? false) ? $data : null;
+    }
+    private function read(string $method, array $query = []): ?array {
+        $data = $this->curl('get', $method, ['query' => $query]);
+        return ($data['ok'] ?? false) ? $data : null;
+    }
+    private function callAsAdmin(string $method, array $payload): ?array {
+        $token = $this->env('USER_TOKEN');
+        if (! $token || ! $this->client) {
+            return null;
+        }
+        try {
+            $response = $this->client->post(self::API.$method, [
+                'headers' => ['Content-Type' => 'application/json; charset=utf-8', 'Authorization' => 'Bearer '.$token],
+                'json'    => $payload,
+            ]);
+            $data = json_decode($response->getBody(), true);
+            return ($data['ok'] ?? false) ? $data : null;
+        } catch (\Exception $e) {
+            return null;
+        }
+    }
+    private function workspace(bool $forced = false): ?array {
+        $key = 'slack_auth_'.hash('sha256', $this->getToken());
+        if ($forced) {
+            Cache::forget($key);
+        }
+        $data = Cache::get($key) ?? $this->call('auth.test');
+        if ($data) {
+            Cache::put($key, $data, now()->addDay());
+        }
+        return $data;
+    }
+
+    // ###### users
+
+    public function getUserId(User $user): ?string {
+        $linked = parent::getUserId($user);
+        if ($linked || ! $user->email) {
+            return $linked;
+        }
+        return Cache::remember('slack_user_'.hash('sha256', $user->email), now()->addDay(), fn () => $this->read('users.lookupByEmail', ['email' => $user->email])['user']['id'] ?? null);
+    }
+    public function getIdFor(User $user): ?string {
+        return $this->getUserId($user);
+    }
+    public function updateStatus(string $status, string $userId): void {
+        if ($profile = self::STATUS_PROFILES[$status] ?? null) {
+            $this->callAsAdmin('users.profile.set', ['user' => $userId, 'profile' => [...$profile, 'status_expiration' => 0]]);
+        }
+    }
+    public function updatePosition(string $position, string $userId): void {
+        $this->callAsAdmin('users.profile.set', ['user' => $userId, 'profile' => ['title' => $position]]);
+    }
+
+    // ###### outbound communication
+
     public function createOrUpdatePost(string $cacheId, string $channelId, string $message, $props = null) {
         return $this->_createOrUpdatePost($cacheId, $channelId, $message, $props, 'ts');
     }
     public function createPost(string $channelId, string $message, $props = null) {
-        $payload = ['channel' => $channelId, 'text' => $message];
-        if ($props) {
-            $payload['attachments'] = $props;
-        }
-        return $this->post('chat.postMessage', $payload);
+        return $this->call('chat.postMessage', ['channel' => $channelId, ...$this->toSlackMessage($message, $props ?? [])]);
     }
-    public function createChannel(string $name, ?string $display_name, string $purpose, string $topic): ?string {
-        $payload  = ['name' => $name, 'is_private' => false];
-        $response = null;
-        try {
-            $data = $this->post('conversations.create', $payload);
-            if ($data && ! empty($data['channel']['id'])) {
-                $response = $data['channel']['id'];
-            }
-        } catch (Exception $ex) {
-            NLog::error($ex);
+    public function updatePost(string $id, string $message, $props = null, ?string $channelId = null) {
+        if (! $channelId) {
+            return null;
         }
-        try {
-            if ($response) {
-                if (! empty($purpose)) {
-                    $payload         = ['channel' => $response, 'purpose' => $purpose];
-                    $purposeResponse = $this->post('conversations.setPurpose', $payload);
-                }
-                if (! empty($topic)) {
-                    $payload       = ['channel' => $response, 'topic' => $topic];
-                    $topicResponse = $this->post('conversations.setTopic', $payload);
-                }
-            }
-        } catch (Exception $ex) {
-            NLog::error($ex);
-        }
-        return $response;
+        return $this->call('chat.update', ['channel' => $channelId, 'ts' => $id, ...$this->toSlackMessage($message, $props ?? [])]);
     }
-    public function addUsersToChannel(string $channelId, User ...$users) {
-        $userIds = array_filter(array_map(fn ($user) => $this->getUserId($user), $users), fn ($id) => $id !== null);
-        $payload = ['channel' => $channelId, 'users' => implode(',', $userIds)];
-        $data    = [];
-        try {
-            $data = $this->post('conversations.invite', $payload);
-        } finally {
-            return $data;
+    private function toSlackMessage(string $message, array $props): array {
+        $payload = [
+            'text'         => SlackMrkdwn::from($message),
+            'unfurl_links' => false,
+            'unfurl_media' => true,
+            'username'     => $props['username'] ?? 'TALVIS',
+            'icon_url'     => $props['icon_url'] ?? config('app.url').'/icons/project.jpg',
+        ];
+        if (! empty($props['attachments'])) {
+            $payload['attachments'] = array_map(fn (array $attachment) => [
+                ...$attachment,
+                'text'      => SlackMrkdwn::from($attachment['text'] ?? ''),
+                'mrkdwn_in' => ['text'],
+            ], $props['attachments']);
+        }
+        $metadata = array_filter(['cache_id' => $props['cache_id'] ?? null, 'type' => $props['type'] ?? null]);
+        if ($metadata) {
+            $payload['metadata'] = ['event_type' => self::METADATA_EVENT, 'event_payload' => $metadata];
+        }
+        return $payload;
+    }
+    protected function findExistingPost(string $cacheId, string $channelId): ?string {
+        $data = $this->getChannelPosts($channelId);
+        foreach ($data['order'] ?? [] as $ts) {
+            if (($data['posts'][$ts]['metadata']['event_payload']['cache_id'] ?? null) === $cacheId) {
+                return $ts;
+            }
+        }
+        return null;
+    }
+    public function getChannelPosts(string $channelId, int $page = 0, int $perPage = 200): array {
+        $cursor = null;
+        for ($i = 0; $i <= $page; $i++) {
+            $data   = $this->read('conversations.history', array_filter(['channel' => $channelId, 'limit' => $perPage, 'include_all_metadata' => 'true', 'cursor' => $cursor]));
+            $cursor = $data['response_metadata']['next_cursor'] ?? null;
+            if (! $data || ($i < $page && ! $cursor)) {
+                return [];
+            }
+        }
+        $messages = collect($data['messages'] ?? []);
+        return [
+            'posts' => $messages->keyBy('ts')->all(),
+            'order' => $messages->pluck('ts')->all(),
+        ];
+    }
+    public function getDirectChannelIdFor(string $userId): ?string {
+        return $this->call('conversations.open', ['users' => $userId])['channel']['id'] ?? null;
+    }
+    public function sendDirectMessageToUserId(string $userId, string $message): void {
+        if ($channelId = $this->getDirectChannelIdFor($userId)) {
+            $this->createPost($channelId, $message);
+        }
+    }
+
+    // ###### channels
+
+    public function createChannel(string $name, string $display_name, string $purpose, string $header): ?string {
+        $name      = substr(strtolower($name), 0, 80);
+        $channelId = $this->call('conversations.create', ['name' => $name, 'is_private' => false])['channel']['id'] ?? $this->getChannelId($name);
+        if ($channelId) {
+            $this->updateChannel($channelId, null, $purpose, $header);
+        }
+        return $channelId;
+    }
+    public function updateChannel(string $id, $displayName, $purpose, $header) {
+        if ($displayName) {
+            $this->call('conversations.rename', ['channel' => $id, 'name' => substr(strtolower($displayName), 0, 80)]);
+        }
+        if ($purpose) {
+            $this->call('conversations.setPurpose', ['channel' => $id, 'purpose' => $purpose]);
+        }
+        if ($header) {
+            $this->call('conversations.setTopic', ['channel' => $id, 'topic' => $header]);
         }
     }
     public function getChannelId(string $name): ?string {
-        try {
-            $data = $this->get('conversations.list');
-            foreach ($data['channels'] as $channel) {
+        $cursor = null;
+        do {
+            $data = $this->read('conversations.list', array_filter([
+                'types'            => 'public_channel,private_channel',
+                'exclude_archived' => 'true',
+                'limit'            => 1000,
+                'cursor'           => $cursor,
+            ]));
+            foreach ($data['channels'] ?? [] as $channel) {
                 if ($channel['name'] === $name) {
                     return $channel['id'];
                 }
             }
-        } finally {
+            $cursor = $data['response_metadata']['next_cursor'] ?? null;
+        } while ($cursor);
+        return null;
+    }
+    public function addUsersToChannel(string $channelId, User ...$users) {
+        $userIds = array_values(array_filter(array_map(fn (User $user) => $this->getUserId($user), $users)));
+        if (! $channelId || ! $userIds) {
             return null;
         }
-    }
-    public function updatePost(string $timestamp, string $message, $attachments = null, ?string $channelId = null) {
-        $payload = [
-            'channel' => $channelId,
-            'ts'      => $timestamp,
-            'text'    => $message,
-        ];
-        if ($attachments) {
-            $payload['attachments'] = $attachments;
-        }
-        return $this->post('chat.update', $payload);
+        return $this->call('conversations.invite', ['channel' => $channelId, 'users' => implode(',', $userIds), 'force' => true]);
     }
     public function removeUserFromChannel($channelId, User $user) {
-        if ($userId = $this->getUserId($user)) {
-            $payload = ['channel' => $channelId, 'user' => $userId];
-            return $this->post('conversations.kick', $payload);
+        if ($channelId && $userId = $this->getUserId($user)) {
+            return $this->call('conversations.kick', ['channel' => $channelId, 'user' => $userId]);
         }
+        return null;
     }
+
+    // ###### plugin-specific abstractions
+
     public function getImageMarkdown(string $path, string $title = 'image'): string {
-        return 'Image: '.config('app.api_url').'../'.$path;
+        return '!['.$title.']('.config('app.api_url').'../'.$path.")\n";
     }
     public function getIconFor(Project $project): string {
-        return ':slack: Slack Channel';
-    }
-    public function env(string $key): ?string {
-        return config('services.slack.'.strtolower($key)) ?: null;
-    }
-    public function updatePosition(string $position, string $userId): void {}
-    public function updateStatus(string $status, string $userId): void {
-        $payload = ['user' => $userId, 'status_text' => $status];
-        $this->post('users.profile.set', $payload);
-    }
-    public function deletePost(string $id): void {}
-    public function getChannelPosts(string $channelId, int $page = 0, int $perPage = 200): array {
-        return [];
-    }
-    public function getDirectChannelIdFor(string $userId): ?string {
-        $data = $this->post('conversations.open', ['users' => $userId]);
-        return $data['channel']['id'] ?? null;
-    }
-    public function getIdFor(User $user): ?string {
-        return $this->getUserId($user);
+        $workspaceUrl = $this->workspace()['url'] ?? null;
+        $channelId    = $this->getChannelIdFor($project);
+        return $workspaceUrl && $channelId ? '[:slack:]('.$workspaceUrl.'archives/'.$channelId.')' : '';
     }
 }

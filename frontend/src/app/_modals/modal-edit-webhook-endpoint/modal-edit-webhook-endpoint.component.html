@@ -1,0 +1,83 @@
+@let _secret = secret();
+<div class="modal d-block" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-title">
+                    @if (isNew()) {
+                        <ng-container i18n="@@i18n.webhooks.create">new webhook</ng-container>
+                    } @else {
+                        <ng-container i18n="@@i18n.webhooks.edit">edit webhook</ng-container>
+                    }
+                </span>
+                <button type="button" class="btn-close" i18n-aria-label="@@i18n.common.close" aria-label="Close" (click)="dismiss()"></button>
+            </div>
+            <div class="modal-body">
+                @if (created()) {
+                    <div class="card card-info mb-3" i18n="@@i18n.webhooks.secretOnceHint">This is the signing secret of the new webhook. Store it now in the receiving system — you can reveal or rotate it later from the edit dialog.</div>
+                    <div class="input-group">
+                        <span class="input-group-text" i18n="@@i18n.webhooks.secret">signing secret</span>
+                        <input class="form-control font-monospace" readonly [value]="_secret ?? ''" (focus)="$any($event.target).select()" />
+                        <button type="button" class="btn btn-outline-primary input-group-text" (click)="copySecret()" i18n-ngbTooltip="@@i18n.common.copyToClipboard" ngbTooltip="copy to clipboard"><i>content_copy</i></button>
+                    </div>
+                } @else {
+                    <div class="input-group mb-3">
+                        <label class="input-group-text col-3" for="webhook-name" i18n="@@i18n.common.name">name</label>
+                        <input id="webhook-name" class="form-control" [ngModel]="name()" (ngModelChange)="name.set($event)" />
+                    </div>
+                    <div class="input-group mb-1">
+                        <label class="input-group-text col-3" for="webhook-url" i18n="@@i18n.common.url">URL</label>
+                        <input id="webhook-url" type="url" class="form-control" placeholder="https://" [ngModel]="url()" (ngModelChange)="url.set($event)" />
+                    </div>
+                    <div class="text-muted small mb-3" i18n="@@i18n.webhooks.urlHint">Only https URLs on publicly reachable hosts are accepted.</div>
+
+                    <div class="mb-2" i18n="@@i18n.webhooks.events">events</div>
+                    <ul class="list-group mb-3">
+                        @for (event of availableEvents(); track event) {
+                            <li class="list-group-item">
+                                <div class="form-check mb-0">
+                                    <input type="checkbox" class="form-check-input" [id]="'webhook-event-' + event" [checked]="hasEvent(event)" (change)="toggleEvent(event, $any($event.target).checked)" />
+                                    <label class="form-check-label d-flex gap-2" [for]="'webhook-event-' + event">
+                                        <span>{{ eventLabel(event) }}</span>
+                                        <code class="text-muted small notranslate ms-auto">{{ event }}</code>
+                                    </label>
+                                </div>
+                            </li>
+                        }
+                    </ul>
+
+                    <div class="form-check form-switch mb-3">
+                        <input type="checkbox" class="form-check-input" id="webhook-active" [ngModel]="isActive()" (ngModelChange)="isActive.set($event)" />
+                        <label class="form-check-label" for="webhook-active" i18n="@@i18n.common.active">active</label>
+                    </div>
+
+                    @if (!isNew()) {
+                        <div class="input-group">
+                            <span class="input-group-text col-3" i18n="@@i18n.webhooks.secret">signing secret</span>
+                            <input class="form-control font-monospace" readonly [value]="_secret ?? '••••••••••••••••'" (focus)="$any($event.target).select()" />
+                            @if (_secret) {
+                                <button type="button" class="btn btn-outline-primary input-group-text" (click)="copySecret()" i18n-ngbTooltip="@@i18n.common.copyToClipboard" ngbTooltip="copy to clipboard"><i>content_copy</i></button>
+                            } @else {
+                                <button type="button" class="btn btn-outline-primary input-group-text" (click)="revealSecret()" i18n-ngbTooltip="@@i18n.webhooks.revealSecret" ngbTooltip="reveal secret"><i>visibility</i></button>
+                            }
+                            <button type="button" class="btn btn-outline-primary input-group-text" (click)="rotateSecret()" i18n-ngbTooltip="@@i18n.webhooks.rotateSecret" ngbTooltip="rotate secret"><i>autorenew</i></button>
+                        </div>
+                    }
+                }
+            </div>
+            <div class="modal-footer">
+                @if (created()) {
+                    <button type="button" class="btn btn-primary" (click)="accept()" i18n="@@i18n.common.ok">ok</button>
+                } @else {
+                    <button type="button" class="btn" (click)="dismiss()" [disabled]="saving()" i18n="@@i18n.common.cancel">cancel</button>
+                    <button type="button" class="btn btn-primary" (click)="save()" [disabled]="!canSave() || saving()" hotkey="CTRL+ENTER">
+                        @if (saving()) {
+                            <spinner [size]="20" [inline]="true" class="me-1"></spinner>
+                        }
+                        <span i18n="@@i18n.common.save">save</span>
+                    </button>
+                }
+            </div>
+        </div>
+    </div>
+</div>

@@ -60,9 +60,7 @@ class Project extends BaseModel {
         return (int)ceil($years * 12);
     }
     public static function incrementQuoteNumber(): void {
-        $param        = Param::get('QUOTE_NO_CURRENT');
-        $param->value = $param->value + 1;
-        $param->save();
+        Param::incrementNumber('QUOTE_NO_CURRENT');
     }
 
     use CanMakeInvoiceTrait;
@@ -120,8 +118,8 @@ class Project extends BaseModel {
     public function newCollection(array $models = []) {
         return new ProjectCollection($models);
     }
-    public function makeQuote(): Response {
-        return app(GenerateProjectQuoteAction::class)->execute($this);
+    public function makeQuote(bool $preview = false): Response {
+        return app(GenerateProjectQuoteAction::class)->execute($this, $preview);
     }
 
     // ######################
@@ -377,6 +375,9 @@ class Project extends BaseModel {
     }
     public function isInWarranty(): bool {
         return $this->warranty_until?->isFuture() ?? false;
+    }
+    public function isTrackable(): bool {
+        return $this->state->progress < ProjectState::Finished || $this->isInWarranty();
     }
     public function cascadingParam(string $key, string $default): string {
         return $this->param($key)->value

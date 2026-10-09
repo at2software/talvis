@@ -20,7 +20,6 @@ use App\Models\User;
 use App\Models\UserEmployment;
 use App\Models\UserPaidTime;
 use App\Models\Vault;
-use App\Models\Vcard;
 use App\Services\DatabaseSchemaService;
 use App\Services\User\UserProjectLoadService;
 use App\Services\UserTimelineService;
@@ -31,7 +30,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 
 class UserController extends Controller {
     const ERROR_404   = 'email not found or password incorrect';
@@ -51,56 +49,7 @@ class UserController extends Controller {
             ->sortByDesc('hr_stress')->values();
     }
     public function store(StoreUserRequest $request) {
-        $validated = $request->validated();
-
-        $firstName  = $validated['first_name'] ?? '';
-        $familyName = $validated['family_name'] ?? '';
-
-        if (! $firstName && ! $familyName && ($validated['name'] ?? null)) {
-            $parts      = explode(' ', $validated['name'], 2);
-            $firstName  = $parts[0];
-            $familyName = $parts[1] ?? '';
-        }
-
-        $fullName = trim($firstName.' '.$familyName) ?: $validated['name'];
-
-        $vcard = new Vcard;
-        $vcard->setProperty('FN', $fullName);
-        $vcard->setProperty('N', [$familyName, $firstName, '', '', ''], ['charset' => 'utf-8']);
-        $vcard->setProperty('EMAIL', $validated['email'], ['type' => 'work']);
-
-        $user = User::create([
-            'name'      => $fullName,
-            'email'     => $validated['email'],
-            'password'  => Hash::make($validated['password']),
-            'api_token' => Str::random(60),
-            'vcard'     => $vcard->toVCardString(false),
-        ]);
-
-        if (isset($validated['employment'])) {
-            $emp       = $validated['employment'];
-            $type      = $emp['type'] ?? 'Festanstellung';
-            $hpw       = (float)($emp['hpw'] ?? 40);
-            $hpd       = $hpw / 5;
-            $start     = $emp['started_at'] ?? now()->format('Y-m-d');
-            $timeBased = ['Werkstudent'];
-
-            UserEmployment::create([
-                'user_id'       => $user->id,
-                'description'   => $type,
-                'mo'            => $hpd,
-                'tu'            => $hpd,
-                'we'            => $hpd,
-                'th'            => $hpd,
-                'fr'            => $hpd,
-                'sa'            => 0,
-                'su'            => 0,
-                'is_time_based' => in_array($type, $timeBased),
-                'started_at'    => $start,
-                'is_active'     => true,
-            ]);
-        }
-        return $user;
+        return User::register($request->validated());
     }
     public function indexFoci(Request $request, User $_) {
         return $_->foci()->with('parent', 'invoiceItem')->latest('started_at')->paginate(100)->withQueryString();
@@ -246,40 +195,35 @@ class UserController extends Controller {
         if ($request->hasHeader('Authorization')) {
             $token = preg_replace('/^Bearer /is', '', $request->header('Authorization'));
             if (strlen($token) === 0) {
-                return response()->make(self::ERROR_TOKEN, 403);
+                abort(403, self::ERROR_TOKEN);
             }
-            try {
-                $user = User::where('api_token', $token)->firstOrFail();
-            } catch (Exception $ex) {
-                return response()->make(self::ERROR_TOKEN, 403);
+            $user = User::findByApiToken($token);
+            if (! $user) {
+                abort(403, self::ERROR_TOKEN);
             }
             Auth::setUser($user);
-            $user->makeVisible('api_token');
-            return $this->showEnvironment();
+            return $this->showEnvironment($token);
         } else {
             $data = json_decode($request->getContent());
             if (empty($data->email)) {
-                return response()->make('Login not set', 403);
+                abort(403, 'Login not set');
             }
             if (empty($data->password)) {
-                return response()->make('Password not set', 403);
+                abort(403, 'Password not set');
             }
             try {
                 $user = User::where('email', $data->email)->firstOrFail();
             } catch (Exception $ex) {
-                return response()->make(self::ERROR_404, 403);
+                abort(403, self::ERROR_404);
             }
             if (! Hash::check($data->password, $user->password)) {
-                return response()->make(self::ERROR_404, 403);
+                abort(403, self::ERROR_404);
             }
             Auth::setUser($user);
-            $user->api_token = Str::random(60);
-            $user->save();
-            $user->makeVisible('api_token');
-            return $this->showEnvironment();
+            return $this->showEnvironment($user->issueSessionToken());
         }
     }
-    public function showEnvironment() {
+    public function showEnvironment(?string $apiToken = null) {
         $user = Auth::user()->load('activeEmployment', ...HasParams::$WITH)->append(['role_names', 'params']);
 
         $team = User::with(['encryptions', 'activeEmployment', 'roles', ...HasParams::$WITH])
@@ -322,7 +266,11 @@ class UserController extends Controller {
             'plugins'        => $plugins,
             'enums'          => $this->getCachedEnums(),
             'roles'          => $roles,
+            'is_seed_admin'  => $user->isSeedAdmin(),
         ]);
+        if ($apiToken !== null) {
+            $object['user'] = [...$user->jsonSerialize(), 'api_token' => $apiToken];
+        }
         return $object;
     }
     public function getTables() {
@@ -345,8 +293,22 @@ class UserController extends Controller {
         if (! Auth::user()->hasRole('admin')) {
             abort(403, 'Unauthorized');
         }
+        if ($user->is(Auth::user())) {
+            return response()->json(['message' => 'You cannot delete your own account.'], 422);
+        }
+        if ($user->isLastAdmin()) {
+            return response()->json(['message' => 'The last administrator cannot be deleted. Assign the admin role to another user first.'], 422);
+        }
+        if ($user->marketingProspects()->exists()) {
+            return response()->json(['message' => 'The user still owns marketing prospects. Reassign them to another user first.'], 409);
+        }
         $user->delete();
         return response()->noContent();
+    }
+    public function revokeToken() {
+        $user = Auth::user();
+        $user->tokens()->delete();
+        return ['api_token' => $user->issueApiToken()];
     }
     public function resetPassword(Request $request, User $user) {
         $request->validate([
@@ -356,14 +318,14 @@ class UserController extends Controller {
         $user->save();
         return response()->noContent();
     }
-    public function storeEmployment(StoreEmploymentRequest $request) {
-        return UserEmployment::create((array)$this->getBody());
+    public function storeEmployment(StoreEmploymentRequest $request, User $_) {
+        return $_->employments()->create($request->validated());
     }
     public function updateEmployment(Request $request, User $_, UserEmployment $id) {
         return $id->applyAndSave($request);
     }
     public function deleteEmployment(User $_, UserEmployment $id) {
-        return $id->delete();
+        return response()->json($id->delete());
     }
     public function enumClass($string) {
         return substr($string, strrpos($string, '\\') + 1);
@@ -402,6 +364,10 @@ class UserController extends Controller {
         return $this->userProjectLoadService->build($_);
     }
     public function indexDailyWorkload(Request $request, User $_) {
+        $request->validate([
+            'start' => 'sometimes|date',
+            'end'   => 'sometimes|date',
+        ]);
         $startDate = $request->has('start')
             ? Carbon::parse($request->get('start'))->startOfDay()
             : now()->startOfDay();

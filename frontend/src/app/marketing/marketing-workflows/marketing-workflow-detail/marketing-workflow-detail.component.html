@@ -155,7 +155,7 @@
     </div>
     <div class="offcanvas-footer border-top p-3">
         <div class="d-flex gap-2 justify-content-end">
-            <button type="button" class="btn btn-dark" (click)="resetActivityForm()" i18n="@@i18n.common.cancel">cancel</button>
+            <button type="button" class="btn" (click)="resetActivityForm()" i18n="@@i18n.common.cancel">cancel</button>
             <button type="button" class="btn btn-primary" (click)="createActivity()" [disabled]="!newActivity.name || newActivity.day_offset === undefined">
                 @if (editingActivity) {
                     <span i18n="@@i18n.marketing.update_activity">update activity</span>

@@ -1,7 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, TemplateRef, computed, effect, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { map } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { ToolbarComponent } from '@app/app/toolbar/toolbar.component';
@@ -10,22 +9,12 @@ import { NgbDateAdapter, NgbDatepickerModule, NgbModal } from '@ng-bootstrap/ng-
 import { SaldoChartComponent } from '@shards/saldo-chart/saldo-chart.component';
 import { dayjs } from '@constants/date/dates';
 import { NgbDateCarbonAdapter } from '@directives/ngb-date.adapter';
-import { Cash } from '@models/cash/cash.model';
 import { CashService } from '@models/cash/cash.service';
 import { modelListResource } from '@models/http/model-resource';
 import { GlobalService } from '@models/global.service';
 import { MoneyPipe } from '@pipes/money.pipe';
 import { HotkeyDirective } from '@directives/hotkey.directive';
 import { StackedTableDirective } from '@directives/stacked-table.directive';
-
-const withRunningBalance = (entries: Cash[]): Cash[] => {
-    let balance = 0;
-    entries.reverse().forEach((_) => {
-        _.var.current = balance;
-        balance += _.value;
-    });
-    return entries.reverse();
-};
 
 @Component({
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -46,12 +35,22 @@ export class InvoicesCashRegisterDetailComponent {
 
     readonly #entries = modelListResource(
         () => this.id() || undefined,
-        (id) => this.#cashService.indexEntries(id).pipe(map(withRunningBalance)),
+        (id) => this.#cashService.indexEntries(id),
     );
     entries = this.#entries.value;
 
-    min = computed(() => this.entries().reduce((m, e) => Math.min(m, e.var.current + e.value), 0));
-    max = computed(() => this.entries().reduce((m, e) => Math.max(m, e.var.current + e.value), 0));
+    balanceBefore = computed(() => {
+        const result = new Map<string, number>();
+        let balance = 0;
+        for (const e of [...this.entries()].reverse()) {
+            e.snapshot();
+            result.set(e.id, balance);
+            balance += e.value;
+        }
+        return result;
+    });
+    min = computed(() => this.entries().reduce((m, e) => Math.min(m, this.balanceBefore().get(e.id)! + e.value), 0));
+    max = computed(() => this.entries().reduce((m, e) => Math.max(m, this.balanceBefore().get(e.id)! + e.value), 0));
     currencySymbol = computed(() => this.#global.currencySymbol() ?? '€');
 
     modalData = signal({

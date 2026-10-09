@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Services\ZugferdInvoiceBuilder;
+use App\Support\Letterhead;
 use Barryvdh\DomPDF\Facade\Pdf;
 use horstoeko\zugferd\codelists\ZugferdInvoiceType;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -12,39 +13,8 @@ use SimpleSoftwareIO\QrCode\Facades\QrCode;
 class Document extends BaseModel {
     use HasFactory;
 
-    public static function getPdfTemplate($title = '', $omit = [], ?string $footerContext = null) {
-        $template = file_get_contents(public_path('pdf/template.html'));
-        $template = str_replace('[documentTitle]', $title, $template);
-        $template = str_replace('[footerContext]', $footerContext ?? $title, $template);
-
-        $name     = Company::myName();
-        $email    = Param::get('ME_EMAIL')->value ?? '';
-        $phone    = Param::get('ME_PHONE')->value ?? '';
-        $fax      = Param::get('ME_FAX')->value ?? '';
-        $iban     = Param::get('ME_IBAN')->value ?? '';
-        $bic      = Param::get('ME_BIC')->value ?? '';
-        $swift    = Param::get('ME_SWIFT')->value ?? '';
-        $vatId    = Param::get('ME_VAT_ID')->value ?? '';
-        $hregNo   = Param::get('ME_HREG_NO')->value ?? '';
-        $hregName = Param::get('ME_HREG_NAME')->value ?? '';
-        $owners   = Param::get('ME_COMPANY_OWNERS')->value ?? '';
-
-        $me       = Company::me();
-        $street   = $me?->vcard?->getFirstAttr('ADR', [])['STREET'] ?? '';
-        $postcode = $me?->vcard?->getFirstAttr('ADR', [])['POSTALCODE'] ?? '';
-        $city     = $me?->vcard?->getFirstAttr('ADR', [])['LOCALITY'] ?? '';
-        $country  = $me?->vcard?->getFirstAttr('ADR', [])['COUNTRY'] ?? '';
-
-        $senderLine = implode(' | ', array_filter([$name, "$street", "$postcode $city", $country]));
-        $template   = str_replace('[senderAddress]', $senderLine, $template);
-        $template   = str_replace('[city]', $city, $template);
-
-        $companyHeader = '<table><tr>';
-        $companyHeader .= '<td>Contact:<br />Web: '.($me?->vcard?->getFirstValue('URL') ?? '').'<br />Mail: '.$email.'<br />Fon: '.$phone.'<br />Fax: '.$fax.'<br /></td>';
-        $companyHeader .= '<td>'.($hregNo ? 'Reg-No: '.$hregNo.'<br />'.$hregName.'<br />' : '').'Company owners: '.$owners.'<br />VAT-ID: '.$vatId.'</td>';
-        $companyHeader .= '<td>IBAN: '.$iban.'<br />SWIFT: '.$swift.'<br />BIC: '.$bic.'</td>';
-        $companyHeader .= '</tr></table>';
-        $template = str_replace('[companyHeader]', $companyHeader, $template);
+    public static function getPdfTemplate($title = '', $omit = [], ?string $footerContext = null, string $lang = 'de', ?string $html = null, ?string $css = null) {
+        $template = str_replace(['[documentTitle]', '[footerContext]'], [$title, $footerContext ?? $title], Letterhead::render($html, $css, $lang));
 
         if (! empty($omit)) {
             $dom = new \DOMDocument;
@@ -139,7 +109,7 @@ class Document extends BaseModel {
         return $replaces;
     }
     public static function renderPdf(string $template): string {
-        $template = self::dropWhiteText($template);
+        $template = preg_replace_callback('/<body\b.*$/is', fn ($_) => self::dropWhiteText($_[0]), $template);
         $pdf      = Pdf::loadHTML($template);
         $output   = $pdf->output();
 

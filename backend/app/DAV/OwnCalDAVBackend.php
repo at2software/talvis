@@ -2,11 +2,9 @@
 
 namespace App\DAV;
 
-use App\Enums\VacationState;
-use App\Models\CalendarEntry;
-use App\Models\Contact;
 use App\Models\User;
-use App\Models\Vacation;
+use App\Services\CompanyCalendar;
+use App\Support\Calendar\CalendarEvent;
 use Carbon\Carbon;
 use Sabre\CalDAV;
 use Sabre\CalDAV\Backend\AbstractBackend;
@@ -83,66 +81,6 @@ class OwnCalDAVBackend extends AbstractBackend {
         return $calendars;
     }
 
-    private function getBirthdayFromVCard($vcard) {
-        if (preg_match('/BDAY:(\d{4}-\d{2}-\d{2})/', $vcard, $matches)) {
-            $birthday = $matches[1];
-            if ($birthday === '1970-01-01') {
-                return null;
-            }
-            return $birthday;
-        }
-        return null;
-    }
-    private function makeEtag($id, $updatedAt): string {
-        $stamp = $updatedAt ? $updatedAt->getTimestamp() : 0;
-        return '"'.$id.'-'.$stamp.'"';
-    }
-    private function getCalendarDataFromVcard($name, $vcard, $uid, $updatedAt = null) {
-        $birthday = $this->getBirthdayFromVCard($vcard);
-        if ($birthday === null) {
-            return null;
-        }
-        $dtstamp = $updatedAt ? gmdate('Ymd\THis\Z', $updatedAt->getTimestamp()) : gmdate('Ymd\THis\Z');
-        return "BEGIN:VCALENDAR\r\n".
-               "VERSION:2.0\r\n".
-               "BEGIN:VEVENT\r\n".
-               'UID:'.$uid."\r\n".
-               'DTSTAMP:'.$dtstamp."\r\n".
-               'DTSTART;VALUE=DATE:'.date('Ymd', strtotime($birthday))."\r\n".
-               'SUMMARY:Birthday of '.$name."\r\n".
-               "RRULE:FREQ=YEARLY\r\n".
-               "END:VEVENT\r\n".
-               "END:VCALENDAR\r\n";
-    }
-    private function getCalendarDataFromVacation($vacation, $isSick = false) {
-        $firstDay = Carbon::parse($vacation->started_at)->format('Ymd');
-        if (empty($vacation->ended_at)) {
-            $duration = ceil(abs($vacation->amount) / 8);
-            $lastDay  = Carbon::parse($vacation->started_at)->addDays($duration - 1)->format('Ymd');
-        } else {
-            $lastDay = Carbon::parse($vacation->ended_at)->addDay()->format('Ymd');
-        }
-        if (empty($lastDay)) {
-            return '';
-        }
-        $timestamp = $lastDay == $firstDay ? 'DTSTART;VALUE=DATE:'.$firstDay."\r\n" : 'DTSTART:'.$firstDay."\r\n";
-        if ($firstDay != $lastDay) {
-            $timestamp .= 'DTEND:'.$lastDay."\r\n";
-        }
-
-        $vacationType = $isSick ? 'Sickday' : 'Vacation';
-        $dtstamp      = $vacation->updated_at ? gmdate('Ymd\THis\Z', $vacation->updated_at->getTimestamp()) : gmdate('Ymd\THis\Z');
-        return "BEGIN:VCALENDAR\r\n".
-                "VERSION:2.0\r\n".
-                "BEGIN:VEVENT\r\n".
-                'UID:vacation-'.$vacation->id.'@nexus'."\r\n".
-                'DTSTAMP:'.$dtstamp."\r\n".
-                $timestamp.
-                'SUMMARY:'.$vacationType.' of '.$vacation->user->name."\r\n".
-                "END:VEVENT\r\n".
-                "END:VCALENDAR\r\n";
-    }
-
     /**
      * Returns all calendar objects within a calendar.
      *
@@ -182,105 +120,22 @@ class OwnCalDAVBackend extends AbstractBackend {
         if (! is_array($calendarId)) {
             throw new \InvalidArgumentException('The value passed to $calendarId is expected to be an array with a calendarId and an instanceId');
         }
-        [$calendarId, $instanceId] = $calendarId;
-
-        $result = [];
-        if ($calendarId == 0) {
-            foreach (User::whereHasBirthday()->get() as $user) {
-                $calendarData = $this->getCalendarDataFromVcard($user->name, $user->vcard, 'birthday-user-'.$user->id.'@nexus', $user->updated_at);
-                if ($calendarData === null) {
-                    continue;
-                }
-                $result[] = [
-                    'id'           => $user->id,
-                    'uri'          => 'user_'.strval($user->id),
-                    'lastmodified' => null,
-                    'etag'         => $this->makeEtag($user->id, $user->updated_at),
-                    'size'         => strlen($calendarData),
-                    'calendardata' => $calendarData,
-                    'component'    => 'vevent',
-                ];
-            }
-            foreach (Contact::whereHasBirthday()->get() as $contact) {
-                $calendarData = $this->getCalendarDataFromVcard($contact->name, $contact->vcard, 'birthday-contact-'.$contact->id.'@nexus', $contact->updated_at);
-                if ($calendarData === null) {
-                    continue;
-                }
-                $result[] = [
-                    'id'           => $contact->id,
-                    'uri'          => 'contact_'.strval($contact->id),
-                    'lastmodified' => null,
-                    'etag'         => $this->makeEtag($contact->id, $contact->updated_at),
-                    'size'         => strlen($calendarData),
-                    'calendardata' => $calendarData,
-                    'component'    => 'vevent',
-                ];
-            }
-            $vacations = Vacation::with(['grant', 'user'])
-                ->whereIn('state', [VacationState::Approved, VacationState::Sick])
-                ->where('amount', '<=', '0')
-                ->get();
-            foreach ($vacations as $vacation) {
-                $isSick = false;
-                if ($vacation->state == VacationState::Sick) {
-                    if ($vacation->ended_at < Carbon::tomorrow()) {
-                        continue;
-                    }
-                    $isSick = true;
-                }
-                if ($start != null && $vacation->started_at < $start && $vacation->ended_at < $start) {
-                    continue;
-                }
-                if ($end != null && $vacation->started_at > $end && $vacation->ended_at > $end) {
-                    continue;
-                }
-                $calendarData = $this->getCalendarDataFromVacation($vacation, $isSick);
-                $result[]     = [
-                    'id'           => $vacation->id,
-                    'uri'          => 'vacation_'.strval($vacation->id),
-                    'lastmodified' => null,
-                    'etag'         => $this->makeEtag($vacation->id, $vacation->updated_at),
-                    'size'         => strlen($calendarData),
-                    'calendardata' => $calendarData,
-                    'component'    => 'vevent',
-                ];
-            }
-            foreach (CalendarEntry::cursor() as $calendarEntry) {
-                $vcalendar = $calendarEntry->vcalendar;
-                // preg_match('/DTSTART:(\d{8}T\d{6}Z)/', $vcalendar, $startMatches);
-                // preg_match('/DTEND:(\d{8}T\d{6}Z)/', $vcalendar, $endMatches);
-                // $startDateTime = isset($startMatches[1]) ? $startMatches[1] : null;
-                // $endDateTime = isset($endMatches[1]) ? $endMatches[1] : null;
-                // $startEvent = $startDateTime ? Carbon::createFromFormat('Ymd\THis\Z', $startDateTime, 'UTC') : null;
-                // $endEvent = $endDateTime ? Carbon::createFromFormat('Ymd\THis\Z', $endDateTime, 'UTC') : null;
-                // if($startEvent != null){
-                //     if($start != null && $startEvent < $start){
-                //         continue;
-                //     }
-                //     if($end != null && $startEvent > $end){
-                //         continue;
-                //     }
-                // }
-                // if($endEvent != null){
-                //     if($start != null && $endEvent < $start){
-                //         continue;
-                //     }
-                //     if($end != null && $endEvent > $end){
-                //         continue;
-                //     }
-                // }
-                $result[] = [
-                    'id'           => $calendarEntry->id,
-                    'uri'          => 'calendarEntry_'.strval($calendarEntry->id),
-                    'lastmodified' => null,
-                    'etag'         => $this->makeEtag($calendarEntry->id, $calendarEntry->updated_at),
-                    'size'         => strlen($vcalendar),
-                    'calendardata' => $vcalendar,
-                    'component'    => 'vevent',
-                ];
-            }
+        if ($calendarId[0] != 0) {
+            return [];
         }
-        return $result;
+        return array_map(self::toObject(...), app(CompanyCalendar::class)->events($start, $end));
+    }
+    private static function toObject(CalendarEvent $event): array {
+        $calendarData = $event->toICal();
+        return [
+            'id'           => $event->objectId,
+            'uri'          => $event->objectId,
+            'lastmodified' => $event->updatedAt?->getTimestamp(),
+            'etag'         => $event->etag(),
+            'size'         => strlen($calendarData),
+            'calendardata' => $calendarData,
+            'component'    => 'vevent',
+        ];
     }
 
     /**
@@ -303,89 +158,8 @@ class OwnCalDAVBackend extends AbstractBackend {
         if (! is_array($calendarId)) {
             throw new \InvalidArgumentException('The value passed to $calendarId is expected to be an array with a calendarId and an instanceId');
         }
-        [$calendarId, $instanceId] = $calendarId;
-        [$prefix, $id]             = explode('_', $objectUri);
-
-        if ($calendarId == 0) {
-            if ($prefix == 'user') {
-                $user = User::find($id);
-                if (empty($user)) {
-                    return [];
-                }
-                $calendardata = $this->getCalendarDataFromVcard($user->name, $user->vcard, 'birthday-user-'.$user->id.'@nexus', $user->updated_at);
-                if ($calendardata === null) {
-                    return [];
-                }
-                return [
-                    'id'           => $user->id,
-                    'uri'          => $objectUri,
-                    'lastmodified' => null,
-                    'etag'         => $this->makeEtag($user->id, $user->updated_at),
-                    'size'         => strlen($calendardata),
-                    'calendardata' => $calendardata,
-                    'component'    => 'vevent',
-                ];
-            }
-            if ($prefix == 'contact') {
-                $contact = Contact::find($id);
-                if (empty($contact)) {
-                    return [];
-                }
-                $calendardata = $this->getCalendarDataFromVcard($contact->name, $contact->vcard, 'birthday-contact-'.$contact->id.'@nexus', $contact->updated_at);
-                if ($calendardata === null) {
-                    return [];
-                }
-                return [
-                    'id'           => $contact->id,
-                    'uri'          => $objectUri,
-                    'lastmodified' => null,
-                    'etag'         => $this->makeEtag($contact->id, $contact->updated_at),
-                    'size'         => strlen($calendardata),
-                    'calendardata' => $calendardata,
-                    'component'    => 'vevent',
-                ];
-            }
-            if ($prefix == 'vacation') {
-                $vacation = Vacation::find($id);
-                if (empty($vacation)) {
-                    return [];
-                }
-                $isSick = false;
-                if ($vacation->state == VacationState::Sick) {
-                    if ($vacation->ended_at < Carbon::tomorrow()) {
-                        return [];
-                    }
-                    $isSick = true;
-                }
-                $calendardata = $this->getCalendarDataFromVacation($vacation, $isSick);
-                return [
-                    'id'           => $vacation->id,
-                    'uri'          => $objectUri,
-                    'lastmodified' => null,
-                    'etag'         => $this->makeEtag($vacation->id, $vacation->updated_at),
-                    'size'         => strlen($calendardata),
-                    'calendardata' => $calendardata,
-                    'component'    => 'vevent',
-                ];
-            }
-            if ($prefix == 'calendarEntry') {
-                $calendarEntry = CalendarEntry::find($id);
-                if (empty($calendarEntry)) {
-                    return [];
-                }
-                $calendardata = $calendarEntry->vcalendar;
-                return [
-                    'id'           => $calendarEntry->id,
-                    'uri'          => $objectUri,
-                    'lastmodified' => null,
-                    'etag'         => $this->makeEtag($calendarEntry->id, $calendarEntry->updated_at),
-                    'size'         => strlen($calendardata),
-                    'calendardata' => $calendardata,
-                    'component'    => 'vevent',
-                ];
-            }
-        }
-        return [];
+        $event = $calendarId[0] == 0 ? app(CompanyCalendar::class)->event($objectUri) : null;
+        return $event ? self::toObject($event) : [];
     }
 
     /**

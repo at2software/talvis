@@ -5,4 +5,18 @@
     &.is_editing app-header .edit {
         display: inherit;
     }
+    &.is_editing .dashboard-col {
+        min-height: 12rem;
+        border: 2px dashed var(--bs-border-color);
+        border-radius: var(--bs-border-radius);
+        padding-top: calc(var(--bs-gutter-x) * .5);
+    }
+    .drop-hint {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 10rem;
+        color: var(--bs-secondary-color);
+        text-align: center;
+    }
 }

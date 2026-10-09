@@ -65,7 +65,7 @@
   justify-content: center;
   min-width: 80px;
   padding: 0.25rem 0.75rem;
-  border-radius: 4px;
+  border-radius: var(--bs-border-radius);
   font-size: 0.75rem;
   font-weight: 600;
   text-transform: lowercase;
@@ -190,7 +190,7 @@
     padding: 0.125rem 0.75rem;
     background: var(--bs-warning);
     color: var(--bs-dark);
-    border-radius: 4px;
+    border-radius: var(--bs-border-radius);
     font-size: 0.7rem;
     font-weight: 700;
     text-transform: uppercase;
@@ -211,7 +211,7 @@
 code {
   background: var(--bs-card-cap-bg);
   padding: 0.125rem 0.375rem;
-  border-radius: 3px;
+  border-radius: var(--bs-border-radius);
   color: #ce9178;
 }
 

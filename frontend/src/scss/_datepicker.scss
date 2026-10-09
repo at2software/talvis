@@ -14,26 +14,23 @@
         width: 650px !important;
     }
     .off { background-color: inherit !important; }
-    //.today { color: var(--color-complement-0) !important;}
     .calendar-table { background-color: colors.$bg-card !important; border: none !important; }
-    
+
     .active { background-color: inherit !important; color: colors.$primary !important; }
     .in-range, .start-date:not(.off) { background-color: color.adjust(colors.$primary, $lightness: -10%) !important; }
 
-    .buttons {  
+    .buttons {
         clear: both;
         .btn { background-color: color.adjust(colors.$primary, $lightness: -10%) !important;}
         .btn-default { background-color: transparent !important;}
         svg { display: none; }
-        
+
         .buttons_input {
             display: flex;
             gap: .25rem;
             float: right;
         }
     }
-
-    .calendar-table { border: 1px black solid;}
 }
 ngb-datepicker {
     .btn:not(.btn-fancy) { color: var(--color-primary-0) !important;}

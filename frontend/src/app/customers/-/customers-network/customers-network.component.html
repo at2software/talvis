@@ -5,7 +5,7 @@
     <spinner></spinner>
 } @else {
     @if (_connections.length === 0) {
-        <empty-state class="chart" i18n-title="@@i18n.customers.networkEmpty" title="no customer network yet">
+        <empty-state [card]="true" class="chart" i18n-title="@@i18n.customers.networkEmpty" title="no customer network yet">
             <p class="text-muted small" i18n="@@i18n.customers.networkEmptyBody">This view visualises the network between companies. Add network connections in each customer's network tab to see who knows whom.</p>
         </empty-state>
     }

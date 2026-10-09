@@ -155,7 +155,7 @@ export class MattermostPlugin extends ChatPluginInstance {
                             is_mini: isSystemMessage,
                             reactions: reactions.length ? reactions : undefined,
                             attachments: attachments.length ? attachments : undefined,
-                            var: { source: 'MattermostPlugin', ...(resolvedUser ? {} : { nicon: 'mattermost' }) },
+                            var: { source: 'mattermost', ...(resolvedUser ? {} : { nicon: 'mattermost' }) },
                         };
 
                         if (resolvedUser) {

@@ -20,7 +20,7 @@ class MilestoneRequest extends FormRequest {
             'state'                    => 'integer|nullable',
             'position'                 => 'integer|nullable',
             'workload_hours'           => 'numeric|min:0|nullable',
-            'ext_issue_plugin_link_id' => 'integer|exists:plugin_links,id|nullable',
+            'ext_issue_plugin_link_id' => 'integer|exists:plugin_links,id,deleted_at,NULL|nullable',
             'ext_issue_id'             => 'string|max:255|nullable',
         ];
 
@@ -28,8 +28,8 @@ class MilestoneRequest extends FormRequest {
             $rules += [
                 'comments'   => 'string|nullable',
                 'user_id'    => 'integer|exists:users,id|nullable',
-                'project_id' => 'integer|exists:projects,id|nullable',
-                'depends_on' => 'nullable|integer|exists:milestones,id',
+                'project_id' => 'integer|exists:projects,id,deleted_at,NULL|nullable',
+                'depends_on' => 'nullable|integer|exists:milestones,id,deleted_at,NULL',
             ];
         }
 

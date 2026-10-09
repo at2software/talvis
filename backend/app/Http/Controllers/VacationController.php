@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Enums\VacationState;
+use App\Enums\WebhookEvent;
+use App\Flow\ApprovalService;
+use App\Flow\Models\Approval;
 use App\Http\Requests\Vacation\ApproveRequest;
 use App\Http\Requests\Vacation\StoreGrantRequest;
 use App\Http\Requests\Vacation\StoreManualRequest;
@@ -13,7 +16,9 @@ use App\Models\Holiday;
 use App\Models\User;
 use App\Models\Vacation;
 use App\Models\VacationGrant;
+use App\Models\WebhookEndpoint;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 use Mail;
 use Storage;
 
@@ -75,16 +80,17 @@ class VacationController extends Controller {
     }
     public function destroy(Vacation $vacation) {
         if ($vacation->grant->user_id != request()->user()->id && $vacation->state !== VacationState::Open) {
-            return response('cannot delete already approved requests', 400);
+            abort(400, 'cannot delete already approved requests');
         }
         $vacation->delete();
+        return response()->noContent();
     }
     public function showGrant(VacationGrant $grant) {
         return $grant->load('vacations');
     }
     public function destroyGrant(VacationGrant $grant) {
         if ($grant->vacations()->where('state', VacationState::Approved)->exists()) {
-            return response('cannot delete grant with approved vacations', 400);
+            abort(400, 'cannot delete grant with approved vacations');
         }
         $sickNotes = $grant->vacations()->where('state', VacationState::Sick);
         if ($sickNotes->exists()) {
@@ -93,11 +99,12 @@ class VacationController extends Controller {
                 ->latest()
                 ->first();
             if (! $latestGrant) {
-                return response('cannot delete: sick notes exist but no other grant to reassign them to', 400);
+                abort(400, 'cannot delete: sick notes exist but no other grant to reassign them to');
             }
             $sickNotes->update(['vacation_grant_id' => $latestGrant->id]);
         }
         $grant->delete();
+        return response()->noContent();
     }
     public function show(Vacation $vacation) {
         return $vacation->load('user', 'grant', 'approved_by');
@@ -111,13 +118,25 @@ class VacationController extends Controller {
         $vacation->update(['state' => VacationState::Cancelled]);
         return $vacation;
     }
-    public function approve(ApproveRequest $request, Vacation $vacation) {
-        $data                     = $this->getBody();
-        $vacation->state          = $data->state;
-        $vacation->approved_by_id = request()->user()->id;
-        $vacation->approved_at    = now();
-        $vacation->save();
+    public function approve(ApproveRequest $request, Vacation $vacation, ApprovalService $approvals) {
+        $data  = $this->getBody();
+        $state = VacationState::from((int)$data->state);
+        DB::transaction(function () use ($approvals, $vacation, $state, $data, $request) {
+            if ($state !== VacationState::Cancelled) {
+                $approval = Approval::pendingFor($vacation) ?? $approvals->request($vacation, 'hr', null);
+                $state === VacationState::Approved
+                    ? $approvals->approve($approval, $request->user(), @$data->reason)
+                    : $approvals->reject($approval, $request->user(), @$data->reason);
+            }
+            $vacation->state          = $data->state;
+            $vacation->approved_by_id = $request->user()->id;
+            $vacation->approved_at    = now();
+            $vacation->save();
+        });
         Mail::to($vacation->user->email)->send(new VacationMail($vacation, $vacation->state, @$data->reason, request()->user()));
+        if ($state === VacationState::Approved) {
+            WebhookEndpoint::dispatch(WebhookEvent::VacationApproved, $vacation->toWebhookPayload());
+        }
         return $vacation;
     }
     public function acknowledge(Vacation $_) {
@@ -129,16 +148,15 @@ class VacationController extends Controller {
         return $_;
     }
     public function store(StoreVacationRequest $request) {
-        $payload                                          = request()->all();
-        isset($payload['comment']) || $payload['comment'] = '';
-        $v                                                = Vacation::create($payload);
-        return $v;
+        $payload            = $request->validated();
+        $payload['comment'] ??= '';
+        return Vacation::create($payload);
     }
     public function storeSickNote(StoreSickNoteRequest $request) {
         $userId = $request->validated('user_id') ?? $request->user()->id;
 
         if ($userId != request()->user()->id && ! request()->user()->hasAnyRole(['admin', 'hr'])) {
-            return response('not permitted', 403);
+            abort(403, 'not permitted');
         }
 
         $grant = VacationGrant::where('user_id', $userId)->where('expires_at', '>', now())->latest()->first();
@@ -153,7 +171,7 @@ class VacationController extends Controller {
             ]);
             return $v;
         } else {
-            return response('no grant found', 404);
+            abort(404, 'no grant found');
         }
     }
     public function storeGrant(StoreGrantRequest $request) {

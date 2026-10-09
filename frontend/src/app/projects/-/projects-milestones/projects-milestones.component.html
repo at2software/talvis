@@ -115,7 +115,7 @@
             <div class="card mb-3 card-accent-info">
                 <div class="card-header hstack gap-2">
                     <span i18n="@@i18n.milestones.noWorkload">milestones without workload</span>
-                    <span class="badge bg-info text-dark ms-auto">{{ milestoneData.noWorkload.length }}</span>
+                    <span class="badge bg-info ms-auto">{{ milestoneData.noWorkload.length }}</span>
                 </div>
                 @if (!milestoneData.noWorkload.length) {
                     <div class="card-body d-flex align-items-center justify-content-center text-muted py-4"
@@ -151,7 +151,7 @@
             <div class="card mb-3 card-accent-primary">
                 <div class="card-header hstack gap-2">
                     <span i18n="@@i18n.milestones.workloadDeviation">workload deviation</span>
-                    <span class="badge bg-primary ms-auto">{{ milestoneData.projects.length }}</span>
+                    <span class="badge bg-dark ms-auto">{{ milestoneData.projects.length }}</span>
                 </div>
                 @if (milestoneData.projects.length === 0) {
                     <div class="card-body d-flex align-items-center justify-content-center text-muted py-4"

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, afterNextRender, computed, effect, ElementRef, inject, input, signal, viewChildren } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, DestroyRef, computed, effect, ElementRef, inject, input, signal, untracked, viewChildren } from '@angular/core';
 import { VcardRow } from '@models/vcard/vcard-row';
 import { Company } from '@models/company/company.model';
 import { CompanyContact } from '@models/company/company-contact.model';
@@ -8,13 +8,14 @@ import { VcardClass } from '@models/vcard/vcard-class.model';
 import { User } from '@models/user/user.model';
 import { MarketingProspect } from '@models/marketing/marketing-prospect.model';
 import { NominatimHttpWrapper } from '@models/http/http.nominatim';
-import { SOCIAL_MEDIA_TYPES } from './socialmediatypes';
+import { SOCIAL_MEDIA_TYPES } from '@constants/socialmediatypes';
 import { NgTemplateOutlet } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Nx } from '@app/nx/nx.directive';
 import { NgbDropdownModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { SpinnerComponent } from '@shards/spinner/spinner.component';
 import * as Leaflet from 'leaflet';
+import { addDarkTileLayer } from '@constants/map-tiles';
 import { DB_COUNTRIES } from '../db.countries';
 import { CountryEntryDto } from '@models/_core/api-response';
 import { PlzDbService } from '../plz-db.service';
@@ -52,6 +53,8 @@ export class VcardComponent {
     #plzDb = inject(PlzDbService);
     #mapInstances = new Map<HTMLElement, Leaflet.Map>();
     #destroyRef = inject(DestroyRef);
+    #cdr = inject(ChangeDetectorRef);
+    #card = computed(() => this.object().card());
     src_string: string = '';
 
     constructor() {
@@ -62,45 +65,46 @@ export class VcardComponent {
             shadowUrl: 'assets/leaflet/marker-shadow.png',
         });
         effect(() => {
-            this.object();
-            this.resetDirty();
-            this.ensureI18nFields();
-            setTimeout(() => this.initializeMaps(), 0);
+            this.#card();
+            untracked(() => {
+                this.resetDirty();
+                this.ensureI18nFields();
+            });
+        });
+        effect(() => {
+            this.mapContainers();
+            untracked(() => this.initializeMaps());
         });
 
         this.#destroyRef.onDestroy(() => {
             this.#mapInstances.forEach((map) => map.remove());
             this.#mapInstances.clear();
         });
-
-        afterNextRender(() => this.initializeMaps());
     }
 
     smSrcForKey = (key?: string) => (key && this.smtypekeys.includes(key) ? this.smtypes[key] : undefined);
 
     resetDirty = (): void => {
+        const card = this.object().card();
+        if (!card) return;
+        this.src_string = card.toString();
+        this.#lookupGeo();
+    };
+    #hasLocation = (adr: VcardRow): boolean => [2, 3, 5].some((i) => !!adr.vals[i]?.trim());
+    #lookupGeo = (): void => {
         const obj = this.object();
-        const card = obj.card();
-        if (card) {
-            this.src_string = card.toString();
-            const geo = card.get('GEO').first();
-            if (!geo) {
-                this.#nominatim.init().then(() => {
-                    const adr = card.get('ADR').first() ?? undefined;
-                    if (adr) {
-                        if (!this.singleGeoLoad) {
-                            this.singleGeoLoad = true;
-                            this.#nominatim.lookup(adr).subscribe((info) => {
-                                if (Array.isArray(info) && info.length) {
-                                    card.rows.push(new VcardRow('GEO', [], [info[0].lat, info[0].lon]));
-                                    this.updateVcard(true);
-                                }
-                            });
-                        }
-                    }
-                });
-            }
-        }
+        const adr = obj.card()?.first('ADR');
+        if (this.singleGeoLoad || !adr || obj.card()?.first('GEO') || !this.#hasLocation(adr)) return;
+        this.singleGeoLoad = true;
+        this.#nominatim.init().then(() =>
+            this.#nominatim.lookup(adr).subscribe((info) => {
+                const card = obj.card();
+                if (obj !== this.object() || !card || card.first('GEO') || !Array.isArray(info) || !info.length) return;
+                card.rows.push(new VcardRow('GEO', [], [info[0].lat, info[0].lon]));
+                this.#cdr.markForCheck();
+                this.updateVcard(true);
+            }),
+        );
     };
     useName = (event: Event & { ctrlKey?: boolean }) => {
         if (event.ctrlKey) {
@@ -115,7 +119,8 @@ export class VcardComponent {
     };
     removeRow = (_: VcardRow) => {
         const card = this.object().card();
-        card?.rows.splice(card.rows.indexOf(_), 1);
+        const index = card?.rows.indexOf(_) ?? -1;
+        if (index !== -1) card!.rows.splice(index, 1);
     };
     addRow = (s: string) => {
         const row = VcardRow.fromString(s);
@@ -129,12 +134,20 @@ export class VcardComponent {
             card.rows.push(VcardRow.fromString('TEL;TYPE=cell,emergency:')!);
         }
     };
-    updateVcard = (silent = false) => {
-        if (!this.isDirty()) return;
+    updateVcard = (silent = false, then?: () => void) => {
         const obj = this.object();
-        obj.update({ vcard: obj.card()?.toString() }, silent).subscribe(() => {
-            this.src_string = obj.card()?.toString() ?? '';
-        });
+        const card = obj.card();
+        if (!card || !this.isDirty()) return;
+        this.src_string = card.toString();
+        obj.saveCard(silent).subscribe(() => then?.());
+    };
+    onAdrFocusOut = (event: FocusEvent, row: VcardRow) => {
+        if ((event.currentTarget as HTMLElement).contains(event.relatedTarget as Node | null)) return;
+        const card = this.object().card();
+        if (!card || this.src_string.split('\n').includes(row.toString())) return;
+        card.rows = card.rows.filter((_) => _.key !== 'GEO');
+        this.singleGeoLoad = false;
+        this.updateVcard(false, () => this.#lookupGeo());
     };
     importImprint = () => {
         const obj = this.object();
@@ -235,6 +248,7 @@ export class VcardComponent {
         const res = await this.#plzDb.lookup(o.vals[5]);
         if (res.length > 0) {
             o.vals[3] = res[0].ort;
+            this.#cdr.markForCheck();
         }
     }
     needsWarning(o: VcardRow): string | undefined {
@@ -298,20 +312,7 @@ export class VcardComponent {
             scrollWheelZoom: true,
         }).setView([lat, lon], 15);
 
-        const isDarkMode = document.body.classList.contains('dark') || document.body.classList.contains('dark-theme') || window.matchMedia('(prefers-color-scheme: dark)').matches;
-
-        const tileLayer = isDarkMode
-            ? Leaflet.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/dark_all/{z}/{x}/{y}.png', {
-                  attribution: '© <a href="https://carto.com/">CARTO</a> © <a href="https://www.openstreetmap.org/">OpenStreetMap</a>',
-                  subdomains: 'abcd',
-                  maxZoom: 19,
-              })
-            : Leaflet.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                  attribution: '© <a href="https://www.openstreetmap.org/">OpenStreetMap</a>',
-                  maxZoom: 19,
-              });
-
-        tileLayer.addTo(map);
+        addDarkTileLayer(map);
 
         const pinIcon = Leaflet.divIcon({
             className: 'map-pin',
@@ -324,6 +325,7 @@ export class VcardComponent {
         this.#mapInstances.set(container, map);
 
         setTimeout(() => {
+            if (this.#mapInstances.get(container) !== map) return;
             map.invalidateSize();
             map.setView([lat, lon], 15);
         }, 200);
@@ -338,78 +340,6 @@ export class VcardComponent {
         if (!rows) return null;
         const geoRows = rows.filter((row) => row.key === 'GEO');
         return geoRows.length > 0 ? geoRows[0] : null;
-    }
-
-    isRealCompany(): boolean {
-        if (!this.isCompany()) return false;
-        const company = this.object() as Company;
-        const companyName = company.getName();
-        return (!!companyName) && (companyName.includes('GmbH') || companyName.includes('AG') || companyName.includes('KG') || companyName.includes('OHG'));
-    }
-
-    isCompanyWithCommercialRegister(): boolean {
-        if (!this.isCompany()) return false;
-        const company = this.object() as Company;
-        const companyName = company.getName();
-        return (!!companyName) && (companyName.includes('GmbH') || companyName.includes('AG') || companyName.includes('KG') || companyName.includes('OHG'));
-    }
-
-    getCommercialRegister(): string {
-        if (this.isCompany()) {
-            return (this.object() as Company).commercial_register || '';
-        }
-        return '';
-    }
-
-    setCommercialRegister(value: string) {
-        if (this.isCompany()) {
-            (this.object() as Company).commercial_register = value;
-        }
-    }
-
-    getRegisterType(): string {
-        const register = this.getCommercialRegister();
-        if (register && register.includes('|')) {
-            return register.split('|')[0] || '';
-        }
-        return '';
-    }
-
-    getRegisterNumber(): string {
-        const register = this.getCommercialRegister();
-        if (register && register.includes('|')) {
-            const parts = register.split('|');
-            return parts[1] || '';
-        }
-        return '';
-    }
-
-    getRegisterCourt(): string {
-        const register = this.getCommercialRegister();
-        if (register && register.includes('|')) {
-            const parts = register.split('|');
-            return parts[2] || '';
-        }
-        return '';
-    }
-
-    setRegisterType = (value: string) => this.#updateRegisterParts(value, this.getRegisterNumber(), this.getRegisterCourt());
-    setRegisterNumber = (value: string) => this.#updateRegisterParts(this.getRegisterType(), value, this.getRegisterCourt());
-    setRegisterCourt = (value: string) => this.#updateRegisterParts(this.getRegisterType(), this.getRegisterNumber(), value);
-
-    #updateRegisterParts(type: string, number: string, court: string) {
-        if (this.isCompany()) {
-            const parts = [type, number, court].filter((part) => part && part.trim());
-            const register = parts.length > 0 ? parts.join('|') : '';
-            (this.object() as Company).commercial_register = register;
-        }
-    }
-
-    updateCommercialRegister() {
-        if (this.isCompany()) {
-            const company = this.object() as Company;
-            company.update({ commercial_register: company.commercial_register }).subscribe();
-        }
     }
 
     ensureI18nFields() {

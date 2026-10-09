@@ -14,6 +14,9 @@ scrollbar {
 }
 
 .widget-preview {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.25rem;
     cursor: move;
     user-select: none;
     opacity: 0.9;
@@ -23,6 +26,11 @@ scrollbar {
     &:hover {
         opacity: 1;
     }
+}
+
+.widget-preview-body {
+    flex: 1 1 auto;
+    min-width: 0;
 }
 ::ng-deep { 
     .widget-used .card-header {

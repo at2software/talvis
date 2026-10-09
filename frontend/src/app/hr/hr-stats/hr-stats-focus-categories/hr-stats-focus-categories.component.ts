@@ -5,7 +5,7 @@ import { StatsService } from '@models/stats.service';
 import { GlobalService } from '@models/global.service';
 import { NgxEchartsModule } from 'ngx-echarts';
 import { Color } from '@constants/Color';
-import { EChartsSimpleOptions, ECHARTS_DEFAULT_TOOLTIP_OPTIONS, ECHARTS_DONUT_ITEM_STYLE } from '@charts/echarts-presets';
+import { EChartsSimpleOptions, ECHARTS_DEFAULT_TOOLTIP_OPTIONS, ECHARTS_DONUT_ITEM_STYLE, ECHARTS_DONUT_SERIES } from '@charts/echarts-presets';
 import { EmptyStateComponent } from '@shards/empty-state/empty-state.component';
 import { Dictionary } from '@constants/constants';
 import type { EChartsOption, SeriesOption } from 'echarts';
@@ -45,7 +45,7 @@ export class HrStatsFocusCategoriesComponent {
     #categoryColors = {
         orga: '#333333',
         unpaid: Color.fromVar('red').toHexString(),
-        time_based_customers: Color.fromVar('teal').toHexString(),
+        time_based_customers: Color.fromVar('cyan').toHexString(),
         time_based_projects: Color.fromVar('cyan').toHexString(),
         budget_projects: Color.fromVar('blue').toHexString(),
         internal_projects: Color.fromVar('purple').toHexString(),
@@ -219,7 +219,7 @@ export class HrStatsFocusCategoriesComponent {
             series: [
                 {
                     type: 'pie',
-                    radius: ['52%', '80%'], // Donut shape (30% thinner)
+                    radius: ECHARTS_DONUT_SERIES.radius,
                     center: ['50%', '50%'],
                     data: pieData,
                     label: {
@@ -233,7 +233,7 @@ export class HrStatsFocusCategoriesComponent {
                 },
                 {
                     type: 'pie',
-                    radius: ['86%', '89%'], // Thin ring outside main donut (3px thick)
+                    radius: ['72%', '75%'], // Thin ring outside main donut (3px thick)
                     center: ['50%', '50%'],
                     data: [
                         { value: 100 - profitablePercentage, itemStyle: { color: 'transparent' } }, // First part transparent

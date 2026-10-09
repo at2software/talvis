@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 509.1 509.1">
+  <defs>
+    <style>
+      .st0 {
+        fill: #fff;
+      }
+    </style>
+  </defs>
+  <path class="st0" d="M339.5,41.8V11.8h-170v30H59.6v455.5h389.9V41.8h-110ZM199.5,41.8h110v50h-110v-50ZM419.5,467.3H89.6V71.8h80v50h170v-50h80v395.5Z"/>
+  <polygon class="st0" points="226.6 365.9 141.4 280.7 162.6 259.5 226.6 323.5 346.5 203.6 367.7 224.8 226.6 365.9"/>
+</svg>

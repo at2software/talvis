@@ -18,7 +18,7 @@
             @if (toast.actions?.length) {
             <div class="hstack gap-1 mt-2">
                 @for (action of toast.actions; track action.label) {
-                <button class="btn btn-sm btn-outline-primary" (click)="action.onClick()">{{action.label}}</button>
+                <button class="btn btn-sm btn-plain text-primary" (click)="action.onClick()">{{action.label}}</button>
                 }
             </div>
             }

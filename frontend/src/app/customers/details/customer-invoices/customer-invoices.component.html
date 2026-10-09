@@ -4,13 +4,15 @@
             <customer-payment-details></customer-payment-details>
         </div>
         <div class="col-md-9">
-            <div class="card mb-3">
+            <div class="card mb-3" [class.d-none]="!table._invoices().length">
                 <div class="card-header" i18n="@@i18n.common.invoices">invoices</div>
                 <invoices-table [observer]="observer()" #table></invoices-table>
             </div>
-            @if (table._invoices().length === 0) {
+            @if (!table._invoices().length) {
                 <div class="card">
-                    <empty-state [card]="false" class="invoices" title="no invoices yet..." i18n-title="@@i18n.invoices.noInvoicesYet"></empty-state>
+                    <empty-state [card]="false" class="invoices" title="no invoices yet..." i18n-title="@@i18n.invoices.noInvoicesYet">
+                        <a class="btn btn-plain text-primary" routerLink="../../billing"><i>add</i><span i18n="@@i18n.customers.prepareInvoice">prepare invoice</span></a>
+                    </empty-state>
                 </div>
             }
         </div>

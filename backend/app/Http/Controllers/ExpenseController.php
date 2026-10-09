@@ -24,6 +24,7 @@ class ExpenseController extends Controller {
     }
     public function destroy(Expense $expense) {
         $expense->delete();
+        return response()->noContent();
     }
     public function bankTransactions() {
         if (! Vault::isActive('FINTS')) {

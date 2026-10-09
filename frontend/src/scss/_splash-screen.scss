@@ -1,26 +1,21 @@
-@use 'colors';
-
 #splash-screen {
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: colors.$bg-card;
+    inset: 0;
+    background: var(--tv-surface-card);
     display: flex;
     justify-content: center;
     align-items: center;
     z-index: 9999;
-}
 
-#splash-screen.fade-out {
-    opacity: 0;
-    transition: opacity 0.5s ease;
-    pointer-events: none;
-}
+    &.fade-out {
+        opacity: 0;
+        transition: opacity 0.5s ease;
+        pointer-events: none;
+    }
 
-#splash-screen img {
-    width: 100px;
-    filter: drop-shadow(0 -2px 2px #fff2) drop-shadow(0 2px 2px #0009);
-    border-radius: 20px;
+    img {
+        width: 100px;
+        filter: drop-shadow(0 -2px 2px #fff2) drop-shadow(0 2px 2px #0009);
+        border-radius: var(--bs-border-radius);
+    }
 }

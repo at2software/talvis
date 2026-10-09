@@ -44,7 +44,7 @@ export class CustomerInitiativesComponent {
     });
 
     statusIcon = (status: string) => status === 'overdue' ? 'warning' : 'schedule';
-    statusClass = (status: string) => status === 'overdue' ? 'text-danger' : 'text-primary';
+    statusClass = (status: string) => status === 'overdue' ? 'text-danger' : 'text-muted';
 
     onActionResolved = () => this.activityRows.update((rows) => rows.filter((a) => a.status === 'pending' || a.status === 'overdue'));
 

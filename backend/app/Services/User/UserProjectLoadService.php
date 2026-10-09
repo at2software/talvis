@@ -9,7 +9,7 @@ use App\Models\User;
 use App\Services\UserTimelineService;
 
 class UserProjectLoadService {
-    public function build(User $user): mixed {
+    public function build(User $user): array {
         $meId      = Param::get('ME_ID')->value;
         $meCompany = Company::find($meId);
 
@@ -19,7 +19,15 @@ class UserProjectLoadService {
 
         $ae = $user->activeEmployment;
         if (! $ae) {
-            return response('user has no active employment', 404);
+            return [
+                'user'             => $user,
+                'hpw'              => 0,
+                'remaining_hpw'    => 0,
+                'subscriptions'    => [],
+                'weekly_ids'       => [],
+                'timeline_planned' => [],
+                'timeline_leaves'  => [],
+            ];
         }
 
         $activeSubscriptions = collect([...$user->activeProjects()->with('company')->get(), ...$user->assigned_companies()->get()])->unique();

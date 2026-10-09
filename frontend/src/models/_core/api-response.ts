@@ -674,6 +674,164 @@ export interface WorkloadDataDto {
     unconfigured_milestones: Milestone[];
 }
 
+export interface FlowTransitionDto {
+    id: number;
+    from_state_id: number;
+    to_state_id: number;
+    required_role: string | null;
+}
+
+export interface FlowApprovalContextDto {
+    options?: string[];
+    recommendation?: string;
+    requested_by_machine?: string;
+    job_id?: number;
+}
+
+export interface FlowApprovalVoteDto {
+    id: number;
+    user_id: number;
+    decision: 'approved' | 'rejected';
+    reason: string | null;
+    selected_option: string | null;
+    created_at: string;
+}
+
+export interface FlowRiskClassDto {
+    id: number;
+    key: string;
+    name: string;
+    level: number;
+    release_required_approvals: number;
+}
+
+export interface FlowPhaseRefDto {
+    id: number;
+    key: string;
+    name: string;
+    sort: number;
+}
+
+export interface FlowGateStatusDto {
+    key: string;
+    name: string;
+    required_role: string;
+    required_approvals: number;
+    condition: Dictionary | null;
+    applies: boolean;
+    satisfied: boolean;
+    pending_approval_id: number | null;
+}
+
+export interface FlowPhaseStatusDto {
+    project_id: number;
+    state_id: number | null;
+    phase: FlowPhaseRefDto | null;
+    next_phase: FlowPhaseRefDto | null;
+    risk_class: FlowRiskClassDto | null;
+    gates: FlowGateStatusDto[];
+}
+
+export interface FlowGateDto {
+    id: number;
+    key: string;
+    name: string;
+    phase_id: number;
+    required_role: string;
+    required_approvals: number | null;
+    condition: Dictionary | null;
+    sort: number;
+}
+
+export interface FlowPhaseDto {
+    id: number;
+    key: string;
+    name: string;
+    project_state_id: number;
+    sort: number;
+    gates: FlowGateDto[];
+}
+
+export interface FlowConfigurationDto {
+    phases: FlowPhaseDto[];
+    risk_classes: FlowRiskClassDto[];
+    job_types: FlowJobTypeDto[];
+}
+
+export interface FlowAdminTransitionDto extends FlowTransitionDto {
+    active: boolean;
+}
+
+export interface FlowAdminStateDto {
+    id: number;
+    name: string;
+    color: string;
+    progress: number;
+}
+
+export interface FlowAdminConfigDto {
+    states: FlowAdminStateDto[];
+    transitions: FlowAdminTransitionDto[];
+    phases: FlowPhaseDto[];
+    risk_classes: FlowRiskClassDto[];
+    job_types: (FlowJobTypeDto & { jobs_count: number })[];
+    roles: string[];
+}
+
+export type FlowConfigResource = 'transitions' | 'phases' | 'gates' | 'risk-classes' | 'job-types';
+
+export interface FlowAuditEntryDto {
+    id: number;
+    created_at: string;
+    action: string;
+    actor_type: 'user' | 'machine';
+    actor_id: number | null;
+    actor_name: string | null;
+    subject_type: string;
+    subject_id: number;
+    subject_label: string;
+    payload: Dictionary | null;
+}
+
+export interface FlowAuditPageDto {
+    data: FlowAuditEntryDto[];
+    current_page: number;
+    last_page: number;
+    total: number;
+}
+
+export interface FlowJobFieldDto {
+    key: string;
+    type: 'string' | 'text' | 'url' | 'list' | 'object';
+    label?: string;
+    description?: string;
+    required?: boolean;
+}
+
+export interface FlowJobTypeDto {
+    id: number;
+    key: string;
+    name: string;
+    description: string | null;
+    input_schema: { fields: FlowJobFieldDto[] };
+    release_gate_key: string | null;
+}
+
+export interface FlowJobApprovalDto {
+    id: number;
+    gate_key: string | null;
+    decision: 'pending' | 'approved' | 'rejected';
+    selected_option: string | null;
+    reason: string | null;
+    decided_at: string | null;
+}
+
+export interface FlowJobEventDto {
+    action: string;
+    actor_type: 'user' | 'machine';
+    created_at: string;
+}
+
 export interface UserEnvironmentDto {
     user: Dictionary;
     team: Dictionary<TeamMemberDataDto>;
@@ -689,6 +847,7 @@ export interface UserEnvironmentDto {
     roles?: unknown[];
     eu_countries: string[];
     encryptions: Encryption[];
+    is_seed_admin?: boolean;
 }
 
 export interface UptimeCheckDayDto {
@@ -792,4 +951,16 @@ export interface QuoteDescriptionDto {
     key: string;
     html: string;
     disabled: boolean;
+}
+
+export type SepaIssue = 'no_mandate' | 'mandate_date_missing' | 'iban_invalid' | 'nothing_due';
+
+export interface InvoiceSepaDto {
+    amount: number;
+    collected: boolean;
+    issues: SepaIssue[];
+}
+
+export interface CalendarFeedDto {
+    url: string;
 }

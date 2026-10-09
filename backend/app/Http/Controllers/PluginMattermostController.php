@@ -40,31 +40,6 @@ class PluginMattermostController extends PluginChatController {
             }
         }
     }
-    public static function buildWebhookProps(string $username = 'TALVIS', ?string $icon = null): array {
-        $icon = $icon ?? config('app.url').'/icons/project.jpg';
-        return [
-            'from_webhook'         => 'true',
-            'webhook_display_name' => $username,
-            'override_username'    => $username,
-            'override_icon_url'    => $icon,
-        ];
-    }
-    protected function getPluginLinkUrl($id) {
-        return $this->env('ENDPOINT').'projects/'.$id;
-    }
-    public function getOrCreateChannel($project, string $purpose, string $header, ?string $postfix = null) {
-        return $this->getChannelIdFor($project, $postfix) ?? $this->createChannelFor($project, $purpose, $header, $postfix);
-    }
-    public function getChannelIdFor(Project $project, ?string $postfix = null): ?string {
-        $existing = $project->pluginLinks()->where('type', static::getKey())->value('url');
-        if ($existing) {
-            $parts = explode('/', $existing);
-            if (count($parts) > 4) {
-                return $parts[count($parts) - 1];   // last element is the channel ID here
-            }
-        }
-        return parent::getChannelIdFor($project, $postfix);
-    }
     protected function getToken(bool $forced = false): string {
         $token = Cache::get('api_token');
         if (! $token || $forced) {
@@ -100,18 +75,19 @@ class PluginMattermostController extends PluginChatController {
         return $this->_createOrUpdatePost($cacheId, $channelId, $message, $props, 'id');
     }
     public function createPost(string $channel_id, string $message, $props = null) {
-        $payload = ['channel_id' => $channel_id, 'message' => $message];
-        if ($props) {
-            $payload['props'] = $props;
-        } else {
-            $payload['props'] = [
-                'from_webhook'         => 'true',
-                'webhook_display_name' => 'TALVIS',
-                'override_username'    => 'TALVIS',
-                'override_icon_url'    => config('app.url').'/assets/modules/logo.svg',
-            ];
-        }
-        return $this->post('posts', $payload);
+        return $this->post('posts', ['channel_id' => $channel_id, 'message' => $message, 'props' => $this->toMattermostProps($props ?? [])]);
+    }
+    private function toMattermostProps(array $props): array {
+        $username = $props['username'] ?? 'TALVIS';
+        return array_filter([
+            'from_webhook'         => 'true',
+            'webhook_display_name' => $username,
+            'override_username'    => $username,
+            'override_icon_url'    => $props['icon_url'] ?? config('app.url').'/assets/modules/logo.svg',
+            'nexus_type'           => $props['type'] ?? null,
+            'nexus_cache_id'       => $props['cache_id'] ?? null,
+            'attachments'          => $props['attachments'] ?? null,
+        ]);
     }
     public function createChannel(string $name, string $display_name, string $purpose, string $header): ?string {
         $payload = [
@@ -173,16 +149,13 @@ class PluginMattermostController extends PluginChatController {
         }
         return null;
     }
-    public function deletePost(string $id): void {
-        $this->delete("posts/$id");
-    }
     public function getChannelPosts(string $channelId, int $page = 0, int $perPage = 200): array {
         return $this->get("channels/$channelId/posts?page=$page&per_page=$perPage") ?? [];
     }
     public function updatePost(string $id, string $message, $props = null, ?string $channelId = null) {
         $payload = ['id' => $id, 'message' => $message];
         if ($props) {
-            $payload['props'] = $props;
+            $payload['props'] = $this->toMattermostProps($props);
         }
         return $this->put('posts/'.$id, $payload);
     }

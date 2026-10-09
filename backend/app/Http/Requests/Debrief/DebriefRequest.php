@@ -12,7 +12,7 @@ class DebriefRequest extends FormRequest {
         $isStore = $this->isMethod('POST');
 
         $rules = [
-            'debriefed_user_id' => 'nullable|exists:users,id',
+            'debriefed_user_id' => 'nullable|integer|exists:users,id',
         ];
 
         if (! $isStore) {

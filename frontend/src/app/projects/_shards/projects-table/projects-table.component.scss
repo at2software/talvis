@@ -1,6 +1,6 @@
 .table { width: 100%; }
 .cdk-cell { min-width:auto; text-overflow: ellipsis; overflow: hidden; white-space: nowrap;}
-.cdk-column-icons { width: 40px !important; }
+.cdk-column-icons { width: 56px !important; text-overflow: clip; }
 .cdk-column-createdAt { min-width: 100px; width: min-content; }
 .cdk-column-companyIcon { min-width: 32px; width: min-content; overflow: visible; }
 .cdk-column-assignees { min-width: 100px; width: min-content; overflow: visible; }

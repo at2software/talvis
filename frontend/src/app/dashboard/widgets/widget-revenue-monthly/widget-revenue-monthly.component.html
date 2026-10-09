@@ -1,8 +1,10 @@
 <div class="card card-chart mb-3">
     <div class="card-header gap-2">
         <n>invoice</n>
-        <span class="flex-fill text-truncate">{{ getI18n() }}</span>
-        <div class="chart-title">{{ data()?.revenue | mshort }}</div>
+        <span class="flex-fill text-truncate" i18n="@@i18n.widget-revenue-monthly">monthly revenue</span>
+        @if (data()) {
+            <div class="chart-title">{{ data().revenue | mshort }}</div>
+        }
     </div>
 
     @if (data()) {

@@ -21,7 +21,7 @@ import { AutosaveDirective } from "@directives/autosave.directive";
 import { NgxEchartsDirective } from 'ngx-echarts';
 import type { EChartsOption } from 'echarts';
 import { Color } from '@constants/Color';
-import { ECHARTS_DONUT_ITEM_STYLE } from '@charts/echarts-presets';
+import { ECHARTS_DONUT_ITEM_STYLE, ECHARTS_DONUT_SERIES } from '@charts/echarts-presets';
 import { GlobalService } from '@models/global.service';
 import { NgbDropdownModule, NgbModal, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { StackedTableDirective } from '@directives/stacked-table.directive';
@@ -130,7 +130,7 @@ export class InvoicesBankBalanceComponent {
             tooltip: { trigger: 'item', formatter: (p) => { const pt = p as { name: string; value: number }; return `${pt.name}: ${pt.value}`; } },
             series: [{
                 type: 'pie',
-                radius: ['55%', '85%'],
+                radius: ECHARTS_DONUT_SERIES.radius,
                 data: [
                     { name: 'matched', value: matchedCount, itemStyle: { color: primaryColor, ...ECHARTS_DONUT_ITEM_STYLE } },
                     { name: 'unmatched', value: unmatchedCount, itemStyle: { color: dangerColor, ...ECHARTS_DONUT_ITEM_STYLE } },

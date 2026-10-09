@@ -1,0 +1,60 @@
+@let _item = trackedItem();
+@let _mode = mode();
+@let _company = trackedCompany();
+@if (_item?.class === 'InvoiceItem') {
+    <div class="hstack gap-2 justify-content-end small">
+        @if (_item.isRegularItem()) {
+            @if (_mode === 'quote' && _item.predictions.length) {
+                <span class="text-muted" ngbTooltip="{{ _item.predictions.length }} predictions">&#8960; {{ avg() }} {{ _item.unit_name }}</span>
+                <span [style.color]="col()">{{ diff() | percent }}</span>
+            }
+            @if (_mode === 'support') {
+                <span class="text-muted" [ngbTooltip]="(_item.billed_foci_count ?? 0) + ' foci entries'"><i>schedule</i> {{ _item.billed_foci_count ?? 0 }}</span>
+                <span class="text-muted" [ngbTooltip]="'invoiced: ' + _item.qty + 'h / tracked: ' + (_item.billed_foci_sum_duration ?? 0) + 'h'">{{ _item.qty | number: '1.2-2' }}h / {{ _item.billed_foci_sum_duration ?? 0 | number: '1.2-2' }}h</span>
+                <span style="font-weight: bold" [style.color]="fociColor()">{{ fociPercentage() | percent }}</span>
+            }
+            @if (_item.discount > 0) {
+                <i class="text-muted" ngbTooltip="discount: {{ _item.discount | number: '1.2-2' : 'de' }} %">local_offer</i>
+            }
+            @if (!_item.willAddToSum()) {
+                <i class="text-warning" i18n-ngbTooltip="@@i18n.invoice.notAppliedInSum" ngbTooltip="not applied in sum">money_off</i>
+            }
+            @if (_mode !== 'quote') {
+                @if (_item.hasVatDespiteId(_company)) {
+                    <i class="text-danger" i18n-ngbTooltip="@@i18n.invoice.hasVatDespiteId" ngbTooltip="item has VAT but company has VAT ID">warning</i>
+                } @else if (_item.hasVatExceptionWithoutId(_company)) {
+                    <i class="text-danger" i18n-ngbTooltip="@@i18n.invoice.hasVatExceptionWithoutId" ngbTooltip="item has no VAT but company has no VAT ID">warning</i>
+                } @else if (_item.hasVatWhenNotNeeded(_company)) {
+                    <i class="text-danger" i18n-ngbTooltip="@@i18n.invoice.hasVatWhenNotNeeded" ngbTooltip="item has VAT but company does not need VAT">warning</i>
+                }
+            }
+            @if (_item.invoice_id) {
+                <n class="text-info" i18n-ngbTooltip="@@i18n.invoice.alreadyInvoiced" ngbTooltip="already invoiced">invoice</n>
+            }
+            @if (extIssue(); as ei) {
+                <a [href]="ei.href" ngbTooltip="#{{ _item.ext_issue_id }}" target="_blank" class="text-primary text-nowrap" (click)="$event.stopPropagation()">
+                    @if (ei.state === 1) {
+                        <n class="text-success">{{ ei.icon }}</n>
+                    } @else if (ei.state === 0) {
+                        <n class="text-cyan">{{ ei.icon }}</n>
+                    }
+                </a>
+            }
+            @if (_item.product_source) {
+                <a class="text-decoration-none" tabindex="-1" smartLink="/products/{{ _item.product_source.id }}" ngbTooltip="{{ _item.product_source.name }}">
+                    <i class="cursor-pointer" [style.color]="_item.product_source.rootGroup.color">link</i>
+                </a>
+            }
+        } @else {
+            @if (text()) {
+                <span class="text-muted text-truncate" style="max-width: 12rem" [ngbTooltip]="text()">{{ text() }}</span>
+            }
+            @if (!_item.willAddToSum() && (_mode === 'invoice' || _item.type < 30)) {
+                <i class="text-warning" i18n-ngbTooltip="@@i18n.invoice.notAppliedInSum" ngbTooltip="not applied in sum">money_off</i>
+            }
+            @if (_mode === 'quote' && _item.type >= 30) {
+                <i class="{{ _item.getRepeatColor() }}" i18n-ngbTooltip="@@i18n.invoice.repeatingItem" ngbTooltip="repeating item">replay</i>
+            }
+        }
+    </div>
+}

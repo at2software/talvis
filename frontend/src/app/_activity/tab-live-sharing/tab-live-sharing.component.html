@@ -2,7 +2,7 @@
 @let _sharingEnabled = sharingEnabled();
 @let _activeSharings = activeSharings();
 
-<activity-tab icon="share_location" [hidden]="!_wsConnected || !featureEnabled()" [componentType]="componentType">
+<activity-tab icon="share_location" i18n-label="@@i18n.liveSharing.title" label="live sharing" [hidden]="!_wsConnected || !featureEnabled()" [componentType]="componentType">
     <div class="container">
         <scrollbar>
             <div class="p-3">

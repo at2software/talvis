@@ -4,7 +4,7 @@
     <div class="payment-plan-view">
         <div class="d-flex align-items-center mb-1 gap-1">
             @if (!_isFallback) {
-                <small class="text-primary flex-fill" i18n="@@i18n.payment.customPlan">custom payment plan</small>
+                <small class="flex-fill" i18n="@@i18n.payment.customPlan">custom payment plan</small>
             } @else if (activeTierLabel()) {
                 <small class="text-muted flex-fill">
                     <span i18n="@@i18n.payment.defaultPlanTier">default payment plan ({{ activeTierLabel() }} projects)</span>
@@ -29,9 +29,9 @@
                 @for (step of _steps; track $index) {
                     <div class="d-flex align-items-center gap-2 py-1 border-bottom border-secondary border-opacity-25">
                         @if (step.amount !== undefined) {
-                            <span class="badge bg-primary" style="min-width: 42px">{{ step.amount | number: '1.2-2' }} {{ currency() }}</span>
+                            <span class="badge bg-dark" style="min-width: 42px">{{ step.amount | number: '1.2-2' }} {{ currency() }}</span>
                         } @else {
-                            <span class="badge bg-primary" style="min-width: 42px">{{ step.percentage }}%</span>
+                            <span class="badge bg-dark" style="min-width: 42px">{{ step.percentage }}%</span>
                         }
                         <span class="text-muted small flex-fill">{{ getTriggerLabel(step) }}</span>
                     </div>
@@ -80,7 +80,7 @@
         }
 
         <div class="d-flex align-items-center gap-3 mb-2">
-            <button class="btn btn-sm btn-outline-primary" (click)="addStep()"><i>add</i> <span i18n="@@i18n.payment.addStep">add step</span></button>
+            <button class="btn btn-sm btn-plain text-primary" (click)="addStep()"><i>add</i> <span i18n="@@i18n.payment.addStep">add step</span></button>
             @if (!isBalanced) {
                 @if (hasAmountSteps) {
                     <small class="text-warning"

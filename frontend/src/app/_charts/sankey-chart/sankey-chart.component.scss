@@ -9,7 +9,7 @@
     background: rgba(0, 0, 0, 0.85);
     color: #fff;
     padding: 4px 10px;
-    border-radius: 4px;
+    border-radius: var(--bs-border-radius);
     font-size: 0.75rem;
     pointer-events: none;
     z-index: 9999;

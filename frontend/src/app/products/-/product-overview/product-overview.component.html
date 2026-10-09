@@ -10,7 +10,8 @@
 @if (hasGroups() === false) {
     <div class="card mb-3">
         <empty-state [card]="false" class="products" i18n-title="@@i18n.products.noProductGroupsYet" title="No product groups yet">
-            <p i18n="@@i18n.products.emptyStateDescription">Build your product catalog from the ground up. Use the <strong>create_new_folder</strong> icon in the left panel to add your first product group, then populate it with products. A well-structured catalog is the foundation of every great business.</p>
+            <p i18n="@@i18n.products.emptyStateDescription">Build your product catalog from the ground up. Add your first product group, then populate it with products. A well-structured catalog is the foundation of every great business.</p>
+            <button type="button" class="btn btn-primary" (click)="onGroupCreate()"><i>create_new_folder</i><span i18n="@@i18n.products.createProductGroup">create product group</span></button>
         </empty-state>
     </div>
 }

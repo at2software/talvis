@@ -7,6 +7,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Facades\DB;
 
 class Param extends BaseModel {
     protected $fillable = ['key', 'value', 'has_history', 'type'];
@@ -26,8 +27,9 @@ class Param extends BaseModel {
     private $pending_updated_at  = null;
     private $has_pending_changes = false;
     private static $paramCache   = [];
-    private $cached_value;
-    public $parent_path = null;
+    private $cached_value        = null;
+    private $has_cached_value    = false;
+    public $parent_path          = null;
 
     public function latestFor($poly): ?HasOne {
         $subQuery = $this->type::select('id')->where($poly)->latest()->limit(1);
@@ -96,7 +98,7 @@ class Param extends BaseModel {
         $clone           = clone $this;
         $clone->model    = $model;
         $clone->fallback = $fallback;
-        unset($clone->cached_value);
+        $clone->forgetCachedValue();
         return $clone;
     }
     public function getFallbackAttribute() {
@@ -110,28 +112,25 @@ class Param extends BaseModel {
                     return $this->pending_value;
                 }
 
-                if (! isset($this->cached_value)) {
+                if (! $this->has_cached_value) {
                     // Use ->first()?->value to ensure Eloquent casts (like I18n) are applied
                     $d = $this->getRel()?->first()?->value ?? null;
                     if (empty($d) && $this->fallback) {
                         $this->fallen_back = true;
                         $d                 = $this->dataForPoly(self::nullPoly())?->first()?->value ?? null;
-
-                        if ($d === null) {
-                            $keys = config('params');
-                            if (! empty($keys[$this->key]['default'])) {
-                                $d = $keys[$this->key]['default'];
-                            }
-                        }
                     }
-                    $this->cached_value = $d;
+                    if ($d === null && ($this->fallback || ! $this->model)) {
+                        $d = self::defaultFor($this->key);
+                    }
+                    $this->cached_value     = $d;
+                    $this->has_cached_value = true;
                 }
                 return $this->cached_value;
             },
             set: function ($value) {
                 $this->pending_value       = $value;
                 $this->has_pending_changes = true;
-                unset($this->cached_value); // Clear cache when value changes
+                $this->forgetCachedValue();
             }
         );
     }
@@ -160,8 +159,17 @@ class Param extends BaseModel {
     public function history(): ?HasMany {
         return $this->getRel(true);
     }
+    public function setCreatedAt($value) {
+        $this->attributes[$this->getCreatedAtColumn()] = $this->fromDateTime($value);
+        return $this;
+    }
+    public function setUpdatedAt($value) {
+        $this->attributes[$this->getUpdatedAtColumn()] = $this->fromDateTime($value);
+        return $this;
+    }
     public function save(array $options = []): bool {
-        if ($this->has_pending_changes && $this->pending_value !== null) {
+        $writesValue = $this->has_pending_changes && $this->pending_value !== null;
+        if ($writesValue) {
             if ($this->has_history) {
                 $this->createNewWithPending();
             } else {
@@ -178,13 +186,10 @@ class Param extends BaseModel {
                     $this->createNewWithPending();
                 }
             }
-
-            $this->clearPendingChanges();
-            return true;
         }
 
-        // Only call parent::save() if we're actually modifying the Param record itself
-        return parent::save($options);
+        $this->clearPendingChanges();
+        return $writesValue || parent::save($options);
     }
     public function delete() {
         if ($this->model && $data = $this->getRel(false)?->first()) {
@@ -203,6 +208,10 @@ class Param extends BaseModel {
         $this->pending_created_at  = null;
         $this->pending_updated_at  = null;
         $this->has_pending_changes = false;
+    }
+    private function forgetCachedValue(): void {
+        $this->cached_value     = null;
+        $this->has_cached_value = false;
     }
     private function getRel($history = false) {
         $relation = $history ? 'historyDataForPoly' : 'dataForPoly';
@@ -255,10 +264,29 @@ class Param extends BaseModel {
                     NLog::warning("accessing unknown Param key `$key` without providing a type. Assuming $type with history, but you should better add to config('params') before deploying!");
                 }
             }
-            $param = Param::create(attributes: ['key' => $key, 'has_history' => $has_history, 'type' => $type]);
+            $param = Param::createOrFirst(['key' => $key], ['has_history' => $has_history, 'type' => $type]);
         }
         self::$paramCache[$key] = $param;   // save for later use
         return $param;
+    }
+    public static function put(string $key, $value): void {
+        $param        = self::get($key);
+        $param->value = $value ?? '';
+        $param->save();
+        unset(self::$paramCache[$key]);
+    }
+    public static function incrementNumber(string $key, int $by = 1): int {
+        return DB::transaction(function () use ($key, $by) {
+            $param = self::get($key);
+            self::whereKey($param->id)->lockForUpdate()->value('id');
+            $param->forgetCachedValue();
+            $param->value = (int)$param->value + $by;
+            $param->save();
+            return (int)$param->value;
+        });
+    }
+    public static function isStored(string $key): bool {
+        return (bool)self::get($key)->history()?->exists();
     }
     public static function index($poly = null): array {
         if ($poly === null) {
@@ -282,6 +310,12 @@ class Param extends BaseModel {
             foreach ($textResults as $result) {
                 $data[$result->key] = $result->value;
             }
+
+            foreach (config('params') as $key => $definition) {
+                if (! array_key_exists($key, $data) && isset($definition['default'])) {
+                    $data[$key] = $definition['type'] === FloatParam::class ? (float)$definition['default'] : $definition['default'];
+                }
+            }
         } else {
             $floatResults = FloatParam::getLatestValuesWithKeys($poly);
             foreach ($floatResults as $result) {
@@ -299,6 +333,12 @@ class Param extends BaseModel {
             }
         }
         return $data;
+    }
+    public static function isWritableBy(string $key, User $user): bool {
+        return $user->hasAnyRole(config('params')[$key]['roles'] ?? 'admin');
+    }
+    public static function defaultFor(string $key): mixed {
+        return config('params')[$key]['default'] ?? null;
     }
     public static function toDictionary($paramArray): array {
         $dictionary = [];

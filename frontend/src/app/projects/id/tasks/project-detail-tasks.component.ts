@@ -14,17 +14,21 @@ import { NComponent } from '@shards/n/n.component';
 import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { UlCompactComponent } from '@shards/ul-compact/ul-compact.component';
 import { CompactItemDirective } from '@shards/ul-compact/CompactItemDirective';
+import { EmptyStateComponent } from '@shards/empty-state/empty-state.component';
+import { RouterLink } from '@angular/router';
+import { HotkeyDirective } from '@directives/hotkey.directive';
 
 @Component({
     changeDetection: ChangeDetectionStrategy.OnPush,
     selector: 'project-detail-tasks',
     templateUrl: './project-detail-tasks.component.html',
     styleUrls: ['./project-detail-tasks.component.scss'],
-    imports: [NgTemplateOutlet, FormsModule, UlCompactComponent, CompactItemDirective, Nx, NComponent, NgbTooltipModule],
+    imports: [NgTemplateOutlet, FormsModule, UlCompactComponent, CompactItemDirective, Nx, NComponent, NgbTooltipModule, EmptyStateComponent, RouterLink, HotkeyDirective],
 })
 export class ProjectDetailTasksComponent {
     newTask!: Task;
     instances = signal<ITaskPlugin[]>([]);
+    instancesLoaded = signal(false);
 
     #parent = inject(ProjectDetailGuard);
     factory = inject(PluginInstanceFactory);
@@ -34,6 +38,7 @@ export class ProjectDetailTasksComponent {
         (instances) => forkJoin(instances.map((_) => _.indexTasks())).pipe(map((tasks) => tasks.flat())),
     );
     readonly tasks = this.#tasks.value;
+    readonly tasksLoading = this.#tasks.isLoading;
 
     constructor() {
         effect(() => {
@@ -41,6 +46,7 @@ export class ProjectDetailTasksComponent {
             untracked(() => {
                 this.#parent.object().taskPluginInstances().then((instances) => {
                     this.instances.set(instances);
+                    this.instancesLoaded.set(true);
                     this.newTask = new Task();
                     this.newTask.httpService = instances[0];
                 });

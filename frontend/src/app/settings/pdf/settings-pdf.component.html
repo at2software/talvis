@@ -2,14 +2,17 @@
     @if (dirty()) {
         <span class="badge bg-warning-subtle text-warning me-1" i18n="@@i18n.common.unsavedChanges">unsaved changes</span>
     }
-    <label class="btn btn-sm btn-outline-primary mb-0">
+    <label class="btn btn-sm btn-plain text-primary mb-0">
         <span i18n="@@i18n.settings.pdf.replaceLogo">replace logo</span>
-        <input type="file" accept="image/*" hidden (change)="onLogoSelected($event)" />
+        <input type="file" accept="image/png,image/jpeg,image/gif" hidden (change)="onLogoSelected($event)" />
     </label>
-    @if (hasOriginal()) {
-        <button class="btn btn-sm btn-outline-primary" (click)="revert()" i18n="@@i18n.settings.pdf.revert">revert to original</button>
+    @if (hasCustomLogo()) {
+        <button class="btn btn-sm btn-plain text-primary" (click)="removeLogo()" i18n="@@i18n.settings.pdf.removeLogo">remove uploaded logo</button>
     }
-    <button class="btn btn-sm btn-outline-primary" [disabled]="rendering()" (click)="renderRealPdf()">
+    @if (customized()) {
+        <button class="btn btn-sm btn-plain text-primary" (click)="revert()" i18n="@@i18n.settings.pdf.revert">reset to default template</button>
+    }
+    <button class="btn btn-sm btn-plain text-primary" [disabled]="rendering()" (click)="renderRealPdf()">
         @if (rendering()) {
             <span class="spinner-border spinner-border-sm"></span>
         }
@@ -41,6 +44,9 @@
                             <button class="nav-link" [class.active]="panelTab() === 'element'" (click)="panelTab.set('element')" i18n="@@i18n.settings.pdf.element">element</button>
                         </li>
                         <li class="nav-item">
+                            <button class="nav-link" [class.active]="panelTab() === 'placeholders'" (click)="panelTab.set('placeholders')" i18n="@@i18n.settings.pdf.placeholders">placeholders</button>
+                        </li>
+                        <li class="nav-item">
                             <button class="nav-link" [class.active]="panelTab() === 'code'" (click)="panelTab.set('code')" i18n="@@i18n.settings.pdf.code">code</button>
                         </li>
                     </ul>
@@ -50,8 +56,8 @@
                     @if (panelTab() === 'element') {
                         @if (selected(); as sel) {
                             <div class="d-flex align-items-center justify-content-between mb-3">
-                                <span class="badge bg-primary-subtle text-primary">&lt;{{ sel.tag }}&gt;</span>
-                                <button class="btn btn-sm btn-outline-danger" (click)="removeSelected()" i18n="@@i18n.common.remove">remove</button>
+                                <span class="badge bg-dark">&lt;{{ sel.tag }}&gt;</span>
+                                <button class="btn btn-sm btn-plain text-danger" (click)="removeSelected()" i18n="@@i18n.common.remove">remove</button>
                             </div>
 
                             @if (sel.text !== null) {
@@ -108,10 +114,16 @@
                         <hr />
                         <div class="form-label small text-muted" i18n="@@i18n.settings.pdf.add">add</div>
                         <div class="d-flex flex-wrap gap-2">
-                            <button class="btn btn-sm btn-outline-primary" (click)="addBlock('text')" i18n="@@i18n.settings.pdf.addText">text block</button>
-                            <button class="btn btn-sm btn-outline-primary" (click)="addBlock('divider')" i18n="@@i18n.settings.pdf.addDivider">divider</button>
-                            <button class="btn btn-sm btn-outline-primary" (click)="addBlock('spacer')" i18n="@@i18n.settings.pdf.addSpacer">spacer</button>
+                            <button class="btn btn-sm btn-plain text-primary" (click)="addBlock('text')" i18n="@@i18n.settings.pdf.addText">text block</button>
+                            <button class="btn btn-sm btn-plain text-primary" (click)="addBlock('divider')" i18n="@@i18n.settings.pdf.addDivider">divider</button>
+                            <button class="btn btn-sm btn-plain text-primary" (click)="addBlock('spacer')" i18n="@@i18n.settings.pdf.addSpacer">spacer</button>
                         </div>
+                    } @else if (panelTab() === 'placeholders') {
+                        <p class="text-muted small" i18n="@@i18n.settings.pdf.placeholdersHint">Click a placeholder to append it to the selected text element. Without a selection it is copied to the clipboard. Placeholders are replaced in the preview and in every invoice, quote, reminder and travel expense report.</p>
+                        <div class="form-label small text-muted" i18n="@@i18n.settings.pdf.senderTokens">sender, from settings › general › company information</div>
+                        <ng-container *ngTemplateOutlet="placeholderList; context: { $implicit: senderPlaceholders() }"></ng-container>
+                        <div class="form-label small text-muted mt-3" i18n="@@i18n.settings.pdf.documentTokens">document, filled per document</div>
+                        <ng-container *ngTemplateOutlet="placeholderList; context: { $implicit: documentPlaceholders() }"></ng-container>
                     } @else {
                         <div class="d-flex flex-column h-100 gap-3">
                             <div class="d-flex flex-column flex-grow-1 min-h-0">
@@ -138,12 +150,26 @@
     </div>
 }
 
+<ng-template #placeholderList let-items>
+    <div class="list-group">
+        @for (p of items; track p.token) {
+            <button type="button" class="list-group-item list-group-item-action px-2 py-1" [title]="p.value" (click)="insertPlaceholder(p.token)">
+                <code class="small">[{{ p.token }}]</code>
+                <div class="small">{{ p.label }}</div>
+                @if (p.value) {
+                    <div class="small text-muted text-truncate">{{ p.value }}</div>
+                }
+            </button>
+        }
+    </div>
+</ng-template>
+
 @if (pdfUrl(); as url) {
     <div class="pdf-overlay" role="presentation" (click)="closePdf()">
         <div class="pdf-overlay-inner" role="presentation" (click)="$event.stopPropagation()">
             <div class="d-flex align-items-center p-2 border-bottom">
                 <span class="fw-bold" i18n="@@i18n.settings.pdf.realPdf">real PDF (DomPDF)</span>
-                <button class="btn btn-sm btn-outline-primary ms-auto" (click)="closePdf()" i18n="@@i18n.common.close">close</button>
+                <button class="btn btn-sm ms-auto" (click)="closePdf()" i18n="@@i18n.common.close">close</button>
             </div>
             <iframe [src]="url" class="pdf-overlay-frame" title="rendered PDF"></iframe>
         </div>

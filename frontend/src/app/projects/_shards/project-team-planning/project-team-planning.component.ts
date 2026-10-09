@@ -19,6 +19,8 @@ import { PluginInstance } from '@models/http/plugins/plugin.instance';
 import { MantisPlugin } from '@models/http/plugins/plugin.mantis';
 import { GitLabPlugin } from '@models/http/plugins/plugin.gitlab';
 import { MattermostPlugin } from '@models/http/plugins/plugin.mattermost';
+import { SlackPlugin } from '@models/http/plugins/plugin.slack';
+import { ChatPluginInstance } from '@models/http/plugins/chat.plugin.instance';
 import { AvatarComponent } from '@shards/avatar/avatar.component';
 
 @Component({
@@ -50,7 +52,7 @@ export class ProjectTeamPlanningComponent {
         effect(() => this.assignees.set(this.trackedEntity().assignees.filter((_) => _.assignee?.class == 'User')));
 
         effect((onCleanup) => {
-            const instances = [this.mantisInstance(), this.gitInstance(), this.mattermostInstance()].filter(Boolean) as PluginInstance[];
+            const instances = [this.mantisInstance(), this.gitInstance(), ...this.chatInstances()].filter(Boolean) as PluginInstance[];
             const subs = instances.map((inst) => inst.init.subscribe(() => this.#cdr.markForCheck()));
             onCleanup(() => subs.forEach((s) => s.unsubscribe()));
         });
@@ -128,27 +130,12 @@ export class ProjectTeamPlanningComponent {
 
     mantisInstance = computed(() => this.#factory.instancesFor(this.trackedEntity(), MantisPlugin));
     gitInstance = computed(() => this.#factory.instancesFor(this.trackedEntity(), GitLabPlugin));
-    mattermostInstance = computed(() => this.#factory.instancesFor(this.trackedEntity(), MattermostPlugin));
+    chatInstances = computed(() => [MattermostPlugin, SlackPlugin].map((ctor) => this.#factory.instancesFor<ChatPluginInstance>(this.trackedEntity(), ctor)).filter((_) => !!_));
 
-    openMantisLink(event: Event) {
+    openLink(event: Event, inst: PluginInstance) {
         event.preventDefault();
         event.stopPropagation();
-        const inst = this.mantisInstance();
-        if (inst) window.open(inst.getHref(), '_blank');
-    }
-
-    openGitLink(event: Event) {
-        event.preventDefault();
-        event.stopPropagation();
-        const inst = this.gitInstance();
-        if (inst) window.open(inst.getHref(), '_blank');
-    }
-
-    openMattermostLink(event: Event) {
-        event.preventDefault();
-        event.stopPropagation();
-        const inst = this.mattermostInstance();
-        if (inst) window.open(inst.getHref(), '_blank');
+        window.open(inst.getHref(), '_blank');
     }
 
     roundHours = (value: number) => Math.round(value * 10) / 10;

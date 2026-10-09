@@ -33,13 +33,11 @@ class ApiEndpointBenchmarkTest extends TestCase {
             'Benchmark user not found. Set API_BENCHMARK_USER_ID to a valid user id before running this test.'
         );
 
-        $originalToken  = $user->api_token;
-        $benchmarkToken = 'benchmark-token-'.Str::random(40);
-        $user->forceFill(['api_token' => $benchmarkToken])->save();
+        $benchmarkToken = $user->createToken('benchmark');
 
         Auth::shouldUse('api');
         $this->actingAs($user, 'api');
-        $this->withHeaders(['Authorization' => 'Bearer '.$benchmarkToken]);
+        $this->withHeaders(['Authorization' => 'Bearer '.$benchmarkToken->plainTextToken]);
 
         try {
             $results = [];
@@ -57,7 +55,7 @@ class ApiEndpointBenchmarkTest extends TestCase {
 
             $this->assertNotEmpty($executed, 'No API endpoints were benchmarked. Adjust the filters or fixture ids.');
         } finally {
-            $user->forceFill(['api_token' => $originalToken])->save();
+            $benchmarkToken->accessToken->delete();
         }
     }
     private function benchmarkScenarios(): array {

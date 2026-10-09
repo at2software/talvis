@@ -72,7 +72,7 @@ trait HasFociTrait {
         $price    = Param::get('INVOICE_HOURLY_WAGE')->value;
         $discount = 0;
         if (! count($data->itemIds)) {
-            return response('no items selected', 400);
+            abort(400, 'no items selected');
         }
 
         $firstItem = Focus::findOrFail($data->itemIds[0]);

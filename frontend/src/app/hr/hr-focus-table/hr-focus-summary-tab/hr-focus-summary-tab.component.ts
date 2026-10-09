@@ -6,7 +6,7 @@ import { ScrollbarComponent } from '@app/app/scrollbar/scrollbar.component';
 import { AvatarComponent } from '@app/_shards/avatar/avatar.component';
 import { User } from '@models/user/user.model';
 import { tracked } from '@constants/tracked';
-import { ECHARTS_DONUT_ITEM_STYLE } from '@charts/echarts-presets';
+import { ECHARTS_DONUT_ITEM_STYLE, ECHARTS_DONUT_SERIES } from '@charts/echarts-presets';
 import { TFocusDay } from '../hr-focus-table.component';
 
 @Component({
@@ -53,10 +53,10 @@ export class HrFocusSummaryTabComponent {
             tooltip: { trigger: 'item', formatter: '{b}: {c}h ({d}%)' },
             series: [{
                 type: 'pie',
-                radius: ['52%', '75%'],
+                radius: ECHARTS_DONUT_SERIES.radius,
                 avoidLabelOverlap: false,
                 selectedMode: 'multiple',
-                selectedOffset: 8,
+                selectedOffset: 6,
                 label: { show: true, position: 'center', color: '#ccc', fontSize: 13, formatter: () => `${totalActual.toFixed(1)}h\n/ ${expected.toFixed(1)}h` },
                 emphasis: { label: { fontSize: 14 } },
                 data: [

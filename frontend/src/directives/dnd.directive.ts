@@ -4,13 +4,17 @@ import { Toast, ToastItem } from '@shards/toast/toast';
 import { forkJoin, last, Observable, tap } from 'rxjs';
 import { FileService } from '@models/file/file.service';
 
+const isFileDrag = (e: DragEvent) => !!e.dataTransfer?.types.includes('Files');
+
 @Directive({
     selector: '[dnd]',
+    host: { '[class.dnd-item-quiet]': '!dndHoverHint()' },
 })
 export class DndDirective {
     readonly dnd = input.required<string>();
     readonly dndAllowed = input<string[]>([]);
     readonly dndCategory = input<string>('');
+    readonly dndHoverHint = input<boolean>(true);
     readonly collect = input<boolean>(false);
     readonly dndUploaded = output();
     readonly dndDrop = output<File[]>();
@@ -27,10 +31,12 @@ export class DndDirective {
         el.classList.add('dnd-item');
 
         el.addEventListener('dragenter', (e: DragEvent) => {
+            if (!isFileDrag(e)) return;
             e.preventDefault();
             e.stopPropagation();
         });
         el.addEventListener('dragover', (e: DragEvent) => {
+            if (!isFileDrag(e)) return;
             e.preventDefault();
             e.stopPropagation();
             el.classList.add('dnd-item-drag');
@@ -41,6 +47,7 @@ export class DndDirective {
             el.classList.remove('dnd-item-drag');
         });
         el.addEventListener('drop', (e: DragEvent) => {
+            if (!isFileDrag(e)) return;
             e.preventDefault();
             e.stopPropagation();
             el.classList.remove('dnd-item-drag');

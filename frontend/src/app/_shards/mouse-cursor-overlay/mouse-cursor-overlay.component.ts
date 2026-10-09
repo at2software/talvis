@@ -65,7 +65,7 @@ import { InputModalService } from '@app/_modals/modal-input/modal-input.service'
                 left: 24px;
                 top: 0;
                 padding: 2px 6px;
-                border-radius: 4px;
+                border-radius: var(--bs-border-radius);
                 color: white;
                 font-size: 11px;
                 font-weight: 500;

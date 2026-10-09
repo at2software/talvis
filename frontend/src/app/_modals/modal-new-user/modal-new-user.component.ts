@@ -1,7 +1,7 @@
-import { ChangeDetectionStrategy, Component, computed, inject, Service, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { ChangeDetectionStrategy, Component, computed, inject, Service, signal, viewChild } from '@angular/core';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { HotkeyDirective } from '@directives/hotkey.directive';
+import { NewUserFormComponent } from '@shards/new-user-form/new-user-form.component';
 
 export interface NewUserData {
     name: string;
@@ -12,7 +12,7 @@ export interface NewUserData {
 @Component({
     selector: 'modal-new-user',
     templateUrl: './modal-new-user.component.html',
-    imports: [FormsModule, HotkeyDirective],
+    imports: [HotkeyDirective, NewUserFormComponent],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ModalNewUserComponent {
@@ -23,7 +23,8 @@ export class ModalNewUserComponent {
 
     #activeModal = inject(NgbActiveModal);
 
-    readonly canSubmit = computed(() => !!this.name().trim() && !!this.email().trim() && this.password().length >= 8);
+    readonly form = viewChild(NewUserFormComponent);
+    readonly canSubmit = computed(() => this.form()?.valid() ?? false);
 
     decline = () => this.#activeModal.close(undefined);
     accept = () => {

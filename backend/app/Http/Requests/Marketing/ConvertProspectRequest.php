@@ -10,7 +10,7 @@ class ConvertProspectRequest extends FormRequest {
     }
     public function rules(): array {
         return [
-            'company_id'   => 'nullable|exists:companies,id',
+            'company_id'   => 'nullable|integer|exists:companies,id,deleted_at,NULL',
             'create_new'   => 'required|boolean',
             'company_name' => 'nullable|string',
         ];

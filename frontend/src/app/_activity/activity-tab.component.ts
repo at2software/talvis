@@ -14,6 +14,7 @@ export class ActivityTabComponent {
     readonly scroll = contentChild(ScrollbarComponent);
 
     icon = input<string>();
+    label = input<string>();
     nicon = input<string>();
     hidden = model(false);
     badge = model<string | undefined>(undefined);

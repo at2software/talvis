@@ -25,6 +25,74 @@
                     </li>
                 </ul>
             </div>
+            <div class="card mb-3">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span i18n="@@i18n.profile.calendarFeed">calendar subscription (Outlook, Google)</span>
+                    <button class="btn btn-sm btn-plain text-primary" (click)="rotateCalendarFeed()" ngbTooltip="new link" i18n-ngbTooltip="@@i18n.profile.calendarFeedRotate">
+                        <i>autorenew</i>
+                    </button>
+                </div>
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        @if (calendarFeed.value()?.url; as feedUrl) {
+                            <div class="d-flex justify-content-between align-items-start gap-2">
+                                <code class="d-block small text-break">{{ feedUrl }}</code>
+                                <button class="btn btn-sm btn-plain text-primary" (click)="copyToClipboard(feedUrl)" ngbTooltip="copy to clipboard" i18n-ngbTooltip="@@i18n.common.copyToClipboard">
+                                    <i>content_copy</i>
+                                </button>
+                            </div>
+                        }
+                        <div class="text-muted small mt-1" i18n="@@i18n.profile.calendarFeedHint">The alternative for calendars outside Microsoft 365. In Outlook: Add calendar → Subscribe from web; in Google Calendar: Other calendars → From URL. Anyone with the link can read the company calendar.</div>
+                    </li>
+                </ul>
+            </div>
+            <div class="card mb-3">
+                @let _m365Address = _user?.getM365Address();
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span i18n="@@i18n.profile.microsoft365">Microsoft 365</span>
+                    @if (_m365Address) {
+                        <button class="btn btn-sm btn-plain text-danger" (click)="disconnectM365()" ngbTooltip="disconnect Microsoft 365" i18n-ngbTooltip="@@i18n.profile.m365Disconnect"><i>link_off</i></button>
+                    }
+                </div>
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        @if (_m365Address) {
+                            <div class="small" i18n="@@i18n.profile.m365LinkedWith">linked with {{ _m365Address }}</div>
+                        } @else {
+                            <button class="btn btn-sm btn-plain text-primary px-0" (click)="connectM365()"><i class="me-1">link</i><span i18n="@@i18n.profile.m365Connect">Connect Microsoft 365</span></button>
+                            <div class="text-muted small mt-1" i18n="@@i18n.profile.m365ConnectHint">Sign in with your Microsoft 365 account to switch on the features below.</div>
+                        }
+                    </li>
+                    <li class="list-group-item">
+                        @if (_user) {
+                            <input-switch-group [object]="_user" key="M365_AUTOREPLY" [(default)]="m365Autoreply" [disabled]="!_m365Address" i18n="@@i18n.profile.m365Autoreply">automatic reply in Outlook</input-switch-group>
+                        }
+                        <div class="text-muted small mt-1" i18n="@@i18n.profile.m365AutoreplyHint">Schedules your Outlook automatic reply for your next approved vacation.</div>
+                    </li>
+                    @if (_user && _m365Address && m365Autoreply()) {
+                        <li class="list-group-item">
+                            <label class="small mb-1" for="m365AutoreplyText" i18n="@@i18n.profile.m365AutoreplyText">automatic reply</label>
+                            <textarea id="m365AutoreplyText" class="form-control form-control-sm" rows="8" [value]="_user.getParam('M365_AUTOREPLY_TEXT') ?? ''" [placeholder]="autoreplyDefault" (blur)="saveAutoreply($event)"></textarea>
+                            <div class="text-muted small mt-1">{{ autoreplyHint }}</div>
+                        </li>
+                    }
+                    <li class="list-group-item">
+                        @if (_user) {
+                            <input-switch-group [object]="_user" key="M365_SYNC_CALENDAR" [disabled]="!_m365Address" i18n="@@i18n.profile.m365SyncCalendar">TALVIS calendar in Outlook</input-switch-group>
+                        }
+                        <div class="text-muted small mt-1" i18n="@@i18n.profile.m365SyncCalendarHint">Mirrors the company calendar — birthdays, absences and calendar entries — every 30 minutes into a separate read-only calendar "TALVIS" in your mailbox. Its events are shown as free. Switching off removes the calendar.</div>
+                    </li>
+                    <li class="list-group-item">
+                        @if (_user) {
+                            <input-switch-group [object]="_user" key="M365_SYNC_CONTACTS" [disabled]="!_m365Address" i18n="@@i18n.profile.m365SyncContacts">TALVIS address book in Outlook</input-switch-group>
+                        }
+                        <div class="text-muted small mt-1" i18n="@@i18n.profile.m365SyncContactsHint">Mirrors your TALVIS address book — the same contacts as via CardDAV — into a contact folder "TALVIS". Switching off removes the folder.</div>
+                    </li>
+                    <li class="list-group-item">
+                        <div class="text-muted small" i18n="@@i18n.profile.m365Hint">Requires that an admin configured the Microsoft 365 connector. Replaces tools like CalDAV Synchronizer.</div>
+                    </li>
+                </ul>
+            </div>
         </div>
         <div class="col-md-9">
             @if (_user) {

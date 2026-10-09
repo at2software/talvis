@@ -1,6 +1,6 @@
 @let _groupedItems = groupedItems();
 @let _newItems = newItems();
-<activity-tab icon="history" [componentType]="componentType">
+<activity-tab icon="history" i18n-label="@@i18n.activityTab.history" label="history" [componentType]="componentType">
     <div class="container">
         <scrollbar>
             @if (_groupedItems.length) {

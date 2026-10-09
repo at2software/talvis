@@ -47,6 +47,11 @@ export abstract class TimetrackingComponent {
     newFocusDuration = signal<number | undefined>(undefined);
     newFocusComment = signal<string>('');
 
+    logDate = signal(dayjs().format('YYYY-MM-DD'));
+    logDuration = signal<number | undefined>(undefined);
+    logComment = signal('');
+    readonly canLogTime = computed(() => this.parent.object() instanceof Project);
+
     readonly hasIssueTracker = computed(() => {
         const obj = this.parent.object();
         return obj instanceof Project && obj.hasTimeBudget() && this.#pluginFactory.getTaskInstances(obj).length > 0;
@@ -170,6 +175,21 @@ export abstract class TimetrackingComponent {
 
     onIssueSelected(task: Task) {
         this.selectedIssue.set(task);
+    }
+
+    onLogTime() {
+        const duration = Number(this.logDuration());
+        const project = this.parent.object();
+        if (!duration || !this.logDate() || !(project instanceof Project)) return;
+        const day = dayjs(this.logDate());
+        const startedAt = day.isSame(dayjs(), 'day') ? dayjs().subtract(duration, 'hour') : day.hour(9);
+        this.focusService
+            .createForProject(project, { duration, started_at: startedAt.format('YYYY-MM-DDTHH:mm:ss.SSSZ'), comment: this.logComment() })
+            .subscribe(() => {
+                this.logDuration.set(undefined);
+                this.logComment.set('');
+                this.reload();
+            });
     }
 
     onCreateFocus() {

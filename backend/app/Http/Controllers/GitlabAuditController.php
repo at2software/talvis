@@ -51,8 +51,8 @@ class GitlabAuditController extends Controller {
             'namespace_with_path' => 'required|string',
             'project_name'        => 'required|string',
             'gitlab_project_id'   => 'required|integer',
-            'company_id'          => 'nullable|exists:companies,id',
-            'invoice_item_id'     => 'nullable|exists:invoice_items,id',
+            'company_id'          => 'nullable|exists:companies,id,deleted_at,NULL',
+            'invoice_item_id'     => 'nullable|exists:invoice_items,id,deleted_at,NULL',
             ...$this->scheduleRules(),
         ]);
         return GitlabAuditProject::updateOrCreate(
@@ -91,8 +91,8 @@ class GitlabAuditController extends Controller {
     public function update(Request $request, GitlabAuditProject $gitlabAuditProject) {
         $data = $request->validate([
             'project_name'    => 'sometimes|string',
-            'company_id'      => 'nullable|exists:companies,id',
-            'invoice_item_id' => 'nullable|exists:invoice_items,id',
+            'company_id'      => 'nullable|exists:companies,id,deleted_at,NULL',
+            'invoice_item_id' => 'nullable|exists:invoice_items,id,deleted_at,NULL',
             ...array_map(fn (array $rules) => ['sometimes', ...$rules], $this->scheduleRules()),
         ]);
         $gitlabAuditProject->update($data);

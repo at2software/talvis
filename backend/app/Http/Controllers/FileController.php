@@ -12,7 +12,6 @@ use App\Models\Param;
 use App\Models\Project;
 use App\Models\User;
 use App\Traits\VcardTrait;
-use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Storage;
 
 class FileController extends Controller {
@@ -24,7 +23,7 @@ class FileController extends Controller {
         return File::stream($file->dir, utf8_decode($file->name));
     }
     public function destroy(File $file) {
-        return $file->delete();
+        return response()->json($file->delete());
     }
     public function uploadAvatar(Company|User $obj) {
         return $obj->setPhoto(request()->file('file')->path());
@@ -58,10 +57,9 @@ class FileController extends Controller {
         $template = str_replace('[content]', $content, $template);
         $template = Document::personalized($template, null, $headers, false);
 
-        $pdf      = Pdf::loadHTML($template);
         $filename = File::filename_safe($data->start.'-'.$data->end.' - '.$request->user()->name.'.pdf');
         $filepath = 'travel-expenses/'.$filename;
-        $f        = File::saveTo($filepath, $pdf->stream()->getContent(), $request->user(), 'hr.module');
+        $f        = File::saveTo($filepath, Document::renderPdf($template), $request->user(), 'hr.module');
         $f->type  = FileType::TypeTravelExpenses;
         $f->save();
 

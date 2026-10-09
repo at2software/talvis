@@ -14,7 +14,7 @@ class DuplicateProjectAction {
     private const PROJECT_FIELDS      = ['company_id', 'description', 'project_id', 'product_id', 'remind_at', 'due_at', 'deadline_at', 'lead_probability', 'project_manager_id', 'no_git_required', 'po_number', 'is_time_based', 'is_internal', 'individual_wage'];
     private const PLUGIN_LINK_FIELDS  = ['name', 'url', 'type', 'framework_id', 'framework_version'];
     private const ASSIGNMENT_FIELDS   = ['role_id', 'assignee_id', 'assignee_type', 'hours_planned', 'hours_weekly', 'flags'];
-    private const TASK_FIELDS         = ['name', 'description', 'link', 'status', 'due_date'];
+    private const TASK_FIELDS         = ['name', 'description', 'link', 'state'];
     private const MILESTONE_FIELDS    = ['name', 'comments', 'due_at', 'started_at', 'duration', 'progress', 'state', 'flags', 'position', 'user_id', 'workload_hours', 'ext_issue_plugin_link_id', 'ext_issue_id'];
     private const INVOICE_ITEM_FIELDS = ['company_id', 'discount', 'flags', 'is_discountable', 'next_recurrence_at', 'position', 'price', 'product_id', 'product_source_id', 'qty', 'text', 'stage', 'type', 'unit_name', 'vat_calculation', 'vat_rate', 'vat_reason', 'ext_issue_plugin_link_id', 'ext_issue_id'];
 

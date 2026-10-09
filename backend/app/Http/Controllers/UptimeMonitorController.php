@@ -58,8 +58,8 @@ class UptimeMonitorController extends Controller {
         return response()->json(['success' => true]);
     }
     public function indexChecks(Request $request, UptimeMonitor $_) {
-        $days      = $request->get('days', 30);
-        $sinceDate = Carbon::now()->subDays($days);
+        $days      = $request->validate(['days' => 'sometimes|integer|between:1,3650'])['days'] ?? 30;
+        $sinceDate = Carbon::now()->subDays((int)$days);
         return $_->checks()->dailyStats($sinceDate)->get();
     }
     public function indexRecipients(Request $request, UptimeMonitor $_) {

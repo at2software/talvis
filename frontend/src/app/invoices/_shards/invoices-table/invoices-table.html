@@ -8,8 +8,7 @@
             <th class="text-end" i18n="@@i18n.common.nextReminder">next reminder</th>
             <th style="width: 128px" class="text-end" i18n="@@i18n.common.net">net</th>
             <th style="width: 128px" class="text-end" i18n="@@i18n.common.gross">gross</th>
-            <th style="width: 32px;"></th>
-            <th style="width: 32px;"></th>
+            <th></th>
         </tr>
     </thead>
     <tbody>
@@ -64,17 +63,16 @@
                 }
             </td>
             } @if (x.cancelles) {
-            <td colspan="3" class="text-primary">{{ getCancellationName(x) }}</td>
+            <td colspan="3" class="text-muted">{{ getCancellationName(x) }}</td>
             } @if (x.cancelled_by) {
             <td colspan="3" class="text-warning">{{ getCancelledByName(x) }}</td>
             }
-            <td>                
-                @if (x.hasFlag(1)) {
+            <td class="text-end text-nowrap">
+                @if (x.isUploadedToDatev()) {
                 <img alt="" src="./assets/images/icon.datev.png" i18n-ngbTooltip="@@i18n.invoice.uploadedToDatev" ngbTooltip="uploaded to DATEV" class="me-1" />
-                } 
-            </td>
-            <td class="text-end">
-                @if (x.sent===1) {
+                } @if (x.isSepaCollected()) {
+                <i class="text-muted me-1" i18n-ngbTooltip="@@i18n.invoice.collectedViaSepa" ngbTooltip="collected via SEPA direct debit">account_balance</i>
+                } @if (x.sent===1) {
                 <i class="text-muted" i18n-ngbTooltip="@@i18n.invoice.sentViaEmail" ngbTooltip="sent via email">mark_email_read</i>
                 } @if (x.sent===2) {
                 <i class="text-muted" i18n-ngbTooltip="@@i18n.invoice.sentViaPostal" ngbTooltip="sent via postal service">mark_email_read</i>
@@ -94,7 +92,6 @@
             <td class="text-end">{{ selectionNet() | money }}</td>
             <td class="text-end">{{ selectionGross() | money }}</td>
             <td></td>
-            <td></td>
         </tr>
         } @else {
         <tr class="sticky-footer">
@@ -112,7 +109,6 @@
                 <span ngbTooltip="remaining after instalments" i18n-ngbTooltip="@@i18n.invoices.remainingAfterInstalments">{{ gross_remaining() | money }}</span>
                 }
             </td>
-            <td></td>
             <td></td>
         </tr>
         }

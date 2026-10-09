@@ -1,184 +1,111 @@
-@use 'colors' as *;
-@use 'var' as *;
-
-.activity {
-    display: block;
-    width: $m-activity;
-    height: 100%;
-}
-
 :host {
-    font-size: smaller;
     position: fixed;
-    top: 0;
-    bottom: 0;
-    right: 0;
+    inset: 0 0 0 auto;
     z-index: 4;
-    overflow: hidden;
+    width: var(--tv-activity-width);
+    border-left: 1px solid var(--tv-surface-darker);
+    background-color: var(--tv-surface-card);
+    font-size: smaller;
 }
 
-::ng-deep {
-    img {
-        max-width: 100% !important;
+:host-context(body.activity-collapsed) {
+    width: var(--tv-activity-rail-width);
+
+    @media (max-width: 768px) {
+        display: none;
+    }
+}
+
+:host-context(body.activity-hidden:not(.activity-collapsed))::before {
+    content: '';
+    position: fixed;
+    inset: 0 var(--tv-activity-width) 0 0;
+    background-color: #000c;
+}
+
+.activity-tabs.border-bottom {
+    border-bottom-color: var(--tv-surface-darker) !important;
+}
+
+.nav-underline {
+    --bs-nav-underline-gap: 0;
+    --bs-nav-link-padding-x: .625rem;
+    --bs-nav-link-padding-y: .625rem;
+    --bs-nav-link-color: var(--bs-secondary-color);
+    --bs-nav-link-hover-color: var(--bs-emphasis-color);
+    --bs-nav-underline-link-active-color: var(--bs-emphasis-color);
+    min-width: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+
+    .nav-link {
+        padding-inline: var(--bs-nav-link-padding-x);
+        margin-bottom: -1px;
+
+        &.active {
+            border-bottom-color: var(--bs-primary);
+        }
+
+        &:not(.active):hover {
+            border-bottom-color: var(--bs-border-color);
+        }
     }
 
-    .activity {
-        .nav {
-            height: calc($m-modules + 10px);
-            margin-left: .25 * $m-modules;
+    &.flex-column .nav-link {
+        width: 100%;
+        margin-bottom: 0;
+        border-bottom: 0;
+        border-left: var(--bs-nav-underline-border-width) solid transparent;
 
-            .nav-link {
-                border-radius: (.5 * $border-radius) (.5 * $border-radius) 0 0 !important;
-                background: radial-gradient(ellipse 60% 40% at bottom center, 
-                    rgba(255, 255, 255, 0.08) 0%, 
-                    transparent 70%),
-                    $bg-card;
-                backdrop-filter: blur(10px);
-                color: #ffffff;
-                margin-right: 5px;
-                transition: all .2s ease;
-                padding: var(--bs-nav-link-padding-y) 12px;
-                
-                &.active {
-                    background: radial-gradient(ellipse 80% 50% at bottom center, 
-                        rgba($primary-4, 0.9) 0%, 
-                        rgba($primary-4, 0.4) 40%,
-                        transparent 80%),
-                        $bg-card;
-                    backdrop-filter: blur(15px);
-                }
-
-                &.active, &:hover {
-                    padding-bottom: 15px;
-                    box-shadow: liquid-glass();
-                }
-
-                &:hover {
-                    background: radial-gradient(ellipse 70% 45% at bottom center,
-                        rgba($primary-3, 0.6) 0%,
-                        rgba($primary-3, 0.2) 50%,
-                        transparent 80%),
-                        $bg-card;
-                    backdrop-filter: blur(12px);
-                }
-
-                &.has-badge {
-                    background: radial-gradient(ellipse 60% 40% at bottom center,
-                        rgba($danger, 0.5) 0%,
-                        transparent 70%),
-                        $bg-card;
-                }
-
-                &.active.has-badge {
-                    background: radial-gradient(ellipse 80% 50% at bottom center,
-                        rgba($danger, 0.9) 0%,
-                        rgba($danger, 0.4) 40%,
-                        transparent 80%),
-                        $bg-card;
-                }
-            }
+        &.active {
+            border-left-color: var(--bs-primary);
         }
 
-        .tab-content {
-            top: $m-modules;
-            color: #ffffff;
-            display: block;
-            height: 100%;
-
-            .tab-pane {
-                height: 100%;
-            }
+        &:not(.active):hover {
+            border-left-color: var(--bs-border-color);
         }
+    }
 
-        .container {
-            box-shadow: liquid-glass();
-            background-color: $bg-card;
-            border-radius: (.5 * $border-radius) 0 0 0;
-            overflow: hidden;
-            height: calc(100vh - $m-modules);
-            position: relative;
+    .badge {
+        font-size: .55rem;
+    }
+}
 
-            & > * {
-                position: absolute;
-            }
+::ng-deep img {
+    max-width: 100% !important;
+}
 
-            .scroll-container {
-                top: 0;
-                bottom: 0;
-                left: 0;
-                right: 0;
-            }
-        }
+::ng-deep app-activity {
+    .tab-pane,
+    .container {
+        height: 100%;
+    }
 
-        scrollbar {
+    .container {
+        position: relative;
+        max-width: none;
+        overflow: hidden;
+
+        & > * {
             position: absolute;
-            top: 0;
-            right: 0;
-            left: 0;
-            bottom: 0;
-            white-space: pre-wrap;
-            overflow-x: hidden;
         }
 
-        .f-icon {
-            margin-top: 0.2rem;
-            float: left;
-        }
-
-        .callout {
-            margin: .25rem .25rem .25rem 2rem;
-
-            img.avatar {
-                float: left;
-                margin-left: -1.5rem;
-                margin-top: .25rem;
-            }
-        }
-
-        .system {
-            margin: 0 .25rem;
-            color: #999;
-        }
-
-        .header {
-            background-color: #0006;
-            padding-top: 2px;
-            padding-bottom: 2px;
-            color: #999;
+        .scroll-container {
+            inset: 0;
         }
     }
 
-    body.activity-collapsed {
-        app-activity {
-            display: none;
-        }
-
-        app-root {
-            margin-right: 0;
-        }
-
-        app-header {
-            right: 0;
-        }
+    scrollbar {
+        position: absolute;
+        inset: 0;
+        white-space: pre-wrap;
+        overflow-x: hidden;
     }
 
-    body.activity-hidden:not(.activity-collapsed) {
-        app-activity::before {
-            content: '';
-            position: fixed;
-            left: 0;
-            right: $m-activity;
-            top: 0;
-            bottom: 0;
-            background-color: #000c;
-        }
-
-        app-root {
-            margin-right: 0;
-        }
-
-        app-header {
-            right: 0;
-        }
+    .header {
+        background-color: #0006;
+        padding-block: 2px;
+        color: #999;
+        border-bottom-color: var(--tv-surface-darker);
     }
 }

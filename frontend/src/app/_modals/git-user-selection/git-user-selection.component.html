@@ -43,7 +43,7 @@
                                     }
                                     <div class="ms-auto flex-shrink-0">
                                         @if (isSelected(u.var.data?.username)) {
-                                            <i class="bi bi-check-circle-fill text-primary"></i>
+                                            <i class="bi bi-check-circle-fill text-success"></i>
                                         }
                                     </div>
                                 </div>
@@ -53,7 +53,7 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" (click)="decline()" tabindex="0" (keydown.enter)="decline()" i18n="@@i18n.common.cancel">cancel</button>
+                <button type="button" class="btn" (click)="decline()" tabindex="0" (keydown.enter)="decline()" i18n="@@i18n.common.cancel">cancel</button>
                 <button type="button" class="btn btn-primary" (click)="accept()" tabindex="0" (keydown.enter)="accept()" [disabled]="!selectedUsername()" i18n="@@i18n.common.save">save</button>
             </div>
         </div>

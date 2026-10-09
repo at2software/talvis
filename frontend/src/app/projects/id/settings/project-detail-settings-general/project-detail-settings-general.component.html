@@ -25,17 +25,19 @@
         </ng-template>
         <li class="hstack gap-2 py-1 px-2" roles="project_manager">
             <div class="input-group">
-                <div class="input-group-text input-group-text-darker">
-                    <i i18n-ngbTooltip="@@i18n.common.reminder" ngbTooltip="reminder">notifications_active</i>
+                <div class="input-group-text input-group-text-darker hstack gap-2" style="width: 11rem">
+                    <i>notifications_active</i>
+                    <span i18n="@@i18n.common.reminder">reminder</span>
                 </div>
                 <input class="form-control flex-fill" (click)="d.toggle()" tabindex="0" (keydown.enter)="d.toggle()" container="body" [footerTemplate]="reminderFooter" (dateSelect)="updateDate('remind_at', $event)" placeholder="yyyy-mm-dd" [(ngModel)]="_project.remind_at" ngbDatepicker #d="ngbDatepicker" />
-                <button class="btn text-primary" (click)="d.toggle()" tabindex="0" (keydown.enter)="d.toggle()" type="button"><i>calendar_month</i></button>
+                <button class="btn btn-plain text-primary" (click)="d.toggle()" tabindex="0" (keydown.enter)="d.toggle()" type="button"><i>calendar_month</i></button>
             </div>
         </li>
         <li class="hstack gap-2 py-1 px-2" noroles="project_manager">
             <div class="input-group">
-                <div class="input-group-text input-group-text-plain">
-                    <i i18n-ngbTooltip="@@i18n.common.reminder" ngbTooltip="reminder">notifications_active</i>
+                <div class="input-group-text input-group-text-plain hstack gap-2" style="width: 11rem">
+                    <i>notifications_active</i>
+                    <span i18n="@@i18n.common.reminder">reminder</span>
                 </div>
                 <div class="input-group-text input-group-text-darker">{{ _project.remind_at | date }}</div>
             </div>
@@ -49,17 +51,19 @@
         </ng-template>
         <li class="hstack gap-2 py-1 px-2" roles="project_manager">
             <div class="input-group">
-                <div class="input-group-text input-group-text-darker">
-                    <i i18n-ngbTooltip="@@i18n.common.deadline" ngbTooltip="deadline">circle_notifications</i>
+                <div class="input-group-text input-group-text-darker hstack gap-2" style="width: 11rem">
+                    <i>circle_notifications</i>
+                    <span i18n="@@i18n.common.deadline">deadline</span>
                 </div>
                 <input class="form-control flex-fill" (click)="deadline.toggle()" tabindex="0" (keydown.enter)="deadline.toggle()" container="body" [footerTemplate]="deadlineFooter" (dateSelect)="updateDate('due_at', $event)" placeholder="yyyy-mm-dd" [(ngModel)]="_project.due_at" ngbDatepicker #deadline="ngbDatepicker" />
-                <button class="btn text-primary" (click)="deadline.toggle()" tabindex="0" (keydown.enter)="deadline.toggle()" type="button"><i>calendar_month</i></button>
+                <button class="btn btn-plain text-primary" (click)="deadline.toggle()" tabindex="0" (keydown.enter)="deadline.toggle()" type="button"><i>calendar_month</i></button>
             </div>
         </li>
         <li class="hstack gap-2 py-1 px-2" noroles="project_manager">
             <div class="input-group">
-                <div class="input-group-text input-group-text-darker">
-                    <i i18n-ngbTooltip="@@i18n.common.deadline" ngbTooltip="deadline">circle_notifications</i>
+                <div class="input-group-text input-group-text-darker hstack gap-2" style="width: 11rem">
+                    <i>circle_notifications</i>
+                    <span i18n="@@i18n.common.deadline">deadline</span>
                 </div>
                 <div class="input-group-text input-group-text-plain">{{ _project.due_at | date }}</div>
             </div>
@@ -68,10 +72,12 @@
         @if (!_project.is_time_based && !_project.is_internal) {
             <li class="hstack gap-2 py-1 px-2" roles="invoicing">
                 <div class="input-group">
-                    <div class="input-group-text input-group-text-darker">
-                        <i i18n-ngbTooltip="@@i18n.common.targetWage" ngbTooltip="targetWage">paid</i>
+                    <div class="input-group-text input-group-text-darker hstack gap-2" style="width: 11rem">
+                        <i>paid</i>
+                        <span i18n="@@i18n.projects.targetHourlyRate">target hourly rate</span>
                     </div>
                     <input type="text" class="form-control" tabindex="1" [autosave]="_project" [(ngModel)]="_project.target_wage" />
+                    <span class="input-group-text input-group-text-darker">{{ global.currencySymbol() }}/h</span>
                 </div>
             </li>
         }
@@ -95,10 +101,10 @@
 
         <li class="d-flex m-3" noroles="project_manager">
             @if (_project.is_internal) {
-                <span class="badge bg-primary" i18n="@@i18n.project.internal">internal project</span>
+                <span class="badge bg-dark" i18n="@@i18n.project.internal">internal project</span>
             }
             @if (_project.is_time_based) {
-                <span class="badge bg-primary" i18n="@@i18n.common.timebased">time-based</span>
+                <span class="badge bg-dark" i18n="@@i18n.common.timebased">time-based</span>
             }
             @if (_project.no_git_required) {
                 <span class="badge bg-secondary" i18n="@@i18n.project.noGitRequired">no git required</span>

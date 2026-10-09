@@ -3,6 +3,7 @@
 @let _updatedAtFilterActive = updatedAtFilterActive();
 @let _revenueFilterActive = revenueFilterActive();
 @let _productFilterActive = productFilterActive();
+@let _onlyWithActiveProjects = onlyWithActiveProjects();
 
 <toolbar>
     <button data-tour="customers-add-btn" type="button" class="btn btn-primary capitalize" (click)="create()" ngbTooltip="CTRL+ALT+N" hotkey="CTRL+ALT+N"><i>add</i><span i18n="@@i18n.common.company">company</span></button>
@@ -17,7 +18,7 @@
             <div class="card-body">
                 <!-- Active Projects Filter -->
                 <div class="form-check form-switch mb-2">
-                    <input class="form-check-input" type="checkbox" [ngModel]="onlyWithActiveProjects()" (ngModelChange)="onlyWithActiveProjects.set($event); filtersUpdated($event)" id="cbProjects" />
+                    <input class="form-check-input" type="checkbox" [ngModel]="_onlyWithActiveProjects" (ngModelChange)="onlyWithActiveProjects.set($event); filtersUpdated($event)" id="cbProjects" />
                     <label class="form-check-label capitalize-first" for="cbProjects" i18n="@@i18n.customers.onlyWithActiveProjects">only with active projects</label>
                 </div>
 
@@ -93,7 +94,13 @@
         @if (_hasLoaded && sortedItems.length === 0) {
             <div class="card">
                 <empty-state [card]="false" class="customers" i18n-title="@@i18n.customers.noCustomersYet" title="No customers yet">
-                    <p i18n="@@i18n.customers.emptyStateDescription">Your customer universe is waiting to be built. Add your first company and start mapping the relationships, projects, and revenue that will define your success.</p>
+                    @if (_onlyWithActiveProjects || _dateRangeFilterActive || _updatedAtFilterActive || _revenueFilterActive || _productFilterActive) {
+                        <p i18n="@@i18n.customers.emptyStateFiltered">no customers match the active filters.</p>
+                        <button type="button" class="btn btn-plain text-primary" (click)="showAll()" i18n="@@i18n.customers.showAll">show all</button>
+                    } @else {
+                        <p i18n="@@i18n.customers.emptyStateDescription">Your customer universe is waiting to be built. Add your first company and start mapping the relationships, projects, and revenue that will define your success.</p>
+                        <button type="button" class="btn btn-plain text-primary" (click)="create()"><i>add</i><span i18n="@@i18n.common.company">company</span></button>
+                    }
                 </empty-state>
             </div>
         }
@@ -101,7 +108,7 @@
             <div class="card">
                 <table stackedTable enableTableExport [filenamePrefix]="'customers'" cdk-table [dataSource]="sortedItems" class="table mb-0">
                     <ng-container cdkColumnDef="created_at">
-                        <th cdk-header-cell *cdkHeaderCellDef class="text-end d-none d-md-table-cell sortable" (click)="sortByColumn('created_at')">since {{ getSortIcon('created_at') }}</th>
+                        <th cdk-header-cell *cdkHeaderCellDef class="text-end d-none d-md-table-cell sortable" (click)="sortByColumn('created_at')"><span i18n="@@i18n.common.since">since</span> {{ getSortIcon('created_at') }}</th>
                         <td cdk-cell *cdkCellDef="let x" class="text-end small text-muted text-nowrap d-none d-md-table-cell">{{ x.created_at | date }}</td>
                     </ng-container>
                     <ng-container cdkColumnDef="icon">
@@ -111,9 +118,14 @@
                         </td>
                     </ng-container>
                     <ng-container cdkColumnDef="name">
-                        <th cdk-header-cell *cdkHeaderCellDef class="sortable" (click)="sortByColumn('customer_number')"># {{ getSortIcon('customer_number') }}</th>
+                        <th cdk-header-cell *cdkHeaderCellDef class="sortable" (click)="sortByColumn('customer_number')"><span i18n="@@i18n.common.name">name</span> {{ getSortIcon('customer_number') }}</th>
                         <td cdk-cell *cdkCellDef="let x">
-                            <div class="customer-name text-truncate">{{ x.getName() }}</div>
+                            <div class="customer-name text-truncate">
+                                @if (x.customer_number) {
+                                    <span class="text-muted small me-1">{{ x.customer_number }}</span>
+                                }
+                                {{ x.getName() }}
+                            </div>
                             <div class="customer-projects d-md-none mt-1 small">
                                 @for (project of x.projects_unfinished; track project.id) {
                                     <project [project]="project" class="me-1"></project>
@@ -130,8 +142,16 @@
                         </td>
                     </ng-container>
                     @if (hasInvoicesModule) {
+                        <ng-container cdkColumnDef="unpaid">
+                            <th cdk-header-cell *cdkHeaderCellDef class="text-end" i18n="@@i18n.common.openInvoices">open invoices</th>
+                            <td cdk-cell *cdkCellDef="let x" class="text-end">
+                                @if (x.unpaid_invoice_count) {
+                                    <span class="text-warning text-nowrap" i18n-ngbTooltip="@@i18n.customers.unpaidInvoiceCount" ngbTooltip="{{ x.unpaid_invoice_count }} unpaid invoices">{{ x.unpaid_invoice_value ?? 0 | money }}</span>
+                                }
+                            </td>
+                        </ng-container>
                         <ng-container cdkColumnDef="revenue">
-                            <th cdk-header-cell *cdkHeaderCellDef class="text-end sortable" (click)="sortByColumn('net')">revenue {{ getSortIcon('net') }}</th>
+                            <th cdk-header-cell *cdkHeaderCellDef class="text-end sortable" (click)="sortByColumn('net')"><span i18n="@@i18n.common.revenue">revenue</span> {{ getSortIcon('net') }}</th>
                             <td cdk-cell *cdkCellDef="let x" class="text-end">
                                 @if (x.net) {
                                     <div>
@@ -144,7 +164,7 @@
                     <tr cdk-header-row *cdkHeaderRowDef="displayedColumns" class="sticky-header"></tr>
                     <tr cdk-row class="align-middle border-black {{ row.markerClass() }}" [nx]="row" *cdkRowDef="let row; columns: displayedColumns"></tr>
                 </table>
-                <continuous-marker [observer]="observer" (dataReceived)="onResult($event)"></continuous-marker>
+                <continuous-marker [observer]="observer()" (dataReceived)="onResult($event)"></continuous-marker>
             </div>
         }
     </div>

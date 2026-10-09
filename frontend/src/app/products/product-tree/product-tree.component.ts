@@ -4,10 +4,8 @@ import { NotificationCenter } from '@models/notification.service';
 import { ProductGroupService } from '@models/product/product-group.service';
 import { ScrollbarComponent } from '@app/app/scrollbar/scrollbar.component';
 import { ProductTreeListComponent } from './product-tree-list.component';
-import { Router } from '@angular/router';
 import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { SpinnerComponent } from '@shards/spinner/spinner.component';
-import { InputModalService } from '@app/_modals/modal-input/modal-input.service';
 import { modelListResource } from '@models/http/model-resource';
 
 @Component({
@@ -22,8 +20,6 @@ export class ProductTreeComponent {
     readonly showDeprecated = signal(false);
 
     readonly #productGroupService = inject(ProductGroupService);
-    readonly #inputModalService = inject(InputModalService);
-    readonly #router = inject(Router);
 
     readonly #groups = modelListResource(() => this.#productGroupService.index());
     readonly groups = this.#groups.value;
@@ -35,11 +31,5 @@ export class ProductTreeComponent {
 
     readonly toggleDeprecated = () => this.showDeprecated.update(v => !v);
 
-    readonly onGroupCreate = () => {
-        this.#inputModalService.open('name').confirmed(({ text }) => {
-            ProductGroup.createWithParentId(text).subscribe(x => {
-                this.#router.navigate(['/products/group/' + x.id]);
-            });
-        });
-    };
+    readonly onGroupCreate = () => ProductGroup.promptCreate();
 }

@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, AfterViewIn
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { fromEvent } from 'rxjs';
 import { Router } from '@angular/router';
-import { DecimalPipe } from '@angular/common';
+import { DatePipe, DecimalPipe } from '@angular/common';
 import { NgbDropdown, NgbDropdownModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { Milestone } from '@models/milestone/milestone.model';
 import { Project } from '@models/project/project.model';
@@ -63,7 +63,7 @@ interface Dependency {
     selector: 'custom-gantt',
     templateUrl: './custom-gantt.component.html',
     styleUrls: ['./custom-gantt.component.scss'],
-    imports: [DecimalPipe, NgbDropdownModule, Nx, NgbTooltipModule, ToolbarComponent],
+    imports: [DatePipe, DecimalPipe, NgbDropdownModule, Nx, NgbTooltipModule, ToolbarComponent],
     host: { class: 'custom-gantt-host' },
 })
 export class CustomGanttComponent implements AfterViewInit {
@@ -95,6 +95,8 @@ export class CustomGanttComponent implements AfterViewInit {
     areaSelectEnd = signal({ x: 0, y: 0 });
 
     readonly Math = Math;
+    readonly hideCompletedLabel = $localize`:@@i18n.milestones.hideCompleted:hide completed milestones`;
+    readonly showCompletedLabel = $localize`:@@i18n.milestones.showCompleted:show completed milestones`;
     readonly HEADER_ROW_HEIGHT = 22;
     readonly MILESTONE_ROW_HEIGHT = 48;
     readonly TASK_HEIGHT = 20;
@@ -975,8 +977,8 @@ export class CustomGanttComponent implements AfterViewInit {
     }
 
     getMilestoneColor = (milestone: Milestone) => milestone.state === 2 ? Color.fromVar('success').toHexString() : '#333';
-    getMilestoneProgressColor = (milestone: Milestone) => milestone.state === 2 ? 'rgba(255, 255, 255, 0.3)' : Color.fromVar('cyan').toHexString();
-    getMilestoneLabelColor = (milestone: Milestone) => milestone.state === 2 || milestone.state === 1 ? '#ffffff' : '#666';
+    getMilestoneProgressColor = (milestone: Milestone) => milestone.state === 2 ? 'rgba(255, 255, 255, 0.3)' : Color.fromVar('primary').toHexString();
+    getMilestoneLabelColor = (milestone: Milestone) => milestone.state === 2 || milestone.state === 1 ? '#ffffff' : '#cccccc';
 
     decodeHtmlEntities(text: string): string {
         const textarea = document.createElement('textarea');

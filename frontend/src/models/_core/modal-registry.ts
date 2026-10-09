@@ -6,6 +6,7 @@ export const MODAL = {
     confirm: 'confirm',
     editFocus: 'edit-focus',
     editExpense: 'edit-expense',
+    editCash: 'edit-cash',
     editMilestone: 'edit-milestone',
     editInvoiceItem: 'edit-invoice-item',
     filePreview: 'file-preview',
@@ -14,6 +15,8 @@ export const MODAL = {
     combineInvoiceItems: 'combine-invoice-items',
     combineDebriefItems: 'combine-debrief-items',
     reviewVacation: 'review-vacation',
+    editWebhookEndpoint: 'edit-webhook-endpoint',
+    webhookDeliveries: 'webhook-deliveries',
 } as const;
 
 export type ModalKey = (typeof MODAL)[keyof typeof MODAL];

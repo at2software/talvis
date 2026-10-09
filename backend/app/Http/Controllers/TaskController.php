@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\TaskState;
 use App\Models\Assignment;
+use App\Models\Milestone;
 use App\Models\Project;
 use App\Models\Task;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class TaskController extends Controller {
     public function store(Request $request) {
@@ -18,7 +21,7 @@ class TaskController extends Controller {
         $data = $request->validate([
             'name'        => 'required|string',
             'description' => 'nullable|string',
-            'parent_type' => 'nullable|string',
+            'parent_type' => 'nullable|in:'.Project::class.','.Milestone::class,
             'parent_id'   => 'nullable|integer',
         ]);
 
@@ -46,15 +49,16 @@ class TaskController extends Controller {
         return $_->unfinishedTasks()->with('assignee.assignee', 'coAssignees.assignee')->get();
     }
     public function destroy(Request $request, Project $_, Task $task) {
-        return $task->delete();
+        return response()->json($task->delete());
     }
     public function update(Request $request, Project $_, Task $task) {
+        $request->validate(['state' => ['sometimes', Rule::enum(TaskState::class)]]);
         return $task->applyAndSave($request);
     }
     public function assign(Request $request, Project $_, Task $task) {
-        $body             = $this->getBody();
-        $ass              = $_->assignees()->where('user_id', $body->user_id)->firstOrFail();
-        $_->assignment_id = $ass->id;
+        $data                = $request->validate(['user_id' => 'required|integer|exists:users,id']);
+        $task->assignment_id = $_->assignees()->where('assignee_type', User::class)->where('assignee_id', $data['user_id'])->firstOrFail()->id;
+        $task->save();
         return $task;
     }
     public function addCoAssignee(Request $request, Task $task) {
@@ -71,5 +75,6 @@ class TaskController extends Controller {
     public function removeCoAssignee(Request $request, Task $task, Assignment $assignment) {
         abort_unless($assignment->parent_type === Task::class && (int)$assignment->parent_id === (int)$task->id && ($assignment->flags & Assignment::FLAG_CO_ASSIGNEE), 404);
         $assignment->delete();
+        return response()->noContent();
     }
 }

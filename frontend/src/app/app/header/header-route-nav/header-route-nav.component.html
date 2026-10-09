@@ -3,9 +3,12 @@
         <header-link-item [routerLink]="route.path" [title]="route.title" [exact]="route.exact"></header-link-item>
     } @else {
         <li class="nav-item" ngbDropdown [autoClose]="true" placement="bottom-start" #dropdown="ngbDropdown" (mouseleave)="dropdown.close()">
-            <a class="nav-link d-flex align-items-center text-capitalize" ngbDropdownToggle tabindex="0" (mouseenter)="dropdown.open()" [routerLink]="route.path" [routerLinkActive]="'active'" [routerLinkActiveOptions]="{ exact: route.exact }">
-                {{ route.title }}
-            </a>
+            <div class="d-flex align-items-center dropdown-toggle-simple" ngbDropdownAnchor (mouseenter)="dropdown.open()">
+                <a class="nav-link text-capitalize pe-0" tabindex="0" [routerLink]="route.path" [routerLinkActive]="'active'" [routerLinkActiveOptions]="{ exact: route.exact }">
+                    {{ route.title }}
+                </a>
+                <button type="button" class="nav-link dropdown-toggle ps-1" [attr.aria-expanded]="dropdown.isOpen()" i18n-aria-label="@@i18n.common.openSubmenu" aria-label="open submenu" (click)="dropdown.open()"></button>
+            </div>
             <ul class="dropdown-menu" ngbDropdownMenu>
                 @for (child of route.children; track child.path) {
                     <li>

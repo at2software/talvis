@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { EmptyStateComponent } from '@shards/empty-state/empty-state.component';
 import { SpinnerComponent } from '@shards/spinner/spinner.component';
 import { User } from '@models/user/user.model';
+import { Toast } from '@shards/toast/toast';
 
 @Component({
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -19,7 +20,7 @@ export class RsaSettingsEmptyComponent {
             await this.user().createRsaKeyPair();
         } catch (error) {
             console.error('Failed to generate RSA keypair:', error);
-            window.alert('Failed to generate RSA keypair. Please try again.');
+            Toast.error($localize`:@@i18n.rsa.generateFailed:failed to generate RSA key pair – please try again`);
         } finally {
             this.isGenerating = false;
         }

@@ -40,6 +40,7 @@ export function getInvoiceActions(self: Invoice): NxAction[] {
                     return self;
                 }),
         },
+        { title: $localize`:@@i18n.sepa.directDebit:SEPA direct debit`, group: true, on: () => self.canSepaDirectDebit() && !!nx().global.user?.hasRole('invoicing'), action: () => self.openSepaDirectDebit() },
         ...self.markerActions(),
         { title: $localize`:@@i18n.invoice.sendToDatev:send to DATEV`, context: 'invoice.module.table', on: () => nx().global.setting('DATEV_MAIL_OUTGOING'), group: true, action: () => self.sendToDatev() },
     ];

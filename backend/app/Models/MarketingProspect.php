@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 
 class MarketingProspect extends BaseModel {
     use VcardGenderTrait;
@@ -36,9 +35,7 @@ class MarketingProspect extends BaseModel {
         ];
     }
 
-    protected $appends = [
-        'gender',
-    ];
+    protected $appends = ['icon', 'class', 'gender'];
 
     public function marketingInitiative(): BelongsTo {
         return $this->belongsTo(MarketingInitiative::class);
@@ -424,8 +421,7 @@ class MarketingProspect extends BaseModel {
             $nAttr      = [$familyName, $givenName, '', '', ''];
         }
 
-        DB::beginTransaction();
-        try {
+        return DB::transaction(function () use ($prospectVcardString, $fn, $nAttr, $createNew, $companyName, $companyId) {
             $contactVcard = new Vcard($prospectVcardString);
             $contactVcard->remove(['ORG', 'TITLE', 'ADR', 'TEL', 'EMAIL']);
             if ($fn) {
@@ -463,12 +459,7 @@ class MarketingProspect extends BaseModel {
                 'company_id'         => null,
             ]);
 
-            DB::commit();
             return ['prospect' => $this->load(['companyContact.contact', 'companyContact.company'])];
-        } catch (\Exception $e) {
-            DB::rollBack();
-            Log::error('Prospect conversion failed:', ['error' => $e->getMessage()]);
-            return ['error' => 'Conversion failed: '.$e->getMessage()];
-        }
+        });
     }
 }

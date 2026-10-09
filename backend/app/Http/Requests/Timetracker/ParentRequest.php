@@ -10,8 +10,8 @@ class ParentRequest extends FormRequest {
     }
     public function rules(): array {
         return [
-            'project_id' => 'required_without_all:company_id|exists:App\Models\Project,id',
-            'company_id' => 'required_without_all:project_id|exists:App\Models\Company,id',
+            'project_id' => 'required_without_all:company_id|integer|exists:App\Models\Project,id,deleted_at,NULL',
+            'company_id' => 'required_without_all:project_id|integer|exists:App\Models\Company,id,deleted_at,NULL',
         ];
     }
 }

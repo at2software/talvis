@@ -7,7 +7,7 @@
             <ul class="list-group list-group-flush">
                 <li class="list-group-item d-flex justify-content-between align-items-center cursor-pointer" [class.active]="typeFilter() === ''" (click)="filterByType('')" tabindex="0" (keydown.enter)="filterByType('')">
                     <span i18n="@@i18n.marketing.total_metrics">total metrics</span>
-                    <span class="badge bg-primary rounded-pill">{{ stats().total }}</span>
+                    <span class="badge bg-dark rounded-pill">{{ stats().total }}</span>
                 </li>
                 <li class="list-group-item d-flex justify-content-between align-items-center cursor-pointer" [class.active]="typeFilter() === 'counter'" (click)="filterByType('counter')" tabindex="0" (keydown.enter)="filterByType('counter')">
                     <span class="d-flex align-items-center gap-1">
@@ -198,7 +198,7 @@
                                 </div>
                                 <div class="flex-fill">
                                     <input type="text" class="form-control form-control-sm mb-1" [ngModel]="iconSearch()" (ngModelChange)="iconSearch.set($event)" name="iconSearch" placeholder="search icons..." i18n-placeholder="@@i18n.marketing.search_icons_placeholder" />
-                                    <div class="icon-grid" style="height: 110px; overflow-y: auto; display: grid; grid-template-columns: repeat(auto-fill, 34px); gap: 3px; border: 1px solid var(--bs-border-color); border-radius: 4px; padding: 4px">
+                                    <div class="icon-grid" style="height: 110px; overflow-y: auto; display: grid; grid-template-columns: repeat(auto-fill, 34px); gap: 3px; border: 1px solid var(--bs-border-color); border-radius: var(--bs-border-radius); padding: 4px">
                                         @for (icon of filteredIcons(); track icon) {
                                             <i class="d-flex align-items-center justify-content-center cursor-pointer rounded"
                                                 [class.text-primary]="metricForm.kpi_icon === icon"
@@ -228,7 +228,7 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" (click)="resetForm()" i18n="@@i18n.common.cancel">cancel</button>
+                <button type="button" class="btn" (click)="resetForm()" i18n="@@i18n.common.cancel">cancel</button>
                 <button type="button" class="btn btn-primary" (click)="saveMetric()" [disabled]="!metricForm.name || !metricForm.metric_type">
                     @if (editingMetric()) {
                         <span i18n="@@i18n.marketing.update_metric">update metric</span>

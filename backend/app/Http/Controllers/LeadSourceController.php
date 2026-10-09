@@ -16,6 +16,6 @@ class LeadSourceController extends Controller {
         return LeadSource::create((new LeadSource)->getValidFields($request->all()))->fresh();
     }
     public function destroy(LeadSource $lead_source) {
-        return $lead_source->delete();
+        return response()->json($lead_source->delete());
     }
 }

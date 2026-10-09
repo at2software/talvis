@@ -1,10 +1,4 @@
 .user-card {
-  transition: box-shadow 0.2s;
-  
-  &:hover {
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  }
-  
   &.selected {
     background-color: rgba(var(--bs-primary-rgb), 0.05);
   }

@@ -37,7 +37,7 @@
                     </div>
                     <div class="input-group input-group-sm">
                         <input type="text" class="form-control" [(ngModel)]="searchQuery" (keyup.enter)="onSearch()" placeholder="Search assets..." i18n-placeholder="@@i18n.marketing.search_assets_placeholder" />
-                        <button class="btn btn-outline-secondary" type="button" (click)="onSearch()" tabindex="0" (keydown.enter)="onSearch()">
+                        <button class="btn btn-plain text-primary" type="button" (click)="onSearch()" tabindex="0" (keydown.enter)="onSearch()">
                             <i>search</i>
                         </button>
                     </div>
@@ -49,7 +49,7 @@
                     </div>
                     <div class="input-group input-group-sm">
                         <input type="text" class="form-control" [(ngModel)]="searchTags" (keyup.enter)="onSearch()" [ngbTypeahead]="tagTypeahead" (selectItem)="onTagSearchSelected($event)" placeholder="Search tags..." i18n-placeholder="@@i18n.marketing.search_tags_placeholder" />
-                        <button class="btn btn-outline-secondary" type="button" (click)="onSearch()" tabindex="0" (keydown.enter)="onSearch()">
+                        <button class="btn btn-plain text-primary" type="button" (click)="onSearch()" tabindex="0" (keydown.enter)="onSearch()">
                             <i>local_offer</i>
                         </button>
                     </div>

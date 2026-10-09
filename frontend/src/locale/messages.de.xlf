@@ -190,10 +190,172 @@
         <target>Schließen</target>
       </segment>
     </unit>
+    <unit id="i18n.common.expand">
+      <segment>
+        <source>expand</source>
+        <target>aufklappen</target>
+      </segment>
+    </unit>
     <unit id="i18n.common.minimize">
       <segment>
         <source>minimize</source>
         <target>minimieren</target>
+      </segment>
+    </unit>
+    <unit id="i18n.common.moreActions">
+      <segment>
+        <source>more actions</source>
+        <target>weitere Aktionen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.common.openSubmenu">
+      <segment>
+        <source>open submenu</source>
+        <target>Untermenü öffnen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.activityTab.summary">
+      <segment>
+        <source>summary</source>
+        <target>Zusammenfassung</target>
+      </segment>
+    </unit>
+    <unit id="i18n.activityTab.latestInvoices">
+      <segment>
+        <source>latest invoices</source>
+        <target>Neueste Rechnungen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.activityTab.history">
+      <segment>
+        <source>history</source>
+        <target>Verlauf</target>
+      </segment>
+    </unit>
+    <unit id="i18n.activityTab.clipboard">
+      <segment>
+        <source>clipboard</source>
+        <target>Zwischenablage</target>
+      </segment>
+    </unit>
+    <unit id="i18n.activityTab.invoiceable">
+      <segment>
+        <source>invoiceable items</source>
+        <target>Abrechenbare Posten</target>
+      </segment>
+    </unit>
+    <unit id="i18n.activityTab.widgets">
+      <segment>
+        <source>widgets</source>
+        <target>Widgets</target>
+      </segment>
+    </unit>
+    <unit id="i18n.activityTab.sidebar">
+      <segment>
+        <source>sidebar</source>
+        <target>Seitenleiste</target>
+      </segment>
+    </unit>
+    <unit id="i18n.dashboard.dropWidgetHere">
+      <segment>
+        <source>drag widget here</source>
+        <target>Widget hierher ziehen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.dashboard.addWidget">
+      <segment>
+        <source>add to dashboard</source>
+        <target>zum Dashboard hinzufügen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.selectInitiativeFirst">
+      <segment>
+        <source>select an initiative in the panel title first</source>
+        <target>Bitte zuerst im Panel-Titel eine Initiative wählen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.noLeadSourceConfigured">
+      <segment>
+        <source>no lead source configured for this initiative – add a channel to the initiative first</source>
+        <target>Für diese Initiative ist keine Lead-Quelle hinterlegt – bitte zuerst einen Kanal zur Initiative hinzufügen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.uptime.requiredFields">
+      <segment>
+        <source>please fill in all required fields (name and URL)</source>
+        <target>Bitte alle Pflichtfelder ausfüllen (Name und URL)</target>
+      </segment>
+    </unit>
+    <unit id="i18n.uptime.saveFailed">
+      <segment>
+        <source>failed to save monitor</source>
+        <target>Monitor konnte nicht gespeichert werden</target>
+      </segment>
+    </unit>
+    <unit id="i18n.uptime.emptyResponse">
+      <segment>
+        <source>server returned an empty response</source>
+        <target>der Server hat eine leere Antwort geliefert</target>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.dependencyCreateFailed">
+      <segment>
+        <source>failed to create dependency – please try again</source>
+        <target>Abhängigkeit konnte nicht angelegt werden – bitte erneut versuchen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.dependencyRemoveFailed">
+      <segment>
+        <source>failed to remove dependency – please try again</source>
+        <target>Abhängigkeit konnte nicht entfernt werden – bitte erneut versuchen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.rsa.generateFailed">
+      <segment>
+        <source>failed to generate RSA key pair – please try again</source>
+        <target>RSA-Schlüsselpaar konnte nicht erzeugt werden – bitte erneut versuchen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.rsa.invalidPem">
+      <segment>
+        <source>invalid PEM key</source>
+        <target>ungültiger PEM-Schlüssel</target>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.confirmUnsubscribe">
+      <segment>
+        <source>unsubscribe from this initiative?</source>
+        <target>Von dieser Initiative abmelden?</target>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.confirmRemoveChannel">
+      <segment>
+        <source>remove this channel from the initiative?</source>
+        <target>Diesen Kanal aus der Initiative entfernen?</target>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.confirmDeleteMetric">
+      <segment>
+        <source>delete metric "<ph id="0" equiv="PH" disp="metric.name"/>"? This will remove it from all initiatives and activities.</source>
+        <target>Metrik "<ph id="0" equiv="PH" disp="metric.name"/>" löschen? Sie wird aus allen Initiativen und Aktivitäten entfernt.</target>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.confirmDeleteActivity">
+      <segment>
+        <source>delete activity "<ph id="0" equiv="PH" disp="activity.name"/>"?</source>
+        <target>Aktivität "<ph id="0" equiv="PH" disp="activity.name"/>" löschen?</target>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.confirmRemoveDependency">
+      <segment>
+        <source>remove dependency from "<ph id="0" equiv="PH" disp="activity.name"/>"?</source>
+        <target>Abhängigkeit von "<ph id="0" equiv="PH" disp="activity.name"/>" entfernen?</target>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.confirmDeleteWorkflow">
+      <segment>
+        <source>delete workflow "<ph id="0" equiv="PH" disp="workflow.name"/>"?</source>
+        <target>Workflow "<ph id="0" equiv="PH" disp="workflow.name"/>" löschen?</target>
       </segment>
     </unit>
     <unit id="i18n.common.today">
@@ -242,6 +404,24 @@
       <segment>
         <source>Toggle Mattermost activity</source>
         <target>Mattermost-Aktivität umschalten</target>
+      </segment>
+    </unit>
+    <unit id="i18n.comments.toggleSlackActivity">
+      <segment>
+        <source>Toggle Slack activity</source>
+        <target>Slack-Aktivität umschalten</target>
+      </segment>
+    </unit>
+    <unit id="i18n.comments.toggleJiraActivity">
+      <segment>
+        <source>Toggle Jira activity</source>
+        <target>Jira-Aktivität umschalten</target>
+      </segment>
+    </unit>
+    <unit id="i18n.comments.toggleGitHubActivity">
+      <segment>
+        <source>Toggle GitHub activity</source>
+        <target>GitHub-Aktivität umschalten</target>
       </segment>
     </unit>
     <unit id="i18n.comments.commentInTalvis">
@@ -418,6 +598,30 @@
         <target>Auf Originalvorlage zurückgesetzt</target>
       </segment>
     </unit>
+    <unit id="i18n.settings.noOwnCompanyInfo">
+      <segment>
+        <source>your own company is not set yet. select an existing company above or create a new one.</source>
+        <target>dein eigenes Unternehmen ist noch nicht festgelegt. Wähle oben ein bestehendes Unternehmen aus oder lege ein neues an.</target>
+      </segment>
+    </unit>
+    <unit id="i18n.settings.createOwnCompany">
+      <segment>
+        <source>create own company</source>
+        <target>eigenes Unternehmen anlegen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.settings.nameOnInvoices">
+      <segment>
+        <source>name on invoices</source>
+        <target>Name auf Rechnungen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.settings.taxNumber">
+      <segment>
+        <source>tax number</source>
+        <target>Steuernummer</target>
+      </segment>
+    </unit>
     <unit id="i18n.settings.pdf.logoUpdated">
       <segment>
         <source>Logo updated</source>
@@ -432,8 +636,8 @@
     </unit>
     <unit id="i18n.settings.pdf.revert">
       <segment>
-        <source>revert to original</source>
-        <target>auf Original zurücksetzen</target>
+        <source>reset to default template</source>
+        <target>auf Standardvorlage zurücksetzen</target>
       </segment>
     </unit>
     <unit id="i18n.settings.pdf.renderPdf">
@@ -556,6 +760,246 @@
         <target>echtes PDF (DomPDF)</target>
       </segment>
     </unit>
+    <unit id="i18n.settings.pdf.placeholders">
+      <segment>
+        <source>placeholders</source>
+        <target>Platzhalter</target>
+      </segment>
+    </unit>
+    <unit id="i18n.settings.pdf.placeholdersHint">
+      <segment>
+        <source>Click a placeholder to append it to the selected text element. Without a selection it is copied to the clipboard. Placeholders are replaced in the preview and in every invoice, quote, reminder and travel expense report.</source>
+        <target>Klicke auf einen Platzhalter, um ihn an das ausgewählte Textelement anzuhängen. Ohne Auswahl wird er in die Zwischenablage kopiert. Platzhalter werden in der Vorschau und in jeder Rechnung, jedem Angebot, jeder Mahnung und jeder Reisekostenabrechnung ersetzt.</target>
+      </segment>
+    </unit>
+    <unit id="i18n.settings.pdf.senderTokens">
+      <segment>
+        <source>sender, from settings › general › company information</source>
+        <target>Absender, aus Einstellungen › Allgemein › Firmeninformationen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.settings.pdf.documentTokens">
+      <segment>
+        <source>document, filled per document</source>
+        <target>Dokument, je Dokument befüllt</target>
+      </segment>
+    </unit>
+    <unit id="i18n.settings.pdf.removeLogo">
+      <segment>
+        <source>remove uploaded logo</source>
+        <target>hochgeladenes Logo entfernen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.settings.pdf.logoRemoved">
+      <segment>
+        <source>uploaded logo removed</source>
+        <target>hochgeladenes Logo entfernt</target>
+      </segment>
+    </unit>
+    <unit id="i18n.settings.pdf.placeholderCopied">
+      <segment>
+        <source>placeholder copied to the clipboard</source>
+        <target>Platzhalter in die Zwischenablage kopiert</target>
+      </segment>
+    </unit>
+    <unit id="i18n.settings.pdf.token.companyName">
+      <segment>
+        <source>company name</source>
+        <target>Firmenname</target>
+      </segment>
+    </unit>
+    <unit id="i18n.settings.pdf.token.companyAddress">
+      <segment>
+        <source>address in one line</source>
+        <target>Adresse in einer Zeile</target>
+      </segment>
+    </unit>
+    <unit id="i18n.settings.pdf.token.companyStreet">
+      <segment>
+        <source>street</source>
+        <target>Straße</target>
+      </segment>
+    </unit>
+    <unit id="i18n.settings.pdf.token.companyPostcode">
+      <segment>
+        <source>postcode</source>
+        <target>PLZ</target>
+      </segment>
+    </unit>
+    <unit id="i18n.settings.pdf.token.companyCity">
+      <segment>
+        <source>city</source>
+        <target>Ort</target>
+      </segment>
+    </unit>
+    <unit id="i18n.settings.pdf.token.companyCountry">
+      <segment>
+        <source>country</source>
+        <target>Land</target>
+      </segment>
+    </unit>
+    <unit id="i18n.settings.pdf.token.companyWeb">
+      <segment>
+        <source>website</source>
+        <target>Webseite</target>
+      </segment>
+    </unit>
+    <unit id="i18n.settings.pdf.token.companyMail">
+      <segment>
+        <source>email</source>
+        <target>E-Mail</target>
+      </segment>
+    </unit>
+    <unit id="i18n.settings.pdf.token.companyPhone">
+      <segment>
+        <source>phone</source>
+        <target>Telefon</target>
+      </segment>
+    </unit>
+    <unit id="i18n.settings.pdf.token.companyFax">
+      <segment>
+        <source>fax</source>
+        <target>Fax</target>
+      </segment>
+    </unit>
+    <unit id="i18n.settings.pdf.token.companyOwners">
+      <segment>
+        <source>managing directors</source>
+        <target>Geschäftsführer</target>
+      </segment>
+    </unit>
+    <unit id="i18n.settings.pdf.token.companyRegisterNumber">
+      <segment>
+        <source>commercial register number</source>
+        <target>Handelsregisternummer</target>
+      </segment>
+    </unit>
+    <unit id="i18n.settings.pdf.token.companyRegisterCourt">
+      <segment>
+        <source>register court</source>
+        <target>Registergericht</target>
+      </segment>
+    </unit>
+    <unit id="i18n.settings.pdf.token.companyVatId">
+      <segment>
+        <source>VAT ID</source>
+        <target>USt-IdNr.</target>
+      </segment>
+    </unit>
+    <unit id="i18n.settings.pdf.token.companyTaxId">
+      <segment>
+        <source>tax number</source>
+        <target>Steuernummer</target>
+      </segment>
+    </unit>
+    <unit id="i18n.settings.pdf.token.companyIban">
+      <segment>
+        <source>IBAN</source>
+        <target>IBAN</target>
+      </segment>
+    </unit>
+    <unit id="i18n.settings.pdf.token.companyBic">
+      <segment>
+        <source>BIC</source>
+        <target>BIC</target>
+      </segment>
+    </unit>
+    <unit id="i18n.settings.pdf.token.companyContact">
+      <segment>
+        <source>contact block</source>
+        <target>Kontaktblock</target>
+      </segment>
+    </unit>
+    <unit id="i18n.settings.pdf.token.companyRegistration">
+      <segment>
+        <source>registration block</source>
+        <target>Registerblock</target>
+      </segment>
+    </unit>
+    <unit id="i18n.settings.pdf.token.companyBankDetails">
+      <segment>
+        <source>bank details block</source>
+        <target>Bankverbindungsblock</target>
+      </segment>
+    </unit>
+    <unit id="i18n.settings.pdf.token.companyHeader">
+      <segment>
+        <source>footer table with contact, registration and bank details</source>
+        <target>Fußzeilentabelle mit Kontakt, Register und Bankverbindung</target>
+      </segment>
+    </unit>
+    <unit id="i18n.settings.pdf.token.senderAddress">
+      <segment>
+        <source>sender line above the address</source>
+        <target>Absenderzeile über der Anschrift</target>
+      </segment>
+    </unit>
+    <unit id="i18n.settings.pdf.token.place">
+      <segment>
+        <source>place in the date line</source>
+        <target>Ort in der Datumszeile</target>
+      </segment>
+    </unit>
+    <unit id="i18n.settings.pdf.token.logo">
+      <segment>
+        <source>logo, use as image source</source>
+        <target>Logo, als Bildquelle verwenden</target>
+      </segment>
+    </unit>
+    <unit id="i18n.settings.pdf.token.documentTitle">
+      <segment>
+        <source>document title</source>
+        <target>Dokumenttitel</target>
+      </segment>
+    </unit>
+    <unit id="i18n.settings.pdf.token.address">
+      <segment>
+        <source>recipient address</source>
+        <target>Empfängeranschrift</target>
+      </segment>
+    </unit>
+    <unit id="i18n.settings.pdf.token.headerInfo">
+      <segment>
+        <source>info block with contact person and customer number</source>
+        <target>Infoblock mit Ansprechpartner und Kundennummer</target>
+      </segment>
+    </unit>
+    <unit id="i18n.settings.pdf.token.dayNow">
+      <segment>
+        <source>date</source>
+        <target>Datum</target>
+      </segment>
+    </unit>
+    <unit id="i18n.settings.pdf.token.content">
+      <segment>
+        <source>document content</source>
+        <target>Dokumentinhalt</target>
+      </segment>
+    </unit>
+    <unit id="i18n.settings.pdf.token.footerContext">
+      <segment>
+        <source>document name in the footer</source>
+        <target>Dokumentname in der Fußzeile</target>
+      </segment>
+    </unit>
+    <unit id="i18n.settings.pdf.token.pageLabel">
+      <segment>
+        <source>word "page"</source>
+        <target>Wort „Seite“</target>
+      </segment>
+    </unit>
+    <unit id="i18n.settings.pdf.token.pageOfLabel">
+      <segment>
+        <source>word "of"</source>
+        <target>Wort „von“</target>
+      </segment>
+    </unit>
+    <unit id="i18n.settings.pdf.token.pageCount">
+      <segment>
+        <source>total number of pages</source>
+        <target>Gesamtzahl der Seiten</target>
+      </segment>
+    </unit>
     <unit id="i18n.common.select_mantis_project">
       <segment>
         <source>Select MantisBT project</source>
@@ -620,6 +1064,42 @@
       <segment>
         <source>Showing global users. For channel-specific users, add a Mattermost plugin link to this project.</source>
         <target>Globale Benutzer werden angezeigt. Für kanalspezifische Benutzer fügen Sie einen Mattermost-Plugin-Link zu diesem Projekt hinzu.</target>
+      </segment>
+    </unit>
+    <unit id="i18n.slack.select_user">
+      <segment>
+        <source>select Slack user</source>
+        <target>Slack-Benutzer auswählen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.slack.root_instance_info">
+      <segment>
+        <source>Showing global users. For channel-specific users, add a Slack plugin link to this project.</source>
+        <target>Globale Benutzer werden angezeigt. Für kanalspezifische Benutzer fügen Sie einen Slack-Plugin-Link zu diesem Projekt hinzu.</target>
+      </segment>
+    </unit>
+    <unit id="i18n.plugins.selectUser">
+      <segment>
+        <source>select user</source>
+        <target>Benutzer auswählen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.plugins.rootInstanceUsersInfo">
+      <segment>
+        <source>Showing global users. For project-specific users, add a plugin link for this tracker to the project.</source>
+        <target>Es werden globale Benutzer angezeigt. Für projektspezifische Benutzer füge dem Projekt einen Plugin-Link zu diesem Tracker hinzu.</target>
+      </segment>
+    </unit>
+    <unit id="i18n.plugins.selectProject">
+      <segment>
+        <source>select project</source>
+        <target>Projekt auswählen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.plugins.linkByIdentifier">
+      <segment>
+        <source>link by identifier</source>
+        <target>per Kennung verknüpfen</target>
       </segment>
     </unit>
     <unit id="i18n.common.select">
@@ -1294,6 +1774,96 @@
         <target>Filter</target>
       </segment>
     </unit>
+    <unit id="i18n.customers.addAddress">
+      <segment>
+        <source>add address</source>
+        <target>Adresse hinzufügen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.customers.contactPersons">
+      <segment>
+        <source>contact persons</source>
+        <target>Ansprechpartner</target>
+      </segment>
+    </unit>
+    <unit id="i18n.customers.noContactPersonsYet">
+      <segment>
+        <source>no contact persons yet</source>
+        <target>Noch keine Ansprechpartner</target>
+      </segment>
+    </unit>
+    <unit id="i18n.customers.moreContacts">
+      <segment>
+        <source>+<ph id="0" equiv="INTERPOLATION" disp="{{ _hiddenContactCount }}"/> more</source>
+        <target>+<ph id="0" equiv="INTERPOLATION" disp="{{ _hiddenContactCount }}"/> weitere</target>
+      </segment>
+    </unit>
+    <unit id="i18n.customers.keyFiguresLater">
+      <segment>
+        <source>key figures and forecasts appear as soon as this customer has invoices.</source>
+        <target>Kennzahlen und Prognosen erscheinen, sobald dieser Kunde Rechnungen hat.</target>
+      </segment>
+    </unit>
+    <unit id="i18n.customers.registerNumber">
+      <segment>
+        <source>number</source>
+        <target>Nummer</target>
+      </segment>
+    </unit>
+    <unit id="i18n.customers.registerCourt">
+      <segment>
+        <source>court</source>
+        <target>Registergericht</target>
+      </segment>
+    </unit>
+    <unit id="i18n.customers.unpaidInvoiceCount">
+      <segment>
+        <source><ph id="0" equiv="INTERPOLATION" disp="{{ x.unpaid_invoice_count }}"/> unpaid invoices</source>
+        <target><ph id="0" equiv="INTERPOLATION" disp="{{ x.unpaid_invoice_count }}"/> unbezahlte Rechnungen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.customers.prepareInvoice">
+      <segment>
+        <source>prepare invoice</source>
+        <target>Rechnung vorbereiten</target>
+      </segment>
+    </unit>
+    <unit id="i18n.customers.addConnection">
+      <segment>
+        <source>add connection</source>
+        <target>Verbindung hinzufügen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.customers.noConnectionsYet">
+      <segment>
+        <source>no connections yet</source>
+        <target>Noch keine Verbindungen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.customers.connectionsEmptyBody">
+      <segment>
+        <source>Link partner companies such as agencies, suppliers or subcontractors with the + in the connections card to see who works with whom.</source>
+        <target>Verknüpfe Partnerfirmen wie Agenturen, Lieferanten oder Subunternehmer über das + in der Karte „Verbindungen“, um zu sehen, wer mit wem arbeitet.</target>
+      </segment>
+    </unit>
+    <unit id="i18n.customers.addDiscount">
+      <segment>
+        <source>add discount</source>
+        <target>Rabatt hinzufügen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.customers.addSepa">
+      <segment>
+        <source>add SEPA direct debit</source>
+        <target>SEPA-Lastschrift hinzufügen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.customers.addVatId">
+      <segment>
+        <source>add VAT ID</source>
+        <target>USt-ID hinzufügen</target>
+      </segment>
+    </unit>
     <unit id="i18n.customers.onlyWithActiveProjects">
       <segment>
         <source>only with active projects</source>
@@ -1480,6 +2050,18 @@
         <target>Angestellt bei</target>
       </segment>
     </unit>
+    <unit id="i18n.contacts.addContactPerson">
+      <segment>
+        <source>add contact person</source>
+        <target>Ansprechpartner hinzufügen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.contacts.contactPersonName">
+      <segment>
+        <source>name of the contact person</source>
+        <target>Name des Ansprechpartners</target>
+      </segment>
+    </unit>
     <unit id="i18n.common.add">
       <segment>
         <source>add</source>
@@ -1522,6 +2104,12 @@
         <target>Noch keine Projekte...</target>
       </segment>
     </unit>
+    <unit id="i18n.projects.createProjectSelectCustomer">
+      <segment>
+        <source>create a project for customer:</source>
+        <target>Projekt anlegen für Kunde:</target>
+      </segment>
+    </unit>
     <unit id="i18n.projects.addSubproject">
       <segment>
         <source>add subproject</source>
@@ -1538,6 +2126,18 @@
       <segment>
         <source>company name</source>
         <target>Firmenname</target>
+      </segment>
+    </unit>
+    <unit id="i18n.customers.emptyStateFiltered">
+      <segment>
+        <source>no customers match the active filters.</source>
+        <target>keine Kunden entsprechen den aktiven Filtern.</target>
+      </segment>
+    </unit>
+    <unit id="i18n.customers.showAll">
+      <segment>
+        <source>show all</source>
+        <target>alle anzeigen</target>
       </segment>
     </unit>
     <unit id="i18n.customers.missing_birthdays">
@@ -1788,7 +2388,7 @@
     </unit>
     <unit id="i18n.customers.desicionDuration">
       <segment>
-        <source>desicion duration</source>
+        <source>decision duration</source>
         <target>Entscheidungsdauer</target>
       </segment>
     </unit>
@@ -1826,6 +2426,24 @@
       <segment>
         <source>predicted next purchase date is in the past — contact this customer</source>
         <target>prognostiziertes nächstes Kaufdatum liegt in der Vergangenheit — Kunde kontaktieren</target>
+      </segment>
+    </unit>
+    <unit id="i18n.customers.customerNumber">
+      <segment>
+        <source>customer number</source>
+        <target>Kundennummer</target>
+      </segment>
+    </unit>
+    <unit id="i18n.customers.invoiceEmail">
+      <segment>
+        <source>invoice e-mail</source>
+        <target>Rechnungs-E-Mail</target>
+      </segment>
+    </unit>
+    <unit id="i18n.customers.invoiceEmailMissing">
+      <segment>
+        <source>missing, required for e-invoices (XRechnung)</source>
+        <target>fehlt, Pflicht für E-Rechnungen (XRechnung)</target>
       </segment>
     </unit>
     <unit id="i18n.customers.mlChurnRisk">
@@ -2136,8 +2754,8 @@
     </unit>
     <unit id="i18n.invoice.create{invoiceNumber}">
       <segment>
-        <source>create <ph id="0" equiv="INTERPOLATION" disp="{{ invoiceNumber }}" /></source>
-        <target><ph id="0" equiv="INTERPOLATION" disp="{{ invoiceNumber }}" /> erstellen</target>
+        <source>create invoice <ph id="0" equiv="INTERPOLATION" disp="{{ invoiceNumber }}" /></source>
+        <target>Rechnung <ph id="0" equiv="INTERPOLATION" disp="{{ invoiceNumber }}" /> erstellen</target>
       </segment>
     </unit>
     <unit id="i18n.invoice.activateRepeatingItems">
@@ -2370,13 +2988,13 @@
     </unit>
     <unit id="i18n.common.commercial_register">
       <segment>
-        <source>commercial_register</source>
+        <source>commercial register</source>
         <target>Handelsregister</target>
       </segment>
     </unit>
     <unit id="i18n.common.managing_director">
       <segment>
-        <source>managing_director</source>
+        <source>managing director</source>
         <target>Geschäftsführer</target>
       </segment>
     </unit>
@@ -3296,6 +3914,12 @@
       <segment>
         <source>new expense</source>
         <target>neue Ausgabe</target>
+      </segment>
+    </unit>
+    <unit id="i18n.invoices.emptyStateHowTo">
+      <segment>
+        <source>invoices are created at the customer under billing. select a customer to add billable items and create the invoice there.</source>
+        <target>Rechnungen entstehen am Kunden unter Rechnungslegung. Wähle einen Kunden, um dort abrechenbare Positionen zu erfassen und die Rechnung zu erstellen.</target>
       </segment>
     </unit>
     <unit id="i18n.common.new">
@@ -5027,6 +5651,36 @@
         <target>So erstellen Sie ein GitLab-Token</target>
       </segment>
     </unit>
+    <unit id="i18n.info.howToCreateSlackToken">
+      <segment>
+        <source>how to create Slack token</source>
+        <target>So erstellen Sie ein Slack-Token</target>
+      </segment>
+    </unit>
+    <unit id="i18n.info.howToCreateJiraToken">
+      <segment>
+        <source>how to create Jira API token</source>
+        <target>So erstellst du ein Jira-API-Token</target>
+      </segment>
+    </unit>
+    <unit id="i18n.profile.jiraTokenHint">
+      <segment>
+        <source>Jira Cloud API token of your Atlassian account, used together with your login email. Projects are linked as https://acme.atlassian.net/browse/KEY.</source>
+        <target>Jira-Cloud-API-Token deines Atlassian-Kontos, zusammen mit deiner Login-E-Mail. Projekte werden als https://acme.atlassian.net/browse/KEY verknüpft.</target>
+      </segment>
+    </unit>
+    <unit id="i18n.info.howToCreateGitHubToken">
+      <segment>
+        <source>how to create GitHub token</source>
+        <target>So erstellst du ein GitHub-Token</target>
+      </segment>
+    </unit>
+    <unit id="i18n.profile.githubTokenHint">
+      <segment>
+        <source>Enter the web URL, not the API URL. Fine-grained token with read and write access to issues and read access to metadata of the repositories you want to link (classic token: repo scope).</source>
+        <target>Gib die Web-URL ein, nicht die API-URL. Fine-grained Token mit Lese- und Schreibzugriff auf Issues und Lesezugriff auf Metadaten der Repositories, die du verknüpfen willst (klassisches Token: Scope repo).</target>
+      </segment>
+    </unit>
     <unit id="i18n.mantis.filterId">
       <segment>
         <source>Filter ID</source>
@@ -5151,6 +5805,18 @@
       <segment>
         <source>slack</source>
         <target>Slack</target>
+      </segment>
+    </unit>
+    <unit id="i18n.common.jira">
+      <segment>
+        <source>Jira</source>
+        <target>Jira</target>
+      </segment>
+    </unit>
+    <unit id="i18n.common.github">
+      <segment>
+        <source>GitHub</source>
+        <target>GitHub</target>
       </segment>
     </unit>
     <unit id="i18n.profile.localaiProxy">
@@ -6587,6 +7253,12 @@
         <target>ändern zu...</target>
       </segment>
     </unit>
+    <unit id="i18n.project.quoteAccepted">
+      <segment>
+        <source>quote accepted</source>
+        <target>Angebot angenommen</target>
+      </segment>
+    </unit>
     <unit id="i18n.projects.requiresPo">
       <segment>
         <source>requires PO#</source>
@@ -7037,6 +7709,198 @@
         <target>Angebot erstellen</target>
       </segment>
     </unit>
+    <unit id="i18n.projects.noAssigneesYet">
+      <segment>
+        <source>no one assigned yet</source>
+        <target>Noch niemand zugewiesen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.projects.noUnbilledTime">
+      <segment>
+        <source>no unbilled time in this period</source>
+        <target>Keine offenen Zeiten in diesem Zeitraum</target>
+      </segment>
+    </unit>
+    <unit id="i18n.projects.selectFociHint">
+      <segment>
+        <source>select unbilled entries to turn them into a support item</source>
+        <target>Offene Einträge auswählen, um daraus eine Support-Position zu erstellen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.projects.noOpenSupportItems">
+      <segment>
+        <source>no open support items</source>
+        <target>Keine offenen Support-Positionen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.foci.companyTimeHint">
+      <segment>
+        <source>Only time booked directly on the customer appears here. Time booked on a project is listed in that project's time tracking tab.</source>
+        <target>Hier erscheinen nur Zeiten, die direkt auf den Kunden gebucht wurden. Projektzeiten stehen im Tab „Zeiterfassung“ des jeweiligen Projekts.</target>
+      </segment>
+    </unit>
+    <unit id="i18n.invoice.noItemsYet">
+      <segment>
+        <source>no items yet</source>
+        <target>Noch keine Positionen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.common.editDefaultText">
+      <segment>
+        <source>edit default text</source>
+        <target>Standardtext bearbeiten</target>
+      </segment>
+    </unit>
+    <unit id="i18n.common.resetToDefaultText">
+      <segment>
+        <source>reset to default text</source>
+        <target>Auf Standardtext zurücksetzen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.common.noTextYet">
+      <segment>
+        <source>no text yet</source>
+        <target>Noch kein Text</target>
+      </segment>
+    </unit>
+    <unit id="i18n.invoice.hasVatWhenNotNeeded">
+      <segment>
+        <source>item has VAT but company does not need VAT</source>
+        <target>Position enthält USt, obwohl der Kunde keine USt benötigt</target>
+      </segment>
+    </unit>
+    <unit id="i18n.common.more">
+      <segment>
+        <source>more</source>
+        <target>mehr</target>
+      </segment>
+    </unit>
+    <unit id="i18n.projects.fromProductCatalog">
+      <segment>
+        <source>from product catalog</source>
+        <target>aus dem Produktkatalog</target>
+      </segment>
+    </unit>
+    <unit id="i18n.projects.includeInQuote">
+      <segment>
+        <source>include in this quote</source>
+        <target>In dieses Angebot aufnehmen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.projects.excludeFromQuote">
+      <segment>
+        <source>exclude from this quote</source>
+        <target>Aus diesem Angebot entfernen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.projects.quoteRequiresContact">
+      <segment>
+        <source>select a contact person under payment information first</source>
+        <target>Bitte zuerst unter Zahlungsinformationen einen Ansprechpartner auswählen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.projects.createQuoteHint">
+      <segment>
+        <source>creates the quote PDF with the next quote number and marks the project as quoted</source>
+        <target>Erstellt das Angebots-PDF mit der nächsten Angebotsnummer und setzt das Projekt auf „angeboten“</target>
+      </segment>
+    </unit>
+    <unit id="i18n.milestones.hideCompleted">
+      <segment>
+        <source>hide completed milestones</source>
+        <target>Erledigte Meilensteine ausblenden</target>
+      </segment>
+    </unit>
+    <unit id="i18n.milestones.showCompleted">
+      <segment>
+        <source>show completed milestones</source>
+        <target>Erledigte Meilensteine einblenden</target>
+      </segment>
+    </unit>
+    <unit id="i18n.foci.logTime">
+      <segment>
+        <source>log time</source>
+        <target>Zeit erfassen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.foci.hoursPlaceholder">
+      <segment>
+        <source>hours</source>
+        <target>Stunden</target>
+      </segment>
+    </unit>
+    <unit id="i18n.foci.whatDidYouDo">
+      <segment>
+        <source>what did you work on?</source>
+        <target>Tätigkeit</target>
+      </segment>
+    </unit>
+    <unit id="i18n.foci.addTimeEntry">
+      <segment>
+        <source>add time entry</source>
+        <target>Zeit eintragen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.foci.noTimeEntriesYet">
+      <segment>
+        <source>no time entries yet</source>
+        <target>Noch keine Zeiteinträge</target>
+      </segment>
+    </unit>
+    <unit id="i18n.tasks.noIssueTrackerLinked">
+      <segment>
+        <source>no issue tracker linked</source>
+        <target>Kein Issue-Tracker verknüpft</target>
+      </segment>
+    </unit>
+    <unit id="i18n.tasks.noIssueTrackerHint">
+      <segment>
+        <source>This page lists the open issues of a linked GitLab or Mantis project. Link one in the plugins card on the dashboard. Internal to-dos can be added to milestones.</source>
+        <target>Diese Seite zeigt die offenen Issues eines verknüpften GitLab- oder Mantis-Projekts. Verknüpfen Sie eines in der Karte „Plugins“ im Dashboard. Interne Aufgaben lassen sich an Meilensteinen anlegen.</target>
+      </segment>
+    </unit>
+    <unit id="i18n.tasks.linkIssueTracker">
+      <segment>
+        <source>link issue tracker</source>
+        <target>Issue-Tracker verknüpfen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.tasks.noOpenTasks">
+      <segment>
+        <source>no open tasks</source>
+        <target>Keine offenen Aufgaben</target>
+      </segment>
+    </unit>
+    <unit id="i18n.common.dropFilesHere">
+      <segment>
+        <source>drop files here to attach them</source>
+        <target>Dateien hierher ziehen, um sie anzuhängen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.project.changeState">
+      <segment>
+        <source>change project state</source>
+        <target>Projektstatus ändern</target>
+      </segment>
+    </unit>
+    <unit id="i18n.projects.noMatchingProjects">
+      <segment>
+        <source>no projects match the current filters</source>
+        <target>Keine Projekte passen zu den aktuellen Filtern</target>
+      </segment>
+    </unit>
+    <unit id="i18n.projects.noMatchingProjectsHint">
+      <segment>
+        <source>Widen the state filter on the left to see more projects, or start a new one for a customer.</source>
+        <target>Erweitern Sie links den Statusfilter, um mehr Projekte zu sehen, oder legen Sie ein neues Projekt für einen Kunden an.</target>
+      </segment>
+    </unit>
+    <unit id="i18n.projects.targetHourlyRate">
+      <segment>
+        <source>target hourly rate</source>
+        <target>Ziel-Stundensatz</target>
+      </segment>
+    </unit>
     <unit id="i18n.projects.noContactSpecified">
       <segment>
         <source>no contact specified</source>
@@ -7431,20 +8295,26 @@
     </unit>
     <unit id="i18n.invoice.invoiceText">
       <segment>
-        <source>invoiceText</source>
+        <source>invoice text</source>
         <target>Rechnungstext</target>
       </segment>
     </unit>
     <unit id="i18n.invoice.dueReminder1Text">
       <segment>
-        <source>dueReminder1Text</source>
+        <source>1st reminder text</source>
         <target>Text für erste Mahnung</target>
       </segment>
     </unit>
     <unit id="i18n.invoice.dueReminder2Text">
       <segment>
-        <source>dueReminder2Text</source>
+        <source>2nd reminder text</source>
         <target>Text für zweite Mahnung</target>
+      </segment>
+    </unit>
+    <unit id="i18n.invoice.overdraftInterestInfo">
+      <segment>
+        <source>information on overdraft interest:</source>
+        <target>Information zum Überziehungszins:</target>
       </segment>
     </unit>
     <unit id="i18n.invoice.emailText">
@@ -7819,6 +8689,12 @@
         <target>Entwickler</target>
       </segment>
     </unit>
+    <unit id="i18n.common.customer">
+      <segment>
+        <source>customer</source>
+        <target>Kunde</target>
+      </segment>
+    </unit>
     <unit id="i18n.common.designer">
       <segment>
         <source>designer</source>
@@ -7829,6 +8705,12 @@
       <segment>
         <source>remove from team</source>
         <target>Aus Team entfernen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.cash.invertSign">
+      <segment>
+        <source>invert sign</source>
+        <target>Vorzeichen umkehren</target>
       </segment>
     </unit>
     <unit id="i18n.cash.reallyDeleteThisEntry">
@@ -9399,8 +10281,14 @@
     </unit>
     <unit id="i18n.products.emptyStateDescription">
       <segment>
-        <source>Build your product catalog from the ground up. Use the <pc id="0" equivStart="START_TAG_STRONG" equivEnd="CLOSE_TAG_STRONG" type="other" dispStart="&lt;strong&gt;" dispEnd="&lt;/strong&gt;">create_new_folder</pc> icon in the left panel to add your first product group, then populate it with products. A well-structured catalog is the foundation of every great business.</source>
-        <target>Baue deinen Produktkatalog von Grund auf auf. Nutze das Symbol <pc id="0" equivStart="START_TAG_STRONG" equivEnd="CLOSE_TAG_STRONG" type="other" dispStart="&lt;strong&gt;" dispEnd="&lt;/strong&gt;">create_new_folder</pc> im linken Panel, um deine erste Produktgruppe anzulegen, und fülle sie anschließend mit Produkten. Ein gut strukturierter Katalog ist das Fundament jedes erfolgreichen Unternehmens.</target>
+        <source>Build your product catalog from the ground up. Add your first product group, then populate it with products. A well-structured catalog is the foundation of every great business.</source>
+        <target>Baue deinen Produktkatalog von Grund auf auf. Lege deine erste Produktgruppe an und fülle sie anschließend mit Produkten. Ein gut strukturierter Katalog ist das Fundament jedes erfolgreichen Unternehmens.</target>
+      </segment>
+    </unit>
+    <unit id="i18n.products.createProductGroup">
+      <segment>
+        <source>create product group</source>
+        <target>Produktgruppe anlegen</target>
       </segment>
     </unit>
     <unit id="i18n.hr.addEmployee">
@@ -10380,6 +11268,12 @@
       <segment>
         <source>financial</source>
         <target>Finanzen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.common.sessionExpired">
+      <segment>
+        <source>your session has expired or was ended on another device – please sign in again</source>
+        <target>deine Sitzung ist abgelaufen oder wurde auf einem anderen Gerät beendet – bitte melde dich erneut an</target>
       </segment>
     </unit>
     
@@ -11829,6 +12723,1818 @@
       <segment>
         <source>optional</source>
         <target>optional</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.company.address">
+      <segment>
+        <source>address</source>
+        <target>Adresse</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.company.bankAndTax">
+      <segment>
+        <source>bank account &amp; tax</source>
+        <target>Bankverbindung &amp; Steuer</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.company.bic">
+      <segment>
+        <source>BIC (optional)</source>
+        <target>BIC (optional)</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.company.city">
+      <segment>
+        <source>city</source>
+        <target>Ort</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.company.contact">
+      <segment>
+        <source>contact</source>
+        <target>Kontakt</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.company.country">
+      <segment>
+        <source>country</source>
+        <target>Land</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.company.description">
+      <segment>
+        <source>These details appear as the sender on your invoices, quotes and e-invoices (XRechnung).</source>
+        <target>Diese Angaben erscheinen als Absender auf deinen Rechnungen, Angeboten und E-Rechnungen (XRechnung).</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.company.email">
+      <segment>
+        <source>invoice e-mail address</source>
+        <target>E-Mail-Adresse für Rechnungen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.company.legalForm">
+      <segment>
+        <source>legal form (optional)</source>
+        <target>Rechtsform (optional)</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.company.name">
+      <segment>
+        <source>company name</source>
+        <target>Firmenname</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.company.owners">
+      <segment>
+        <source>owner / managing director</source>
+        <target>Inhaber / Geschäftsführung</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.company.phone">
+      <segment>
+        <source>phone (optional)</source>
+        <target>Telefon (optional)</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.company.street">
+      <segment>
+        <source>street and number</source>
+        <target>Straße und Hausnummer</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.company.taxHint">
+      <segment>
+        <source>A tax number or a VAT ID is required – one of the two is enough.</source>
+        <target>Du brauchst eine Steuernummer oder eine USt-IdNr. – eins von beiden reicht.</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.company.taxId">
+      <segment>
+        <source>tax number</source>
+        <target>Steuernummer</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.company.title">
+      <segment>
+        <source>your company</source>
+        <target>Dein Unternehmen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.company.vatId">
+      <segment>
+        <source>VAT ID (e.g. DE123456789)</source>
+        <target>USt-IdNr. (z. B. DE123456789)</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.company.website">
+      <segment>
+        <source>website (optional)</source>
+        <target>Website (optional)</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.company.zip">
+      <segment>
+        <source>postal code</source>
+        <target>PLZ</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.createAccountAndContinue">
+      <segment>
+        <source>create account &amp; continue</source>
+        <target>Konto anlegen &amp; weiter</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.day.mo">
+      <segment>
+        <source>Mon</source>
+        <target>Mo</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.day.tu">
+      <segment>
+        <source>Tue</source>
+        <target>Di</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.day.we">
+      <segment>
+        <source>Wed</source>
+        <target>Mi</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.day.th">
+      <segment>
+        <source>Thu</source>
+        <target>Do</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.day.fr">
+      <segment>
+        <source>Fri</source>
+        <target>Fr</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.day.sa">
+      <segment>
+        <source>Sat</source>
+        <target>Sa</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.day.su">
+      <segment>
+        <source>Sun</source>
+        <target>So</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.doItNow">
+      <segment>
+        <source>do it now</source>
+        <target>Jetzt erledigen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.gettingStarted">
+      <segment>
+        <source>getting started</source>
+        <target>Erste Schritte</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.hide">
+      <segment>
+        <source>hide – you can show it again in settings &gt; general</source>
+        <target>ausblenden – unter Einstellungen &gt; Allgemein kannst du es wieder einblenden</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.invoicing.days">
+      <segment>
+        <source>days</source>
+        <target>Tage</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.invoicing.hourlyWage">
+      <segment>
+        <source>default hourly rate</source>
+        <target>Standard-Stundensatz</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.invoicing.invoices">
+      <segment>
+        <source>invoices</source>
+        <target>Rechnungen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.invoicing.nextNumber">
+      <segment>
+        <source>next number</source>
+        <target>nächste Nummer</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.invoicing.numberRanges">
+      <segment>
+        <source>number ranges</source>
+        <target>Nummernkreise</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.invoicing.numberRangesHint">
+      <segment>
+        <source>Invoice numbers must be consecutive. If you already wrote invoices with another tool, continue with your next number.</source>
+        <target>Rechnungsnummern müssen fortlaufend sein. Hast du schon mit einem anderen Programm Rechnungen geschrieben, mach mit deiner nächsten Nummer weiter.</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.invoicing.paymentDuration">
+      <segment>
+        <source>payment term</source>
+        <target>Zahlungsziel</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.invoicing.preview">
+      <segment>
+        <source>preview</source>
+        <target>Vorschau</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.invoicing.quotes">
+      <segment>
+        <source>quotes</source>
+        <target>Angebote</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.invoicing.title">
+      <segment>
+        <source>invoices &amp; taxes</source>
+        <target>Rechnungen &amp; Steuern</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.invoicing.vat">
+      <segment>
+        <source>default VAT rate</source>
+        <target>Standard-Umsatzsteuersatz</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.invoicing.vatHint">
+      <segment>
+        <source>19 % is the regular rate in Germany, 7 % the reduced rate. You can still change the rate on every invoice position.</source>
+        <target>19 % ist in Deutschland der Regelsatz, 7 % der ermäßigte Satz. Du kannst den Satz an jeder Rechnungsposition noch ändern.</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.missing">
+      <segment>
+        <source>missing:</source>
+        <target>Es fehlt:</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.missing.city">
+      <segment>
+        <source>city</source>
+        <target>Ort</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.missing.company">
+      <segment>
+        <source>company</source>
+        <target>Unternehmen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.missing.country">
+      <segment>
+        <source>country</source>
+        <target>Land</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.missing.email">
+      <segment>
+        <source>e-mail</source>
+        <target>E-Mail</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.missing.employment">
+      <segment>
+        <source>working hours</source>
+        <target>Arbeitszeit</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.missing.iban">
+      <segment>
+        <source>IBAN</source>
+        <target>IBAN</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.missing.invoiceNumbers">
+      <segment>
+        <source>invoice number range</source>
+        <target>Rechnungsnummernkreis</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.missing.name">
+      <segment>
+        <source>name</source>
+        <target>Name</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.missing.ownAdmin">
+      <segment>
+        <source>own administrator account</source>
+        <target>eigenes Administratorkonto</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.missing.paymentDuration">
+      <segment>
+        <source>payment term</source>
+        <target>Zahlungsziel</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.missing.seedAdminActive">
+      <segment>
+        <source>default account still active – sign in with it once to hand over</source>
+        <target>Standardkonto ist noch aktiv – melde dich einmal damit an, um es zu übergeben</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.missing.street">
+      <segment>
+        <source>street</source>
+        <target>Straße</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.missing.taxId">
+      <segment>
+        <source>tax number or VAT ID</source>
+        <target>Steuernummer oder USt-IdNr.</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.missing.vacationGrant">
+      <segment>
+        <source>vacation entitlement</source>
+        <target>Urlaubsanspruch</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.missing.vat">
+      <segment>
+        <source>VAT rate</source>
+        <target>Umsatzsteuersatz</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.missing.workZip">
+      <segment>
+        <source>postal code for public holidays</source>
+        <target>PLZ für Feiertage</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.missing.zip">
+      <segment>
+        <source>postal code</source>
+        <target>PLZ</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.nextUp">
+      <segment>
+        <source>next up</source>
+        <target>Als Nächstes</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.ownAccountDescription">
+      <segment>
+        <source>You are signed in with the default account. Create your personal administrator account now – the default account will be deactivated afterwards and can no longer be used to sign in.</source>
+        <target>Du bist mit dem Standardkonto angemeldet. Lege jetzt dein persönliches Administratorkonto an – das Standardkonto wird danach deaktiviert und kann sich nicht mehr anmelden.</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.ownAccountTitle">
+      <segment>
+        <source>Create your own account first</source>
+        <target>Lege zuerst dein eigenes Konto an</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.progress">
+      <segment>
+        <source><ph id="0" equiv="INTERPOLATION"/> of <ph id="1" equiv="INTERPOLATION_1"/> required steps done</source>
+        <target><ph id="0" equiv="INTERPOLATION"/> von <ph id="1" equiv="INTERPOLATION_1"/> Pflichtschritten erledigt</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.save">
+      <segment>
+        <source>save</source>
+        <target>Speichern</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.showOnDashboard">
+      <segment>
+        <source>show the "getting started" checklist on the dashboard</source>
+        <target>Checkliste „Erste Schritte“ auf dem Dashboard anzeigen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.step.company">
+      <segment>
+        <source>your company</source>
+        <target>Dein Unternehmen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.step.companyDescription">
+      <segment>
+        <source>Address, bank account and tax numbers – the sender of every invoice.</source>
+        <target>Adresse, Bankverbindung und Steuernummern – der Absender jeder Rechnung.</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.step.firstCustomer">
+      <segment>
+        <source>first customer</source>
+        <target>Erster Kunde</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.step.firstCustomerDescription">
+      <segment>
+        <source>Add a customer with address and invoice e-mail.</source>
+        <target>Lege einen Kunden mit Adresse und Rechnungs-E-Mail an.</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.step.firstInvoice">
+      <segment>
+        <source>first invoice</source>
+        <target>Erste Rechnung</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.step.firstInvoiceDescription">
+      <segment>
+        <source>Bill your time or services.</source>
+        <target>Rechne deine Zeit oder Leistungen ab.</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.step.firstProject">
+      <segment>
+        <source>first project</source>
+        <target>Erstes Projekt</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.step.firstProjectDescription">
+      <segment>
+        <source>Start a project for a customer and write a quote.</source>
+        <target>Starte ein Projekt für einen Kunden und schreib ein Angebot.</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.step.invoicing">
+      <segment>
+        <source>invoices &amp; taxes</source>
+        <target>Rechnungen &amp; Steuern</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.step.invoicingDescription">
+      <segment>
+        <source>VAT rate, payment term, hourly rate and number ranges.</source>
+        <target>Umsatzsteuersatz, Zahlungsziel, Stundensatz und Nummernkreise.</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.step.owner">
+      <segment>
+        <source>your own account</source>
+        <target>Dein eigenes Konto</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.step.ownerDescription">
+      <segment>
+        <source>Work with a personal administrator account – the default account is deactivated.</source>
+        <target>Arbeite mit einem persönlichen Administratorkonto – das Standardkonto wird deaktiviert.</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.step.products">
+      <segment>
+        <source>first services</source>
+        <target>Erste Leistungen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.step.productsDescription">
+      <segment>
+        <source>Create the services and products you sell.</source>
+        <target>Lege die Leistungen und Produkte an, die du verkaufst.</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.step.vacation">
+      <segment>
+        <source>vacation</source>
+        <target>Urlaub</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.step.vacationDescription">
+      <segment>
+        <source>Your annual vacation entitlement.</source>
+        <target>Dein jährlicher Urlaubsanspruch.</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.step.workingTime">
+      <segment>
+        <source>working time</source>
+        <target>Arbeitszeit</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.step.workingTimeDescription">
+      <segment>
+        <source>Weekly hours, working days and the postal code for public holidays.</source>
+        <target>Wochenstunden, Arbeitstage und die PLZ für Feiertage.</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.welcome">
+      <segment>
+        <source>Welcome to TALVIS</source>
+        <target>Willkommen bei TALVIS</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.workingTime.hoursPerWeek">
+      <segment>
+        <source>weekly working hours</source>
+        <target>Wochenarbeitszeit</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.workingTime.hoursUnit">
+      <segment>
+        <source>h</source>
+        <target>h</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.workingTime.noWorkdays">
+      <segment>
+        <source>select at least one working day</source>
+        <target>wähle mindestens einen Arbeitstag</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.workingTime.perDay">
+      <segment>
+        <source>= <ph id="0" equiv="INTERPOLATION"/> h per working day</source>
+        <target>= <ph id="0" equiv="INTERPOLATION"/> h pro Arbeitstag</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.workingTime.title">
+      <segment>
+        <source>working time &amp; vacation</source>
+        <target>Arbeitszeit &amp; Urlaub</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.workingTime.vacationDays">
+      <segment>
+        <source>vacation days per year</source>
+        <target>Urlaubstage pro Jahr</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.workingTime.vacationHint">
+      <segment>
+        <source>valid until March 31 of next year</source>
+        <target>gültig bis 31. März des Folgejahres</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.workingTime.workdays">
+      <segment>
+        <source>working days</source>
+        <target>Arbeitstage</target>
+      </segment>
+    </unit>
+    <unit id="i18n.setup.workingTime.zip">
+      <segment>
+        <source>postal code for public holidays</source>
+        <target>PLZ für Feiertage</target>
+      </segment>
+    </unit>
+    <unit id="i18n.user.passwordsDoNotMatch">
+      <segment>
+        <source>the passwords do not match</source>
+        <target>die Passwörter stimmen nicht überein</target>
+      </segment>
+    </unit>
+    <unit id="i18n.user.repeatPassword">
+      <segment>
+        <source>repeat password</source>
+        <target>Passwort wiederholen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.openApprovals">
+      <segment>
+        <source>open approvals</source>
+        <target>Offene Freigaben</target>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.noOpenApprovals">
+      <segment>
+        <source>nothing is waiting for your approval</source>
+        <target>Nichts wartet auf deine Freigabe</target>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.recommendation">
+      <segment>
+        <source>recommendation</source>
+        <target>Empfehlung</target>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.approveReason">
+      <segment>
+        <source>reason for the approval (optional)</source>
+        <target>Begründung der Freigabe (optional)</target>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.rejectReason">
+      <segment>
+        <source>why is this rejected?</source>
+        <target>Warum wird abgelehnt?</target>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.tab">
+      <segment>
+        <source>flow</source>
+        <target>Flow</target>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.phase">
+      <segment>
+        <source>phase</source>
+        <target>Phase</target>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.noPhase">
+      <segment>
+        <source>This project state is not mapped to a phase.</source>
+        <target>Dieser Projektstatus ist keiner Phase zugeordnet.</target>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.nextPhase">
+      <segment>
+        <source>next phase</source>
+        <target>nächste Phase</target>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.riskClass">
+      <segment>
+        <source>risk class</source>
+        <target>Risikoklasse</target>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.gateNotRequired">
+      <segment>
+        <source>not required for this risk class</source>
+        <target>für diese Risikoklasse nicht nötig</target>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.requestApproval">
+      <segment>
+        <source>request approval</source>
+        <target>Freigabe anfordern</target>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.jobs">
+      <segment>
+        <source>development jobs</source>
+        <target>Development-Jobs</target>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.newJob">
+      <segment>
+        <source>new job</source>
+        <target>Job anlegen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.jsonPreview">
+      <segment>
+        <source>JSON preview</source>
+        <target>JSON-Vorschau</target>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.createJob">
+      <segment>
+        <source>create job</source>
+        <target>Job anlegen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.noJobs">
+      <segment>
+        <source>no development jobs yet</source>
+        <target>noch keine Development-Jobs</target>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.mergeRequest">
+      <segment>
+        <source>merge request</source>
+        <target>Merge Request</target>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.viewTable">
+      <segment>
+        <source>table</source>
+        <target>Tabelle</target>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.viewDiagram">
+      <segment>
+        <source>flow diagram</source>
+        <target>Flussdiagramm</target>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.legendFree">
+      <segment>
+        <source>transition without requirements</source>
+        <target>Übergang ohne Anforderungen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.legendRequirements">
+      <segment>
+        <source>transition with requirements (role or gates)</source>
+        <target>Übergang mit Anforderungen (Rolle oder Gates)</target>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.legendColumns">
+      <segment>
+        <source>columns follow the phases; finished states on the right</source>
+        <target>Spalten folgen den Phasen; abgeschlossene Status rechts</target>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.approvalsFromRiskClass">
+      <segment>
+        <source>per risk class</source>
+        <target>lt. Risikoklasse</target>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.riskAtLeast">
+      <segment>
+        <source>risk ≥</source>
+        <target>Risiko ≥</target>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.requiresRole">
+      <segment>
+        <source>role</source>
+        <target>Rolle</target>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.requiresGates">
+      <segment>
+        <source>gates</source>
+        <target>Gates</target>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.leavesPhase">
+      <segment>
+        <source>leaves phase</source>
+        <target>verlässt Phase</target>
+      </segment>
+    </unit>
+    <unit id="i18n.settings.contactDetails">
+      <segment>
+        <source>contact details</source>
+        <target>Kontaktdaten</target>
+      </segment>
+    </unit>
+    <unit id="i18n.settings.bankDetails">
+      <segment>
+        <source>bank details</source>
+        <target>Bankverbindung</target>
+      </segment>
+    </unit>
+    <unit id="i18n.settings.taxAndRegister">
+      <segment>
+        <source>tax and register</source>
+        <target>Steuer und Register</target>
+      </segment>
+    </unit>
+    <unit id="i18n.settings.companyInformationUsage">
+      <segment>
+        <source>These details appear as the sender on invoices, quotes and PDF templates.</source>
+        <target>Diese Angaben erscheinen als Absender auf Rechnungen, Angeboten und PDF-Vorlagen.</target>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.action">
+      <segment>
+        <source>action</source>
+        <target>Aktion</target>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.actionApproval">
+      <segment>
+        <source>approvals</source>
+        <target>Freigaben</target>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.actionConfig">
+      <segment>
+        <source>configuration</source>
+        <target>Konfiguration</target>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.actionJob">
+      <segment>
+        <source>jobs</source>
+        <target>Jobs</target>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.actionProject">
+      <segment>
+        <source>project state changes</source>
+        <target>Statuswechsel</target>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.active">
+      <segment>
+        <source>active</source>
+        <target>aktiv</target>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.actor">
+      <segment>
+        <source>actor</source>
+        <target>Akteur</target>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.addGate">
+      <segment>
+        <source>add gate</source>
+        <target>Gate hinzufügen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.addJobType">
+      <segment>
+        <source>add job type</source>
+        <target>Job-Typ hinzufügen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.addPhase">
+      <segment>
+        <source>add phase</source>
+        <target>Phase hinzufügen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.addRiskClass">
+      <segment>
+        <source>add risk class</source>
+        <target>Risikoklasse hinzufügen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.addTransition">
+      <segment>
+        <source>add transition</source>
+        <target>Übergang hinzufügen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.allActions">
+      <segment>
+        <source>all actions</source>
+        <target>alle Aktionen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.allActors">
+      <segment>
+        <source>users and machines</source>
+        <target>Nutzer und Maschinen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.allSubjects">
+      <segment>
+        <source>all subjects</source>
+        <target>alle Objekte</target>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.approvals">
+      <segment>
+        <source>approvals</source>
+        <target>Freigaben</target>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.auditEmpty">
+      <segment>
+        <source>nothing recorded yet</source>
+        <target>noch nichts protokolliert</target>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.condition">
+      <segment>
+        <source>condition</source>
+        <target>Bedingung</target>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.conditionAlways">
+      <segment>
+        <source>always</source>
+        <target>immer</target>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.conditionRisk">
+      <segment>
+        <source>risk level ≥</source>
+        <target>ab Risiko-Level</target>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.deleteMessage">
+      <segment>
+        <source>delete this entry? The change is recorded in the protocol.</source>
+        <target>diesen Eintrag löschen? Die Änderung wird protokolliert.</target>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.deleteTitle">
+      <segment>
+        <source>delete</source>
+        <target>löschen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.details">
+      <segment>
+        <source>details</source>
+        <target>Details</target>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.from">
+      <segment>
+        <source>from</source>
+        <target>von</target>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.gate">
+      <segment>
+        <source>gate</source>
+        <target>Gate</target>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.inputSchema">
+      <segment>
+        <source>input schema (JSON)</source>
+        <target>Input-Schema (JSON)</target>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.invalidJson">
+      <segment>
+        <source>This is not valid JSON.</source>
+        <target>Das ist kein gültiges JSON.</target>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.jobTypes">
+      <segment>
+        <source>job types</source>
+        <target>Job-Typen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.jobsShort">
+      <segment>
+        <source>jobs</source>
+        <target>Jobs</target>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.key">
+      <segment>
+        <source>key</source>
+        <target>Schlüssel</target>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.level">
+      <segment>
+        <source>level</source>
+        <target>Level</target>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.machines">
+      <segment>
+        <source>machines</source>
+        <target>Maschinen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.newGateKey">
+      <segment>
+        <source>new gate key</source>
+        <target>neuer Gate-Schlüssel</target>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.newJobTypeKey">
+      <segment>
+        <source>new job type key</source>
+        <target>neuer Job-Typ-Schlüssel</target>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.newPhaseKey">
+      <segment>
+        <source>new phase key</source>
+        <target>neuer Phasen-Schlüssel</target>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.phasesAndGates">
+      <segment>
+        <source>phases &amp; gates</source>
+        <target>Phasen &amp; Gates</target>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.protocol">
+      <segment>
+        <source>protocol</source>
+        <target>Protokoll</target>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.releaseApprovals">
+      <segment>
+        <source>release approvals</source>
+        <target>Release-Freigaben</target>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.releaseGate">
+      <segment>
+        <source>release gate</source>
+        <target>Release-Gate</target>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.requiredRole">
+      <segment>
+        <source>required role</source>
+        <target>Pflichtrolle</target>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.riskClassHint">
+      <segment>
+        <source>Projects without a risk class count as level 0. Gates whose approval count is empty take it from the release approvals of the project's risk class.</source>
+        <target>Projekte ohne Risikoklasse zählen als Level 0. Gates ohne eigene Freigabe-Anzahl übernehmen die Release-Freigaben der Risikoklasse des Projekts.</target>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.riskClasses">
+      <segment>
+        <source>risk classes</source>
+        <target>Risikoklassen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.schemaHint">
+      <segment>
+        <source>Field types: string, text, url (http/https), list (one entry per line), object (JSON). New types start with an example field.</source>
+        <target>Feldtypen: string, text, url (http/https), list (ein Eintrag pro Zeile), object (JSON). Neue Typen starten mit einem Beispielfeld.</target>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.showDetails">
+      <segment>
+        <source>show</source>
+        <target>anzeigen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.sort">
+      <segment>
+        <source>sort</source>
+        <target>Sortierung</target>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.stateMachine">
+      <segment>
+        <source>project state machine</source>
+        <target>Projekt-State-Machine</target>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.subject">
+      <segment>
+        <source>subject</source>
+        <target>Objekt</target>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.to">
+      <segment>
+        <source>to</source>
+        <target>nach</target>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.transitionExists">
+      <segment>
+        <source>this transition already exists</source>
+        <target>dieser Übergang existiert schon</target>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.transitions">
+      <segment>
+        <source>transitions</source>
+        <target>Übergänge</target>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.users">
+      <segment>
+        <source>users</source>
+        <target>Nutzer</target>
+      </segment>
+    </unit>
+    <unit id="i18n.invoice.collectedViaSepa">
+      <segment>
+        <source>collected via SEPA direct debit</source>
+        <target>per SEPA-Lastschrift eingezogen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.sepa.directDebit">
+      <segment>
+        <source>SEPA direct debit</source>
+        <target>SEPA-Lastschrift</target>
+      </segment>
+    </unit>
+    <unit id="i18n.sepa.help">
+      <segment>
+        <source>upload the file in your online banking. the invoices are not marked as paid automatically.</source>
+        <target>Lade die Datei in deinem Online-Banking hoch. Die Rechnungen werden nicht automatisch als bezahlt markiert.</target>
+      </segment>
+    </unit>
+    <unit id="i18n.sepa.collectionDate">
+      <segment>
+        <source>collection date</source>
+        <target>Einzugsdatum</target>
+      </segment>
+    </unit>
+    <unit id="i18n.sepa.noCandidates">
+      <segment>
+        <source>no unpaid invoices of customers with a SEPA mandate</source>
+        <target>keine offenen Rechnungen von Kunden mit SEPA-Mandat</target>
+      </segment>
+    </unit>
+    <unit id="i18n.sepa.alreadyCollected">
+      <segment>
+        <source>already collected via SEPA direct debit</source>
+        <target>bereits per SEPA-Lastschrift eingezogen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.sepa.createXml">
+      <segment>
+        <source>create XML</source>
+        <target>XML erstellen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.sepa.created">
+      <segment>
+        <source>SEPA direct debit file created</source>
+        <target>SEPA-Lastschriftdatei erstellt</target>
+      </segment>
+    </unit>
+    <unit id="i18n.sepa.issue.noMandate">
+      <segment>
+        <source>no mandate</source>
+        <target>kein Mandat</target>
+      </segment>
+    </unit>
+    <unit id="i18n.sepa.issue.mandateDateMissing">
+      <segment>
+        <source>mandate date missing</source>
+        <target>Mandatsdatum fehlt</target>
+      </segment>
+    </unit>
+    <unit id="i18n.sepa.issue.ibanInvalid">
+      <segment>
+        <source>IBAN invalid</source>
+        <target>IBAN ungültig</target>
+      </segment>
+    </unit>
+    <unit id="i18n.sepa.issue.nothingDue">
+      <segment>
+        <source>nothing due</source>
+        <target>nichts offen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.customers.set_bic">
+      <segment>
+        <source>set BIC</source>
+        <target>BIC setzen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.customers.set_account_holder">
+      <segment>
+        <source>set account holder</source>
+        <target>Kontoinhaber setzen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.customers.accountHolderHint">
+      <segment>
+        <source>optional, defaults to the customer name</source>
+        <target>optional, standardmäßig der Kundenname</target>
+      </segment>
+    </unit>
+    <unit id="i18n.customers.set_mandate_date">
+      <segment>
+        <source>set mandate date</source>
+        <target>Mandatsdatum setzen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.customers.mandateDateHint">
+      <segment>
+        <source>date the mandate was signed (YYYY-MM-DD), needed for SEPA direct debit</source>
+        <target>Datum der Mandatsunterschrift (JJJJ-MM-TT), nötig für die SEPA-Lastschrift</target>
+      </segment>
+    </unit>
+    <unit id="i18n.customers.invalidMandateDate">
+      <segment>
+        <source>invalid mandate date, expected YYYY-MM-DD</source>
+        <target>ungültiges Mandatsdatum, erwartet JJJJ-MM-TT</target>
+      </segment>
+    </unit>
+    <unit id="i18n.customers.accountHolder">
+      <segment>
+        <source>account holder</source>
+        <target>Kontoinhaber</target>
+      </segment>
+    </unit>
+    <unit id="i18n.customers.mandateDate">
+      <segment>
+        <source>mandate date</source>
+        <target>Mandatsdatum</target>
+      </segment>
+    </unit>
+    <unit id="i18n.customers.mandateDateMissing">
+      <segment>
+        <source>mandate date missing, needed for SEPA direct debit</source>
+        <target>Mandatsdatum fehlt, nötig für die SEPA-Lastschrift</target>
+      </segment>
+    </unit>
+    <unit id="i18n.common.refresh">
+      <segment>
+        <source>refresh</source>
+        <target>aktualisieren</target>
+      </segment>
+    </unit>
+    <unit id="i18n.webhooks.title">
+      <segment>
+        <source>webhooks</source>
+        <target>Webhooks</target>
+      </segment>
+    </unit>
+    <unit id="i18n.webhooks.create">
+      <segment>
+        <source>new webhook</source>
+        <target>neuer Webhook</target>
+      </segment>
+    </unit>
+    <unit id="i18n.webhooks.edit">
+      <segment>
+        <source>edit webhook</source>
+        <target>Webhook bearbeiten</target>
+      </segment>
+    </unit>
+    <unit id="i18n.webhooks.noEndpoints">
+      <segment>
+        <source>no webhooks yet</source>
+        <target>noch keine Webhooks</target>
+      </segment>
+    </unit>
+    <unit id="i18n.webhooks.events">
+      <segment>
+        <source>events</source>
+        <target>Ereignisse</target>
+      </segment>
+    </unit>
+    <unit id="i18n.webhooks.event">
+      <segment>
+        <source>event</source>
+        <target>Ereignis</target>
+      </segment>
+    </unit>
+    <unit id="i18n.webhooks.event.invoiceCreated">
+      <segment>
+        <source>invoice created</source>
+        <target>Rechnung erstellt</target>
+      </segment>
+    </unit>
+    <unit id="i18n.webhooks.event.invoicePaid">
+      <segment>
+        <source>invoice paid</source>
+        <target>Rechnung bezahlt</target>
+      </segment>
+    </unit>
+    <unit id="i18n.webhooks.event.invoiceCancelled">
+      <segment>
+        <source>invoice cancelled</source>
+        <target>Rechnung storniert</target>
+      </segment>
+    </unit>
+    <unit id="i18n.webhooks.event.projectStateChanged">
+      <segment>
+        <source>project state changed</source>
+        <target>Projektstatus geändert</target>
+      </segment>
+    </unit>
+    <unit id="i18n.webhooks.event.companyCreated">
+      <segment>
+        <source>company created</source>
+        <target>Firma angelegt</target>
+      </segment>
+    </unit>
+    <unit id="i18n.webhooks.event.vacationApproved">
+      <segment>
+        <source>vacation approved</source>
+        <target>Urlaub genehmigt</target>
+      </segment>
+    </unit>
+    <unit id="i18n.webhooks.event.ping">
+      <segment>
+        <source>test event</source>
+        <target>Testereignis</target>
+      </segment>
+    </unit>
+    <unit id="i18n.webhooks.ping">
+      <segment>
+        <source>send test event</source>
+        <target>Testereignis senden</target>
+      </segment>
+    </unit>
+    <unit id="i18n.webhooks.pingDelivered">
+      <segment>
+        <source>test event delivered</source>
+        <target>Testereignis zugestellt</target>
+      </segment>
+    </unit>
+    <unit id="i18n.webhooks.pingFailed">
+      <segment>
+        <source>test event failed</source>
+        <target>Testereignis fehlgeschlagen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.webhooks.deliveries">
+      <segment>
+        <source>deliveries</source>
+        <target>Zustellungen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.webhooks.deliveriesHint">
+      <segment>
+        <source>the last 50 deliveries</source>
+        <target>die letzten 50 Zustellungen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.webhooks.noDeliveries">
+      <segment>
+        <source>no deliveries yet</source>
+        <target>noch keine Zustellungen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.webhooks.attempts">
+      <segment>
+        <source>attempts</source>
+        <target>Versuche</target>
+      </segment>
+    </unit>
+    <unit id="i18n.webhooks.delivered">
+      <segment>
+        <source>delivered</source>
+        <target>zugestellt</target>
+      </segment>
+    </unit>
+    <unit id="i18n.webhooks.nextAttempt">
+      <segment>
+        <source>next attempt</source>
+        <target>nächster Versuch</target>
+      </segment>
+    </unit>
+    <unit id="i18n.webhooks.failed">
+      <segment>
+        <source>failed</source>
+        <target>fehlgeschlagen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.webhooks.payload">
+      <segment>
+        <source>payload</source>
+        <target>Payload</target>
+      </segment>
+    </unit>
+    <unit id="i18n.webhooks.lastDelivered">
+      <segment>
+        <source>last delivered</source>
+        <target>zuletzt zugestellt</target>
+      </segment>
+    </unit>
+    <unit id="i18n.webhooks.neverDelivered">
+      <segment>
+        <source>nothing delivered yet</source>
+        <target>noch nichts zugestellt</target>
+      </segment>
+    </unit>
+    <unit id="i18n.webhooks.lastFailed">
+      <segment>
+        <source>last failed</source>
+        <target>zuletzt fehlgeschlagen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.webhooks.reallyDelete">
+      <segment>
+        <source>really delete this webhook? Pending deliveries are discarded.</source>
+        <target>Diesen Webhook wirklich löschen? Ausstehende Zustellungen werden verworfen.</target>
+      </segment>
+    </unit>
+    <unit id="i18n.webhooks.reallyRotate">
+      <segment>
+        <source>rotate the signing secret? The current secret stops working immediately.</source>
+        <target>Signatur-Secret erneuern? Das bisherige Secret ist sofort ungültig.</target>
+      </segment>
+    </unit>
+    <unit id="i18n.webhooks.secret">
+      <segment>
+        <source>signing secret</source>
+        <target>Signatur-Secret</target>
+      </segment>
+    </unit>
+    <unit id="i18n.webhooks.secretCopied">
+      <segment>
+        <source>secret copied to the clipboard</source>
+        <target>Secret in die Zwischenablage kopiert</target>
+      </segment>
+    </unit>
+    <unit id="i18n.webhooks.secretOnceHint">
+      <segment>
+        <source>This is the signing secret of the new webhook. Store it now in the receiving system — you can reveal or rotate it later from the edit dialog.</source>
+        <target>Das ist das Signatur-Secret des neuen Webhooks. Hinterlege es jetzt im empfangenden System – du kannst es später im Bearbeiten-Dialog anzeigen oder erneuern.</target>
+      </segment>
+    </unit>
+    <unit id="i18n.webhooks.revealSecret">
+      <segment>
+        <source>reveal secret</source>
+        <target>Secret anzeigen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.webhooks.rotateSecret">
+      <segment>
+        <source>rotate secret</source>
+        <target>Secret erneuern</target>
+      </segment>
+    </unit>
+    <unit id="i18n.webhooks.urlHint">
+      <segment>
+        <source>Only https URLs on publicly reachable hosts are accepted.</source>
+        <target>Nur https-URLs auf öffentlich erreichbaren Hosts sind erlaubt.</target>
+      </segment>
+    </unit>
+    <unit id="i18n.webhooks.signatureHelp">
+      <segment>
+        <source>Every delivery is a signed JSON POST. Receivers verify it with the signing secret as described in the Standard Webhooks specification:</source>
+        <target>Jede Zustellung ist ein signierter JSON-POST. Empfänger prüfen ihn mit dem Signatur-Secret, wie in der Standard-Webhooks-Spezifikation beschrieben:</target>
+      </segment>
+    </unit>
+    <unit id="i18n.webhooks.headers">
+      <segment>
+        <source>headers</source>
+        <target>Header</target>
+      </segment>
+    </unit>
+    <unit id="i18n.webhooks.signature">
+      <segment>
+        <source>signature</source>
+        <target>Signatur</target>
+      </segment>
+    </unit>
+    <unit id="i18n.webhooks.retryHelp">
+      <segment>
+        <source>Failed deliveries are retried up to 8 times, from after 1 minute up to after 1 day.</source>
+        <target>Fehlgeschlagene Zustellungen werden bis zu 8-mal wiederholt – im Abstand von 1 Minute bis zu 1 Tag.</target>
+      </segment>
+    </unit>
+    <unit id="i18n.profile.calendarFeed">
+      <segment>
+        <source>calendar subscription (Outlook, Google)</source>
+        <target>Kalender-Abo (Outlook, Google)</target>
+      </segment>
+    </unit>
+    <unit id="i18n.profile.calendarFeedRotate">
+      <segment>
+        <source>new link</source>
+        <target>neuer Link</target>
+      </segment>
+    </unit>
+    <unit id="i18n.profile.calendarFeedRotateConfirm">
+      <segment>
+        <source>Create a new subscription link? The old link stops working immediately.</source>
+        <target>Neuen Abo-Link erstellen? Der alte Link funktioniert dann sofort nicht mehr.</target>
+      </segment>
+    </unit>
+    <unit id="i18n.profile.calendarFeedHint">
+      <segment>
+        <source>The alternative for calendars outside Microsoft 365. In Outlook: Add calendar → Subscribe from web; in Google Calendar: Other calendars → From URL. Anyone with the link can read the company calendar.</source>
+        <target>Die Alternative für Kalender außerhalb von Microsoft 365. In Outlook: Kalender hinzufügen → Aus dem Internet abonnieren; in Google Kalender: Weitere Kalender → Per URL. Jeder mit dem Link kann den Firmenkalender lesen.</target>
+      </segment>
+    </unit>
+    <unit id="i18n.profile.microsoft365">
+      <segment>
+        <source>Microsoft 365</source>
+        <target>Microsoft 365</target>
+      </segment>
+    </unit>
+    <unit id="i18n.profile.m365Autoreply">
+      <segment>
+        <source>automatic reply in Outlook</source>
+        <target>automatische Antwort in Outlook</target>
+      </segment>
+    </unit>
+    <unit id="i18n.profile.m365AutoreplyHint">
+      <segment>
+        <source>Schedules your Outlook automatic reply for your next approved vacation.</source>
+        <target>Plant deine automatische Antwort in Outlook für deinen nächsten genehmigten Urlaub.</target>
+      </segment>
+    </unit>
+    <unit id="i18n.profile.m365SyncCalendar">
+      <segment>
+        <source>TALVIS calendar in Outlook</source>
+        <target>TALVIS-Kalender in Outlook</target>
+      </segment>
+    </unit>
+    <unit id="i18n.profile.m365SyncCalendarHint">
+      <segment>
+        <source>Mirrors the company calendar — birthdays, absences and calendar entries — every 30 minutes into a separate read-only calendar "TALVIS" in your mailbox. Its events are shown as free. Switching off removes the calendar.</source>
+        <target>Spiegelt den Firmenkalender — Geburtstage, Abwesenheiten und Kalendereinträge — alle 30 Minuten in einen eigenen, schreibgeschützten Kalender „TALVIS“ in deinem Postfach. Seine Termine werden als frei angezeigt. Beim Ausschalten wird der Kalender entfernt.</target>
+      </segment>
+    </unit>
+    <unit id="i18n.profile.m365SyncContacts">
+      <segment>
+        <source>TALVIS address book in Outlook</source>
+        <target>TALVIS-Adressbuch in Outlook</target>
+      </segment>
+    </unit>
+    <unit id="i18n.profile.m365SyncContactsHint">
+      <segment>
+        <source>Mirrors your TALVIS address book — the same contacts as via CardDAV — into a contact folder "TALVIS". Switching off removes the folder.</source>
+        <target>Spiegelt dein TALVIS-Adressbuch — dieselben Kontakte wie per CardDAV — in einen Kontaktordner „TALVIS“. Beim Ausschalten wird der Ordner entfernt.</target>
+      </segment>
+    </unit>
+    <unit id="i18n.profile.m365Hint">
+      <segment>
+        <source>Requires that an admin configured the Microsoft 365 connector. Replaces tools like CalDAV Synchronizer.</source>
+        <target>Setzt voraus, dass ein Admin den Microsoft-365-Connector eingerichtet hat. Ersetzt Tools wie CalDAV Synchronizer.</target>
+      </segment>
+    </unit>
+    <unit id="i18n.profile.m365AutoreplyText">
+      <segment>
+        <source>automatic reply</source>
+        <target>automatische Antwort</target>
+      </segment>
+    </unit>
+    <unit id="i18n.profile.m365AutoreplyTextHint">
+      <segment>
+        <source>Leave empty to use the company default. <ph id="0" equiv="name" disp="'{name}'"/> becomes your name, <ph id="1" equiv="until" disp="'{until}'"/> the last day of your vacation. Changes apply to your next vacation from the next morning on.</source>
+        <target>Leer lassen, um den Standardtext der Firma zu verwenden. <ph id="0" equiv="name" disp="'{name}'"/> wird durch deinen Namen ersetzt, <ph id="1" equiv="until" disp="'{until}'"/> durch den letzten Tag deines Urlaubs. Änderungen gelten ab dem nächsten Morgen für deinen nächsten Urlaub.</target>
+      </segment>
+    </unit>
+    <unit id="i18n.profile.m365Connect">
+      <segment>
+        <source>Connect Microsoft 365</source>
+        <target>Microsoft 365 verbinden</target>
+      </segment>
+    </unit>
+    <unit id="i18n.profile.m365ConnectHint">
+      <segment>
+        <source>Sign in with your Microsoft 365 account to switch on the features below.</source>
+        <target>Melde dich mit deinem Microsoft-365-Konto an, um die Funktionen unten einzuschalten.</target>
+      </segment>
+    </unit>
+    <unit id="i18n.profile.m365LinkedWith">
+      <segment>
+        <source>linked with <ph equiv="INTERPOLATION" id="0" /></source>
+        <target>verbunden mit <ph equiv="INTERPOLATION" id="0" /></target>
+      </segment>
+    </unit>
+    <unit id="i18n.profile.m365Disconnect">
+      <segment>
+        <source>disconnect Microsoft 365</source>
+        <target>Microsoft 365 trennen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.profile.m365DisconnectConfirm">
+      <segment>
+        <source>Disconnect your Microsoft 365 account? The TALVIS calendar and address book are removed from your mailbox.</source>
+        <target>Dein Microsoft-365-Konto trennen? Der TALVIS-Kalender und das TALVIS-Adressbuch werden aus deinem Postfach entfernt.</target>
+      </segment>
+    </unit>
+    <unit id="i18n.profile.m365Connected">
+      <segment>
+        <source>Microsoft 365 connected</source>
+        <target>Microsoft 365 verbunden</target>
+      </segment>
+    </unit>
+    <unit id="i18n.profile.m365ConnectFailed">
+      <segment>
+        <source>Microsoft 365 could not be connected</source>
+        <target>Microsoft 365 konnte nicht verbunden werden</target>
+      </segment>
+    </unit>
+    <unit id="i18n.hr.m365NotConnected">
+      <segment>
+        <source>not connected — each person connects their own account in their profile</source>
+        <target>nicht verbunden – jede Person verbindet ihr Konto selbst in ihrem Profil</target>
+      </segment>
+    </unit>
+    <unit id="i18n.hr.m365DisconnectConfirm">
+      <segment>
+        <source>Disconnect this person's Microsoft 365 account? The TALVIS calendar and address book are removed from the mailbox.</source>
+        <target>Das Microsoft-365-Konto dieser Person trennen? Der TALVIS-Kalender und das TALVIS-Adressbuch werden aus dem Postfach entfernt.</target>
+      </segment>
+    </unit>
+    <unit id="i18n.m365Guide.title">
+      <segment>
+        <source>Microsoft 365 setup guide</source>
+        <target>Einrichtungsanleitung Microsoft 365</target>
+      </segment>
+    </unit>
+    <unit id="i18n.m365Guide.prerequisites">
+      <segment>
+        <source>You need the Entra role Global Administrator (or Cloud Application Administrator plus Exchange Administrator), Teams admin rights and, for Teams only, an Azure subscription — pay-as-you-go is enough, the F0 bot tier is free. One app registration serves automatic replies, the TALVIS calendar, the TALVIS address book and Teams.</source>
+        <target>Du brauchst die Entra-Rolle Globaler Administrator (oder Cloudanwendungsadministrator plus Exchange-Administrator), Teams-Admin-Rechte und, nur für Teams, ein Azure-Abonnement — Pay-as-you-go reicht, der Bot-Tarif F0 ist kostenlos. Eine einzige App-Registrierung deckt Abwesenheitsnotizen, den TALVIS-Kalender, das TALVIS-Adressbuch und Teams ab.</target>
+      </segment>
+    </unit>
+    <unit id="i18n.m365Guide.step1Title">
+      <segment>
+        <source>Register the app</source>
+        <target>App registrieren</target>
+      </segment>
+    </unit>
+    <unit id="i18n.m365Guide.step1Text">
+      <segment>
+        <source>Entra admin center → App registrations → New registration. Name it TALVIS, choose "Accounts in this organizational directory only" (single tenant) and leave the redirect URI empty. Copy the Directory (tenant) ID and the Application (client) ID from the overview page into "tenant id" and "client id" of this connector.</source>
+        <target>Entra Admin Center → App-Registrierungen → Neue Registrierung. Name TALVIS, „Nur Konten in diesem Organisationsverzeichnis“ (Single Tenant) wählen und die Umleitungs-URI leer lassen. Verzeichnis-ID (Tenant-ID) und Anwendungs-ID (Client-ID) von der Übersichtsseite in „tenant id“ und „client id“ dieses Connectors kopieren.</target>
+      </segment>
+    </unit>
+    <unit id="i18n.m365Guide.openEntra">
+      <segment>
+        <source>open Entra admin center</source>
+        <target>Entra Admin Center öffnen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.m365Guide.step2Title">
+      <segment>
+        <source>Grant Graph permissions</source>
+        <target>Graph-Berechtigungen erteilen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.m365Guide.step2Text">
+      <segment>
+        <source>API permissions → Add a permission → Microsoft Graph → Application permissions:</source>
+        <target>API-Berechtigungen → Berechtigung hinzufügen → Microsoft Graph → Anwendungsberechtigungen:</target>
+      </segment>
+    </unit>
+    <unit id="i18n.m365Guide.step2Consent">
+      <segment>
+        <source>Then click "Grant admin consent" — every row must show a green check mark. Mailbox settings, calendars and contacts are deliberately not granted here; step 4 restricts them to a group.</source>
+        <target>Danach „Administratorzustimmung erteilen“ klicken — jede Zeile muss einen grünen Haken zeigen. Postfacheinstellungen, Kalender und Kontakte werden hier bewusst nicht vergeben; Schritt 4 beschränkt sie auf eine Gruppe.</target>
+      </segment>
+    </unit>
+    <unit id="i18n.m365Guide.step3Title">
+      <segment>
+        <source>Create a client secret</source>
+        <target>Geheimen Clientschlüssel erstellen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.m365Guide.step3Text">
+      <segment>
+        <source>Certificates &amp; secrets → New client secret, expiry 24 months. Copy the Value — not the Secret ID, and it is shown only once — into "client secret" and enter its expiry date into "secret expires at". Once the secret expires, the integration stops until a new one is saved.</source>
+        <target>Zertifikate &amp; Geheimnisse → Neuer geheimer Clientschlüssel, Laufzeit 24 Monate. Den Wert — nicht die Geheimnis-ID, und er wird nur einmal angezeigt — in „client secret“ kopieren und das Ablaufdatum in „secret expires at“ eintragen. Läuft der Schlüssel ab, steht die Integration still, bis ein neuer hinterlegt ist.</target>
+      </segment>
+    </unit>
+    <unit id="i18n.m365Guide.step4Title">
+      <segment>
+        <source>Restrict mailbox access to a group</source>
+        <target>Postfachzugriff auf eine Gruppe beschränken</target>
+      </segment>
+    </unit>
+    <unit id="i18n.m365Guide.step4Group">
+      <segment>
+        <source>Automatic replies, the TALVIS calendar and the TALVIS address book use Exchange Online RBAC for Applications, limited to the members of one group. Create a mail-enabled security group in the Exchange admin center and add everyone whose mailbox TALVIS should write to. The three role assignments grant MailboxSettings for the automatic reply, Calendars for the TALVIS calendar and Contacts for the TALVIS address book.</source>
+        <target>Abwesenheitsnotizen, der TALVIS-Kalender und das TALVIS-Adressbuch laufen über Exchange Online RBAC für Anwendungen, beschränkt auf die Mitglieder einer Gruppe. Lege im Exchange Admin Center eine E-Mail-aktivierte Sicherheitsgruppe an und nimm alle auf, in deren Postfach TALVIS schreiben soll. Die drei Rollenzuweisungen vergeben MailboxSettings für die automatische Antwort, Calendars für den TALVIS-Kalender und Contacts für das TALVIS-Adressbuch.</target>
+      </segment>
+    </unit>
+    <unit id="i18n.m365Guide.step4ObjectId">
+      <segment>
+        <source>The object id is under Entra → Enterprise applications → TALVIS → Object ID. It differs from the object id of the app registration.</source>
+        <target>Die Objekt-ID findest du unter Entra → Unternehmensanwendungen → TALVIS → Objekt-ID. Sie ist nicht die Objekt-ID der App-Registrierung.</target>
+      </segment>
+    </unit>
+    <unit id="i18n.m365Guide.step4Module">
+      <segment>
+        <source>Run in PowerShell — install the module once with</source>
+        <target>In PowerShell ausführen — das Modul einmalig installieren mit</target>
+      </segment>
+    </unit>
+    <unit id="i18n.m365Guide.step4Check">
+      <segment>
+        <source>The last command must report InScope = True for a group member. It can take up to 2 hours until the assignment takes effect. New colleagues later only need to be added to the group.</source>
+        <target>Der letzte Befehl muss für ein Gruppenmitglied InScope = True melden. Bis die Zuweisung greift, kann es bis zu 2 Stunden dauern. Neue Kolleg:innen müssen später nur noch in die Gruppe aufgenommen werden.</target>
+      </segment>
+    </unit>
+    <unit id="i18n.m365Guide.step5Title">
+      <segment>
+        <source>Connect Microsoft Teams (optional)</source>
+        <target>Microsoft Teams anbinden (optional)</target>
+      </segment>
+    </unit>
+    <unit id="i18n.m365Guide.step5Bot">
+      <segment>
+        <source>Azure portal → Create a resource → Azure Bot: pricing tier F0, type single tenant, creation type "Use existing app registration" with the client id from step 1. Under Channels, add Microsoft Teams with the default settings. Under Configuration, set the messaging endpoint to:</source>
+        <target>Azure Portal → Ressource erstellen → Azure Bot: Tarif F0, Typ Einzelmandant, Erstellungstyp „Vorhandene App-Registrierung verwenden“ mit der Client-ID aus Schritt 1. Unter Kanäle Microsoft Teams mit den Standardeinstellungen hinzufügen. Unter Konfiguration den Messaging-Endpunkt setzen auf:</target>
+      </segment>
+    </unit>
+    <unit id="i18n.m365Guide.openAzure">
+      <segment>
+        <source>open Azure portal</source>
+        <target>Azure Portal öffnen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.m365Guide.step5Proxy">
+      <segment>
+        <source>If TALVIS runs behind a login proxy, this endpoint must be reachable without it — TALVIS verifies the Bot Framework token itself.</source>
+        <target>Läuft TALVIS hinter einem Login-Proxy, muss dieser Endpunkt ohne ihn erreichbar sein — TALVIS prüft das Bot-Framework-Token selbst.</target>
+      </segment>
+    </unit>
+    <unit id="i18n.m365Guide.step5Team">
+      <segment>
+        <source>In Teams, create or pick the team for the project channels and copy its id — the groupId value from "Get link to team" — into "team id". Optionally enter a channel id for company-wide announcements into "town square". A team holds at most 1000 channels; TALVIS archives channels of completed projects instead of deleting them.</source>
+        <target>In Teams das Team für die Projektkanäle anlegen oder auswählen und seine ID — den groupId-Wert aus „Link zum Team abrufen“ — in „team id“ kopieren. Optional eine Kanal-ID für firmenweite Ankündigungen in „town square“ eintragen. Ein Team fasst höchstens 1000 Kanäle; TALVIS archiviert Kanäle abgeschlossener Projekte, statt sie zu löschen.</target>
+      </segment>
+    </unit>
+    <unit id="i18n.m365Guide.step6Title">
+      <segment>
+        <source>Install the Teams app</source>
+        <target>Teams-App installieren</target>
+      </segment>
+    </unit>
+    <unit id="i18n.m365Guide.step6Text">
+      <segment>
+        <source>Save this connector first, then download the app package. Upload it in the Teams admin center → Teams apps → Manage apps → Upload and add the app to the team — without that, the bot cannot post there. To let the bot send direct messages, pre-install the app for the users via a setup policy.</source>
+        <target>Speichere zuerst diesen Connector und lade dann das App-Paket herunter. Lade es im Teams Admin Center → Teams-Apps → Apps verwalten → Hochladen hoch und füge die App dem Team hinzu — sonst darf der Bot dort nicht posten. Damit der Bot Direktnachrichten senden kann, die App per Setup-Richtlinie für die Benutzer vorinstallieren.</target>
+      </segment>
+    </unit>
+    <unit id="i18n.m365Guide.openTeamsAdmin">
+      <segment>
+        <source>open Teams admin center</source>
+        <target>Teams Admin Center öffnen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.m365Guide.downloadPackage">
+      <segment>
+        <source>download Teams app package</source>
+        <target>Teams-App-Paket herunterladen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.m365Guide.step7Title">
+      <segment>
+        <source>Connect and enable per person</source>
+        <target>Pro Person verbinden und aktivieren</target>
+      </segment>
+    </unit>
+    <unit id="i18n.m365Guide.step7Text">
+      <segment>
+        <source>Each person connects their own Microsoft 365 account in their profile (vCard page → "Connect Microsoft 365") by signing in with Microsoft, then switches on the features they want: automatic reply, TALVIS calendar and TALVIS address book. Admins can disconnect an account in HR → contact.</source>
+        <target>Jede Person verbindet ihr eigenes Microsoft-365-Konto im Profil (vCard-Seite → „Microsoft 365 verbinden“) per Anmeldung bei Microsoft und schaltet dann die gewünschten Funktionen ein: automatische Antwort, TALVIS-Kalender und TALVIS-Adressbuch. Admins können ein Konto unter HR → Kontakt trennen.</target>
+      </segment>
+    </unit>
+    <unit id="i18n.m365Guide.permUserRead">
+      <segment>
+        <source>match TALVIS users to Microsoft 365 accounts by e-mail</source>
+        <target>TALVIS-Benutzer per E-Mail einem Microsoft-365-Konto zuordnen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.m365Guide.permPresence">
+      <segment>
+        <source>set the Teams status during vacation or sick leave</source>
+        <target>Teams-Status bei Urlaub oder Krankheit setzen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.m365Guide.permTeamRead">
+      <segment>
+        <source>read the team that holds the project channels</source>
+        <target>das Team mit den Projektkanälen lesen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.m365Guide.permChannelRead">
+      <segment>
+        <source>find existing project channels</source>
+        <target>vorhandene Projektkanäle wiederfinden</target>
+      </segment>
+    </unit>
+    <unit id="i18n.m365Guide.permChannelCreate">
+      <segment>
+        <source>create one channel per project</source>
+        <target>einen Kanal pro Projekt anlegen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.m365Guide.permChannelSettings">
+      <segment>
+        <source>update channel name and description</source>
+        <target>Kanalname und -beschreibung aktualisieren</target>
+      </segment>
+    </unit>
+    <unit id="i18n.m365Guide.permTeamMember">
+      <segment>
+        <source>add project members to the team</source>
+        <target>Projektmitglieder ins Team aufnehmen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.m365Guide.placeholderClientId">
+      <segment>
+        <source>&lt;client id&gt;</source>
+        <target>&lt;Client-ID&gt;</target>
+      </segment>
+    </unit>
+    <unit id="i18n.m365Guide.placeholderObjectId">
+      <segment>
+        <source>&lt;object id of the enterprise application&gt;</source>
+        <target>&lt;Objekt-ID der Unternehmensanwendung&gt;</target>
+      </segment>
+    </unit>
+    <unit id="i18n.m365Guide.placeholderGroup">
+      <segment>
+        <source>&lt;group&gt;</source>
+        <target>&lt;Gruppe&gt;</target>
+      </segment>
+    </unit>
+    <unit id="i18n.m365Guide.placeholderMember">
+      <segment>
+        <source>someone@yourdomain</source>
+        <target>jemand@deinedomain</target>
+      </segment>
+    </unit>
+    <unit id="i18n.m365Guide.copied">
+      <segment>
+        <source>copied to the clipboard</source>
+        <target>in die Zwischenablage kopiert</target>
+      </segment>
+    </unit>
+    <unit id="i18n.m365Guide.open">
+      <segment>
+        <source>setup guide</source>
+        <target>Einrichtungsanleitung</target>
       </segment>
     </unit>
   </file>

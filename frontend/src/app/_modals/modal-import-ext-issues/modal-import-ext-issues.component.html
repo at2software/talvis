@@ -30,7 +30,7 @@
                         <div class="text-center text-muted py-4" i18n="@@i18n.issues.noIssuesFound">no issues found</div>
                     } @else {
                         <div class="hstack gap-2 mb-2">
-                            <button type="button" class="btn btn-sm btn-outline-primary" (click)="toggleSelectAll()">
+                            <button type="button" class="btn btn-sm btn-plain text-primary" (click)="toggleSelectAll()">
                                 @if (allFilteredSelected()) {
                                     <span i18n="@@i18n.issues.deselectAll">deselect all</span>
                                 } @else {

@@ -10,7 +10,7 @@
             <span class="badge bg-success"> {{ _availableModels.length }} models available </span>
         }
         @if (!_isNewPlugin && plugin.value?.url?.length) {
-            <button type="button" class="btn btn-sm" (click)="onLinkMyId()" [class.btn-outline-success]="!plugin.my_id" [class.btn-success]="plugin.my_id" [title]="plugin.my_id ? 'ID Linked' : 'Link My ID'">
+            <button type="button" class="btn btn-sm btn-plain hover-primary" (click)="onLinkMyId()" [class.text-muted]="!plugin.my_id" [class.text-success]="plugin.my_id" [title]="plugin.my_id ? 'ID Linked' : 'Link My ID'">
                 <i>{{ plugin.my_id ? 'link' : 'link_off' }}</i>
             </button>
         }
@@ -92,7 +92,7 @@
             </div>
             <div class="col-12">
                 <div class="mb-2">
-                    <button type="button" class="btn btn-sm btn-outline-primary me-2" [disabled]="_isTestingConnection || !plugin.value?.url || !plugin.value?.token || _isNewPlugin" (click)="onMantisConnectionTest()">
+                    <button type="button" class="btn btn-sm btn-plain text-primary me-2" [disabled]="_isTestingConnection || !plugin.value?.url || !plugin.value?.token || _isNewPlugin" (click)="onMantisConnectionTest()">
                         @if (!_isTestingConnection) {
                             <span i18n="@@i18n.profile.testConnection">test connection</span>
                         }
@@ -131,6 +131,58 @@
         </div>
     }
 
+    <!-- Jira -->
+    @if (plugin.type === 'jira') {
+        <div class="row">
+            <div class="col-12 col-md-6 col-xl-4">
+                <div class="form-floating mb-3">
+                    <input type="url" class="form-control" id="url" placeholder="https://acme.atlassian.net/" [(ngModel)]="plugin.value.url" />
+                    <label for="url" i18n="@@i18n.common.url">URL</label>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-xl-4">
+                <div class="form-floating mb-3">
+                    <input type="email" class="form-control" id="email" placeholder="me&#64;acme.com" [(ngModel)]="plugin.value.email" />
+                    <label for="email" i18n="@@i18n.common.email">email</label>
+                </div>
+            </div>
+            <div class="col-12 col-md-6 col-xl-4">
+                <div class="form-floating mb-3">
+                    <input type="password" class="form-control" id="token" placeholder="ATATT…" [(ngModel)]="plugin.value.token" />
+                    <label for="token" i18n="@@i18n.common.token">token</label>
+                </div>
+            </div>
+            <div class="col-12">
+                <div class="mb-2">Form: URL: <code>https://acme.atlassian.net/</code> email: <code>me&#64;acme.com</code> token: <code>ATATTxxxxxxx</code></div>
+                <div class="mb-2 small text-muted" i18n="@@i18n.profile.jiraTokenHint">Jira Cloud API token of your Atlassian account, used together with your login email. Projects are linked as https://acme.atlassian.net/browse/KEY.</div>
+                <a href="https://id.atlassian.com/manage-profile/security/api-tokens" target="_blank" i18n="@@i18n.info.howToCreateJiraToken">how to create Jira API token</a>
+            </div>
+        </div>
+    }
+
+    <!-- GitHub -->
+    @if (plugin.type === 'github') {
+        <div class="row">
+            <div class="col-12 col-md-6">
+                <div class="form-floating mb-3">
+                    <input type="url" class="form-control" id="url" placeholder="https://github.com/" [(ngModel)]="plugin.value.url" />
+                    <label for="url" i18n="@@i18n.common.url">URL</label>
+                </div>
+            </div>
+            <div class="col-12 col-md-6">
+                <div class="form-floating mb-3">
+                    <input type="password" class="form-control" id="token" placeholder="github_pat_…" [(ngModel)]="plugin.value.token" />
+                    <label for="token" i18n="@@i18n.common.token">token</label>
+                </div>
+            </div>
+            <div class="col-12">
+                <div class="mb-2">Form: URL: <code>https://github.com/</code> (Enterprise: <code>https://ghe.example.com/</code>) token: <code>github_pat_xxxxxxx</code></div>
+                <div class="mb-2 small text-muted" i18n="@@i18n.profile.githubTokenHint">Enter the web URL, not the API URL. Fine-grained token with read and write access to issues and read access to metadata of the repositories you want to link (classic token: repo scope).</div>
+                <a href="https://github.com/settings/personal-access-tokens" target="_blank" i18n="@@i18n.info.howToCreateGitHubToken">how to create GitHub token</a>
+            </div>
+        </div>
+    }
+
     <!-- Slack -->
     @if (plugin.type === 'slack') {
         <div class="row">
@@ -142,9 +194,14 @@
             </div>
             <div class="col-12 col-md-6">
                 <div class="form-floating mb-3">
-                    <input type="password" class="form-control" id="token" [(ngModel)]="plugin.value.token" />
+                    <input type="password" class="form-control" id="token" placeholder="xoxp-…" [(ngModel)]="plugin.value.token" />
                     <label for="token" i18n="@@i18n.common.token">token</label>
                 </div>
+            </div>
+            <div class="col-12">
+                <div class="mb-2">Form: URL: <code>https://myworkspace.slack.com/</code> token: <code>xoxp-xxxxxxx</code></div>
+                <div class="mb-2 small text-muted">User token scopes: <code>channels:read channels:history channels:write groups:read groups:history groups:write chat:write users:read users:read.email</code></div>
+                <a href="https://api.slack.com/apps" target="_blank" i18n="@@i18n.info.howToCreateSlackToken">how to create Slack token</a>
             </div>
         </div>
     }
@@ -185,7 +242,7 @@
             </div>
             <div class="col-12">
                 <div class="mb-2">
-                    <button type="button" class="btn btn-sm btn-outline-primary me-2" [disabled]="_isLoadingModels || !plugin.value?.url || _isNewPlugin" (click)="onLocalAIConnectionTest()">
+                    <button type="button" class="btn btn-sm btn-plain text-primary me-2" [disabled]="_isLoadingModels || !plugin.value?.url || _isNewPlugin" (click)="onLocalAIConnectionTest()">
                         @if (!_isLoadingModels) {
                             <span i18n="@@i18n.profile.testConnectionLoadModels">test connection & load models</span>
                         }
@@ -222,8 +279,8 @@
 
 <div class="modal-footer">
     @if (!_isNewPlugin) {
-        <button type="button" class="btn btn-outline-danger" (click)="onDelete()" i18n="@@i18n.profile.deletePlugin">delete plugin</button>
+        <button type="button" class="btn btn-plain text-danger" (click)="onDelete()" i18n="@@i18n.profile.deletePlugin">delete plugin</button>
     }
     <button type="button" class="btn btn-success" (click)="save()">{{ _isNewPlugin ? 'Create Plugin' : 'Save Changes' }}</button>
-    <button type="button" class="btn btn-secondary" (click)="close()" i18n="@@i18n.common.cancel">cancel</button>
+    <button type="button" class="btn" (click)="close()" i18n="@@i18n.common.cancel">cancel</button>
 </div>

@@ -25,11 +25,22 @@
         @if (hasLoaded() && invoices().length === 0) {
             <div class="card">
                 <empty-state [card]="false" class="invoices" i18n-title="@@i18n.invoices.noInvoicesYet" title="No invoices yet">
-                    <p i18n="@@i18n.invoices.emptyStateDescription">Your financial story is yet to be written. Create your first invoice and set the engine of your business in motion.</p>
+                    <p i18n="@@i18n.invoices.emptyStateHowTo">invoices are created at the customer under billing. select a customer to add billable items and create the invoice there.</p>
+                    <div class="col-md-6 mx-auto">
+                        <search-input only="Company" (itemSelected)="onCustomerSelected($event)"></search-input>
+                    </div>
                 </empty-state>
             </div>
         } @else {
             <div class="card">
+                @if (global.user?.hasRole('invoicing')) {
+                    <div class="card-header hstack gap-2">
+                        <span class="flex-fill text-truncate" i18n="@@i18n.common.invoices">invoices</span>
+                        <div class="card-header-actions text-nowrap">
+                            <i (click)="openSepaDirectDebit()" (keyup.enter)="openSepaDirectDebit()" tabindex="0" class="text-primary pointer" ngbTooltip="SEPA direct debit" i18n-ngbTooltip="@@i18n.sepa.directDebit">account_balance</i>
+                        </div>
+                    </div>
+                }
                 <invoices-table [invoices]="invoices()"></invoices-table>
                 <continuous-marker [observer]="observer()" (dataReceived)="onResult($event)"></continuous-marker>
             </div>

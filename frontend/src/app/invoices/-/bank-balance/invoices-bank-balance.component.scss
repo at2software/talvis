@@ -9,10 +9,8 @@
 }
 
 .tx-row {
-    cursor: pointer;
     user-select: none;
     &.active {
-        background: rgba(var(--bs-primary-rgb), 0.15) !important;
         border-left: 3px solid var(--bs-primary);
     }
 

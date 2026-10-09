@@ -1,5 +1,5 @@
 import { ShortPipe } from '@pipes/short.pipe';
-import type { EChartsOption } from 'echarts';
+import type { EChartsOption, PieSeriesOption } from 'echarts';
 
 declare module 'echarts/types/dist/shared' {
     interface CallbackDataParams {
@@ -18,9 +18,25 @@ export const ECHARTS_DEFAULT_TOOLTIP_OPTIONS = {
 };
 
 export const ECHARTS_DONUT_ITEM_STYLE = {
-    borderWidth: 1,
-    borderColor: '#000',
+    borderWidth: 0,
 };
+
+export const ECHARTS_DONUT_TRACK_COLOR = 'rgba(255, 255, 255, 0.08)';
+
+export const ECHARTS_DONUT_CENTER_TEXT = { fill: '#fff', fontSize: 16, fontWeight: 300 } as const;
+
+export const ECHARTS_DONUT_SERIES = {
+    type: 'pie',
+    radius: ['62%', '68%'],
+    label: { show: false },
+    labelLine: { show: false },
+    emphasis: { scale: false },
+} satisfies PieSeriesOption;
+
+export const ECHARTS_DONUT_SERIES_LABELED = {
+    ...ECHARTS_DONUT_SERIES,
+    radius: ['50%', '56%'],
+} satisfies PieSeriesOption;
 
 export const EChartsSimpleOptions = {
     backgroundColor: 'transparent',

@@ -1,0 +1,21 @@
+<div class="setup-overlay">
+    <div class="setup-dialog">
+        <div class="setup-image"></div>
+        <div class="setup-content d-flex flex-column">
+            <div class="d-flex align-items-center gap-2 mb-4">
+                <i class="text-primary">rocket_launch</i>
+                <span class="fw-semibold" i18n="@@i18n.setup.welcome">Welcome to TALVIS</span>
+            </div>
+            <h4 i18n="@@i18n.setup.ownAccountTitle">Create your own account first</h4>
+            <p class="text-muted mb-4" i18n="@@i18n.setup.ownAccountDescription">You are signed in with the default account. Create your personal administrator account now – the default account will be deactivated afterwards and can no longer be used to sign in.</p>
+            <new-user-form [(name)]="name" [(email)]="email" [(password)]="password" [(passwordRepeat)]="passwordRepeat" [confirmPassword]="true" [errors]="errors()" (submitted)="submit()" />
+            <div class="flex-fill"></div>
+            <button type="button" class="btn btn-primary btn-lg" [disabled]="!canSubmit()" (click)="submit()">
+                @if (loading()) {
+                    <spinner [size]="20" [inline]="true" class="me-2"></spinner>
+                }
+                <span i18n="@@i18n.setup.createAccountAndContinue">create account &amp; continue</span>
+            </button>
+        </div>
+    </div>
+</div>

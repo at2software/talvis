@@ -1,0 +1,77 @@
+@let _invoicing = invoicing();
+@let _errors = errors();
+<div class="modal d-block" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-title" i18n="@@i18n.setup.invoicing.title">invoices &amp; taxes</span>
+            </div>
+            <div class="modal-body">
+                @if (_invoicing) {
+                    <h6 i18n="@@i18n.setup.invoicing.vat">default VAT rate</h6>
+                    <div class="btn-group mb-1" role="group">
+                        @for (rate of VAT_RATES; track rate) {
+                            <button type="button" class="btn" [class.btn-primary]="_invoicing.INVOICE_DEFAULT_VAT === rate" [class.text-muted]="_invoicing.INVOICE_DEFAULT_VAT !== rate" (click)="_invoicing.INVOICE_DEFAULT_VAT = rate">{{ rate }} %</button>
+                        }
+                    </div>
+                    <div class="small text-muted mb-3" i18n="@@i18n.setup.invoicing.vatHint">19 % is the regular rate in Germany, 7 % the reduced rate. You can still change the rate on every invoice position.</div>
+
+                    <h6 i18n="@@i18n.setup.invoicing.paymentDuration">payment term</h6>
+                    <div class="d-flex gap-2 align-items-center mb-3">
+                        <div class="btn-group" role="group">
+                            @for (days of PAYMENT_DURATIONS; track days) {
+                                <button type="button" class="btn" [class.btn-primary]="_invoicing.INVOICE_PAYMENT_DURATION === days" [class.text-muted]="_invoicing.INVOICE_PAYMENT_DURATION !== days" (click)="_invoicing.INVOICE_PAYMENT_DURATION = days">{{ days }}</button>
+                            }
+                        </div>
+                        <div class="input-group w-auto">
+                            <input type="number" min="0" class="form-control text-end" style="max-width: 6rem" [class.is-invalid]="_errors['INVOICE_PAYMENT_DURATION']" [(ngModel)]="_invoicing.INVOICE_PAYMENT_DURATION" />
+                            <span class="input-group-text" i18n="@@i18n.setup.invoicing.days">days</span>
+                        </div>
+                    </div>
+
+                    <h6 i18n="@@i18n.setup.invoicing.hourlyWage">default hourly rate</h6>
+                    <div class="input-group mb-3" style="max-width: 16rem">
+                        <input type="number" min="0" step="5" class="form-control text-end" [class.is-invalid]="_errors['INVOICE_HOURLY_WAGE']" [(ngModel)]="_invoicing.INVOICE_HOURLY_WAGE" />
+                        <span class="input-group-text">{{ currency }}/h</span>
+                    </div>
+
+                    <h6 i18n="@@i18n.setup.invoicing.numberRanges">number ranges</h6>
+                    <table class="table table-sm align-middle">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th i18n="@@i18n.common.prefix">prefix</th>
+                                <th i18n="@@i18n.common.numberOfDigits">number of digits</th>
+                                <th i18n="@@i18n.setup.invoicing.nextNumber">next number</th>
+                                <th i18n="@@i18n.setup.invoicing.preview">preview</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td i18n="@@i18n.setup.invoicing.invoices">invoices</td>
+                                <td><input class="form-control form-control-sm" [class.is-invalid]="_errors['INVOICE_NO_PREFIX']" [(ngModel)]="_invoicing.INVOICE_NO_PREFIX" /></td>
+                                <td><input type="number" min="1" max="12" class="form-control form-control-sm text-end" [class.is-invalid]="_errors['INVOICE_NO_DIGITS']" [(ngModel)]="_invoicing.INVOICE_NO_DIGITS" /></td>
+                                <td><input type="number" min="1" class="form-control form-control-sm text-end" [class.is-invalid]="_errors['INVOICE_NO_CURRENT']" [(ngModel)]="_invoicing.INVOICE_NO_CURRENT" /></td>
+                                <td class="font-monospace">{{ preview(_invoicing.INVOICE_NO_PREFIX, _invoicing.INVOICE_NO_DIGITS, _invoicing.INVOICE_NO_CURRENT) }}</td>
+                            </tr>
+                            <tr>
+                                <td i18n="@@i18n.setup.invoicing.quotes">quotes</td>
+                                <td><input class="form-control form-control-sm" [class.is-invalid]="_errors['QUOTE_NO_PREFIX']" [(ngModel)]="_invoicing.QUOTE_NO_PREFIX" /></td>
+                                <td><input type="number" min="1" max="12" class="form-control form-control-sm text-end" [class.is-invalid]="_errors['QUOTE_NO_DIGITS']" [(ngModel)]="_invoicing.QUOTE_NO_DIGITS" /></td>
+                                <td><input type="number" min="1" class="form-control form-control-sm text-end" [class.is-invalid]="_errors['QUOTE_NO_CURRENT']" [(ngModel)]="_invoicing.QUOTE_NO_CURRENT" /></td>
+                                <td class="font-monospace">{{ preview(_invoicing.QUOTE_NO_PREFIX, _invoicing.QUOTE_NO_DIGITS, _invoicing.QUOTE_NO_CURRENT) }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="small text-muted" i18n="@@i18n.setup.invoicing.numberRangesHint">Invoice numbers must be consecutive. If you already wrote invoices with another tool, continue with your next number.</div>
+                } @else {
+                    <spinner [size]="32"></spinner>
+                }
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn" (click)="decline()" i18n="@@i18n.common.cancel">cancel</button>
+                <button type="button" class="btn btn-primary" [disabled]="!_invoicing || saving()" (click)="save()" hotkey="CTRL+ENTER" i18n="@@i18n.setup.save">save</button>
+            </div>
+        </div>
+    </div>
+</div>

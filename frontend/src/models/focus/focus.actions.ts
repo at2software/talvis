@@ -3,13 +3,15 @@ import { Focus } from './focus.model';
 import { MODAL } from '@models/_core/modal-registry';
 import { ExtIssueLinkResult } from '@models/_core/modal-results';
 import { nx } from '@models/_core/nx-bridge';
+import { Dictionary } from '@constants/constants';
+import { firstValueFrom } from 'rxjs';
 
 export function getFocusActions(self: Focus): NxAction[] {
     return [
         {
             title: $localize`:@@i18n.common.edit:edit`,
             doubleClick: true,
-            action: () => nx().openModal(MODAL.editFocus, self),
+            action: () => nx().openModal<Dictionary>(MODAL.editFocus, self).then((changes) => (changes ? firstValueFrom(self.update(changes)) : undefined)),
         },
         ...nx().clipboardActions(self),
         {

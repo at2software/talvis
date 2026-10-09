@@ -40,6 +40,6 @@ export class Toast {
         Toast.show(textOrTpl, { classname: 'bg-danger bg-gradient text-white', icon: 'error' });
     }
     static info(textOrTpl: string | TemplateRef<unknown>) {
-        Toast.show(textOrTpl, { classname: 'bg-info bg-gradient text-dark', icon: 'info' });
+        Toast.show(textOrTpl, { classname: 'bg-info bg-gradient', icon: 'info' });
     }
 }

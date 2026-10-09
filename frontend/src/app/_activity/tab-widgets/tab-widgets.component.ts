@@ -12,6 +12,7 @@ import { GlobalService } from '@models/global.service';
 import { ActivatedRoute } from '@angular/router';
 import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { DashboardWidgetConfigDto } from '@models/_core/api-response';
+import { BaseWidgetListener } from '@dashboard/widgets/base.widget.listener';
 
 @Component({
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -24,6 +25,7 @@ export class TabWidgetsComponent {
     readonly tab = viewChild.required(ActivityTabComponent);
     readonly #global = inject(GlobalService);
     readonly #activityService = inject(ActivityService);
+    readonly #widgetListener = inject(BaseWidgetListener);
     readonly #usedWidgetKeys = new Set<string>();
     readonly #currentDashboard = toSignal(
         inject(ActivatedRoute).params.pipe(map(p => 'dashboard' in p ? parseInt(p['dashboard']) : 0)),
@@ -33,6 +35,11 @@ export class TabWidgetsComponent {
     readonly isEditMode = signal(false);
     readonly allWidgets = signal<TAWidget[]>([]);
     readonly isUsedWidget = (widgetKey: string) => this.#usedWidgetKeys.has(widgetKey);
+
+    addWidget(widgetKey: string) {
+        this.#usedWidgetKeys.add(widgetKey);
+        this.#widgetListener.added.next(widgetKey);
+    }
 
     constructor() {
         NxStatic.dashboardEditMode$.pipe(takeUntilDestroyed()).subscribe(isEditing => {

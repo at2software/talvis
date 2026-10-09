@@ -54,9 +54,9 @@ export function getAssigneeActions(self: Assignee): NxAction[] {
             title: $localize`:@@i18n.companies.changeRoleTo:change role to...`,
             on: () => (self.isUser() ? false : true),
             children: [
-                { title: $localize`:@@i18n.common.developer:developer`, label: 'CTRL+1', action: () => self.setRole(1), on: () => self.role_id != 1 },
-                { title: $localize`:@@i18n.common.projectManager:project manager`, label: 'CTRL+2', action: () => self.setRole(2), on: () => self.role_id != 2 },
-                { title: $localize`:@@i18n.common.designer:designer`, label: 'CTRL+3', action: () => self.setRole(3), on: () => self.role_id != 3 },
+                { title: $localize`:@@i18n.common.projectManager:project manager`, label: 'CTRL+1', action: () => self.setRole(1), on: () => self.role_id != 1 },
+                { title: $localize`:@@i18n.common.developer:developer`, label: 'CTRL+2', action: () => self.setRole(2), on: () => self.role_id != 2 },
+                { title: $localize`:@@i18n.common.customer:customer`, label: 'CTRL+3', action: () => self.setRole(3), on: () => self.role_id != 3 },
             ],
         },
     ];

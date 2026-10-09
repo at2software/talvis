@@ -58,6 +58,8 @@ export class ProfilePluginsComponent {
         ...this.factory.getPluginEncryptionsOfType('mattermost').map((p) => this.#makeEntry(p, 'mattermost', 'Mattermost')),
         ...this.factory.getPluginEncryptionsOfType('git').map((p) => this.#makeEntry(p, 'git', 'GitLab')),
         ...this.factory.getPluginEncryptionsOfType('mantis').map((p) => this.#makeEntry(p, 'mantis', 'MantisBT')),
+        ...this.factory.getPluginEncryptionsOfType('jira').map((p) => this.#makeEntry(p, 'jira', 'Jira')),
+        ...this.factory.getPluginEncryptionsOfType('github').map((p) => this.#makeEntry(p, 'github', 'GitHub')),
         ...this.factory.getPluginEncryptionsOfType('slack').map((p) => this.#makeEntry(p, 'slack', 'Slack')),
         ...this.factory.getPluginEncryptionsOfType('local_ai').map((p) => this.#makeEntry(p, 'local_ai', 'LocalAI Proxy')),
         ...this.factory.getPluginEncryptionsOfType('talvis').map((p) => this.#makeEntry(p, 'talvis', 'TALVIS')),
@@ -125,6 +127,8 @@ export class ProfilePluginsComponent {
             case 'mattermost': return { url: '', team: '', token: '' };
             case 'git': return { url: '', token: '' };
             case 'mantis': return { url: '', token: '' };
+            case 'jira': return { url: '', email: '', token: '' };
+            case 'github': return { url: 'https://github.com/', token: '' };
             case 'slack': return { url: '', token: '' };
             case 'local_ai': return { url: '', login: '', password: '' };
             default: return {};

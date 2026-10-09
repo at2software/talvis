@@ -4,19 +4,15 @@ import { VcardRow } from './vcard-row';
 export class Vcard {
     rows: VcardRow[];
     get name(): string {
-        return this.#trackFN !== -1 ? this.rows[this.#trackFN].vals[0] : '';
+        return this.first('FN')?.vals[0] ?? '';
     }
     get url(): string | undefined {
-        return this.#trackURL !== -1 ? this.rows[this.#trackURL].vals[0] : undefined;
+        return this.first('URL')?.vals[0];
     }
     get org(): string | undefined {
-        return this.#trackORG !== -1 ? this.rows[this.#trackORG].vals[0] : undefined;
+        return this.first('ORG')?.vals[0];
     }
     title: string = '';
-
-    #trackFN: number = -1;
-    #trackORG: number = -1;
-    #trackURL: number = -1;
 
     constructor(vcard: string) {
         if (vcard == null) {
@@ -27,9 +23,6 @@ export class Vcard {
         vcard.split('\n').forEach((x: string) => {
             const v = VcardRow.fromString(x);
             if (v) {
-                if (v.key == 'FN') this.#trackFN = a.length;
-                if (v.key == 'ORG') this.#trackORG = a.length;
-                if (v.key == 'URL') this.#trackURL = a.length;
                 a.push(v);
                 if (v.key == 'TITLE') this.title = v.vals.join('');
             }
@@ -54,4 +47,6 @@ export class Vcard {
     };
 
     toString = (): string => this.rows.map((_) => _.toString()).join('\n');
+    normalized = (): string => this.rows.map((_) => _.normalized()).join('\n');
+    equals = (vcard: string): boolean => new Vcard(vcard).normalized() === this.normalized();
 }

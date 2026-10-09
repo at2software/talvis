@@ -5,19 +5,7 @@
                 <span class="modal-title" i18n="@@i18n.user.addNewUser">add new user</span>
             </div>
             <div class="modal-body">
-                <div class="input-group mb-3">
-                    <span class="input-group-text" i18n="@@i18n.common.name">name</span>
-                    <input type="text" class="form-control" [ngModel]="name()" (ngModelChange)="name.set($event)" (keyup.enter)="accept()" />
-                </div>
-                <div class="input-group mb-3">
-                    <span class="input-group-text" i18n="@@i18n.common.email">e-mail</span>
-                    <input type="email" class="form-control" [ngModel]="email()" (ngModelChange)="email.set($event)" (keyup.enter)="accept()" />
-                </div>
-                <div class="input-group mb-3">
-                    <span class="input-group-text" i18n="@@i18n.common.password">password</span>
-                    <input type="password" class="form-control" [ngModel]="password()" (ngModelChange)="password.set($event)" (keyup.enter)="accept()" />
-                    <span class="input-group-text text-muted small" i18n="@@i18n.user.passwordMinLength">min. 8 chars</span>
-                </div>
+                <new-user-form [(name)]="name" [(email)]="email" [(password)]="password" (submitted)="accept()" />
                 @if (error) {
                     <small class="text-danger">{{ error }}</small>
                 }

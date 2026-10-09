@@ -18,7 +18,7 @@
                 <div class="card h-100">
                     <div class="card-header hstack gap-2">
                         <div class="flex-fill" i18n="@@i18n.invoices.invoice_funnel">invoice funnel</div>
-                        <button type="button" class="btn btn-sm btn-outline-primary" (click)="toggleFunnelMode()" [ngbTooltip]="funnelMode() === 'count' ? 'Switch to money view' : 'Switch to count view'">
+                        <button type="button" class="btn btn-sm btn-plain text-primary" (click)="toggleFunnelMode()" [ngbTooltip]="funnelMode() === 'count' ? 'Switch to money view' : 'Switch to count view'">
                             <i>{{ funnelMode() === 'count' ? 'attach_money' : 'format_list_numbered' }}</i>
                         </button>
                     </div>

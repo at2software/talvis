@@ -1,24 +1,33 @@
-<div class="activity">
-    <ul class="nav nav-pills justify-content-start align-items-end" role="tablist" #buttonContainer>
-        @for (tab of srv.tabs(); track tab; let i = $index) {
-            @let _icon = tab.icon();
-            @let _nicon = tab.nicon();
-            <li class="nav-item position-relative" role="presentation">
-                <button #buttonRef class="nav-link" [class.active]="srv.activeTabIndex() === i" [class.has-badge]="tab.badge()" id="activity-tab-{{ i }}" [class.d-none]="tab.hidden()" type="button" role="tab" [attr.aria-controls]="'activity-' + i" [attr.aria-selected]="srv.activeTabIndex() === i" (click)="srv.setActiveTab(i)">
-                    @if (_icon) {
-                        <i>{{ _icon }}</i>
-                    }
-                    @if (_nicon) {
-                        <n>{{ _nicon }}</n>
-                    }
-                </button>
-            </li>
-        }
-        <li class="nav-item" role="presentation">
-            <button class="nav-link" id="activity-nav-burger" (click)="onActivityTabClicked()" i18n-ngbTooltip="@@i18n.common.minimize" ngbTooltip="minimize">
-                <i>menu</i>
-            </button>
-        </li>
-    </ul>
-    <div class="tab-content" #content></div>
-</div>
+@let _active = srv.activeTabIndex();
+@let _collapsed = collapsed();
+@let _toggleLabel = toggleLabel();
+<section class="activity d-flex flex-column h-100">
+    <div class="activity-tabs d-flex flex-shrink-0" [class.flex-column-reverse]="_collapsed" [class.border-bottom]="!_collapsed">
+        <ul class="nav nav-underline flex-fill" [class.flex-column]="_collapsed" [class.flex-nowrap]="!_collapsed" role="tablist" i18n-aria-label="@@i18n.activityTab.sidebar" aria-label="sidebar" [attr.aria-orientation]="_collapsed ? 'vertical' : 'horizontal'">
+            @for (tab of srv.tabs(); track tab; let i = $index) {
+                @let _label = tab.label();
+                @let _badge = tab.badge();
+                @let _selected = _active === i;
+                <li class="nav-item" role="presentation" [class.d-none]="tab.hidden()">
+                    <button #buttonRef class="nav-link" type="button" role="tab" id="activity-tab-{{ i }}" [class.active]="_selected" [attr.aria-controls]="'activity-' + i" [attr.aria-selected]="_selected" [attr.aria-label]="_label" [attr.tabindex]="_selected ? 0 : -1" [ngbTooltip]="_label" [placement]="_collapsed ? 'start' : 'bottom'" (click)="select(i)" (keydown)="onTabKeydown($event)">
+                        <span class="position-relative">
+                            @if (tab.icon(); as _icon) {
+                                <i>{{ _icon }}</i>
+                            }
+                            @if (tab.nicon(); as _nicon) {
+                                <n>{{ _nicon }}</n>
+                            }
+                            @if (_badge) {
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill text-bg-danger">{{ _badge }}</span>
+                            }
+                        </span>
+                    </button>
+                </li>
+            }
+        </ul>
+        <button type="button" class="btn btn-plain text-primary justify-content-center px-2" [class.py-2]="_collapsed" (click)="toggle()" [ngbTooltip]="_toggleLabel" [attr.aria-label]="_toggleLabel" [attr.aria-expanded]="!_collapsed" [placement]="_collapsed ? 'start' : 'bottom-end'">
+            <i>{{ _collapsed ? 'keyboard_double_arrow_left' : 'keyboard_double_arrow_right' }}</i>
+        </button>
+    </div>
+    <div class="tab-content flex-fill position-relative overflow-hidden text-body-emphasis" [class.d-none]="_collapsed" #content></div>
+</section>

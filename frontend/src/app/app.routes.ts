@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { PermissionsGuard } from '@guards/permissions.guard';
+import { onlySeedAdmin, redirectSeedAdminToSetup } from '@guards/setup.guard';
 import { VacationDetailsComponent } from './profile/vacation-details/vacation-details.component';
 import { VacationGuardComponent } from './profile/vacation-details/vacation-guard.component';
 import { LoginComponent } from './app/login/login.component';
@@ -17,8 +18,15 @@ export const routes = (): Routes => [
     { path: 'login', component: LoginComponent },
     { path: 'environment404', component: Environment404Component },
     {
+        title: 'TALVIS',
+        path: 'setup',
+        canActivate: [AuthenticationService.getAuthGuard(), onlySeedAdmin],
+        loadComponent: () => import('./app/setup/setup.component').then((m) => m.SetupComponent),
+    },
+    {
         path: '',
         canActivate: [AuthenticationService.getAuthGuard()],
+        canActivateChild: [redirectSeedAdminToSetup],
         children: [
             {
                 title: 'Dashboard',
@@ -90,6 +98,12 @@ export const routes = (): Routes => [
                 canActivate: [PermissionsGuard],
                 data: { roles: 'user' },
                 loadChildren: () => import('./calendar/calendar.routes').then((m) => m.CALENDAR_ROUTES).catch((err) => moduleLoadError(err)),
+            },
+            {
+                path: 'flow',
+                canActivate: [PermissionsGuard],
+                data: { roles: 'user' },
+                loadChildren: () => import('./flow/flow.routes').then((m) => m.FLOW_ROUTES).catch((err) => moduleLoadError(err)),
             },
             {
                 title: $localize`:@@i18n.common.vacationRequest:vacation request`,

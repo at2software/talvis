@@ -1,5 +1,6 @@
 <?php
 
+use App\Flow\FlowServiceProvider;
 use App\Providers\AppServiceProvider;
 use App\Providers\BootHooksServiceProvider;
 use App\Providers\BroadcastServiceProvider;
@@ -134,6 +135,8 @@ return [
 
     'team_monitor_api_key' => env('TEAM_MONITOR_API_KEY', ''),
 
+    'api_rate_limit' => (int)env('API_RATE_LIMIT', 300),
+
     'api_url'     => env('API_URL', env('APP_URL', 'http://localhost')),
     // Must be the key Reverb registers its app under - config/reverb.php reads PUSHER_APP_KEY.
     // No fallback on purpose: a wrong key looks identical to a working one until the socket
@@ -177,6 +180,7 @@ return [
         BroadcastServiceProvider::class,
         BootHooksServiceProvider::class,
         PermissionServiceProvider::class,
+        FlowServiceProvider::class,
     ])->toArray(),
 
     /*

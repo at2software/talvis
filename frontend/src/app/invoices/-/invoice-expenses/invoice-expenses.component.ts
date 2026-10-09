@@ -20,7 +20,7 @@ import { ToolbarComponent } from '@app/app/toolbar/toolbar.component';
 import { DatePipe } from '@angular/common';
 import { NgxEchartsDirective } from 'ngx-echarts';
 import type { EChartsOption } from 'echarts';
-import { ECHARTS_DONUT_ITEM_STYLE } from '@charts/echarts-presets';
+import { ECHARTS_DONUT_ITEM_STYLE, ECHARTS_DONUT_SERIES } from '@charts/echarts-presets';
 import { ModalInputComponent } from '@app/_modals/modal-input/modal-input.component';
 import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
 import { SpinnerComponent } from '@shards/spinner/spinner.component';
@@ -67,7 +67,7 @@ export class InvoiceExpensesComponent {
             }},
             series: [{
                 type: 'pie',
-                radius: ['55%', '85%'],
+                radius: ECHARTS_DONUT_SERIES.radius,
                 data: cats.map(c => ({
                     name:      c.name,
                     value:     exps.filter(e => e.category_id == c.id).reduce((s, e) => s + e.yearlyPrice, 0),

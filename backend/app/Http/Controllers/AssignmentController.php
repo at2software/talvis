@@ -14,7 +14,7 @@ class AssignmentController extends Controller {
         if ($assignment->links(Project::class, User::class)) {
             ChatRemoveUsersJob::dispatch($assignment->parent, [$assignment->assignee->id]);
         }
-        return $assignment->delete();
+        return response()->json($assignment->delete());
     }
     public function update(Request $request, Assignment $assignment) {
         $assignment->load('assignee', 'parent');

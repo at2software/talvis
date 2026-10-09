@@ -4,7 +4,6 @@ import { GlobalService } from '@models/global.service';
 import { PluginInstance } from '@models/http/plugins/plugin.instance';
 import { PluginInstanceFactory } from '@models/http/plugins/plugin.instance.factory';
 import { Project } from '@models/project/project.model';
-import { InputModalService } from '@app/_modals/modal-input/modal-input.service';
 import { PluginLinkService } from '@models/plugin-link/plugin-link.service';
 import { ActivityTabComponent } from '@activity/activity-tab.component';
 import { ScrollbarComponent } from '@app/app/scrollbar/scrollbar.component';
@@ -26,7 +25,6 @@ export class TabPluginsComponent {
     readonly #global = inject(GlobalService);
     readonly #factory = inject(PluginInstanceFactory);
     readonly #pluginLinkService = inject(PluginLinkService);
-    readonly #modalService = inject(InputModalService);
     readonly #destroyRef = inject(DestroyRef);
 
     readonly project = signal<Project | undefined>(undefined);
@@ -60,19 +58,17 @@ export class TabPluginsComponent {
     };
 
     onNewPluginLink(_: PluginInstance) {
-        this.#modalService
-            .open(_.newPluginText)
-            .then((response) => {
-                if (response && 'text' in response) {
-                    _.toPluginLink(response!.text).storeUnder(this.project()!, true).subscribe((link) => {
-                        this.project.update((p) => {
-                            p?.plugin_links.push(link);
-                            return p ? Object.assign(Object.create(Object.getPrototypeOf(p)), p) : p;
-                        });
+        PluginInstanceFactory.promptLinkId(_)
+            .then((id) => {
+                if (!id) return;
+                _.toPluginLink(id).storeUnder(this.project()!, true).subscribe((link) => {
+                    this.project.update((p) => {
+                        p?.plugin_links.push(link);
+                        return p ? Object.assign(Object.create(Object.getPrototypeOf(p)), p) : p;
                     });
-                }
+                });
             })
-            .catch();
+            .catch(() => void 0);
     }
 
     onNewPluginChannel(_: PluginInstance) {

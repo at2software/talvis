@@ -49,6 +49,8 @@ export class PluginConfigModalComponent {
             case 'mattermost': return { url: '', team: '', token: '' };
             case 'git': return { url: '', token: '' };
             case 'mantis': return { url: '', token: '', filterId: undefined };
+            case 'jira': return { url: '', email: '', token: '' };
+            case 'github': return { url: 'https://github.com/', token: '' };
             case 'slack': return { url: '', token: '' };
             case 'local_ai': return { url: '', login: '', password: '', model: '' };
             default: return {};

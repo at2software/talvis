@@ -22,7 +22,7 @@
 }
 @if (isCC) {
     <div class="cursor-pointer align-bottom">
-        <i class="text-{{ cc.is_favorite ? 'yellow' : 'muted' }}" (click)="toggleFav($event)" (keyup.enter)="toggleFav($event)" tabindex="0">star</i>
+        <i class="cursor-pointer text-{{ cc.is_favorite ? 'yellow' : 'muted' }}" (click)="toggleFav($event)" (keyup.enter)="toggleFav($event)" tabindex="0">star</i>
     </div>
 }
 <div class="hstack gap-2 flex-fill align-items-center overflow-hidden">
@@ -55,7 +55,7 @@
 @if (_card && showQuickContact()) {
     <span class="quickContacts text-nowrap">
         @for (p of _card.get('TEL'); track p.track_id) {
-            <a class="ms-1" href="tel:{{ trimmed(p.val()) }}" [ngbTooltip]="p.type() + trimmed(p.val())" container="parent" placement="bottom"
+            <a class="ms-1" [href]="p.telHref()" [ngbTooltip]="p.type() + trimmed(p.val())" container="parent" placement="bottom"
                 ><i>{{ p.contactIcon() }}</i></a
             >
             @if (p.isMobile()) {

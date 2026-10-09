@@ -1,7 +1,7 @@
-@let _annotationType = annotationType();
+@let _infoType = infoType();
 @let _item = trackedItem();
 @let _company = trackedCompany();
-@let _annotationMode = annotationMode();
+@let _infoMode = infoMode();
 @if (_item) {
     @switch (_item.type) {
         @case (0) {
@@ -9,39 +9,39 @@
         }
         @case (1) {
             <!-- Inactive -->
-            @if (_annotationType !== 'none') {
-                <td tr-annotation [mode]="_annotationMode" [company]="_company" [item]="_item" [extIssues]="extIssues()"></td>
-            } @else {
-                <td></td>
-            }
             <td class="text-muted text-end small"></td>
             <td class="text-muted" [innerHTML]="_item.text | safe: 'html'"></td>
+            @if (_infoType !== 'none') {
+                <td tr-item-info data-export-hidden [mode]="_infoMode" [company]="_company" [item]="_item" [extIssues]="extIssues()"></td>
+            } @else {
+                <td data-export-hidden></td>
+            }
             <ng-container [ngTemplateOutlet]="priceCol" [ngTemplateOutletContext]="{ $implicit: _item }"></ng-container>
             <ng-container [ngTemplateOutlet]="changeableQty" [ngTemplateOutletContext]="{ $implicit: _item }"></ng-container>
             <ng-container [ngTemplateOutlet]="instaTotal" [ngTemplateOutletContext]="{ $implicit: _item }"></ng-container>
         }
         @case (2) {
             <!-- Optional -->
-            @if (_annotationType !== 'none') {
-                <td tr-annotation [mode]="_annotationMode" [company]="_company" [item]="_item" [extIssues]="extIssues()"></td>
-            } @else {
-                <td></td>
-            }
             <td class="text-end text-muted small">({{ _item.var.pos }})</td>
             <td [innerHTML]="_item.text | safe: 'html'"></td>
+            @if (_infoType !== 'none') {
+                <td tr-item-info data-export-hidden [mode]="_infoMode" [company]="_company" [item]="_item" [extIssues]="extIssues()"></td>
+            } @else {
+                <td data-export-hidden></td>
+            }
             <ng-container [ngTemplateOutlet]="priceCol" [ngTemplateOutletContext]="{ $implicit: _item }"></ng-container>
             <ng-container [ngTemplateOutlet]="changeableQty" [ngTemplateOutletContext]="{ $implicit: _item }"></ng-container>
             <ng-container [ngTemplateOutlet]="instaTotal" [ngTemplateOutletContext]="{ $implicit: _item }"></ng-container>
         }
         @case (10) {
             <!-- Paydown -->
-            @if (_annotationType !== 'none') {
-                <td tr-annotation [mode]="_annotationMode" [company]="_company" [item]="_item" [extIssues]="extIssues()" text="paydown"></td>
-            } @else {
-                <td></td>
-            }
             <td class="text-end text-muted small">{{ _item.var.pos }}</td>
             <td [innerHTML]="_item.text | safe: 'html'"></td>
+            @if (_infoType !== 'none') {
+                <td tr-item-info data-export-hidden [mode]="_infoMode" [company]="_company" [item]="_item" [extIssues]="extIssues()" text="paydown"></td>
+            } @else {
+                <td data-export-hidden></td>
+            }
             <ng-container [ngTemplateOutlet]="priceCol" [ngTemplateOutletContext]="{ $implicit: _item }"></ng-container>
             @if (_item.qty !== -1) {
                 <td class="text-end">
@@ -52,13 +52,13 @@
         }
         @case (11) {
             <!-- Manual Discount -->
-            @if (_annotationType !== 'none') {
-                <td tr-annotation [mode]="_annotationMode" [company]="_company" [item]="_item" [extIssues]="extIssues()" text="manual discount"></td>
-            } @else {
-                <td></td>
-            }
             <td class="text-end text-muted small">{{ _item.var.pos }}</td>
             <td [innerHTML]="_item.text | safe: 'html'"></td>
+            @if (_infoType !== 'none') {
+                <td tr-item-info data-export-hidden [mode]="_infoMode" [company]="_company" [item]="_item" [extIssues]="extIssues()" text="manual discount"></td>
+            } @else {
+                <td data-export-hidden></td>
+            }
             <ng-container [ngTemplateOutlet]="priceCol" [ngTemplateOutletContext]="{ $implicit: _item }"></ng-container>
             <td class="text-end">
                 {{ _item.qty | number: '1.0-5' }}&nbsp;<span class="text-muted">{{ _item.unit_name }}</span>
@@ -67,8 +67,8 @@
         }
         @case (20) {
             <!-- Group -->
-            <td class="header" colspan="2"></td>
-            <td class="header" colspan="2">{{ _item.text }}</td>
+            <td class="header"></td>
+            <td class="header" colspan="3">{{ _item.text }}</td>
             <td class="header small text-end">{{ _item.var.pt | number }} PT</td>
             <td class="header small text-end">{{ _item.var.sum | money }}</td>
         }
@@ -96,38 +96,38 @@
 }
 
 <ng-template #activeItemTemplate>
-    @if (_annotationType !== 'none') {
-        <td tr-annotation [mode]="_annotationMode" [company]="_company" [item]="_item" [extIssues]="extIssues()"></td>
-    } @else {
-        <td></td>
-    }
     <td class="text-end text-muted small">{{ _item.var.pos }}</td>
     <td [innerHTML]="_item.text | safe: 'html'"></td>
+    @if (_infoType !== 'none') {
+        <td tr-item-info data-export-hidden [mode]="_infoMode" [company]="_company" [item]="_item" [extIssues]="extIssues()"></td>
+    } @else {
+        <td data-export-hidden></td>
+    }
     <ng-container [ngTemplateOutlet]="priceCol" [ngTemplateOutletContext]="{ $implicit: _item }"></ng-container>
     <ng-container [ngTemplateOutlet]="changeableQty" [ngTemplateOutletContext]="{ $implicit: _item }"></ng-container>
     <ng-container [ngTemplateOutlet]="instaTotal" [ngTemplateOutletContext]="{ $implicit: _item }"></ng-container>
 </ng-template>
 
 <ng-template #repeating let-item>
-    @if (_annotationType !== 'none') {
-        @if (_annotationType === 'quote' && !item.next_recurrence_at) {
-            <td tr-annotation [mode]="'quote'" [item]="item" [company]="_company" text="starts to repeat on project start"></td>
-        } @else if (_annotationType === 'quote' && item.next_recurrence_at) {
-            <td tr-annotation [mode]="'quote'" [item]="item" [company]="_company" text="next repeat: {{ item.next_recurrence_at | date }}"></td>
-        } @else {
-            <td tr-annotation [mode]="_annotationMode" [item]="item" [company]="_company" text="starts to repeat on invoice"></td>
-        }
-    } @else {
-        <td></td>
-    }
     <td class="text-end text-muted small">{{ item.var.pos }}</td>
     <td [innerHTML]="item.text | safe: 'html'" class="text-decoration-none"></td>
+    @if (_infoType !== 'none') {
+        @if (_infoType === 'quote' && !item.next_recurrence_at) {
+            <td tr-item-info data-export-hidden [mode]="'quote'" [item]="item" [company]="_company" text="starts to repeat on project start"></td>
+        } @else if (_infoType === 'quote' && item.next_recurrence_at) {
+            <td tr-item-info data-export-hidden [mode]="'quote'" [item]="item" [company]="_company" text="next repeat: {{ item.next_recurrence_at | date }}"></td>
+        } @else {
+            <td tr-item-info data-export-hidden [mode]="_infoMode" [item]="item" [company]="_company" text="starts to repeat on invoice"></td>
+        }
+    } @else {
+        <td data-export-hidden></td>
+    }
     <ng-container [ngTemplateOutlet]="priceCol" [ngTemplateOutletContext]="{ $implicit: item }"></ng-container>
     <td colspan="2" class="{{ item.getRepeatColor() }} text-end">{{ item.getRepeatString() }}</td>
 </ng-template>
 
 <ng-template #priceCol let-item>
-    <td class="text-end" [ngbTooltip]="item.unit_name === '%' ? 'automatically calculated' : undefined">
+    <td class="text-end" [ngbTooltip]="item.unit_name === '%' ? 'automatically calculated' : undefined" [attr.data-export]="f(item.price * (1 - 0.01 * item.discount))" data-export-numeric>
         <span [class.text-muted]="item.type === 1" [class.badge]="item.unit_name === '%'" [class.bg-info-darker]="item.unit_name === '%'">
             {{ f(item.price * (1 - 0.01 * item.discount)) | money }}
         </span>
@@ -135,19 +135,19 @@
 </ng-template>
 
 <ng-template #changeableQty let-item>
-    @if (_annotationType === 'quote') {
-        <td>
+    @if (_infoType === 'quote') {
+        <td [attr.data-export]="item.qty" data-export-numeric>
             <input type="number" class="form-control text-end" style="width: 50px" [autosave]="item" [ngModel]="item.qty" autosaveKey="qty" (ngModelChange)="onQuickQtyChange($event)" i18n-placeholder="@@i18n.common.qty" suffix="{{ item.unit_name }}" />
         </td>
     }
-    @if (_annotationType === 'invoice' || _annotationType === 'support' || _annotationType === 'none') {
+    @if (_infoType === 'invoice' || _infoType === 'support' || _infoType === 'none') {
         <td class="text-end text-muted small" style="white-space: nowrap">{{ f(item.qty) }} {{ item.unit_name }}</td>
     }
 </ng-template>
 
 <ng-template #instaTotal let-item>
     @if (item.class === 'InvoiceItem') {
-        <td class="text-end" [attr.colspan]="item.qty === -1 ? 3 : 1" [class.text-primary]="!item.frontendEqualsBackend()" [ngbTooltip]="item.frontendEqualsBackendHover()">
+        <td class="text-end" [attr.colspan]="item.qty === -1 ? 3 : 1" [class.text-warning]="!item.frontendEqualsBackend()" [ngbTooltip]="item.frontendEqualsBackendHover()" [attr.data-export]="item._total" data-export-numeric>
             {{ item._total | money }}
         </td>
     }

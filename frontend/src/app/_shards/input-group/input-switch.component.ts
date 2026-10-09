@@ -12,6 +12,7 @@ export class InputSwitchGroupComponent {
     object = input<Serializable | undefined>();
     key = input<string>('');
     default = model<number>(0);
+    disabled = input(false);
     #initialized = false;
 
     constructor() {

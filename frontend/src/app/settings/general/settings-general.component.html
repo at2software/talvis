@@ -31,7 +31,17 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-md-4"></div>
+                <div class="col-md-4">
+                    <div class="card mb-3">
+                        <div class="card-header" i18n="@@i18n.setup.gettingStarted">getting started</div>
+                        <div class="card-body">
+                            <div class="form-check form-switch mb-0">
+                                <input id="showGettingStarted" type="checkbox" class="form-check-input" [checked]="showGettingStarted()" (change)="toggleGettingStarted()" />
+                                <label for="showGettingStarted" class="form-check-label" i18n="@@i18n.setup.showOnDashboard">show the "getting started" checklist on the dashboard</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
             <div [class.d-none]="_tab !== 1" class="row">
                 <div class="col-md-8">
@@ -63,35 +73,81 @@
                     </div>
                 </div>
             </div>
-            <div [class.d-none]="_tab !== 2" class="row">
+            <div [class.d-none]="_tab !== 2" class="row company-information">
                 <div class="col-md-8">
                     <div class="card mb-3">
-                        <div class="card-header mb-3" i18n="@@i18n.common.companyInformation">company information</div>
+                        <div class="card-header" i18n="@@i18n.common.companyInformation">company information</div>
                         <div class="card-body">
-                            <div class="input-group mb-2">
-                                <span class="input-group-text col-3" i18n="@@i18n.settings.myCompany">my company</span>
-                                <search-input class="col-12 col-md-9" only="Company" (itemSelected)="onCompanyChanged($event)" [query]="_me?.getName() ?? ''"></search-input>
+                            <div class="input-group">
+                                <span class="input-group-text" i18n="@@i18n.settings.myCompany">my company</span>
+                                <search-input class="flex-fill" only="Company" (itemSelected)="onCompanyChanged($event)" [query]="_me?.getName() ?? ''"></search-input>
                             </div>
+                            @if (!_me && !companyLoading()) {
+                                <div class="card card-info mt-3 p-3 hstack gap-3">
+                                    <span class="flex-fill" i18n="@@i18n.settings.noOwnCompanyInfo">your own company is not set yet. select an existing company above or create a new one.</span>
+                                    <button type="button" class="btn btn-primary" (click)="onCreateOwnCompany()" i18n="@@i18n.settings.createOwnCompany">create own company</button>
+                                </div>
+                            }
                             @if (_me) {
-                                <input-settings-group class="mb-2" id="ME_COMPANY_OWNERS" i18n="@@i18n.common.companyOwners">company owners</input-settings-group>
-                                <input-settings-group class="mb-2" id="ME_DEPARTMENT" i18n="@@i18n.common.department">department</input-settings-group>
-                                <input-settings-group class="mb-2" id="ME_PHONE" i18n="@@i18n.common.phone">phone</input-settings-group>
-                                <input-settings-group class="mb-2" id="ME_FAX" i18n="@@i18n.common.fax">fax</input-settings-group>
-                                <input-settings-group class="mb-2" id="ME_EMAIL" i18n="@@i18n.common.email">email</input-settings-group>
-                                <input-settings-group class="mb-2" id="ME_SWIFT" i18n="@@i18n.common.SWIFT">SWIFT</input-settings-group>
-                                <input-settings-group class="mb-2" id="ME_DUNS" i18n="@@i18n.common.DUNS">DUNS</input-settings-group>
-                                <input-settings-group class="mb-2" id="ME_IBAN" i18n="@@i18n.common.IBAN">IBAN</input-settings-group>
-                                <input-settings-group class="mb-2" id="ME_BIC" i18n="@@i18n.common.BIC">BIC</input-settings-group>
-                                <input-settings-group class="mb-2" id="ME_VATID" i18n="@@i18n.common.VATID">VAT-ID</input-settings-group>
-                                <input-settings-group class="mb-2" id="ME_CREDITOR_ID" i18n="@@i18n.common.SepaCreditorIdentifier">sepa creditor identifier</input-settings-group>
-                                <input-settings-group class="mb-2" id="ME_HREG_NO" i18n="@@i18n.common.hregNo">handelsregister nummer</input-settings-group>
-                                <input-settings-group class="mb-2" id="ME_HREG_NAME" i18n="@@i18n.common.hregName">handelsregister name</input-settings-group>
-                                <input-settings-group class="mb-2" id="ME_COUNTRY_SUBDIVISION_NAME" i18n="@@i18n.common.countrySubdivisionName">country subdividion name</input-settings-group>
+                                <div class="mt-3">
+                                    <input-settings-group id="ME_NAME" i18n="@@i18n.settings.nameOnInvoices">name on invoices</input-settings-group>
+                                    <input-settings-group id="ME_COMPANY_OWNERS" i18n="@@i18n.common.companyOwners">company owners</input-settings-group>
+                                    <input-settings-group id="ME_DEPARTMENT" i18n="@@i18n.common.department">department</input-settings-group>
+                                </div>
                             }
                         </div>
                     </div>
+                    @if (_me) {
+                        <div class="card mb-3">
+                            <div class="card-header" i18n="@@i18n.settings.contactDetails">contact details</div>
+                            <div class="card-body">
+                                <input-settings-group id="ME_PHONE" i18n="@@i18n.common.phone">phone</input-settings-group>
+                                <input-settings-group id="ME_FAX" i18n="@@i18n.common.fax">fax</input-settings-group>
+                                <input-settings-group id="ME_EMAIL" i18n="@@i18n.common.email">email</input-settings-group>
+                            </div>
+                        </div>
+                        <div class="card mb-3">
+                            <div class="card-header" i18n="@@i18n.settings.bankDetails">bank details</div>
+                            <div class="card-body">
+                                <input-settings-group id="ME_IBAN" i18n="@@i18n.common.IBAN">IBAN</input-settings-group>
+                                <input-settings-group id="ME_BIC" i18n="@@i18n.common.BIC">BIC</input-settings-group>
+                                <input-settings-group id="ME_SWIFT" i18n="@@i18n.common.SWIFT">SWIFT</input-settings-group>
+                                <input-settings-group id="ME_CREDITOR_ID" i18n="@@i18n.common.SepaCreditorIdentifier">sepa creditor identifier</input-settings-group>
+                            </div>
+                        </div>
+                        <div class="card mb-3">
+                            <div class="card-header" i18n="@@i18n.settings.taxAndRegister">tax and register</div>
+                            <div class="card-body">
+                                <input-settings-group id="ME_VAT_ID" i18n="@@i18n.common.VATID">VAT-ID</input-settings-group>
+                                <input-settings-group id="ME_TAX_ID" i18n="@@i18n.settings.taxNumber">tax number</input-settings-group>
+                                <input-settings-group id="ME_HREG_NO" i18n="@@i18n.common.hregNo">handelsregister nummer</input-settings-group>
+                                <input-settings-group id="ME_HREG_NAME" i18n="@@i18n.common.hregName">handelsregister name</input-settings-group>
+                                <input-settings-group id="ME_COUNTRY_SUBDIVISION_NAME" i18n="@@i18n.common.countrySubdivisionName">country subdividion name</input-settings-group>
+                                <input-settings-group id="ME_DUNS" i18n="@@i18n.common.DUNS">DUNS</input-settings-group>
+                            </div>
+                        </div>
+                    }
                 </div>
-                <div class="col-md-4"></div>
+                <div class="col-md-4">
+                    @if (_me) {
+                        <div class="card sticky-side">
+                            <div class="card-header d-flex align-items-center">
+                                <span class="flex-fill" i18n="@@i18n.settings.myCompany">my company</span>
+                                <a class="text-primary" [routerLink]="_me.frontendUrl()" i18n-ngbTooltip="@@i18n.common.open" ngbTooltip="open"><i>open_in_new</i></a>
+                            </div>
+                            <div class="card-body d-flex gap-3 align-items-start">
+                                <avatar [object]="_me" size="lg"></avatar>
+                                <div class="flex-fill">
+                                    <div class="fs-5 text-break">{{ _me.getName() }}</div>
+                                    @for (line of addressLines(); track $index) {
+                                        <div class="text-muted small">{{ line }}</div>
+                                    }
+                                </div>
+                            </div>
+                            <div class="card-body pt-0 text-muted small" i18n="@@i18n.settings.companyInformationUsage">These details appear as the sender on invoices, quotes and PDF templates.</div>
+                        </div>
+                    }
+                </div>
             </div>
             <div [class.d-none]="_tab !== 3" class="row">
                 <div class="col-md-8">

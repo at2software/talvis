@@ -17,6 +17,7 @@ import { InputModalService } from '@app/_modals/modal-input/modal-input.service'
 import { Nx } from '@app/nx/nx.directive';
 import { TaskService } from '@models/task/task.service';
 import { tracked } from '@constants/tracked';
+import { ConfirmationService } from '@app/_modals/modal-confirm/confirmation.service';
 
 type TimePeriod = NonNullable<DaterangepickerDirective['value']>;
 type DateRanges = DaterangepickerDirective['ranges'];
@@ -75,6 +76,7 @@ export class MilestonePopupComponent {
     #projectService = inject(ProjectService);
     #inputModalService = inject(InputModalService);
     #taskService = inject(TaskService);
+    #confirm = inject(ConfirmationService);
 
     constructor() {
         effect(() => {
@@ -188,8 +190,8 @@ export class MilestonePopupComponent {
 
     onCancel = () => this.closed.emit();
 
-    onDeleteMilestone() {
-        if (!confirm($localize`:@@i18n.milestone.deleteConfirm:Are you sure you want to delete this milestone?`)) return;
+    async onDeleteMilestone() {
+        if (!(await this.#confirm.ask({ title: $localize`:@@i18n.common.delete:delete`, message: $localize`:@@i18n.milestone.deleteConfirm:Are you sure you want to delete this milestone?` }))) return;
         const milestone = this.trackedMilestone();
         milestone.delete().subscribe({
             next: () => {
@@ -231,8 +233,8 @@ export class MilestonePopupComponent {
             .catch(() => void 0);
     }
 
-    onDeleteTask(task: Task) {
-        if (!confirm($localize`:@@i18n.task.deleteConfirm:Are you sure you want to delete this task?`)) return;
+    async onDeleteTask(task: Task) {
+        if (!(await this.#confirm.ask({ title: $localize`:@@i18n.common.delete:delete`, message: $localize`:@@i18n.task.deleteConfirm:Are you sure you want to delete this task?` }))) return;
         task.delete().subscribe({
             next: () => {
                 Toast.success($localize`:@@i18n.task.deleted:Task deleted successfully`);

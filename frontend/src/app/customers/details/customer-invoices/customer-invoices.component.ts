@@ -6,11 +6,12 @@ import { ScrollbarComponent } from '@app/app/scrollbar/scrollbar.component';
 import { CustomerPaymentDetailsComponent } from '@app/customers/_shards/customer-payment-details/customer-payment-details.component';
 import { InvoicesTable } from '@app/invoices/_shards/invoices-table/invoices-table';
 import { EmptyStateComponent } from '@shards/empty-state/empty-state.component';
+import { RouterLink } from '@angular/router';
 
 @Component({
     selector: 'customer-invoices',
     templateUrl: './customer-invoices.component.html',
-    imports: [ScrollbarComponent, CustomerPaymentDetailsComponent, InvoicesTable, EmptyStateComponent],
+    imports: [ScrollbarComponent, CustomerPaymentDetailsComponent, InvoicesTable, EmptyStateComponent, RouterLink],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CustomerInvoicesComponent {

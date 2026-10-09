@@ -60,16 +60,8 @@ trait HasAssignmentsTrait {
         $a = new Assignment;
         $a->parent()->associate($this);
         $a->assignee()->associate($obj);
-        $a->flags = 0;
-
-        if (! $role && is_a($obj, User::class)) {
-            $a->role_id = $role ?: 1;
-        } elseif (! $role && is_a($obj, CompanyContact::class)) {
-            $a->role_id = $role ?: 3;
-        } else {
-            $a->role_id = 1;
-        }
-
+        $a->flags   = 0;
+        $a->role_id = $role ?: ($obj instanceof CompanyContact ? 3 : 1);
         $a->save();
         $a->load('assignee', 'parent');
         return $a;

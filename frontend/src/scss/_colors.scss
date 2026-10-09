@@ -1,5 +1,17 @@
 @use "sass:map";
 @use "sass:color";
+@use "sass:math";
+
+// WCAG 2 relative luminance; above ~0.179 black text has the higher contrast ratio.
+@function readable-on($background) {
+    $luminance: 0;
+    @each $channel, $weight in ('red': 0.2126, 'green': 0.7152, 'blue': 0.0722) {
+        $value: math.div(color.channel($background, $channel, $space: rgb), 255);
+        $linear: if($value <= 0.04045, math.div($value, 12.92), math.pow(math.div($value + 0.055, 1.055), 2.4));
+        $luminance: $luminance + $weight * $linear;
+    }
+    @return if($luminance > 0.179, black, white);
+}
 
 $bg-darker : #050909;  // deepest surface, near-black green-gray
 $bg-card   : #101818;  // cards
@@ -53,29 +65,9 @@ $secondary: $pink;
 $primary-1: map.get($custom-colors, 'primary-1');
 $primary-2: map.get($custom-colors, 'primary-2');
 $primary-3: map.get($custom-colors, 'primary-3');
-// NOTE: intentionally differs from the map key 'primary-4' (which is primary-0
-// darkened for --color-primary-4); this softer tone is used as a surface color
-// in component styles. Candidate for unification later.
 $primary-4: #005d4e;
 
 $success: #6bf57e;
 $warning: #e2f56b;
 $danger : #f57e6b;
 $info   : #6be2f5;
-
-@each $key, $value in $custom-colors {
-    .bg-#{$key}   { background-color: #{$value} !important; }
-    .text-#{$key} { color: #{$value} !important; }
-}
-
-:root {
-    @each $key, $value in $custom-colors {
-        --color-#{$key}: #{$value};
-        --bs-#{$key}: #{$value};
-    }
-    --color-primary-filter: invert(0.5) sepia(1) saturate(5) hue-rotate(130deg); // sepia is 40° hue
-    --color-success-soft: #{$success};
-    --color-danger-soft: #{$danger};
-    --color-warning-soft: #{$warning};
-    --color-info-soft: #{$info};
-}

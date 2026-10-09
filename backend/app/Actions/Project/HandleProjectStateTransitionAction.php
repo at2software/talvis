@@ -3,18 +3,42 @@
 namespace App\Actions\Project;
 
 use App\Enums\CommentType;
-use App\Http\Controllers\PluginMattermostController;
+use App\Events\ProjectStateTransitioned;
+use App\Events\ProjectStateTransitioning;
+use App\Exceptions\ProjectStateTransitionRejected;
 use App\Jobs\ChatAddUsersJob;
 use App\Jobs\ChatGetOrCreateChannelJob;
 use App\Jobs\ChatRemoveUsersJob;
 use App\Jobs\ChatSendMessageJob;
 use App\Models\Comment;
 use App\Models\Project;
+use App\Models\ProjectProjectState;
 use App\Models\ProjectState;
+use App\Models\User;
 use App\Queries\ProjectSuccessQuoteQuery;
+use App\Support\ChatProps;
 use Illuminate\Support\Facades\Bus;
 
 class HandleProjectStateTransitionAction {
+    public function transition(Project $project, ProjectState $to, User $actor, ?string $reason = null): Project {
+        $from  = $project->state;
+        $event = new ProjectStateTransitioning($project, $from, $to, $actor, $reason);
+        event($event);
+        if ($event->rejection() !== null) {
+            throw new ProjectStateTransitionRejected($event->rejection());
+        }
+
+        ProjectProjectState::create([
+            'project_id'       => $project->id,
+            'project_state_id' => $to->id,
+            'user_id'          => $actor->id,
+            'reason'           => $reason,
+        ]);
+        $project = $project->fresh('states');
+
+        event(new ProjectStateTransitioned($project, $from, $to, $actor, $reason));
+        return $project;
+    }
     public function execute(Project $project, ProjectState $previousState, int $userId): void {
         $name = $project->company->name.' - '.$project->name;
         $icon = config('app.api_url').'companies/'.$project->company->id.'/icon?'.time();
@@ -35,7 +59,7 @@ class HandleProjectStateTransitionAction {
             Comment::create([...$project->toPoly(), 'text' => $stateChangeMessage, 'user_id' => $userId, 'is_mini' => true, 'type' => CommentType::Info]);
 
             if (! config('app.debug')) {
-                $props        = PluginMattermostController::buildWebhookProps($name, $icon);
+                $props        = ChatProps::sender($name, $icon);
                 $userIds      = $project->assigned_users->pluck('id')->toArray();
                 $featuresText = PHP_EOL.'#### Bestellte Features:'.PHP_EOL;
                 $featuresText .= $project->orderedFeatures->map(fn ($item) => "* [ ] $item->text ($item->qty $item->unit_name)")->implode(PHP_EOL);
@@ -54,7 +78,7 @@ class HandleProjectStateTransitionAction {
             $project->clearAssignedTimeBudgets();
 
             if (! config('app.debug')) {
-                $props = PluginMattermostController::buildWebhookProps($name, $icon);
+                $props = ChatProps::sender($name, $icon);
                 ChatSendMessageJob::dispatch('', $props, $project, imagePath: 'images/projekt_abgeschlossen.png');
                 ChatRemoveUsersJob::dispatch($project, $project->assigned_users->pluck('id')->toArray());
                 ChatSendMessageJob::dispatch($stateChangeMessage, $props, channelEnvKey: 'TOWN_SQUARE');

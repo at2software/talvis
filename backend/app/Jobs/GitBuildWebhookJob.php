@@ -56,13 +56,12 @@ class GitBuildWebhookJob implements ShouldQueue {
 
         $message .= $this->pipelineJobList($jobs, $projectUrl);
 
-        $cacheId                 = 'git_pipeline_'.$pipelineId;
-        $props                   = $this->props($this->project['name']);
-        $props['nexus_cache_id'] = $cacheId;
-        $siblings                = $this->links->siblingsOfType(PluginChatController::class)->unique('channelId')->values();
+        $cacheId  = 'git_pipeline_'.$pipelineId;
+        $props    = $this->props($this->project['name']);
+        $siblings = $this->links->siblingsOfType(PluginChatController::class)->unique('channelId')->values();
 
         foreach ($siblings as $chatInfo) {
-            ChatSendMessageJob::dispatch($message, $props, channelId: $chatInfo['channelId'], cacheId: $cacheId);
+            ChatSendMessageJob::dispatch($message, $props, channelId: $chatInfo['channelId'], cacheId: $cacheId, chatKey: $chatInfo['controller']::getKey());
         }
 
         if ($siblings->isEmpty()) {

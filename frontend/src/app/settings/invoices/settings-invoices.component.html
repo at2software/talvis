@@ -9,9 +9,9 @@
                 <div class="card-header" i18n="@@i18n.common.index">index</div>
                 <ul class="list-group">
                     <li class="list-group-item pointer" [class.active]="_tab === 0" (click)="tab.set(0)" (keyup.enter)="tab.set(0)" tabindex="0" i18n="@@i18n.common.general">general</li>
-                    <li class="list-group-item pointer" [class.active]="_tab === 1" (click)="tab.set(1)" (keyup.enter)="tab.set(1)" tabindex="0" i18n="@@i18n.invoice.invoiceText">invoicetext</li>
-                    <li class="list-group-item pointer" [class.active]="_tab === 2" (click)="tab.set(2)" (keyup.enter)="tab.set(2)" tabindex="0" i18n="@@i18n.invoice.dueReminder1Text">duereminder1text</li>
-                    <li class="list-group-item pointer" [class.active]="_tab === 3" (click)="tab.set(3)" (keyup.enter)="tab.set(3)" tabindex="0" i18n="@@i18n.invoice.dueReminder2Text">duereminder2text</li>
+                    <li class="list-group-item pointer" [class.active]="_tab === 1" (click)="tab.set(1)" (keyup.enter)="tab.set(1)" tabindex="0" i18n="@@i18n.invoice.invoiceText">invoice text</li>
+                    <li class="list-group-item pointer" [class.active]="_tab === 2" (click)="tab.set(2)" (keyup.enter)="tab.set(2)" tabindex="0" i18n="@@i18n.invoice.dueReminder1Text">1st reminder text</li>
+                    <li class="list-group-item pointer" [class.active]="_tab === 3" (click)="tab.set(3)" (keyup.enter)="tab.set(3)" tabindex="0" i18n="@@i18n.invoice.dueReminder2Text">2nd reminder text</li>
                     <li class="list-group-item pointer" [class.active]="_tab === 4" (click)="tab.set(4)" (keyup.enter)="tab.set(4)" tabindex="0" i18n="@@i18n.invoice.emailText">email text</li>
                     <li class="list-group-item pointer" [class.active]="_tab === 5" (click)="tab.set(5)" (keyup.enter)="tab.set(5)" tabindex="0" i18n="@@i18n.invoice.datev">DATEV</li>
                     <li class="list-group-item pointer" [class.active]="_tab === 6" (click)="tab.set(6)" (keyup.enter)="tab.set(6)" tabindex="0" i18n="@@i18n.invoice.invoiceCancellation">invoice cancellation</li>
@@ -49,7 +49,7 @@
                         <input-settings-group id="INVOICE_GRACE_PERIOD" [suffix]="days()" i18n="@@i18n.invoice.gracePeriod">grace period</input-settings-group>
                         <input-settings-group id="INVOICE_OVERDRAFT_INTEREST" [suffix]="percent()" i18n="@@i18n.common.overdraftInterest">overdraft interest</input-settings-group>
                         <input-settings-group id="INVOICE_REMINDER_FEE" [suffix]="currency()" i18n="@@i18n.invoice.reminderFee">reminder fee</input-settings-group>
-                        <div class="text-end">Information zum Überziehungszins: <a href="http://basiszinssatz.de/" target="_blank">http://basiszinssatz.de/</a></div>
+                        <div class="text-end"><span i18n="@@i18n.invoice.overdraftInterestInfo">information on overdraft interest:</span> <a href="http://basiszinssatz.de/" target="_blank">http://basiszinssatz.de/</a></div>
                     </div>
                 </div>
             </div>

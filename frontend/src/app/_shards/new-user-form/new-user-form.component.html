@@ -1,0 +1,32 @@
+@let _errors = errors();
+<div class="input-group mb-3">
+    <span class="input-group-text" i18n="@@i18n.common.name">name</span>
+    <input type="text" class="form-control" autocomplete="name" [class.is-invalid]="_errors['name']" [ngModel]="name()" (ngModelChange)="name.set($event)" (keyup.enter)="submitted.emit()" />
+    @if (_errors['name']) {
+        <div class="invalid-feedback">{{ _errors['name'] }}</div>
+    }
+</div>
+<div class="input-group mb-3">
+    <span class="input-group-text" i18n="@@i18n.common.email">e-mail</span>
+    <input type="email" class="form-control" autocomplete="email" [class.is-invalid]="_errors['email']" [ngModel]="email()" (ngModelChange)="email.set($event)" (keyup.enter)="submitted.emit()" />
+    @if (_errors['email']) {
+        <div class="invalid-feedback">{{ _errors['email'] }}</div>
+    }
+</div>
+<div class="input-group mb-3">
+    <span class="input-group-text" i18n="@@i18n.common.password">password</span>
+    <input type="password" class="form-control" autocomplete="new-password" [class.is-invalid]="_errors['password']" [ngModel]="password()" (ngModelChange)="password.set($event)" (keyup.enter)="submitted.emit()" />
+    <span class="input-group-text text-muted small" i18n="@@i18n.user.passwordMinLength">min. 8 chars</span>
+    @if (_errors['password']) {
+        <div class="invalid-feedback">{{ _errors['password'] }}</div>
+    }
+</div>
+@if (confirmPassword()) {
+    <div class="input-group mb-3">
+        <span class="input-group-text" i18n="@@i18n.user.repeatPassword">repeat password</span>
+        <input type="password" class="form-control" autocomplete="new-password" [class.is-invalid]="!passwordsMatch()" [ngModel]="passwordRepeat()" (ngModelChange)="passwordRepeat.set($event)" (keyup.enter)="submitted.emit()" />
+        @if (!passwordsMatch()) {
+            <div class="invalid-feedback" i18n="@@i18n.user.passwordsDoNotMatch">the passwords do not match</div>
+        }
+    </div>
+}

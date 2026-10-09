@@ -41,12 +41,13 @@
             <div class="card-header hstack gap-2">
                 <div ngbDropdown class="flex-fill" placement="bottom-start">
                     <button class="btn btn-plain btn-sm dropdown-toggle-simple hstack gap-2 p-0 w-100 text-start" ngbDropdownToggle>
-                        <span class="flex-fill">
+                        <span class="flex-fill hstack gap-1">
                             @if (!_initiativeFilter) {
                                 <span i18n="@@i18n.marketing.prospects">prospects</span>
                             } @else {
-                                {{ selectedInitiativeName() }}
+                                <span>{{ selectedInitiativeName() }}</span>
                             }
+                            <i class="text-muted">arrow_drop_down</i>
                         </span>
                         @if (!_initiativeFilter && _totalOverdueCount > 0) {
                             <span class="badge bg-danger rounded-pill">{{ _totalOverdueCount }}</span>
@@ -74,9 +75,10 @@
                     </div>
                 </div>
                 @if (!_isLoading) {
-                    <span class="badge bg-primary rounded-pill me-1">{{ _filteredProspects.length }}</span>
+                    <span class="badge bg-dark rounded-pill me-1">{{ _filteredProspects.length }}</span>
                 }
-                <i class="cursor-pointer text-primary" tabindex="0" (keydown.enter)="createNewProspect()" (click)="createNewProspect()">add</i>
+                @let _createBlocker = createProspectBlocker();
+                <i class="cursor-pointer" [class.text-primary]="!_createBlocker" [class.text-muted]="_createBlocker" role="button" tabindex="0" [attr.aria-disabled]="!!_createBlocker" [ngbTooltip]="_createBlocker" (keydown.enter)="createNewProspect()" (click)="createNewProspect()">add</i>
             </div>
 
             <div class="px-2 py-2 border-bottom d-flex flex-wrap gap-1">
@@ -137,11 +139,11 @@
             </div>
 
             <div class="card-footer d-flex gap-2 justify-content-end py-2">
-                <button class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1" (click)="openImportFile()" i18n-ngbTooltip="@@i18n.marketing.importCsvTooltip" ngbTooltip="Import prospects from CSV file">
+                <button class="btn btn-sm btn-plain text-primary d-flex align-items-center gap-1" (click)="openImportFile()" i18n-ngbTooltip="@@i18n.marketing.importCsvTooltip" ngbTooltip="Import prospects from CSV file">
                     <i style="font-size: 1rem">upload</i>
                     <span>Import</span>
                 </button>
-                <button class="btn btn-sm btn-outline-primary d-flex align-items-center gap-1" (click)="exportCsv()" [disabled]="filteredProspects().length === 0" i18n-ngbTooltip="@@i18n.marketing.exportCsvTooltip" ngbTooltip="Export filtered prospects as CSV">
+                <button class="btn btn-sm btn-plain text-primary d-flex align-items-center gap-1" (click)="exportCsv()" [disabled]="filteredProspects().length === 0" i18n-ngbTooltip="@@i18n.marketing.exportCsvTooltip" ngbTooltip="Export filtered prospects as CSV">
                     <i style="font-size: 1rem">download</i>
                     <span>Export</span>
                 </button>

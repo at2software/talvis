@@ -16,7 +16,7 @@ TALVIS combines CRM, project management, invoicing, time tracking, HR, marketing
 |---|---|
 | **CRM** | Company and contact management, relationship mapping, revenue analytics |
 | **Projects** | Gantt planning, milestones, tasks, team assignments, budget tracking |
-| **Invoicing** | PDF generation, ZUGFeRD/Factur-X, recurring billing, cash flow |
+| **Invoicing** | PDF generation, ZUGFeRD/Factur-X, recurring billing, SEPA direct debit (pain.008), cash flow |
 | **Time Tracking** | Focus sessions, break management, workload heatmaps, billable hours |
 | **HR** | Vacation, sick leave, travel expenses, team capacity analytics |
 | **Marketing** | Prospect pipeline, campaign management, Sankey funnel charts |
@@ -24,7 +24,9 @@ TALVIS combines CRM, project management, invoicing, time tracking, HR, marketing
 | **Sentinels** | Visual no-code automation — triggers, conditions, commands |
 | **Uptime Monitoring** | HTTP health checks with alerting via email and team chat |
 | **Security Audits** | Scheduled re-runs of the dependency, container and SAST scan jobs of each deployed GitLab pipeline, reported to team chat |
-| **Calendar** | CalDAV and CardDAV protocol support for universal device sync |
+| **Project Flow** | Configurable project phases with gates, four-eyes approvals and risk classes; development jobs that AI agents claim through an MCP server |
+| **Integrations** | Mattermost, Slack and Microsoft Teams; issues from GitLab, Mantis, Jira and GitHub; Microsoft 365 calendar, contacts and automatic replies; signed outgoing webhooks for n8n, Make or Zapier |
+| **Calendar** | CalDAV and CardDAV protocol support for universal device sync, subscribable ICS feed for Outlook and Google Calendar |
 
 ---
 
@@ -118,7 +120,7 @@ Subsequent starts use the cached image and are instant.
 | TALVIS | http://localhost:3200 |
 | Backend API | http://localhost:8000 |
 
-Log in with the `ADMIN_EMAIL` / `ADMIN_PASSWORD` you set in `.env`.
+Log in with the `ADMIN_EMAIL` / `ADMIN_PASSWORD` you set in `.env`. A setup wizard then asks for your company, invoicing and working-time details and creates your own owner account, which replaces the initial admin.
 
 ### Upgrading from NEXUS (1.3.x and earlier)
 

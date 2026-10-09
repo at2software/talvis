@@ -8,7 +8,17 @@ export interface PdfTemplate {
     baseUrl: string;
     pdfBase: string;
     logoUrl: string;
-    hasOriginal: boolean;
+    logoSources: string[];
+    hasCustomLogo: boolean;
+    customized: boolean;
+    senderTokens: string[];
+    documentTokens: string[];
+    tokens: Record<string, string>;
+}
+
+export interface PdfLogo {
+    logoUrl: string;
+    hasCustomLogo: boolean;
 }
 
 @Service()
@@ -22,6 +32,7 @@ export class PdfTemplateService extends TalvisHttpService<never> {
     uploadLogo = (logo: File) => {
         const data = new FormData();
         data.append('logo', logo);
-        return this.upload<{ success: boolean; logoUrl: string }>('pdf-template/logo', data);
+        return this.upload<PdfLogo>('pdf-template/logo', data);
     };
+    removeLogo = (): Observable<PdfLogo> => this.delete('pdf-template/logo', {}, Object);
 }

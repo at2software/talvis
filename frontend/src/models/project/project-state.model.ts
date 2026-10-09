@@ -5,6 +5,7 @@ import { deepMerge } from '@constants/object/deepMerge';
 import { Model } from '@constants/model/type-discriminators';
 import { Dictionary } from '@constants/constants';
 import { computed } from '@angular/core';
+import type { FlowTransitionDto } from '@models/_core/api-response';
 
 const mkState = (id: number) => ({ state: ProjectState.stateFor(id) });
 
@@ -40,6 +41,14 @@ export class ProjectState extends Serializable {
         '8': ["1", "3", "4", "5", "9"],
         '9': ["1", "3", "4", "5"],
     };
+    static transitions: FlowTransitionDto[] | undefined;
+
+    static allowedTargetIds = (fromId: string | number, user?: { hasAnyRole: (roles: string[]) => boolean }): string[] =>
+        ProjectState.transitions
+            ? ProjectState.transitions
+                  .filter((_) => _.from_state_id == fromId && (!_.required_role || !!user?.hasAnyRole([_.required_role])))
+                  .map((_) => '' + _.to_state_id)
+            : (ProjectState.StateChangeWorkflow['' + fromId] ?? []);
 
     name: string = '';
     progress: 0 | 1 | 2 = 0;
@@ -54,6 +63,8 @@ export class ProjectState extends Serializable {
     isFinishedSuccessful = computed(() => { this.snapshot(); return this.isFinishedAny() && this.is_in_stats && this.is_successful; });
     isFinishedFailed     = computed(() => { this.snapshot(); return this.isFinishedAny() && this.is_in_stats && !this.is_successful; });
     isFinishedIgnored    = computed(() => { this.snapshot(); return this.isFinishedAny() && !this.is_in_stats; });
+
+    isQuoteAcceptanceFrom = (current: ProjectState) => current.isPrepared() && this.isRunning();
 
     static stateFor      = (id: number): ProjectState | undefined => nx().global.project_states.find((_) => _.id == '' + id);
     static _idsFor       = (cmp: (s: ProjectState) => boolean) => nx().global.project_states.filter(cmp).map((_) => _.id).join(',');

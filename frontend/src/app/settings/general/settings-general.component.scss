@@ -1,0 +1,14 @@
+.company-information ::ng-deep .input-group-text {
+    width: 12rem;
+    flex-shrink: 0;
+}
+
+.company-information ::ng-deep .card-body input-settings-group:last-child .input-group {
+    margin-bottom: 0 !important;
+}
+
+@media (max-width: 575.98px) {
+    .company-information ::ng-deep .input-group-text {
+        width: auto;
+    }
+}

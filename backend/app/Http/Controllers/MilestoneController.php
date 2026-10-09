@@ -10,6 +10,7 @@ use App\Models\InvoiceItem;
 use App\Models\Milestone;
 use App\Models\Param;
 use App\Models\Project;
+use App\Support\ChatProps;
 use Illuminate\Http\Request;
 
 class MilestoneController extends Controller {
@@ -182,12 +183,7 @@ class MilestoneController extends Controller {
     private function notifyStateChange(Milestone $milestone, $actingUser): void {
         $pm = $milestone->project->projectManager;
         if ($pm && $pm->id !== $actingUser->id) {
-            $props = [
-                'from_webhook'         => 'true',
-                'webhook_display_name' => $milestone->user->name ?? 'TALVIS',
-                'override_username'    => $milestone->user->name ?? 'TALVIS',
-                'override_icon_url'    => config('app.api_url').($milestone->user->icon ?? ''),
-            ];
+            $props         = ChatProps::sender($milestone->user->name ?? 'TALVIS', config('app.api_url').($milestone->user->icon ?? ''));
             $state         = MilestoneState::from($milestone->state);
             $stateName     = $state->getName();
             $utf8StateIcon = match ($state) {
@@ -217,7 +213,7 @@ class MilestoneController extends Controller {
     }
     public function addDependency(Request $request, Milestone $milestone) {
         $data = $request->validate([
-            'depends_on' => 'required|integer|exists:milestones,id',
+            'depends_on' => 'required|integer|exists:milestones,id,deleted_at,NULL',
         ]);
 
         $dependsOnMilestone = Milestone::findOrFail($data['depends_on']);

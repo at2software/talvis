@@ -18,8 +18,8 @@ class ProblemSolutionRequest extends FormRequest {
 
         if ($isStore) {
             $rules += [
-                'debrief_solution_id'        => 'required|exists:debrief_solutions,id',
-                'debrief_project_debrief_id' => 'nullable|exists:debrief_project_debriefs,id',
+                'debrief_solution_id'        => 'required|exists:debrief_solutions,id,deleted_at,NULL',
+                'debrief_project_debrief_id' => 'nullable|exists:debrief_project_debriefs,id,deleted_at,NULL',
             ];
         }
 

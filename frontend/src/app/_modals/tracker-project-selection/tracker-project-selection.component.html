@@ -1,0 +1,60 @@
+@let _plugin = plugin();
+@let _projects = projects();
+@let _manualId = manualId();
+<div class="modal d-block" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-title hstack gap-2">
+                    <n>{{ _plugin?.icon() }}</n>
+                    <span i18n="@@i18n.plugins.selectProject">select project</span>
+                </span>
+                <button type="button" class="btn-close" (click)="decline()" tabindex="0" (keydown.enter)="decline()" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <input type="text" class="form-control" [ngModel]="searchTerm()" (ngModelChange)="searchTerm.set($event || '')" placeholder="Search projects..." i18n-placeholder="@@i18n.mantis.search_projects" />
+                </div>
+                <div class="project-list">
+                    @if (isLoading()) {
+                        <div class="text-center py-4"><spinner [size]="20" [inline]="true"></spinner></div>
+                    } @else if (_projects.length === 0 && !_manualId) {
+                        <div class="text-center text-muted py-4">
+                            <p i18n="@@i18n.common.noProjectsFound">no projects found</p>
+                        </div>
+                    }
+                    @if (_manualId) {
+                        <div class="card mb-2 project-card cursor-pointer" [class.border-primary]="isSelected(_manualId)" [class.selected]="isSelected(_manualId)" (click)="selectProject(_manualId)" tabindex="0" (keydown.enter)="selectProject(_manualId)">
+                            <div class="card-body py-2 px-3 d-flex align-items-center gap-2">
+                                <span i18n="@@i18n.plugins.linkByIdentifier">link by identifier</span>
+                                <code>{{ _manualId }}</code>
+                                @if (isSelected(_manualId)) {
+                                    <i class="ms-auto text-success">check_circle</i>
+                                }
+                            </div>
+                        </div>
+                    }
+                    @for (p of _projects; track p.id) {
+                        <div class="card mb-2 project-card cursor-pointer" [class.border-primary]="isSelected(p.id)" [class.selected]="isSelected(p.id)" (click)="selectProject(p.id)" tabindex="0" (keydown.enter)="selectProject(p.id)">
+                            <div class="card-body py-2 px-3 d-flex align-items-center gap-3">
+                                <div class="flex-grow-1 text-truncate">
+                                    <div>{{ p.name }}</div>
+                                    @if (p.description && p.description !== p.name) {
+                                        <small class="text-muted">{{ p.description }}</small>
+                                    }
+                                </div>
+                                @if (isSelected(p.id)) {
+                                    <i class="text-success">check_circle</i>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn" (click)="decline()" tabindex="0" (keydown.enter)="decline()" i18n="@@i18n.common.cancel">cancel</button>
+                <button type="button" class="btn btn-primary" (click)="accept()" tabindex="0" (keydown.enter)="accept()" [disabled]="!selectedId()" i18n="@@i18n.common.ok">ok</button>
+            </div>
+        </div>
+    </div>
+</div>

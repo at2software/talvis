@@ -12,15 +12,24 @@ import { Invoice } from '@models/invoice/invoice.model';
 import { InvoiceService } from '@models/invoice/invoice.service';
 import { WidgetInvoiceManagerComponent } from '@dashboard/widgets/widget-invoice-manager/widget-invoice-manager.component';
 import { GlobalService } from '@models/global.service';
+import { Router } from '@angular/router';
+import { SearchInputComponent } from '@shards/search-input/search-input.component';
+import { Serializable } from '@models/_core/serializable';
+import { Company } from '@models/company/company.model';
+import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
+import { ModalBaseService } from '@app/_modals/modal-base-service';
+import { ModalSepaDirectDebitComponent } from '@app/_modals/modal-sepa-direct-debit/modal-sepa-direct-debit.component';
 
 @Component({
     selector: 'invoices-dashboard',
     templateUrl: './invoices-dashboard.html',
-    imports: [FormsModule, InvoicesTable, ContinuousMarkerComponent, NgxDaterangepickerMd, EmptyStateComponent, WidgetInvoiceManagerComponent],
+    imports: [FormsModule, InvoicesTable, ContinuousMarkerComponent, NgxDaterangepickerMd, EmptyStateComponent, WidgetInvoiceManagerComponent, SearchInputComponent, NgbTooltipModule],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class InvoicesDashboard {
     #invoiceService = inject(InvoiceService);
+    #router = inject(Router);
+    #modal = inject(ModalBaseService);
     global = inject(GlobalService);
 
     invoices = signal<Invoice[]>([]);
@@ -47,6 +56,18 @@ export class InvoicesDashboard {
         this.hasLoaded.set(false);
         this.observer.set(this.#invoiceService.indexPaginated(filters));
     }
+
+    openSepaDirectDebit() {
+        this.#modal.open(ModalSepaDirectDebitComponent).then(() => {
+            this.#currentFilter = '';
+            this.reload();
+        });
+    }
+
+    onCustomerSelected = (selected: Serializable) => {
+        const company = selected.assert(Company);
+        if (company) this.#router.navigate(['/customers', company.id, 'billing']);
+    };
 
     onResult = (result: Invoice[]) => {
         this.hasLoaded.set(true);

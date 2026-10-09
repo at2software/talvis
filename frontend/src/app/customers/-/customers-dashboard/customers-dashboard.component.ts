@@ -33,13 +33,14 @@ import { EmptyStateComponent } from '@shards/empty-state/empty-state.component';
 import { GuidedTourComponent } from '@shards/guided-tour/guided-tour.component';
 import { Dictionary } from '@constants/constants';
 import { StackedTableDirective } from '@directives/stacked-table.directive';
+import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
     changeDetection: ChangeDetectionStrategy.OnPush,
     selector: 'customers-dashboard',
     templateUrl: './customers-dashboard.component.html',
     styleUrls: ['./customers-dashboard.component.scss'],
-    imports: [StackedTableDirective, ToolbarComponent, EnableTableExportDirective, CdkTableModule, Nx, AvatarComponent, ProjectComponent, MoneyPipe, ContinuousMarkerComponent, FormsModule, DatePipe, ProjectComponent, NgxDaterangepickerMd, SearchInputComponent, EmptyStateComponent, GuidedTourComponent],
+    imports: [StackedTableDirective, ToolbarComponent, EnableTableExportDirective, CdkTableModule, Nx, AvatarComponent, ProjectComponent, MoneyPipe, ContinuousMarkerComponent, FormsModule, DatePipe, ProjectComponent, NgxDaterangepickerMd, SearchInputComponent, EmptyStateComponent, GuidedTourComponent, NgbTooltipModule],
 })
 export class CustomersDashboardComponent extends TableSearchSortBase<Company> implements AfterViewInit {
     protected getItems(): Company[] {
@@ -54,7 +55,7 @@ export class CustomersDashboardComponent extends TableSearchSortBase<Company> im
     companies: Company[] = [];
 
     revenueOn: boolean = false;
-    onlyWithActiveProjects = signal(true);
+    onlyWithActiveProjects = signal(false);
     revenueSpan: StartEnd = new StartEnd();
     selUpdated: StartEnd = new StartEnd();
     revenueMin: number = 0;
@@ -75,7 +76,7 @@ export class CustomersDashboardComponent extends TableSearchSortBase<Company> im
     currentFilter: string = '';
     global = inject(GlobalService);
 
-    observer!: Observable<Page<Company>>;
+    observer = signal<Observable<Page<Company>> | undefined>(undefined);
     onResult = (x: Company[]) => {
         this.hasLoaded.set(true);
         this.companies = this.companies.concat(x);
@@ -90,7 +91,7 @@ export class CustomersDashboardComponent extends TableSearchSortBase<Company> im
         super();
         this.hasInvoicesModule = this.global.user?.hasRole('invoicing') ?? false;
         if (this.hasInvoicesModule) {
-            this.displayedColumns.push('revenue');
+            this.displayedColumns.push('unpaid', 'revenue');
         }
 
         this.updatedAtRanges = {
@@ -110,7 +111,16 @@ export class CustomersDashboardComponent extends TableSearchSortBase<Company> im
         this.currentFilter = nextFilter;
         this.companies = [];
         this.hasLoaded.set(false);
-        this.observer = this.#companyService.indexPaginated(filters);
+        this.observer.set(this.#companyService.indexPaginated(filters));
+    };
+
+    showAll = () => {
+        this.onlyWithActiveProjects.set(false);
+        this.dateRangeFilterActive.set(false);
+        this.updatedAtFilterActive.set(false);
+        this.revenueFilterActive.set(false);
+        this.productFilterActive.set(false);
+        this.filtersUpdated();
     };
 
     filters = () => {
@@ -206,7 +216,7 @@ export class CustomersDashboardComponent extends TableSearchSortBase<Company> im
     create = () => {
         this.#inputModalService.open($localize`:@@i18n.customers.company_name_or_url:Company name or URL`).confirmed(({ text }) => {
             this.#companyService.create(text).subscribe((x) => {
-                this.#router.navigate(['/customers/' + x.id + '/cards']);
+                this.#router.navigate(['/customers', x.id, 'contacts']);
             });
         });
     };

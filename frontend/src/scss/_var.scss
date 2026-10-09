@@ -1,27 +1,17 @@
 @use 'sass:color';
-@use 'colors';
 
 $grid-width    : 1.5rem;
-$border-radius: 0.5 * $grid-width;
+$border-radius : 5px;
 $ratio-modules : 2;                                         // internal: golden cut ratio
 $ratio-views   : $ratio-modules * 1.618 * 1.618 * 1.618;    // internal: golden cut ratio
 $ratio-activity: $ratio-views * 1.618;                      // internal: golden cut ratio
 $m-modules     : $grid-width * $ratio-modules;       // width of module bar on the left
-$m-views       : $grid-width * $ratio-views;         // not used
 $m-activity    : $grid-width * $ratio-activity;      // width of activity tab on the right
+$m-activity-rail: 2.5rem;
 $container-app : 1320px;                             // widest the shell content column ever grows
 $mobile-burger-size      : 60px;
 $mobile-burger-offset    : 20px;
 $mobile-burger-clearance : $mobile-burger-size + 2 * $mobile-burger-offset;
-
-$shadow-box-default: .25rem;
-$shadow-box--inner-default: .125rem;
-$shadow-box-hover: .125;
-
-$shadow-light: #fff1;
-$shadow-lighter: #fff2;
-$shadow-dark: #0009;
-$shadow-darker: #000;
 
 $header-nav-ratio        : .618;
 $header-logo-size        : 3 * $grid-width;
@@ -31,71 +21,23 @@ $header-total-text-height: $header-logo-size - (3 * $header-py);
 $header-font-size        : $header-nav-ratio * $header-total-text-height;
 $nav-font-size           : (1 - $header-nav-ratio) * $header-total-text-height;
 
-
-$color-popup               : #090909;
-$btn-border-width          : 0;
-$card-bg                   : color.adjust(colors.$bg-card, $lightness: -1%);
-$card-cap-bg               : color.adjust(colors.$bg-card, $lightness: -3%);
-$card-border-width         : 0;
-$dropdown-bg               : rgba(colors.$bg-card, 80%);
-$form-select-padding-y     : .0125rem;
-$input-padding-y           : 0.125rem;
-$input-border-width        : 0;
-$list-group-bg             : transparent;
-$list-group-border-width   : 0;
-$list-group-color          : white;
-$list-group-action-color   : white;
-$list-group-item-padding-y : 5px;
-$modal-backdrop-bg         : #000a;
-$modal-backdrop-opacity    : 1;
-$modal-content-border-width: 0;
-$table-bg                  : transparent;
-$table-border-color        : #fff1;
-$tooltip-bg                : $color-popup;
-$tooltip-color             : white;
-$btn-bg                    : #09f;
-$border-radius             : 16px;
+$shadow-light: #fff1;
+$shadow-dark : #0009;
 
 @function light-top($size: .125rem) { @return 0 (-$size) ($size) $shadow-light; }
 @function dark-top($size: .125rem) { @return 0 (-$size) ($size) $shadow-dark; }
 @function light-bottom($size: .125rem) { @return 0 ($size) ($size) $shadow-light; }
 @function dark-bottom($size: .125rem) { @return 0 ($size) ($size) $shadow-dark; }
+@function shadow($size: .125rem) { @return light-top($size), dark-bottom($size); }
+@function shadow-down($size, $blur) { @return (-$size) (-$size) $blur $shadow-dark, $size $size $blur $shadow-light; }
 
 @function liquid-glass() {
-    @return 
+    @return
         inset 0 1px 0 0 #fff2,
         inset 0 8px 16px -6px #fff1,
         inset 0 -6px 12px -4px #0004;
 }
-@function shadow($size: .125rem) { @return 0 (-$size) ($size) $shadow-light, 0 $size $size $shadow-dark; }
-@function shadow-more($size: .125rem) { @return 0 (-$size) ($size) $shadow-lighter, 0 $size $size $shadow-darker; }
-@function inset-shadow-up($size: .125rem) {
-    @return inset 0 (-$size) ($size) #0003, inset 0 $size $size #fff1;
-}
-@function shadow-up($size, $blur) {
-    @return 0 (-$size) $blur $shadow-light, 0 $size $blur $shadow-dark;
-}
-@function filter-shadow-up($size, $blur) {
-    @return drop-shadow((-$size) (-$size) $blur $shadow-light) drop-shadow($size $size $blur $shadow-dark);
-}
-@function shadow-down($size, $blur) {
-    @return (-$size) (-$size) $blur $shadow-dark, $size $size $blur $shadow-light;
-}
-@function filter-shadow-down($size, $blur) {
-    @return drop-shadow((-$size) (-$size) $blur $shadow-dark) drop-shadow($size $size $blur $shadow-light);
-}
-// @function inset-shadow-down($size, $blur) {
-//     @return inset (-$size) (-$size) $blur $shadow-light, inset $size $size $blur $shadow-dark;
-// }
-// @function inset-shadow-up($size, $blur) {
-//     @return inset 0 (-$size) $blur $shadow-dark, inset 0 $size $blur $shadow-light;
-// }
-// @function double-shadow-up($size) {
-//     @return shadow-up($size, 2 * $size), inset-shadow-up($size, 2 * $size);
-// }
-// @function double-shadow-down($size) {
-//     @return shadow-down($size, 2 * $size), inset-shadow-down($size, 2 * $size);
-// }
+
 @function gradient($color) {
     @return linear-gradient(-30deg, color.adjust($color, $lightness: -2%) 0%, $color 50%, color.adjust($color, $lightness: -1%) 100%)
 }

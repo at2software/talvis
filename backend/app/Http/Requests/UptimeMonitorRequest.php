@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Rules\SafeUrl;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UptimeMonitorRequest extends FormRequest {
@@ -12,7 +13,7 @@ class UptimeMonitorRequest extends FormRequest {
         $req = $this->isMethod('POST') ? 'required' : 'sometimes';
         return [
             'name'                    => "$req|string|max:255",
-            'url'                     => "$req|url|max:512",
+            'url'                     => [$req, 'url', 'max:512', new SafeUrl],
             'method'                  => 'sometimes|in:GET,POST,HEAD',
             'expected_status_code'    => 'sometimes|integer|min:100|max:599',
             'timeout'                 => 'sometimes|integer|min:5|max:120',
@@ -22,7 +23,7 @@ class UptimeMonitorRequest extends FormRequest {
             'request_headers'         => 'sometimes|array|nullable',
             'request_body'            => 'sometimes|string|nullable',
             'project_ids'             => 'sometimes|array',
-            'project_ids.*'           => 'exists:projects,id',
+            'project_ids.*'           => 'exists:projects,id,deleted_at,NULL',
             'recipient_ids'           => 'sometimes|array',
             'recipient_ids.*'         => 'exists:users,id',
         ];

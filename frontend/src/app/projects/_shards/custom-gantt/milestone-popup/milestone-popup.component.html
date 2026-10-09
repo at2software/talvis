@@ -66,7 +66,7 @@
                                 <button type="button" class="btn btn-sm" [class.btn-secondary]="milestoneForm.get('state')?.value === MilestoneState.TODO" [class.btn-outline-primary]="milestoneForm.get('state')?.value !== MilestoneState.TODO" (click)="selectState(MilestoneState.TODO)">
                                     {{ milestoneStates[MilestoneState.TODO].name }}
                                 </button>
-                                <button type="button" class="btn btn-sm" [class.btn-primary]="milestoneForm.get('state')?.value === MilestoneState.IN_PROGRESS" [class.btn-outline-primary]="milestoneForm.get('state')?.value !== MilestoneState.IN_PROGRESS" (click)="selectState(MilestoneState.IN_PROGRESS)">
+                                <button type="button" class="btn btn-sm" [class.btn-info]="milestoneForm.get('state')?.value === MilestoneState.IN_PROGRESS" [class.btn-outline-primary]="milestoneForm.get('state')?.value !== MilestoneState.IN_PROGRESS" (click)="selectState(MilestoneState.IN_PROGRESS)">
                                     {{ milestoneStates[MilestoneState.IN_PROGRESS].name }}
                                 </button>
                                 <button type="button" class="btn btn-sm" [class.btn-success]="milestoneForm.get('state')?.value === MilestoneState.DONE" [class.btn-outline-primary]="milestoneForm.get('state')?.value !== MilestoneState.DONE" (click)="selectState(MilestoneState.DONE)">
@@ -115,7 +115,7 @@
                     <div class="mb-3">
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <div class="flex-fill text-truncate" i18n="@@i18n.common.tasks">tasks</div>
-                            <button type="button" class="btn btn-outline-primary btn-sm" (click)="onAddTask()">
+                            <button type="button" class="btn btn-sm btn-plain text-primary" (click)="onAddTask()">
                                 <i>add</i>
                             </button>
                         </div>
@@ -135,12 +135,12 @@
                 </div>
                 <div class="modal-footer">
                     <div class="d-flex justify-content-between w-100">
-                        <button type="button" class="btn btn-outline-danger btn-sm" (click)="onDeleteMilestone()">
+                        <button type="button" class="btn btn-plain text-danger btn-sm" (click)="onDeleteMilestone()">
                             <i class="me-1">delete</i>
                             <span i18n="@@i18n.common.delete">delete</span>
                         </button>
                         <div class="d-flex gap-2">
-                            <button type="button" class="btn btn-outline-primary btn-sm" (click)="onCancel()">
+                            <button type="button" class="btn btn-sm" (click)="onCancel()">
                                 <span i18n="@@i18n.common.cancel">cancel</span>
                             </button>
                             <button type="submit" class="btn btn-primary btn-sm" [disabled]="milestoneForm.invalid">

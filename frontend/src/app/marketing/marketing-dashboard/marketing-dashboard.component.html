@@ -86,8 +86,8 @@
                     <div class="row g-1 text-center">
                         @for (day of _activitySchedule; track day.date) {
                             <div class="col">
-                                <small class="d-block" [class.fw-bold]="day.isToday" [class.text-primary]="day.isToday">{{ day.day }}</small>
-                                <div class="rounded p-1 mt-1" [class.border]="day.isToday" [class.border-primary]="day.isToday" [ngbTooltip]="day.day + ': ' + day.completed + ' done, ' + day.pending + ' pending'">
+                                <small class="d-block" [class.fw-bold]="day.isToday">{{ day.day }}</small>
+                                <div class="rounded p-1 mt-1" [class.border]="day.isToday" [ngbTooltip]="day.day + ': ' + day.completed + ' done, ' + day.pending + ' pending'">
                                     <div class="fw-semibold">{{ day.total || '—' }}</div>
                                     @if (day.total > 0) {
                                         <small class="text-muted d-block">{{ day.pending }}/{{ day.total }}</small>
@@ -105,12 +105,12 @@
             <div class="card-header hstack gap-2">
                 <div class="flex-fill text-truncate">funnel visualization</div>
                 <div class="hstack gap-2 flex-shrink-0">
-                    <button type="button" class="btn btn-sm btn-outline-primary border-0" (click)="toggleFunnelMode()" tabindex="0" [ngbTooltip]="funnelMode === 'count' ? 'Switch to money view' : 'Switch to count view'">
+                    <button type="button" class="btn btn-sm btn-plain text-primary" (click)="toggleFunnelMode()" tabindex="0" [ngbTooltip]="funnelMode === 'count' ? 'Switch to money view' : 'Switch to count view'">
                         <i>{{ funnelMode === 'count' ? 'attach_money' : 'format_list_numbered' }}</i>
                     </button>
                     <div class="input-group">
                         <input type="text" class="form-control" ngxDaterangepickerMd [(ngModel)]="creation_span" [ranges]="presetRanges" [showCustomRangeLabel]="true" [alwaysShowCalendars]="true" (datesUpdated)="onCreationUpdated()" [locale]="{ applyLabel: 'ok', format: 'DD.MM.YYYY' }" />
-                        <button type="button" class="btn btn-sm btn-outline-primary" (click)="clearSelection()" tabindex="0">
+                        <button type="button" class="btn btn-sm btn-plain text-primary" (click)="clearSelection()" tabindex="0">
                             <i>close</i>
                         </button>
                     </div>
@@ -247,7 +247,7 @@
                         <small class="text-muted">observed</small>
                     </div>
                     <div class="col py-2">
-                        <div class="fs-4 fw-bold" [class.text-primary]="(_remarketing?.suggested?.length || 0) > 0">{{ _remarketing?.suggested?.length || 0 }}</div>
+                        <div class="fs-4 fw-bold">{{ _remarketing?.suggested?.length || 0 }}</div>
                         <small class="text-muted">suggested</small>
                     </div>
                 </div>

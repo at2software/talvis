@@ -118,7 +118,7 @@ export class WidgetRevenueRadialComponent {
             .attr('class', 'radial-chart-tooltip')
             .style('position', 'absolute').style('visibility', 'hidden')
             .style('background-color', 'rgba(0, 0, 0, 0.9)').style('color', '#fff')
-            .style('padding', '12px').style('border-radius', '4px')
+            .style('padding', '12px').style('border-radius', 'var(--bs-border-radius)')
             .style('font-size', '12px').style('pointer-events', 'none').style('z-index', '1000');
 
         const hoverArc = arc<unknown, MonthlyRevenueData>()

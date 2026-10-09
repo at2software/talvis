@@ -5,7 +5,7 @@ import { UserEmployment } from './user-employment.model';
 import { Encryption } from '../encryption/encryption.model';
 import * as forge from 'node-forge';
 import { NxAction } from '@models/_core/nx.actions';
-import { ReplaySubject } from 'rxjs';
+import { ReplaySubject, tap } from 'rxjs';
 import { Type } from '@models/_core/hydrate';
 import { Company } from '@models/company/company.model';
 import { Project } from '@models/project/project.model';
@@ -15,6 +15,7 @@ import { IHasFoci } from '@models/focus/has-foci.interface';
 import { computed } from '@angular/core';
 import { storageGet, storageSet, storageRemove } from '@constants/storage';
 import { nx } from '@models/_core/nx-bridge';
+import { Toast } from '@shards/toast/toast';
 
 @Model('User')
 export class User extends VcardClass {
@@ -40,6 +41,8 @@ export class User extends VcardClass {
     color: string = '#000000';
     work_zip?: number;
     role_names: string[] = [];
+    m365_object_id: string | null = null;
+    m365_address: string | null = null;
     latest_foci?: { id: string; parent_path: string; parent_name: string }[];
 
     @Type(()=>UserEmployment) active_employment!: UserEmployment;
@@ -53,6 +56,7 @@ export class User extends VcardClass {
     protected override buildActions(): NxAction[] { return getUserActions(this) }
 
     css = computed(() => this.snapshot().color);
+    readonly getM365Address = computed(() => this.snapshotAsThis().m365_address ?? null);
 
     avatar = () => this.getAvatar();
 
@@ -76,6 +80,9 @@ export class User extends VcardClass {
         return roles.some((role) => this.role_names.includes(role));
     };
 
+    connectMicrosoft365 = () => this.httpService.get<{ url: string }>('microsoft365/connect').pipe(tap(({ url }) => (window.location.href = url)));
+    disconnectMicrosoft365 = () => this.httpService.delete(`${this.apiPathWithId()}/microsoft365`).pipe(tap(() => this.patch({ m365_object_id: null, m365_address: null })));
+
     initRsaEncryption() {
         const pem = storageGet<string>(User.COOKIE_ENC_KEY, '');
         if (pem && pem.length) {
@@ -92,7 +99,7 @@ export class User extends VcardClass {
                 this.#assignRsaKeyPair(this.toKeyPair(decrypted));
             }
         } catch (_x: unknown) {
-            window.alert('invalid PEM key');
+            Toast.error($localize`:@@i18n.rsa.invalidPem:invalid PEM key`);
             this.#deleteEncryptionCookie();
         } finally {
             this.#encryptionInitialized.next(true);

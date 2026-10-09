@@ -9,7 +9,7 @@
                 <div class="form-group mb-3">
                     <div i18n="@@i18n.common.command">command</div>
                     <div ngbDropdown class="sentinel-dropdown">
-                        <button type="button" class="btn btn-outline-secondary w-100 text-start d-flex align-items-center" ngbDropdownToggle>
+                        <button type="button" class="btn btn-dark w-100 text-start d-flex align-items-center" ngbDropdownToggle>
                             <span class="sentinel-pill bg-warning text-dark" i18n="@@i18n.common.do">do</span>
                             <span class="sentinel-command ms-2">{{ selectedCommand.label || 'Select command...' }}</span>
                         </button>
@@ -64,7 +64,7 @@
         }
         @case ('enum') {
             <div ngbDropdown class="sentinel-dropdown">
-                <button type="button" class="btn btn-outline-secondary w-100 text-start" ngbDropdownToggle>
+                <button type="button" class="btn btn-dark w-100 text-start" ngbDropdownToggle>
                     <span class="sentinel-value">{{ opt.value || 'Select...' }}</span>
                 </button>
                 <div ngbDropdownMenu class="w-100">
@@ -78,7 +78,7 @@
         }
         @case ('column') {
             <div ngbDropdown class="sentinel-dropdown">
-                <button type="button" class="btn btn-outline-secondary w-100 text-start" ngbDropdownToggle>
+                <button type="button" class="btn btn-dark w-100 text-start" ngbDropdownToggle>
                     <span class="sentinel-table">{{ opt.value || 'Select column...' }}</span>
                 </button>
                 <div ngbDropdownMenu class="w-100 dropdown-menu-scroll">
@@ -92,7 +92,7 @@
         }
         @case ('table') {
             <div ngbDropdown class="sentinel-dropdown">
-                <button type="button" class="btn btn-outline-secondary w-100 text-start" ngbDropdownToggle>
+                <button type="button" class="btn btn-dark w-100 text-start" ngbDropdownToggle>
                     <span class="sentinel-table">{{ opt.value || 'Select table...' }}</span>
                 </button>
                 <div ngbDropdownMenu class="w-100 dropdown-menu-scroll">

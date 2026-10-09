@@ -2,7 +2,7 @@ import { Dictionary } from '@constants/constants';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { NgbDateAdapter, NgbDropdownModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { dayjs, Dayjs } from '@constants/date/dates';
-import { ECHARTS_DEFAULT_TOOLTIP_OPTIONS, ECHARTS_DONUT_ITEM_STYLE, eAnnotateY } from '@charts/echarts-presets';
+import { ECHARTS_DEFAULT_TOOLTIP_OPTIONS, ECHARTS_DONUT_CENTER_TEXT, ECHARTS_DONUT_ITEM_STYLE, ECHARTS_DONUT_SERIES, eAnnotateY } from '@charts/echarts-presets';
 import { GlobalService } from '@models/global.service';
 import { Color } from '@constants/Color';
 import { NgbDateCarbonAdapter } from '@directives/ngb-date.adapter';
@@ -140,7 +140,7 @@ export class ProjectsStatsComponent {
             .filter((val) => val !== null && val !== undefined);
         const maxVal = Math.max(...allValues);
 
-        const colors = [Color.fromVar('cyan'), Color.fromVar('teal'), Color.fromVar('yellow')];
+        const colors = [Color.fromVar('cyan'), Color.fromVar('primary'), Color.fromVar('yellow')];
         const stacked = this.svbStacked();
 
         return {
@@ -181,7 +181,7 @@ export class ProjectsStatsComponent {
         const option = this.quoteSignalOptions.find((o) => o.key === key)!;
         const points = response.points;
         const format = option.format;
-        const primaryColor = Color.fromVar('--color-primary-0', '').toHexString();
+        const primaryColor = Color.fromVar('primary').toHexString();
 
         return {
             chart: { height: 220 },
@@ -221,8 +221,8 @@ export class ProjectsStatsComponent {
         if (!this.#quoteAccuracy.hasValue()) return undefined;
 
         const data = [...this.#quoteAccuracy.value()].sort((a, b) => a.net - b.net);
-        const rangeColor = Color.fromVar('--color-primary-0', '').darken(30).toHexString();
-        const lineColor = Color.fromVar('--color-primary-0', '').toHexString();
+        const rangeColor = Color.fromVar('primary').darken(30).toHexString();
+        const lineColor = Color.fromVar('primary').toHexString();
         const warnColor = Color.fromVar('--color-warning', '').toHexString();
         const dangerColor = Color.fromVar('--color-danger', '').toHexString();
 
@@ -307,11 +307,11 @@ export class ProjectsStatsComponent {
                 backgroundColor: 'transparent',
                 animation: false,
                 tooltip: { trigger: 'item', ...ECHARTS_DEFAULT_TOOLTIP_OPTIONS, formatter: (rawParams: unknown) => { const p = rawParams as { name: string; value: number }; return `${p.name}: ${p.value}`; } },
-                graphic: [{ type: 'text', left: 'center', top: 'center', style: { text: '' + mix.total, fill: '#fff', fontSize: 22 } }],
+                graphic: [{ type: 'text', left: 'center', top: 'center', style: { ...ECHARTS_DONUT_CENTER_TEXT, text: '' + mix.total } }],
                 series: [
                     {
                         type: 'pie',
-                        radius: ['40%', '70%'],
+                        radius: ECHARTS_DONUT_SERIES.radius,
                         data: countSegments.map((s) => ({ value: s.value, name: groupMeta.get(s.id)?.name ?? s.id, itemStyle: { color: groupMeta.get(s.id)?.color, ...ECHARTS_DONUT_ITEM_STYLE } })),
                         label: { show: false },
                     },
@@ -322,11 +322,11 @@ export class ProjectsStatsComponent {
                 backgroundColor: 'transparent',
                 animation: false,
                 tooltip: { trigger: 'item', ...ECHARTS_DEFAULT_TOOLTIP_OPTIONS, formatter: (rawParams: unknown) => { const p = rawParams as { name: string; value: number }; return `${p.name}: ${this.moneyPipe.transform(p.value)}`; } },
-                graphic: [{ type: 'text', left: 'center', top: 'center', style: { text: this.moneyPipe.transform(totalNet), fill: '#fff', fontSize: 14 } }],
+                graphic: [{ type: 'text', left: 'center', top: 'center', style: { ...ECHARTS_DONUT_CENTER_TEXT, text: this.moneyPipe.transform(totalNet) } }],
                 series: [
                     {
                         type: 'pie',
-                        radius: ['40%', '70%'],
+                        radius: ECHARTS_DONUT_SERIES.radius,
                         data: netSegments.map((s) => ({ value: s.value, name: groupMeta.get(s.id)?.name ?? s.id, itemStyle: { color: groupMeta.get(s.id)?.color, ...ECHARTS_DONUT_ITEM_STYLE } })),
                         label: { show: false },
                     },
@@ -370,18 +370,18 @@ export class ProjectsStatsComponent {
 
         const pct = (load.warranty_hours / total) * 100;
         const warrantyColor = Color.fromVar('--color-warning-soft', '').toHexString();
-        const regularColor = Color.fromVar('--color-primary-0', '').darken(30).toHexString();
+        const regularColor = Color.fromVar('primary').darken(30).toHexString();
 
         return {
             chart: { height: 260 },
             backgroundColor: 'transparent',
             animation: false,
             tooltip: { trigger: 'item', ...ECHARTS_DEFAULT_TOOLTIP_OPTIONS, formatter: (rawParams: unknown) => { const p = rawParams as { name: string; value: number }; return `${p.name}: ${this.#hours(p.value)}`; } },
-            graphic: [{ type: 'text', left: 'center', top: 'center', style: { text: `${pct.toFixed(1)}%`, fill: '#fff', fontSize: 20 } }],
+            graphic: [{ type: 'text', left: 'center', top: 'center', style: { ...ECHARTS_DONUT_CENTER_TEXT, text: `${pct.toFixed(1)}%` } }],
             series: [
                 {
                     type: 'pie',
-                    radius: ['40%', '70%'],
+                    radius: ECHARTS_DONUT_SERIES.radius,
                     data: [
                         { value: load.warranty_hours, name: $localize`:@@i18n.project.warrantyHours:warranty`, itemStyle: { color: warrantyColor, ...ECHARTS_DONUT_ITEM_STYLE } },
                         { value: load.regular_hours, name: $localize`:@@i18n.project.regularHours:project runtime`, itemStyle: { color: regularColor, ...ECHARTS_DONUT_ITEM_STYLE } },
@@ -435,11 +435,11 @@ export class ProjectsStatsComponent {
             backgroundColor: 'transparent',
             animation: false,
             tooltip: { trigger: 'item', ...ECHARTS_DEFAULT_TOOLTIP_OPTIONS },
-            graphic: [{ type: 'text', left: 'center', top: 'center', style: { text: `${pct.toFixed(1)}%`, fill: '#fff', fontSize: 20 } }],
+            graphic: [{ type: 'text', left: 'center', top: 'center', style: { ...ECHARTS_DONUT_CENTER_TEXT, text: `${pct.toFixed(1)}%` } }],
             series: [
                 {
                     type: 'pie',
-                    radius: ['40%', '70%'],
+                    radius: ECHARTS_DONUT_SERIES.radius,
                     data: [
                         { value: rate.successful, name: $localize`:@@i18n.common.successful:successful`, itemStyle: { color: successColor, ...ECHARTS_DONUT_ITEM_STYLE } },
                         { value: rate.unsuccessful, name: $localize`:@@i18n.common.unsuccessful:unsuccessful`, itemStyle: { color: dangerColor, ...ECHARTS_DONUT_ITEM_STYLE } },

@@ -43,14 +43,17 @@
         }
         @let _mantisInstance = mantisInstance();
         @let _gitInstance = gitInstance();
-        @let _mattermostInstance = mattermostInstance();
+        @let _chatInstances = chatInstances();
+        @if (!_assignees.length) {
+            <div class="card-body py-2 small text-muted" i18n="@@i18n.projects.noAssigneesYet">no one assigned yet</div>
+        }
         <ul class="list-group">
             @for (c of _assignees; track c.id) {
                 <li class="list-group-item hstack gap-2" [nx]="c" [tables]="_assignees">
                     <div class="position-relative">
                         <avatar [object]="c.assignee"></avatar>
                         @if (_project?.project_manager?.id === c.assignee.id) {
-                            <i class="pm-badge text-primary" i18n-title="@@i18n.common.projectManager" title="project manager">manage_accounts</i>
+                            <i class="pm-badge" i18n-title="@@i18n.common.projectManager" title="project manager">manage_accounts</i>
                         }
                     </div>
                     <div class="flex-fill text-truncate" [title]="c.assignee.getName()">
@@ -58,19 +61,21 @@
                     </div>
                     <div class="input-group w-auto flex-nowrap">
                         @if (c.assignee.getUserIdForPlugin('X-NEXUS-MANTISBT') && _mantisInstance) {
-                            <a class="input-group-text text-decoration-none px-1 cursor-pointer" (click)="openMantisLink($event)" (keyup.enter)="openMantisLink($event)" tabindex="0">
+                            <a class="input-group-text text-decoration-none px-1 cursor-pointer" (click)="openLink($event, _mantisInstance)" (keyup.enter)="openLink($event, _mantisInstance)" tabindex="0">
                                 <n [class]="c.assignee.getInstanceIconClass(_mantisInstance)" style="font-size: 0.7rem">mantis</n>
                             </a>
                         }
                         @if (c.assignee.getUserIdForPlugin('X-NEXUS-GIT') && _gitInstance) {
-                            <a class="input-group-text text-decoration-none px-1 cursor-pointer" (click)="openGitLink($event)" (keyup.enter)="openGitLink($event)" tabindex="0">
+                            <a class="input-group-text text-decoration-none px-1 cursor-pointer" (click)="openLink($event, _gitInstance)" (keyup.enter)="openLink($event, _gitInstance)" tabindex="0">
                                 <n [class]="c.assignee.getInstanceIconClass(_gitInstance)" style="font-size: 0.7rem">git</n>
                             </a>
                         }
-                        @if (c.assignee.getUserIdForPlugin('X-NEXUS-MATTERMOST') && _mattermostInstance) {
-                            <a class="input-group-text text-decoration-none px-1 cursor-pointer" (click)="openMattermostLink($event)" (keyup.enter)="openMattermostLink($event)" tabindex="0">
-                                <n [class]="c.assignee.getInstanceIconClass(_mattermostInstance)" style="font-size: 0.7rem">mattermost</n>
-                            </a>
+                        @for (chat of _chatInstances; track chat.id) {
+                            @if (c.assignee.getUserIdForPlugin(chat.getVcardAttributeName())) {
+                                <a class="input-group-text text-decoration-none px-1 cursor-pointer" (click)="openLink($event, chat)" (keyup.enter)="openLink($event, chat)" tabindex="0">
+                                    <n [class]="c.assignee.getInstanceIconClass(chat)" style="font-size: 0.7rem">{{ chat.icon() }}</n>
+                                </a>
+                            }
                         }
                         @if (_project?.is_time_based || isProjectManager()) {
                             @if (isProjectManager()) {

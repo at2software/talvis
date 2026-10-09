@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\NLog;
-use App\Http\Requests\Timetracker\JoinProjectRequest;
 use App\Http\Requests\Timetracker\ParentRequest;
 use App\Http\Requests\Timetracker\SearchRequest;
 use App\Http\Requests\Timetracker\StoreRequest;
@@ -16,6 +15,7 @@ use App\Models\Project;
 use App\Models\ProjectState;
 use App\Services\TimetrackerDataService;
 use Carbon\Carbon;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
@@ -78,7 +78,7 @@ class TimetrackerController extends Controller {
         }
         if ($parent = $this->getParentPolyFromRequest()) {
             if (is_a($parent, Project::class) && $parent->state->progress == ProjectState::Finished && ! $parent->isInWarranty()) {
-                return response('Cannot create foci on finished projects outside their warranty period!', 400);
+                abort(400, 'Cannot create foci on finished projects outside their warranty period!');
             }
             if (is_a($parent, Project::class)) {
                 if ($assignment = $parent->assignees()->where(request()->user()->toPoly('assignee'))->first()) {
@@ -89,23 +89,26 @@ class TimetrackerController extends Controller {
             request()->user()->update(Param::nullPoly('current_focus'));
             return $this->createFocus([...$parent->toPoly(), ...$payload]);
         } else {
-            return response('no valid parent found', 400);
+            abort(400, 'no valid parent found');
         }
     }
     public function subscribe(ParentRequest $request) {
         $parent = $this->getParentPolyFromRequest();
+        abort_if($parent instanceof Project && ! $parent->isTrackable(), 422, 'Project is not trackable');
 
         $assignment = Assignment::firstOrCreate([
             ...Auth::user()->toPoly('assignee'),
             ...$parent->toPoly(),
-        ], ['role' => 2]);
-        return $assignment->wasRecentlyCreated ? $this->getParent() : response('Already subscribed', 406);
+        ], ['role_id' => 2]);
+        abort_unless($assignment->wasRecentlyCreated, 406, 'Already subscribed');
+        return $this->getParent();
     }
     public function unsubscribe(ParentRequest $request) {
         $parent = $this->getParentPolyFromRequest();
 
         $deleted = Assignment::where($parent->toPoly())->whereAssignee(Auth::user())->delete();
-        return $deleted ? $this->getParent() : response('No subscription found to unsubscribe from', 406);
+        abort_unless($deleted, 406, 'No subscription found to unsubscribe from');
+        return $this->getParent();
     }
     public function createFocus($data = []) {
         $q = [
@@ -122,7 +125,7 @@ class TimetrackerController extends Controller {
             $q['invoice_item_id'] = request('item_focus_id');
         }
         if (empty($q['parent_type']) || empty($q['parent_id'])) {
-            return response('parent is invalid', 400);
+            abort(400, 'parent is invalid');
         }
         request()->user()->update(['current_focus_id' => null, 'current_focus_type' => null]);
         return Focus::create($q);
@@ -133,17 +136,17 @@ class TimetrackerController extends Controller {
         $data = $this->getBody();
         if (empty($data->project_id)) {
             request()->user()->current_project_id = null;
-            return request()->user()->save();
+            return response()->json(request()->user()->save());
         }
         if ($project = Project::find($data->project_id)) {
             request()->user()->current_project_id = $project->id;
-            return request()->user()->save();
+            return response()->json(request()->user()->save());
         }
-        return response()->make('project not found', 404);
+        abort(404, 'project not found');
     }
     public function getParent() {
         if (request()->has(self::TARGET_PROJECT)) {
-            return $this->dataService->mapProjects(Project::where('id', request(self::TARGET_PROJECT)))[0];
+            return Arr::first($this->dataService->mapProjects(Project::where('id', request(self::TARGET_PROJECT))));
         }
         if (request()->has(self::TARGET_COMPANY)) {
             return $this->dataService->mapCompanies(Company::where('id', request(self::TARGET_COMPANY)))[0];
@@ -159,13 +162,9 @@ class TimetrackerController extends Controller {
         }
         return null;
     }
-    public function join(JoinProjectRequest $request) {
-        request()->user()->projects()->associate($request->validated('project_id'));
-        return request()->user();
-    }
     public function search(SearchRequest $request) {
         $projects  = $this->dataService->mapProjects(Project::whereTrackable()->where('name', 'like', '%'.request('q').'%'));
-        $companies = $this->dataService->mapCompanies(Company::where('vcard', 'like', '%'.request('q').'%'));
+        $companies = $this->dataService->mapCompanies(Company::whereVcardLike((string)request('q')));
         return $this->sorted($projects, $companies);
     }
     public function updateCurrentFocus() {
@@ -223,13 +222,16 @@ class TimetrackerController extends Controller {
                 'status'  => request('status'),
             ]);
         }
-        return response('successfully updated');
+        return response([
+            'message' => 'successfully updated',
+            'value'   => true,
+        ]);
     }
     public function indexRecentComments(ParentRequest $request) {
         $parent = $this->getParentPolyFromRequest();
 
         if (! $parent) {
-            return response('No valid parent found', 400);
+            abort(400, 'No valid parent found');
         }
         return Focus::where('user_id', request()->user()->id)
             ->where($parent->toPoly())

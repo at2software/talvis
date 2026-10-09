@@ -1,6 +1,7 @@
 @let _entries = entries();
 @let _min = min();
 @let _max = max();
+@let _balanceBefore = balanceBefore();
 @let _modal = modalData();
 <toolbar>
     <div class="btn-group" role="group">
@@ -22,14 +23,15 @@
             </colgroup>
             <tbody>
                 @for (e of _entries; track e.id) {
+                    @let _before = _balanceBefore.get(e.id) ?? 0;
                     <tr [nx]="e" [tables]="_entries">
                         <td class="small text-muted text-nowrap">{{ e.occured_at | date }}</td>
                         <td class="text-truncate">{{ e.description }}</td>
                         <td class="text-truncate">{{ e.approver }}</td>
                         <td class="td-chard">
-                            <saldo-chart [min]="_min" [max]="_max" [delta]="e.value" [dx]="e.var.current"></saldo-chart>
+                            <saldo-chart [min]="_min" [max]="_max" [delta]="e.value" [dx]="_before"></saldo-chart>
                         </td>
-                        <td class="text-nowrap text-end">{{ e.value + e.var.current | money }}</td>
+                        <td class="text-nowrap text-end">{{ e.value + _before | money }}</td>
                     </tr>
                 }
             </tbody>

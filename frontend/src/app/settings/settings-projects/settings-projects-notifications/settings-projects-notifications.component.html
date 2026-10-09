@@ -28,7 +28,7 @@
         <p class="text-muted small mb-3" i18n="@@i18n.settings.emailThresholdsDesc">Send an email to the project manager when hours invested divided by estimated work exceeds a threshold. Notifications reset automatically if the ratio drops below the threshold again.</p>
         <div class="d-flex flex-wrap gap-2 mb-3">
             @for (threshold of thresholds(); track threshold) {
-                <span class="badge d-inline-flex align-items-center gap-1 fs-6 bg-primary bg-opacity-25 text-primary border border-primary border-opacity-25">
+                <span class="badge d-inline-flex align-items-center gap-1 fs-6 bg-dark">
                     {{ threshold }}%
                     <button type="button" class="btn-close btn-close-white ms-1" aria-label="remove" (click)="removeThreshold(threshold)" style="font-size: 0.6em"></button>
                 </span>

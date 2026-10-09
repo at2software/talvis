@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject, signal, viewChild, effect, computed } from '@angular/core';
-import { DatePipe, DecimalPipe, PercentPipe } from '@angular/common';
+import { DatePipe, DecimalPipe, NgTemplateOutlet, PercentPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { ToolbarComponent } from '@app/app/toolbar/toolbar.component';
@@ -41,9 +41,8 @@ import { BusyService } from '@app/busy.service';
 @Component({
     changeDetection: ChangeDetectionStrategy.OnPush,
     selector: 'project-detail-quote',
-    imports: [AvatarComponent, FormsModule, DatePipe, DecimalPipe, PercentPipe, ToolbarComponent, InvoicePrepareWrapper, NComponent, NgbTooltipModule, NgbDropdownModule, SafePipe, MoneyPipe, MlReliabilityDirective, SpinnerComponent],
+    imports: [AvatarComponent, FormsModule, DatePipe, DecimalPipe, PercentPipe, NgTemplateOutlet, ToolbarComponent, InvoicePrepareWrapper, NComponent, NgbTooltipModule, NgbDropdownModule, SafePipe, MoneyPipe, MlReliabilityDirective, SpinnerComponent],
     templateUrl: './project-invoicing.component.html',
-    styleUrl: './project-invoicing.component.scss',
 })
 export class ProjectInvoicingComponent {
 
@@ -209,6 +208,7 @@ export class ProjectInvoicingComponent {
             this.onInvoicingTypeChange(TInvoicing.FinalInvoice);
         });
     }
+    previewQuote = () => this.#projectService.makePdf(this.#parent.object(), PdfCreationType.Preview);
     makeDraftInvoice = () => this.makeInvoice(true);
     makeInvoice = (draft = false) => {
         const project = this.#parent.object();
@@ -288,6 +288,11 @@ export class ProjectInvoicingComponent {
     }
 
     warningMissingContact = () => !this.#parent.object()?.personalized?.firstName;
+    quoteTooltip = computed(() =>
+        this.warningMissingContact()
+            ? $localize`:@@i18n.projects.quoteRequiresContact:select a contact person under payment information first`
+            : $localize`:@@i18n.projects.createQuoteHint:creates the quote PDF with the next quote number and marks the project as quoted`,
+    );
     adresseeName = () => {
         const p = this.#parent.object()?.personalized;
         return p?.firstName ? `${p.salutation || ''} ${p.firstName} ${p.familyName || ''}`.trim()
@@ -462,7 +467,7 @@ export class ProjectInvoicingComponent {
 
     #openNewHeaderItem(stage: number, switchToQuote = false) {
         this.#inputModalService
-            .open('@@i18n.common.title')
+            .open($localize`:@@i18n.common.title:title`)
             .then((result) => {
                 if (!result?.text) return;
                 const item = InvoiceItem.fromJson({

@@ -8,6 +8,9 @@ import { Param } from '@models/param/param.model';
 import { Toast } from '@shards/toast/toast';
 import { NComponent } from '@shards/n/n.component';
 import { Dictionary } from '@constants/constants';
+import { SettingsWebhooksComponent } from '@app/settings/settings-webhooks/settings-webhooks.component';
+import { ModalBaseService } from '@app/_modals/modal-base-service';
+import { ModalM365SetupGuideComponent } from '@app/_modals/modal-m365-setup-guide/modal-m365-setup-guide.component';
 
 interface TPipelineJob {
     job: string;
@@ -39,7 +42,11 @@ const VAULT_INFO: Dictionary<{ label: string; description: string }[]> = {
         { label: 'login', description: 'Username or email address of the bot account' },
         { label: 'password', description: 'Password of the bot account' },
         { label: 'broadcast channel', description: 'Channel ID used for system-wide notifications' },
-        { label: 'default user ID', description: 'TALVIS user ID who receives direct payment notifications (e.g. discrepancies from bank reconciliation)' },
+    ],
+    SLACK: [
+        { label: 'bot token', description: 'Bot user OAuth token (xoxb-…) — scopes: chat:write, chat:write.customize, channels:manage, channels:read, channels:history, groups:read, groups:history, users:read, users:read.email, im:write' },
+        { label: 'broadcast channel', description: 'Channel ID used for system-wide notifications — the bot must be a member' },
+        { label: 'admin user token', description: 'Optional: user OAuth token (xoxp-…) of a workspace admin on a paid plan with users.profile:write — only needed to set the status and title of other users' },
     ],
     GITLAB: [
         { label: 'GitLab URL', description: 'Base URL of your GitLab instance (e.g. https://gitlab.com)' },
@@ -53,6 +60,23 @@ const VAULT_INFO: Dictionary<{ label: string; description: string }[]> = {
         { label: 'login ID (Kennung)', description: 'Your online banking login ID (not the card PIN)' },
         { label: 'PIN', description: 'Your online banking PIN' },
     ],
+    MANTIS: [
+        { label: 'URL', description: "Base URL of your MantisBT installation (e.g. https://mantis.example.com/) — must match the URL in the users' Mantis connectors so project links are recognised" },
+        { label: 'token', description: 'API token of a Mantis account that can read all linked projects (My Account → API Tokens)' },
+    ],
+    M365: [
+        { label: 'tenant id', description: 'Directory (tenant) ID of the TALVIS app registration in Entra' },
+        { label: 'client id', description: 'Application (client) ID' },
+        { label: 'client secret', description: 'Client secret value (not the secret ID)' },
+        { label: 'secret expires at', description: 'Optional, YYYY-MM-DD — admins get a chat reminder 30/14/7/3/1 days before' },
+        { label: 'team id', description: "Optional: id of the Teams team for project channels (groupId from 'Get link to team'); enables Microsoft Teams as chat platform" },
+        { label: 'town square', description: 'Optional: Teams channel id (19:…@thread.tacv2) for company-wide announcements' },
+    ],
+};
+
+const VAULT_DESCRIPTION: Dictionary<string> = {
+    MANTIS: 'TALVIS polls all linked Mantis projects every 5 minutes and posts new, changed and commented issues to the project chat.',
+    M365: 'App-only access via an Entra app registration — the setup guide walks you through it step by step.',
 };
 
 const DEFAULT_PIPELINE_JOBS: TPipelineJob[] = [
@@ -65,7 +89,7 @@ const DEFAULT_PIPELINE_JOBS: TPipelineJob[] = [
 
 @Component({
     selector: 'settings-connectors',
-    imports: [FormsModule, NgbDropdownModule, NgbTooltipModule, NComponent],
+    imports: [FormsModule, NgbDropdownModule, NgbTooltipModule, NComponent, SettingsWebhooksComponent],
     templateUrl: './settings-connectors.component.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -80,6 +104,7 @@ export class SettingsConnectorsComponent {
     #vaultService = inject(VaultService);
     #paramService = inject(ParamService);
     #modalService = inject(NgbModal);
+    #modalBaseService = inject(ModalBaseService);
 
     readonly #vaults = modelListResource(() => this.#vaultService.index());
     readonly vaults = linkedSignal(() =>
@@ -113,6 +138,10 @@ export class SettingsConnectorsComponent {
         this.bankName.set(null);
         if (vault.prefix === 'GITLAB') this.#pipelineParam.reload();
         this.#modalService.open(content, { size: 'lg' });
+    }
+
+    openM365SetupGuide() {
+        this.#modalBaseService.open(ModalM365SetupGuideComponent, this.currentVault()?.map['M365_CLIENT_ID']);
     }
 
     checkCredentials() {
@@ -176,11 +205,12 @@ export class SettingsConnectorsComponent {
     }
 
     infoFor = (vault: TVault) => VAULT_INFO[vault.prefix] ?? [];
+    descriptionFor = (vault: TVault) => VAULT_DESCRIPTION[vault.prefix];
     keysFor = (vault: TVault) => Object.keys(vault.keys);
     mapKey = (key: string) => this.currentVault()!.prefix + '_' + key;
     isKeyMissing = (key: string) => this.currentVault()?.missing?.includes(key) ?? false;
     vaultIcon = (vault: TVault) =>
-        ({ MATTERMOST: 'mattermost', GITLAB: 'git', FINTS: 'bank' }[vault.prefix] ?? vault.prefix.toLowerCase());
+        ({ MATTERMOST: 'mattermost', SLACK: 'slack', GITLAB: 'git', FINTS: 'bank', MANTIS: 'mantis', M365: 'microsoft' }[vault.prefix] ?? vault.prefix.toLowerCase());
 
     #onIbanChange(iban: string) {
         const normalized = iban.replace(/\s/g, '').toUpperCase();

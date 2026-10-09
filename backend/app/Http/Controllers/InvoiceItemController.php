@@ -19,7 +19,7 @@ class InvoiceItemController extends Controller {
         if ($invoiceItem->deletionBlockers()) {
             abort(409, 'Already invoiced - correct it with a cancellation or credit note.');
         }
-        return $invoiceItem->delete();
+        return response()->json($invoiceItem->delete());
     }
     public function store(Request $request) {
         return InvoiceItem::create((new InvoiceItem)->getValidFields($request->all()))->fresh();
@@ -41,11 +41,12 @@ class InvoiceItemController extends Controller {
                 $invoiceItem->save();
             }
         }
+        return response()->noContent();
     }
     public function combine(Request $request) {
         $request->validate([
             'item_ids'    => 'required|array|min:2',
-            'item_ids.*'  => 'required|integer|exists:invoice_items,id',
+            'item_ids.*'  => 'required|integer|exists:invoice_items,id,deleted_at,NULL',
             'description' => 'required|string',
         ]);
 

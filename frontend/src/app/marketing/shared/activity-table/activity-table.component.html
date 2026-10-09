@@ -41,7 +41,7 @@
                     </td>
                     <td class="text-center text-truncate">
                         @if (activity.quick_action) {
-                            <i class="text-primary" style="font-size: 1.2rem" [ngbTooltip]="formatQuickAction(activity.quick_action)" placement="left">{{ getQuickActionIcon(activity.quick_action) }}</i>
+                            <i class="text-muted" style="font-size: 1.2rem" [ngbTooltip]="formatQuickAction(activity.quick_action)" placement="left">{{ getQuickActionIcon(activity.quick_action) }}</i>
                         }
                     </td>
                     <td class="text-center text-truncate" [title]="activity.parent_activity_id ? getParentActivityName(activity.parent_activity_id) : ''" (mouseenter)="hoveredActivityId = activity.parent_activity_id || null" (mouseleave)="hoveredActivityId = null">

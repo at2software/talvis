@@ -19,15 +19,12 @@ export class SentinelCommand {
     hasNestedActions?: boolean;
 }
 
-export const SENTINEL_COMMANDS: SentinelCommand[] = [
-    {
-        label: 'None',
-        key: 'none',
-        allowedTriggerTypes: ALL_TRIGGERS,
-    },
-    {
-        label: 'Mattermost Post',
-        key: 'mattermost_post',
+export const CHAT_POST_COMMAND_KEYS = ['mattermost_post', 'slack_post'];
+
+function chatPostCommand(label: string, key: string): SentinelCommand {
+    return {
+        label,
+        key,
         allowedTriggerTypes: ALL_TRIGGERS,
         options: [
             {
@@ -43,7 +40,17 @@ export const SENTINEL_COMMANDS: SentinelCommand[] = [
                 default: '',
             },
         ],
+    };
+}
+
+export const SENTINEL_COMMANDS: SentinelCommand[] = [
+    {
+        label: 'None',
+        key: 'none',
+        allowedTriggerTypes: ALL_TRIGGERS,
     },
+    chatPostCommand('Mattermost Post', 'mattermost_post'),
+    chatPostCommand('Slack Post', 'slack_post'),
     {
         label: 'Setting Value',
         key: 'set_value',

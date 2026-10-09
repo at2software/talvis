@@ -14,7 +14,14 @@ import { Toast } from '@shards/toast/toast';
 import { Task } from '@models/task/task.model';
 import { CustomGanttComponent, GanttRow } from '@app/projects/_shards/custom-gantt/custom-gantt.component';
 import { SpinnerComponent } from '@shards/spinner/spinner.component';
+import { EmptyStateComponent } from '@shards/empty-state/empty-state.component';
 import { storageGet, storageSet } from '@constants/storage';
+import { dayjs } from '@constants/date/dates';
+import { DatePipe, DecimalPipe } from '@angular/common';
+import { Nx } from '@app/nx/nx.directive';
+import { AvatarComponent } from '@shards/avatar/avatar.component';
+import { GlobalService } from '@models/global.service';
+import { getMilestoneStateInfo } from '@models/milestone/milestone-state.enum';
 
 interface T_ASSIGNMENT {
     assignee: Assignee;
@@ -27,7 +34,7 @@ interface T_ASSIGNMENT {
     templateUrl: './project-milestones.component.html',
     styleUrls: ['./project-milestones.component.scss'],
     host: { class: 'container-full' },
-    imports: [ToolbarComponent, CustomGanttComponent, NgbTooltipModule, NgbDropdownModule, SpinnerComponent],
+    imports: [ToolbarComponent, CustomGanttComponent, NgbTooltipModule, NgbDropdownModule, SpinnerComponent, EmptyStateComponent, DatePipe, DecimalPipe, Nx, AvatarComponent],
 })
 export class ProjectMilestonesComponent {
     ganttComponent = viewChild(CustomGanttComponent);
@@ -42,6 +49,7 @@ export class ProjectMilestonesComponent {
     #projectService = inject(ProjectService);
     #inputModalService = inject(InputModalService);
     #confirmationService = inject(ConfirmationService);
+    #global = inject(GlobalService);
 
     readonly #milestones = modelResource(
         () => this.parent.object()?.id || undefined,
@@ -66,6 +74,12 @@ export class ProjectMilestonesComponent {
         return rows;
     });
 
+    readonly milestoneList = computed<Milestone[]>(() => [...(this.#milestones.value()?.milestones ?? [])].sort((a, b) => (a.started_at ?? '').localeCompare(b.started_at ?? '')));
+
+    readonly stateInfo = getMilestoneStateInfo;
+    isOverdue = (m: Milestone) => m.state !== 2 && !!m.due_at && dayjs(m.due_at).isBefore(dayjs(), 'day');
+    userFor = (m: Milestone) => this.#global.userFor(m.user_id ?? '');
+
     constructor() {
         effect(() => (this.project = this.parent.object()));
         effect(() => {
@@ -89,6 +103,7 @@ export class ProjectMilestonesComponent {
                     this.#projectService
                         .createMilestone(this.project.id, {
                             name: result.text.trim(),
+                            ...this.#nextMilestoneSlot(),
                         })
                         .pipe(takeUntilDestroyed(this.#destroyRef))
                         .subscribe({
@@ -107,6 +122,13 @@ export class ProjectMilestonesComponent {
                 // User cancelled - no action needed
             });
     };
+
+    #nextMilestoneSlot() {
+        const lastDue = (this.project.milestones ?? []).map((m) => m.due_at).filter((d): d is string => !!d).sort().at(-1);
+        const today = dayjs().startOf('day');
+        const start = lastDue && dayjs(lastDue).isAfter(today) ? dayjs(lastDue).add(1, 'day') : today;
+        return { started_at: start.format('YYYY-MM-DD'), due_at: start.add(6, 'day').format('YYYY-MM-DD') };
+    }
 
     onViewModeChange = (mode: string) => {
         this.currentViewMode = mode;

@@ -1,4 +1,20 @@
-<div class="container">
+@if (instancesLoaded() && !instances().length) {
+    <div class="card mx-auto" style="max-width: 36rem">
+        <empty-state [card]="false" class="workflows" i18n-title="@@i18n.tasks.noIssueTrackerLinked" title="no issue tracker linked">
+            <p class="text-muted" i18n="@@i18n.tasks.noIssueTrackerHint">This page lists the open issues of a linked GitLab or Mantis project. Link one in the plugins card on the dashboard. Internal to-dos can be added to milestones.</p>
+            <div class="hstack gap-3 justify-content-center">
+                <a class="text-primary text-decoration-none hstack gap-1" routerLink="..">
+                    <i>extension</i>
+                    <span i18n="@@i18n.tasks.linkIssueTracker">link issue tracker</span>
+                </a>
+                <a class="text-primary text-decoration-none hstack gap-1" routerLink="../milestones">
+                    <i>flag</i>
+                    <span i18n="@@i18n.common.milestones">milestones</span>
+                </a>
+            </div>
+        </empty-state>
+    </div>
+} @else if (instances().length) {
     <div class="row">
         <div class="col-md-3">
             @if (newTask) {
@@ -7,9 +23,9 @@
                         <div class="flex-fill" i18n="@@i18n.task.newTask">new task</div>
                     </div>
                     <div class="card-body">
-                        <select class="form-select" id="issueSource" [(ngModel)]="newTask.httpService">
+                        <select class="form-select mb-2" id="issueSource" [(ngModel)]="newTask.httpService">
                             @for (h of instances(); track $index) {
-                                <option [value]="h">{{ h.getName() }}</option>
+                                <option [ngValue]="h">{{ h.getName() }}</option>
                             }
                         </select>
                         <textarea class="form-control mb-3" [(ngModel)]="newTask.name"></textarea>
@@ -30,10 +46,14 @@
                         }
                     </ul-compact>
                 </div>
+            } @else if (!tasksLoading()) {
+                <div class="card">
+                    <empty-state [card]="false" class="done" i18n-title="@@i18n.tasks.noOpenTasks" title="no open tasks"></empty-state>
+                </div>
             }
         </div>
     </div>
-</div>
+}
 
 <ng-template let-item #task>
     <li class="d-flex py-1 list-group-item" [compact]="item.var.compact" [nx]="item" (actionsResolved)="actionsResolved()" #li>

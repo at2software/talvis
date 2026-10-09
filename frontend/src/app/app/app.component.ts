@@ -8,6 +8,7 @@ import { GlobalService } from '@models/global.service';
 import { LiveSyncService } from '@models/live/live-sync.service';
 import { NavigationComponent } from './navigation/navigation.component';
 import { ActivityComponent } from '@activity/activity.component';
+import { ActivitySidebarStateService } from '@activity/activity-sidebar-state.service';
 import { TabAttentionComponent } from '@activity/tab-attention/tab-attention.component';
 import { TabCopypasteComponent } from '@activity/tab-copypaste/tab-copypaste.component';
 import { TabTasksComponent } from '@activity/tab-tasks/tab-tasks.component';
@@ -17,6 +18,7 @@ import { ToastsContainer } from '@shards/toast/toast.container';
 import { SpinnerComponent } from '@shards/spinner/spinner.component';
 import { RouteChangeListenerService } from '@app/routeChangeListener.service';
 import { BusyService } from '@app/busy.service';
+import { BacklightService } from '@app/backlight.service';
 
 const BREAKPOINT_ACTIVITY = 1700;
 
@@ -29,6 +31,7 @@ const BREAKPOINT_ACTIVITY = 1700;
 })
 export class AppComponent {
     #tooltipConfig = inject(NgbTooltipConfig);
+    #sidebarState = inject(ActivitySidebarStateService);
 
     authResolved = inject(GlobalService).authResolved;
     #navigating = inject(RouteChangeListenerService).navigating;
@@ -42,14 +45,12 @@ export class AppComponent {
 
     constructor() {
         inject(LiveSyncService);
+        inject(BacklightService);
 
         this.#tooltipConfig.container = 'body';
         this.#tooltipConfig.animation = false;
 
-        effect(() => {
-            document.body.classList.toggle('activity-hidden', this.#narrow());
-            document.body.classList.toggle('activity-collapsed', this.#narrow());
-        });
+        effect(() => this.#sidebarState.applyViewport(this.#narrow()));
 
         window.addEventListener('dragover', (e) => e.preventDefault(), true);
         window.addEventListener('drop', (e) => e.preventDefault(), false);

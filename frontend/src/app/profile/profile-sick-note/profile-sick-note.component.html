@@ -53,12 +53,12 @@
             </div>
         }
         @if (global.user && formHasBeenSent()) {
-            <empty-state class="get-well" [title]="undefined">
+            <empty-state [card]="true" class="get-well" [title]="undefined">
                 <div class="my-3">
                     <span i18n="@@i18n.profile.thankYouForYourSick">thank you for your sick note. get well soon</span>
                     <span class="notranslate">!</span>
                 </div>
-                <button class="btn btn-primary" (click)="onResetForm()" i18n="@@i18n.profile.resetForm">reset form</button>
+                <button class="btn btn-plain text-primary" (click)="onResetForm()" i18n="@@i18n.profile.resetForm">reset form</button>
             </empty-state>
         }
     </div>

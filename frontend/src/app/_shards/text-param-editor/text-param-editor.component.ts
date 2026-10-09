@@ -1,7 +1,8 @@
 import { afterNextRender, ChangeDetectionStrategy, Component, inject, Injector, TemplateRef, viewChild, computed, effect, input, signal, untracked } from '@angular/core';
 import { QuillEditorComponent, QuillModules } from 'ngx-quill';
 import type Quill from 'quill';
-import { NgbActiveModal, NgbDropdownModule, NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { NgbActiveModal, NgbDropdownModule, NgbModal, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
+import { SmartLinkDirective } from '@directives/smart-link.directive';
 import { Param } from '@models/param/param.model';
 import { ParamService } from '@models/param/param.service';
 import { personalized } from '@constants/personalized';
@@ -28,7 +29,7 @@ interface I18nVariant {
     selector: 'text-param-editor',
     templateUrl: './text-param-editor.component.html',
     styleUrls: ['./text-param-editor.component.scss'],
-    imports: [QuillEditorComponent, FormsModule, SafePipe, PaymentPlanEditorComponent, SpinnerComponent, NgbDropdownModule],
+    imports: [QuillEditorComponent, FormsModule, SafePipe, PaymentPlanEditorComponent, SpinnerComponent, NgbDropdownModule, NgbTooltipModule, SmartLinkDirective],
 })
 export class TextParamEditorComponent {
 
@@ -37,7 +38,7 @@ export class TextParamEditorComponent {
     #marketingService = inject(MarketingService);
     #injector = inject(Injector);
 
-    annotations = input<boolean>(false);
+    showTextSource = input<boolean>(false);
     key = input<string>('');
     object = input<Serializable | undefined>(undefined);
     fallback = input<boolean>(false);
@@ -92,6 +93,8 @@ export class TextParamEditorComponent {
             return items;
         });
     });
+
+    readonly isEmpty = computed(() => this.contentSegments().every((seg) => seg.type === 'html' && !/<img/i.test(seg.content) && !seg.content.replace(/<[^>]*>/g, '').trim()));
 
     readonly #inlineParamJson = computed(() => {
         const key = this.key();

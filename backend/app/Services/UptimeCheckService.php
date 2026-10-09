@@ -5,11 +5,18 @@ namespace App\Services;
 use App\Models\UptimeCheck;
 use App\Models\UptimeMonitor;
 use Carbon\Carbon;
+use GuzzleHttp\Psr7\Uri;
+use GuzzleHttp\Psr7\UriResolver;
 use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 class UptimeCheckService {
+    private const MAX_REDIRECTS = 5;
+
+    public function __construct(private SafeUrlGuard $guard) {}
+
     public function performCheck(UptimeMonitor $monitor): UptimeCheck {
         $startTime    = microtime(true);
         $status       = 'down';
@@ -18,22 +25,7 @@ class UptimeCheckService {
         $errorMessage = null;
 
         try {
-            $requestConfig = [
-                'timeout'         => $monitor->timeout,
-                'connect_timeout' => 10,
-                'verify'          => ! $monitor->skip_ssl_verification,
-            ];
-
-            if ($monitor->request_headers) {
-                $requestConfig['headers'] = $monitor->request_headers;
-            }
-
-            $response = match ($monitor->method) {
-                'GET'   => Http::withOptions($requestConfig)->get($monitor->url),
-                'HEAD'  => Http::withOptions($requestConfig)->head($monitor->url),
-                'POST'  => Http::withOptions($requestConfig)->post($monitor->url, $monitor->request_body ?? ''),
-                default => throw new \Exception('Unsupported HTTP method: '.$monitor->method),
-            };
+            $response = $this->request($monitor);
 
             $responseTime = (int)round((microtime(true) - $startTime) * 1000);
             $statusCode   = $response->status();
@@ -75,6 +67,36 @@ class UptimeCheckService {
             'last_status'   => $status,
         ]);
         return $check;
+    }
+    private function request(UptimeMonitor $monitor): Response {
+        $method = $monitor->method;
+        $url    = $monitor->url;
+        $config = [
+            'timeout'         => $monitor->timeout,
+            'connect_timeout' => 10,
+            'verify'          => ! $monitor->skip_ssl_verification,
+            'allow_redirects' => false,
+            ...($monitor->request_headers ? ['headers' => $monitor->request_headers] : []),
+        ];
+
+        for ($hop = 0; ; $hop++) {
+            $client   = Http::withOptions([...$config, 'curl' => $this->guard->pinnedCurlOptions($url)]);
+            $response = match ($method) {
+                'GET'   => $client->get($url),
+                'HEAD'  => $client->head($url),
+                'POST'  => $client->post($url, $monitor->request_body ?? ''),
+                default => throw new \Exception('Unsupported HTTP method: '.$method),
+            };
+
+            $location = $response->header('Location');
+            if (! $response->redirect() || ! $location || $hop === self::MAX_REDIRECTS) {
+                return $response;
+            }
+            $url = (string)UriResolver::resolve(new Uri($url), new Uri($location));
+            if ($method === 'POST' && ! in_array($response->status(), [307, 308], true)) {
+                $method = 'GET';
+            }
+        }
     }
     public function shouldNotify(UptimeMonitor $monitor, UptimeCheck $check): bool {
         if ($check->status === 'up') {

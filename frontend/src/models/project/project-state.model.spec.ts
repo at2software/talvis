@@ -24,3 +24,24 @@ describe('ProjectState id helpers', () => {
         expect([...ProjectState.idsPrepared(), ...ProjectState.idsRunning()].join(',')).not.toBe('1,2,3');
     });
 });
+
+describe('ProjectState.allowedTargetIds', () => {
+    const pm = { hasAnyRole: (roles: string[]) => roles.includes('project_manager') };
+
+    afterEach(() => (ProjectState.transitions = undefined));
+
+    it('falls back to the built-in matrix while no transitions are loaded', () => {
+        expect(ProjectState.allowedTargetIds(3, pm)).toEqual(['1']);
+    });
+
+    it('uses the loaded transitions and hides those whose role the user lacks', () => {
+        ProjectState.transitions = [
+            { id: 1, from_state_id: 1, to_state_id: 2, required_role: null },
+            { id: 2, from_state_id: 1, to_state_id: 6, required_role: 'financial' },
+            { id: 3, from_state_id: 1, to_state_id: 7, required_role: 'project_manager' },
+            { id: 4, from_state_id: 2, to_state_id: 3, required_role: null },
+        ];
+        expect(ProjectState.allowedTargetIds('1', pm)).toEqual(['2', '7']);
+        expect(ProjectState.allowedTargetIds(1)).toEqual(['2']);
+    });
+});

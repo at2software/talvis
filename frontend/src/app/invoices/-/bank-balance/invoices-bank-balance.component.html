@@ -27,7 +27,7 @@
                     <span>unassigned expenses</span>
                     @if (_categories.length > 0) {
                         <div ngbDropdown placement="bottom-end" autoClose="outside" class="ms-auto">
-                            <button class="btn btn-sm p-0" ngbDropdownToggle
+                            <button class="btn btn-sm btn-plain p-0" ngbDropdownToggle
                                 [class.text-primary]="selectedCategoryIds().size > 0"
                                 [class.text-muted]="selectedCategoryIds().size === 0">
                                 <i>filter_list</i>
@@ -70,7 +70,7 @@
                     <span>expense patterns</span>
                     @if (_categories.length > 0) {
                         <div ngbDropdown placement="bottom-end" autoClose="outside" class="ms-auto">
-                            <button class="btn btn-sm p-0" ngbDropdownToggle
+                            <button class="btn btn-sm btn-plain p-0" ngbDropdownToggle
                                 [class.text-primary]="selectedPatternCategoryIds().size > 0"
                                 [class.text-muted]="selectedPatternCategoryIds().size === 0">
                                 <i>filter_list</i>
@@ -113,7 +113,7 @@
                                         <input type="text" class="form-control form-control-sm" [autosave]="item.expense" [(ngModel)]="item.expense.matching_string" placeholder="pattern… (* wildcard)" />
                                     </td>
                                     <td class="text-center">
-                                        <span class="badge" [class.text-bg-primary]="item.transactions.length > 0" [class.text-bg-secondary]="item.transactions.length === 0">{{ item.transactions.length }}</span>
+                                        <span class="badge" [class.text-bg-dark]="item.transactions.length > 0" [class.text-muted]="item.transactions.length === 0">{{ item.transactions.length }}</span>
                                     </td>
                                     <td class="text-end text-nowrap small text-muted pe-3">€ {{ fmt(item.expense.price) }}</td>
                                     <td class="text-end text-nowrap small text-muted pe-2">
@@ -159,14 +159,14 @@
                         [ngModel]="filterText()"
                         (ngModelChange)="filterText.set($event)"
                     />
-                    <button class="btn btn-sm" title="hide debitors that appear only once"
-                        [class.btn-primary]="hideSingleDebitors()"
+                    <button class="btn btn-sm btn-plain" title="hide debitors that appear only once"
+                        [class.text-primary]="hideSingleDebitors()"
                         [class.text-muted]="!hideSingleDebitors()"
                         (click)="hideSingleDebitors.update(v => !v)">
                         <n>filter_1</n>
                     </button>
                     @if (selectedTxs().length > 0) {
-                        <span class="badge bg-primary ms-1">{{ selectedTxs().length }} selected</span>
+                        <span class="badge bg-dark ms-1">{{ selectedTxs().length }} selected</span>
                         @if (commonPattern(); as pattern) {
                             <span class="badge bg-secondary text-truncate" style="max-width:200px" [title]="pattern">
                                 "{{ pattern }}"

@@ -19,12 +19,8 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class WidgetController extends Controller {
-    public function getQrCode() {
-        return QrCode::format('png')->generate('Hallo');
-    }
     public function preparedInvoices() {
         $maxUpdatedAt = $this->maxUpdatedFor(Company::class, Project::class);
 

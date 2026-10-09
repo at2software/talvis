@@ -50,6 +50,7 @@ class MarketingMetricsService {
             ->first();
     }
     public static function updateInitiativeMetric(MarketingInitiative $initiative, MarketingPerformanceMetric $metric, ?float $targetValue) {
+        $initiative->performanceMetrics()->findOrFail($metric->id);
         $initiative->performanceMetrics()->updateExistingPivot($metric->id, [
             'target_value' => $targetValue,
         ]);
@@ -72,6 +73,7 @@ class MarketingMetricsService {
             ->first();
     }
     public static function updateActivityMetric(MarketingActivity $activity, MarketingPerformanceMetric $metric, ?float $targetValue) {
+        $activity->performanceMetrics()->findOrFail($metric->id);
         $activity->performanceMetrics()->updateExistingPivot($metric->id, [
             'target_value' => $targetValue,
         ]);

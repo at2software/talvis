@@ -20,16 +20,8 @@
 @let _areaSelectEnd = areaSelectEnd();
 
 <toolbar>
-    <button
-        type="button"
-        class="btn"
-        [class.btn-outline-primary]="!_hideCompleted"
-        [class.btn-primary]="_hideCompleted"
-        (click)="toggleHideCompleted()"
-        [title]="_hideCompleted ? 'Show completed milestones' : 'Hide completed milestones'"
-    >
+    <button type="button" class="btn btn-plain text-primary" (click)="toggleHideCompleted()" [ngbTooltip]="_hideCompleted ? showCompletedLabel : hideCompletedLabel" [attr.aria-label]="_hideCompleted ? showCompletedLabel : hideCompletedLabel">
         <i>{{ _hideCompleted ? 'visibility_off' : 'visibility' }}</i>
-        {{ _hideCompleted ? 'Show completed' : 'Hide completed' }}
     </button>
 </toolbar>
 
@@ -181,7 +173,7 @@
         }
 
         <!-- Milestones -->
-        <g class="milestones">
+        <g class="milestones nx-no-trigger">
             @for (rendered of _renderedMilestones; track rendered.milestone.id) {
                 <g class="milestone-bar"
                    [class.dependency-target]="_drawingDependency && _dependencyToMilestone?.id === rendered.milestone.id && _dependencyToMilestone?.project_id === _dependencyFromMilestone?.project_id"
@@ -286,7 +278,7 @@
                             font-size="12"
                             font-weight="500"
                             class="milestone-label"
-                        ><title>requires {{ rendered.milestone.computed_workload_percent | number:'1.0-0' }}% of assignee's daily workload</title>{{ decodeHtmlEntities(rendered.milestone.name) }}@if (rendered.milestone.computed_workload_percent) {<tspan class="workload-percent" fill="#666" font-size="10" dx="8">{{ rendered.milestone.computed_workload_percent | number:'1.0-0' }}%</tspan>}</text>
+                        ><title>{{ decodeHtmlEntities(rendered.milestone.name) }}: {{ rendered.milestone.started_at | date: 'dd.MM.' }} – {{ rendered.milestone.due_at | date: 'dd.MM.yyyy' }}</title>{{ decodeHtmlEntities(rendered.milestone.name) }}@if (rendered.milestone.computed_workload_percent) {<tspan class="workload-percent" fill="#666" font-size="10" dx="8">{{ rendered.milestone.computed_workload_percent | number:'1.0-0' }}%</tspan>}</text>
                     </g>
 
                     <!-- Resize handles -->

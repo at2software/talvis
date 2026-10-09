@@ -1,0 +1,81 @@
+@let _candidates = candidates.value();
+@let _selectedIds = selectedIds();
+@let _creating = creating();
+<div class="modal-header">
+    <span class="modal-title" i18n="@@i18n.sepa.directDebit">SEPA direct debit</span>
+    <button class="btn-close" i18n-aria-label="@@i18n.common.close" aria-label="Close" (click)="activeModal.dismiss()"></button>
+</div>
+
+<div class="modal-body">
+    <p class="text-muted small" i18n="@@i18n.sepa.help">upload the file in your online banking. the invoices are not marked as paid automatically.</p>
+
+    <div class="input-group mb-3" style="max-width: 22rem">
+        <label class="input-group-text capitalize-first" for="sepaCollectionDate" i18n="@@i18n.sepa.collectionDate">collection date</label>
+        <input id="sepaCollectionDate" type="date" class="form-control" [min]="minDate" [ngModel]="collectionDate()" (ngModelChange)="collectionDate.set($event)" />
+    </div>
+
+    @if (candidates.isLoading() && !_candidates.length) {
+        <spinner class="py-4"></spinner>
+    } @else if (!_candidates.length) {
+        <div class="text-muted small" i18n="@@i18n.sepa.noCandidates">no unpaid invoices of customers with a SEPA mandate</div>
+    } @else {
+        <table class="table mb-0">
+            <thead>
+                <tr>
+                    <th style="width: 40px">
+                        <input type="checkbox" class="form-check-input" [checked]="allSelected()" [disabled]="!selectable().length" (change)="toggleAll()" />
+                    </th>
+                    <th i18n="@@i18n.common.invoiceNumber">invoice number</th>
+                    <th i18n="@@i18n.common.customer">customer</th>
+                    <th i18n="@@i18n.common.created_at">created at</th>
+                    <th i18n="@@i18n.common.due_date">due date</th>
+                    <th class="text-end" i18n="@@i18n.common.amount">amount</th>
+                    <th i18n="@@i18n.common.status">status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (x of _candidates; track x.id) {
+                    @let _collectable = x.isSepaCollectable();
+                    <tr #row class="align-middle" [attr.data-id]="x.id" [nx]="x" [class.text-muted]="!_collectable" [class.table-active]="isFocused(x)">
+                        <td>
+                            <input type="checkbox" class="form-check-input" [checked]="_selectedIds.has(x.id)" [disabled]="!_collectable" (change)="toggle(x)" />
+                        </td>
+                        <td>{{ x.name }}</td>
+                        <td class="text-truncate">{{ x.company.getName() }}</td>
+                        <td>{{ x.created_at | date }}</td>
+                        <td>{{ x.due_at | date }}</td>
+                        <td class="text-end">{{ x.sepa?.amount | money }}</td>
+                        <td>
+                            <div class="d-flex flex-wrap gap-1 align-items-center">
+                                @if (x.isSepaCollected()) {
+                                    <i class="text-muted" ngbTooltip="already collected via SEPA direct debit" i18n-ngbTooltip="@@i18n.sepa.alreadyCollected">account_balance</i>
+                                }
+                                @for (issue of x.sepa?.issues ?? []; track issue) {
+                                    <span class="badge bg-dark text-warning">{{ issueLabels[issue] }}</span>
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td></td>
+                    <td colspan="4"><strong i18n="@@i18n.common.selection">selection</strong> <span class="text-muted ms-1">({{ selected().length }})</span></td>
+                    <td class="text-end"><strong>{{ selectedSum() | money }}</strong></td>
+                    <td></td>
+                </tr>
+            </tfoot>
+        </table>
+    }
+</div>
+
+<div class="modal-footer">
+    <button class="btn" (click)="activeModal.dismiss()" i18n="@@i18n.common.close">Close</button>
+    <button class="btn btn-primary" (click)="create()" [disabled]="!canCreate()">
+        @if (_creating) {
+            <spinner [size]="20" [inline]="true" class="me-1"></spinner>
+        }
+        <ng-container i18n="@@i18n.sepa.createXml">create XML</ng-container>
+    </button>
+</div>

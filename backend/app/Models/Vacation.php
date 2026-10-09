@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\VacationState;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -24,6 +25,14 @@ class Vacation extends BaseModel {
 
     protected $fillable = ['amount', 'started_at', 'log', 'ended_at', 'vacation_grant_id', 'comment', 'state', 'approved_at', 'approved_by_id'];
 
+    public function firstDay(): Carbon {
+        return Carbon::parse($this->started_at)->startOfDay();
+    }
+    public function endExclusive(): Carbon {
+        return empty($this->ended_at)
+            ? $this->firstDay()->addDays(max(1, (int)ceil(abs($this->amount) / 8)))
+            : Carbon::parse($this->ended_at)->startOfDay()->addDay();
+    }
     public function approved_by() {
         return $this->belongsTo(User::class, 'approved_by_id');
     }
@@ -32,6 +41,16 @@ class Vacation extends BaseModel {
     }
     public function user() {
         return $this->hasOneThrough(User::class, VacationGrant::class, 'id', 'id', 'vacation_grant_id', 'user_id');
+    }
+    public function toWebhookPayload(): array {
+        return [
+            'id'          => $this->id,
+            'user'        => $this->user ? ['id' => $this->user->id, 'name' => $this->user->name, 'email' => $this->user->email] : null,
+            'started_at'  => $this->started_at?->toDateString(),
+            'ended_at'    => $this->ended_at?->toDateString(),
+            'hours'       => abs((float)$this->amount),
+            'approved_by' => $this->approved_by ? ['id' => $this->approved_by->id, 'name' => $this->approved_by->name] : null,
+        ];
     }
     public function scopeWithUserAndGrant($query) {
         return $query

@@ -1,0 +1,53 @@
+@let _form = form();
+@let _errors = errors();
+<div class="modal d-block" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-title" i18n="@@i18n.setup.workingTime.title">working time &amp; vacation</span>
+            </div>
+            <div class="modal-body">
+                @if (_form) {
+                    <h6 i18n="@@i18n.setup.workingTime.hoursPerWeek">weekly working hours</h6>
+                    <div class="input-group mb-3" style="max-width: 12rem">
+                        <input type="number" min="0" max="168" class="form-control text-end" [(ngModel)]="_form.hpw" />
+                        <span class="input-group-text" i18n="@@i18n.setup.workingTime.hoursUnit">h</span>
+                    </div>
+
+                    <h6 i18n="@@i18n.setup.workingTime.workdays">working days</h6>
+                    <div class="btn-group mb-1" role="group">
+                        @for (day of DAYS; track day.key) {
+                            <button type="button" class="btn" [class.btn-primary]="_form.days[day.key]" [class.text-muted]="!_form.days[day.key]" (click)="_form.days[day.key] = !_form.days[day.key]">{{ day.label }}</button>
+                        }
+                    </div>
+                    <div class="small text-muted mb-3">
+                        @if (workdays(_form)) {
+                            <span i18n="@@i18n.setup.workingTime.perDay">= {{ hoursPerDay(_form) }} h per working day</span>
+                        } @else {
+                            <span class="text-danger" i18n="@@i18n.setup.workingTime.noWorkdays">select at least one working day</span>
+                        }
+                    </div>
+
+                    <h6 i18n="@@i18n.setup.workingTime.zip">postal code for public holidays</h6>
+                    <div class="mb-3" style="max-width: 12rem">
+                        <input class="form-control" maxlength="5" inputmode="numeric" [class.is-invalid]="_errors['work_zip']" [(ngModel)]="_form.work_zip" />
+                        <div class="invalid-feedback">{{ _errors['work_zip'] }}</div>
+                    </div>
+
+                    <h6 i18n="@@i18n.setup.workingTime.vacationDays">vacation days per year</h6>
+                    <div class="input-group" style="max-width: 12rem">
+                        <input type="number" min="0" class="form-control text-end" [class.is-invalid]="_errors['vacation_days']" [(ngModel)]="_form.vacation_days" />
+                        <span class="input-group-text" i18n="@@i18n.setup.invoicing.days">days</span>
+                    </div>
+                    <div class="small text-muted mt-1" i18n="@@i18n.setup.workingTime.vacationHint">valid until March 31 of next year</div>
+                } @else {
+                    <spinner [size]="32"></spinner>
+                }
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn" (click)="decline()" i18n="@@i18n.common.cancel">cancel</button>
+                <button type="button" class="btn btn-primary" [disabled]="!_form || saving() || !workdays(_form)" (click)="save()" hotkey="CTRL+ENTER" i18n="@@i18n.setup.save">save</button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,68 @@
+<?php
+
+namespace Tests\Unit\Support;
+
+use App\Support\Calendar\CalendarEvent;
+use App\Support\GraphContact;
+use App\Support\GraphEvent;
+use DateTimeImmutable;
+use PHPUnit\Framework\TestCase;
+
+class CalendarAdaptersTest extends TestCase {
+    private function birthday(): CalendarEvent {
+        $day = new DateTimeImmutable('1982-02-10');
+        return new CalendarEvent('user_3', 'birthday-user-3@nexus', 'Birthday of Jane', $day, $day->modify('+1 day'), true, recurrence: ['FREQ' => 'YEARLY']);
+    }
+    public function test_all_day_events_render_as_date_values_for_webdav(): void {
+        $ical = $this->birthday()->toICal();
+
+        $this->assertStringContainsString("DTSTART;VALUE=DATE:19820210\r\n", $ical);
+        $this->assertStringContainsString("DTEND;VALUE=DATE:19820211\r\n", $ical);
+        $this->assertStringContainsString("RRULE:FREQ=YEARLY\r\n", $ical);
+        $this->assertStringContainsString("UID:birthday-user-3@nexus\r\n", $ical);
+    }
+    public function test_ical_entries_survive_the_round_trip(): void {
+        $ical  = "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nBEGIN:VEVENT\r\nUID:abc\r\nDTSTART;TZID=Europe/Berlin:20261012T090000\r\nDTEND;TZID=Europe/Berlin:20261012T100000\r\nSUMMARY:Jour fixe\r\nLOCATION:Büro\r\nRRULE:FREQ=WEEKLY;BYDAY=MO;COUNT=10\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n";
+        $event = CalendarEvent::fromICal('calendarEntry_7', $ical);
+
+        $this->assertSame('abc', $event->uid);
+        $this->assertFalse($event->allDay);
+        $this->assertSame('2026-10-12T07:00:00+00:00', $event->start->setTimezone(new \DateTimeZone('UTC'))->format('c'));
+        $this->assertStringContainsString("DTSTART:20261012T070000Z\r\n", $event->toICal());
+        $this->assertSame(['FREQ' => 'WEEKLY', 'BYDAY' => 'MO', 'COUNT' => '10'], $event->recurrence);
+    }
+    public function test_exchange_events_are_free_and_keep_recurrence(): void {
+        $graph = GraphEvent::fromEvent($this->birthday());
+
+        $this->assertSame('free', $graph['showAs']);
+        $this->assertTrue($graph['isAllDay']);
+        $this->assertSame(['dateTime' => '1982-02-10T00:00:00', 'timeZone' => 'UTC'], $graph['start']);
+        $this->assertSame(['type' => 'absoluteYearly', 'interval' => 1, 'month' => 2, 'dayOfMonth' => 10], $graph['recurrence']['pattern']);
+        $this->assertSame('noEnd', $graph['recurrence']['range']['type']);
+    }
+    public function test_weekly_rules_map_to_days_of_week(): void {
+        $ical  = "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nBEGIN:VEVENT\r\nUID:abc\r\nDTSTART:20261012T070000Z\r\nDTEND:20261012T080000Z\r\nSUMMARY:x\r\nRRULE:FREQ=WEEKLY;BYDAY=MO,WE;COUNT=10\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n";
+        $graph = GraphEvent::fromEvent(CalendarEvent::fromICal('calendarEntry_1', $ical));
+
+        $this->assertSame(['monday', 'wednesday'], $graph['recurrence']['pattern']['daysOfWeek']);
+        $this->assertSame(['type' => 'numbered', 'startDate' => '2026-10-12', 'numberOfOccurrences' => 10], $graph['recurrence']['range']);
+    }
+    public function test_vcards_map_to_exchange_contacts(): void {
+        $contact = GraphContact::fromVCard(implode("\r\n", [
+            'BEGIN:VCARD', 'VERSION:3.0', 'FN:Jane Doe', 'N:Doe;Jane;;Dr.;', 'ORG:ACME GmbH;IT', 'TITLE:CTO',
+            'EMAIL;TYPE=work:jane@acme.test', 'TEL;TYPE=cell:+49 171 1', 'TEL;TYPE=work:+49 89 2',
+            'ADR;TYPE=work:;;Main St 1;Munich;;80331;DE', 'BDAY:1980-05-04', 'END:VCARD', '',
+        ]));
+
+        $this->assertSame('Jane Doe', $contact['displayName']);
+        $this->assertSame('Doe', $contact['surname']);
+        $this->assertSame('Dr.', $contact['title']);
+        $this->assertSame('ACME GmbH', $contact['companyName']);
+        $this->assertSame('IT', $contact['department']);
+        $this->assertSame('+49 171 1', $contact['mobilePhone']);
+        $this->assertSame(['+49 89 2'], $contact['businessPhones']);
+        $this->assertSame(['street' => 'Main St 1', 'city' => 'Munich', 'postalCode' => '80331', 'countryOrRegion' => 'DE'], $contact['businessAddress']);
+        $this->assertSame('1980-05-04T00:00:00Z', $contact['birthday']);
+        $this->assertSame([['address' => 'jane@acme.test', 'name' => 'Jane Doe']], $contact['emailAddresses']);
+    }
+}

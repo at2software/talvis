@@ -261,8 +261,8 @@ class DebriefController extends Controller {
 
     public function showStats(Request $request) {
         $filters = $request->all();
-        $limit   = $request->input('limit', 10);
-        $months  = $request->input('months', 12);
+        $limit   = $this->limit($request);
+        $months  = $this->months($request);
 
         $sections = [
             'aggregated'           => fn () => $this->statisticsService->getAggregatedStats($filters),
@@ -293,23 +293,23 @@ class DebriefController extends Controller {
     }
     public function showStatsTopProblems(Request $request) {
         return $this->statisticsService->getTopProblems(
-            $request->input('limit', 10),
+            $this->limit($request),
             $request->all()
         );
     }
     public function showStatsTopSolutions(Request $request) {
         return $this->statisticsService->getTopSolutions(
-            $request->input('limit', 10)
+            $this->limit($request)
         );
     }
     public function showStatsTrends(Request $request) {
         return $this->statisticsService->getTrends(
-            $request->input('months', 12)
+            $this->months($request)
         );
     }
     public function showStatsTopPositives(Request $request) {
         return $this->statisticsService->getTopPositives(
-            $request->input('limit', 10),
+            $this->limit($request),
             $request->all()
         );
     }
@@ -371,13 +371,19 @@ class DebriefController extends Controller {
     }
     public function showStatsTopCustomersWorst(Request $request) {
         return $this->statisticsService->getTopCustomersByProblems(
-            $request->input('limit', 10),
+            $this->limit($request),
             $request->all()
         );
     }
+    private function limit(Request $request): int {
+        return $request->validate(['limit' => 'integer|min:1|max:100'])['limit'] ?? 10;
+    }
+    private function months(Request $request): int {
+        return $request->validate(['months' => 'integer|min:1|max:120'])['months'] ?? 12;
+    }
     public function showStatsTopCustomersBest(Request $request) {
         return $this->statisticsService->getTopCustomersByPositives(
-            $request->input('limit', 10),
+            $this->limit($request),
             $request->all()
         );
     }

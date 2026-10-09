@@ -1,0 +1,36 @@
+@let _config = config();
+@let _section = section();
+
+<div class="card">
+    <div class="card-header d-flex flex-wrap align-items-center gap-2">
+        <span class="flex-fill" i18n="@@i18n.flow.stateMachine">project state machine</span>
+        <div class="btn-group btn-group-sm" role="group">
+            @for (item of sections; track item.key) {
+                <button type="button" class="btn btn-outline-primary" [class.active]="_section === item.key" (click)="section.set(item.key)" [ngbTooltip]="item.label"><i>{{ item.icon }}</i><span class="d-none d-xxl-inline ms-1">{{ item.label }}</span></button>
+            }
+        </div>
+    </div>
+
+    @if (_section === 'diagram') {
+        <state-flow-diagram [states]="states()"></state-flow-diagram>
+    } @else if (_section === 'audit') {
+        <flow-audit-section></flow-audit-section>
+    } @else if (!_config) {
+        <spinner class="p-5"></spinner>
+    } @else {
+        @switch (_section) {
+            @case ('transitions') {
+                <flow-transitions-section [config]="_config" (changed)="reload()"></flow-transitions-section>
+            }
+            @case ('phases') {
+                <flow-phases-section [config]="_config" (changed)="reload()"></flow-phases-section>
+            }
+            @case ('risk') {
+                <flow-risk-classes-section [config]="_config" (changed)="reload()"></flow-risk-classes-section>
+            }
+            @case ('jobTypes') {
+                <flow-job-types-section [config]="_config" (changed)="reload()"></flow-job-types-section>
+            }
+        }
+    }
+</div>

@@ -19,8 +19,8 @@
 </app-header>
 
 <toolbar style="position: relative" class="gap-2">
-    <button class="btn btn-outline-primary" routerLink="/profile/vacation-request"><i>beach_access</i> <span i18n="@@i18n.common.vacationRequest">vacation request</span></button>
-    <button #popupButton (click)="togglePopup()" tabindex="0" (keydown.enter)="togglePopup()" class="btn btn-primary"><i>calendar_month</i></button>
+    <button class="btn btn-plain text-primary" routerLink="/profile/vacation-request"><i>beach_access</i> <span i18n="@@i18n.common.vacationRequest">vacation request</span></button>
+    <button #popupButton (click)="togglePopup()" tabindex="0" (keydown.enter)="togglePopup()" class="btn btn-plain text-primary"><i>calendar_month</i></button>
     @if (isPopupOpen()) {
         <div class="popup shadow bg-transparent border-0 rounded" [style.top]="popupStyles().top" [style.right]="popupStyles().right" #popup>
             <div class="month-picker">

@@ -7,12 +7,12 @@
     <spinner class="py-4"></spinner>
 } @else {
     @if (_premiumCustomers === undefined) {
-        <empty-state class="chart" i18n-title="@@i18n.customers.statsEmpty" title="no customer statistics yet">
+        <empty-state [card]="true" class="chart" i18n-title="@@i18n.customers.statsEmpty" title="no customer statistics yet">
             <p class="text-muted small" i18n="@@i18n.customers.statsEmptyBody">Statistics will appear once invoices are recorded for your customers.</p>
         </empty-state>
     }
     @if (_premiumCustomers !== undefined && _premiumCustomers.length === 0) {
-        <empty-state class="chart" i18n-title="@@i18n.customers.statsNoData" title="no data available">
+        <empty-state [card]="true" class="chart" i18n-title="@@i18n.customers.statsNoData" title="no data available">
             <p class="text-muted small" i18n="@@i18n.customers.statsNoDataBody">No revenue data found. Statistics require invoices to be recorded.</p>
         </empty-state>
     }

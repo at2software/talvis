@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\AssignmentRole;
-use App\Models\TextParam;
+use App\Models\Param;
 use App\Models\User;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Hash;
@@ -34,6 +34,11 @@ class InsertBasicRoles extends Command {
         AssignmentRole::firstOrCreate(['name' => 'developer']);
         AssignmentRole::firstOrCreate(['name' => 'customer']);
 
+        if (Param::get('SYS_SEED_ADMIN_RETIRED')->value) {
+            $this->info('Roles seeded successfully, seed admin is retired.');
+            return;
+        }
+
         $admin = User::firstOrCreate(
             ['email' => config('services.admin.email')],
             [
@@ -44,10 +49,7 @@ class InsertBasicRoles extends Command {
         );
         $admin->assignRole('admin');
         $admin->save();
-
-        $dashboardParam        = $admin->param('DASHBOARDS', ['type' => TextParam::class]);
-        $dashboardParam->value = '[{"title":"Dashboard","cols":[[],[],[],[]]}]';
-        $dashboardParam->save();
+        $admin->ensureDefaultDashboard();
 
         $this->info('Roles and admin user seeded successfully.');
     }

@@ -4,21 +4,24 @@ export enum MilestoneState {
     DONE = 2,
 }
 
-export const MILESTONE_STATES: Record<number, { name: string; color: string; bgClass: string }> = {
+export const MILESTONE_STATES: Record<number, { name: string; color: string; bgClass: string; textClass: string }> = {
     [MilestoneState.TODO]: {
         name: $localize`:@@i18n.milestone.toDo:To Do`,
-        color: '#6c757d', // grey
-        bgClass: 'bg-secondary',
+        color: 'var(--color-grey)',
+        bgClass: 'bg-grey',
+        textClass: 'text-muted',
     },
     [MilestoneState.IN_PROGRESS]: {
         name: $localize`:@@i18n.milestone.inProgress:In Progress`,
-        color: 'var(--color-primary-4)', // primary-4
+        color: 'var(--bs-primary)',
         bgClass: 'bg-primary',
+        textClass: 'text-primary',
     },
     [MilestoneState.DONE]: {
         name: $localize`:@@i18n.milestone.done:Done`,
-        color: 'var(--color-primary-1)', // primary-1
+        color: 'var(--bs-success)',
         bgClass: 'bg-success',
+        textClass: 'text-success',
     },
 };
 

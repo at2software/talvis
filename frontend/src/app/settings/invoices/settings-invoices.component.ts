@@ -19,8 +19,8 @@ export class SettingsInvoicesComponent {
 
     #global = inject(GlobalService);
 
-    readonly currency = computed(() => this.#global.setting('invoiceCurrencySymbol'));
-    readonly hours = computed(() => this.#global.setting('invoiceDefaultHourUnit'));
-    readonly days = computed(() => this.#global.setting('invoiceDefaultDayUnit'));
-    readonly percent = computed(() => this.#global.setting('invoiceDefaultPercentUnit'));
+    readonly currency = computed(() => this.#global.currencySymbol());
+    readonly hours = computed(() => this.#global.setting('INVOICE_HOUR_UNIT'));
+    readonly days = computed(() => this.#global.setting('INVOICE_DAY_UNIT'));
+    readonly percent = computed(() => this.#global.setting('INVOICE_PERC_UNIT'));
 }

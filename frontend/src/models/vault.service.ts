@@ -12,4 +12,5 @@ export class VaultService extends TalvisHttpService<Vault> {
     checkCredentials = (credentials: Dictionary) => this.post('vaults', credentials, Object);
     submitTan = (data: { prefix: string; challenge_id: string; tan?: string }) => this.post('vaults/tan', data, Object);
     bankLookup = (blz: string) => this.get<BankLookupDto>('vaults/bank-lookup', { blz });
+    downloadTeamsAppPackage = (done?: () => unknown) => this.getFile('vaults/m365/teams-app-package', undefined, undefined, done);
 }

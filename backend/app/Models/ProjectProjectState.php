@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\Pivot;
 class ProjectProjectState extends Pivot {
     protected $table     = 'project_project_state';
     public $incrementing = true;
-    protected $fillable  = ['project_id', 'project_state_id'];
+    protected $fillable  = ['project_id', 'project_state_id', 'user_id', 'reason'];
 
     protected static function booted() {
         static::created(function ($model) {

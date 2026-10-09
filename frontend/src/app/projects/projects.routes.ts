@@ -137,6 +137,15 @@ export const PROJECTS_ROUTES: Routes = [
                 },
             },
             {
+                path: 'flow',
+                loadComponent: () => import('./id/project-flow/project-flow.component').then((m) => m.ProjectFlowComponent),
+                data: {
+                    nav: {
+                        title: $localize`:@@i18n.flow.tab:flow`,
+                    },
+                },
+            },
+            {
                 path: 'debriefing',
                 loadComponent: () => import('./id/project-debriefing/project-debriefing.component').then((m) => m.ProjectDebriefingComponent),
                 data: {
@@ -192,10 +201,7 @@ export const PROJECTS_ROUTES: Routes = [
                 loadComponent: () => import('./id/project-planning/project-planning.component').then((m) => m.ProjectPlanningComponent),
                 data: { target: 'my_prediction' },
             },
-            {
-                path: 'quote',
-                loadComponent: () => import('./id/quote/project-detail-quote.component').then((m) => m.ProjectDetailQuoteComponent),
-            },
+            { path: 'quote', redirectTo: 'invoicing/quote' },
             {
                 path: 'media',
                 loadComponent: () => import('./id/project-media/project-media.component').then((m) => m.ProjectMediaComponent),

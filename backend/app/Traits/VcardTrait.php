@@ -39,7 +39,7 @@ trait VcardTrait {
         $size = getimagesize($filePath);
         $file = file_get_contents($filePath);
         if (! $file) {
-            return response()->make('error creating image');
+            abort(422, 'error creating image');
         }
 
         $vcard = $this->vcard;

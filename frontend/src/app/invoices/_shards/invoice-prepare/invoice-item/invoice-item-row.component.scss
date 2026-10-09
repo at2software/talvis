@@ -1,13 +1,8 @@
 :host { 
     //td:not(.header) { padding: 1px 5px;}
     .header { 
-        font-weight: bold;
         //padding: 1rem 0;
         color: #ffffff;
-        text-shadow: 1px 1px 0 #000;
-        background-color: var(--bs-border-color);
+        background-color: var(--tv-surface-darker);
     }
-    .annotate { opacity: .5; padding: 0 0 0 0; }
-    &:hover .annotate { opacity: 1; }
-    .annotation { margin-top: 5px;}
 }

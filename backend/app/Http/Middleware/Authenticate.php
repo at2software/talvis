@@ -21,7 +21,7 @@ class Authenticate extends Middleware {
         if ($request->hasHeader('Authorization')) {
             $token = preg_replace('/^Bearer /is', '', $request->header('Authorization'));
             if (strlen($token) > 0) {
-                $user = User::where('api_token', $token)->first();
+                $user = User::findByApiToken($token);
                 if ($user) {
                     Auth::setUser($user);
                     $this->applyImpersonation();

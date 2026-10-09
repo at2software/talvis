@@ -51,12 +51,12 @@
             </div>
         </div>
         <div class="col-md-6">
-            @if (global.user) {
+            @if (global.user && !global.user.is_retired) {
                 <hr-workload [user]="global.user" [title]="workloadTitle"></hr-workload>
             }
         </div>
         <div class="col-md-3">
-            @if (global.user) {
+            @if (global.user && !global.user.is_retired) {
                 <hr-workload-heatmap [user]="global.user"></hr-workload-heatmap>
             }
         </div>

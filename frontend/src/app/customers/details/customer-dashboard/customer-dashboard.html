@@ -1,7 +1,8 @@
 @let _company = company();
 @let _product = product();
 @let _invoices = invoices();
-@let _quickContacts = quickContacts();
+@let _contactPersons = contactPersons();
+@let _hiddenContactCount = hiddenContactCount();
 @let _hasInvoicingRole = globalUserHasInvoicingRole;
 @let _forecastRevenue = _company.forecast12m();
 @let _currentRevenue = _company.revenue12m();
@@ -33,25 +34,67 @@
                         </button>
                     </div>
                 </div>
-                @if (_company.card()) {
                 <div class="card-body">
+                    @if (_company.customer_number) {
+                    <div class="small text-muted mb-1" ngbTooltip="customer number" i18n-ngbTooltip="@@i18n.customers.customerNumber">#{{ _company.customer_number }}</div>
+                    }
+                    @if (_company.hasAddress()) {
                     <div [innerHTML]="_company.address | safe:'html'"></div>
-                    @for (a of _company.url(); track a) {
-                    <div>
-                        <a [href]="a" target="_blank">{{a}}</a>
+                    } @else {
+                    <a class="text-primary cursor-pointer" routerLink="contacts" i18n="@@i18n.customers.addAddress">add address</a>
+                    }
+                    @if (_company.emails().length || _company.websites().length) {
+                    <div class="hstack flex-wrap align-items-center gap-2 mt-2">
+                        @for (e of _company.emails(); track e.track_id) {
+                        <a class="text-primary lh-1" href="mailto:{{ e.val() }}" [ngbTooltip]="e.val()">
+                            <i>email</i>
+                        </a>
+                        }
+                        @for (w of _company.websites(); track w.track_id) {
+                        <a class="text-primary lh-1" [href]="w.urlHref()" target="_blank" rel="noopener" [ngbTooltip]="w.val()">
+                            @if (w.socialMediaIcon(); as icon) {
+                            <img [src]="icon" class="avatar avatar-sm avatar-img" alt="" />
+                            } @else {
+                            <i>language</i>
+                            }
+                        </a>
+                        }
                     </div>
                     }
+                    @if (_company.card()) {
                     <div class="mt-2">
                         <company-locale-selector [company]="_company" (localeChanged)="reload()"></company-locale-selector>
                     </div>
+                    }
                 </div>
-                } @if (_quickContacts.length) {
+                @if (_company.phones().length) {
+                <ul class="list-group">
+                    @for (p of _company.phones(); track p.track_id) {
+                    <a class="list-group-item list-group-item-action hstack gap-2 py-1" [href]="p.telHref()">
+                        <i class="text-muted">{{ p.contactIcon() }}</i>
+                        <span class="text-primary text-truncate">{{ p.val() }}</span>
+                    </a>
+                    }
+                </ul>
+                }
                 <div class="card-header">
-                    <span i18n="@@i18n.common.favorites">favorites</span>
+                    <span i18n="@@i18n.customers.contactPersons">contact persons</span>
+                    <div class="card-header-actions">
+                        <button class="card-header-action btn text-primary" type="button" (click)="onAddContact()" title="add contact person" i18n-title="@@i18n.contacts.addContactPerson">
+                            <i>add</i>
+                        </button>
+                    </div>
                 </div>
-                @for (_ of _quickContacts; track _.id) {
-                <list-group-item-contact [nx]="_" [tables]="_quickContacts" [contact]="_" [role]="_.role()" [showQuickContact]="true" routerLink="{{_.id}}"> </list-group-item-contact>
-                } }
+                @for (_ of _contactPersons; track _.id) {
+                <list-group-item-contact class="cursor-pointer" [nx]="_" [tables]="_contactPersons" [contact]="_" [role]="_.role()" [showQuickContact]="true" routerLink="contacts/{{_.id}}"> </list-group-item-contact>
+                } @empty {
+                <div class="card-body py-2 small text-muted" i18n="@@i18n.customers.noContactPersonsYet">no contact persons yet</div>
+                }
+                @if (_hiddenContactCount > 0) {
+                <a class="list-group-item list-group-item-action small text-primary py-1" routerLink="contacts">
+                    <span i18n="@@i18n.customers.moreContacts">+{{ _hiddenContactCount }} more</span>
+                </a>
+                }
                 <div class="card-body">
                     <ng-container roles="financial">
                         <div class="hstack gap-2 pointer" (click)="showDefaultProduct.set(!showDefaultProduct())" (keyup.enter)="showDefaultProduct.set(!showDefaultProduct())" tabindex="0">
@@ -77,22 +120,22 @@
                     } }
                     <div class="hstack gap-2 mt-2">
                         <ng-container roles="financial">
-                            <button type="button" class="btn btn-sm flex-fill d-flex align-items-center justify-content-center" [class.btn-danger]="_company.is_deprecated" [class.text-muted]="!_company.is_deprecated" (click)="_company.update({is_deprecated: !_company.is_deprecated}).subscribe()" [ngbTooltip]="_company.is_deprecated ? 'Customer is deprecated and ignored for maintenance checks' : 'Customer is active for maintenance checks'" placement="bottom">
+                            <button type="button" class="btn btn-sm btn-plain hover-primary flex-fill d-flex align-items-center justify-content-center" [class.text-danger]="_company.is_deprecated" [class.text-muted]="!_company.is_deprecated" (click)="_company.update({is_deprecated: !_company.is_deprecated}).subscribe()" [ngbTooltip]="_company.is_deprecated ? 'Customer is deprecated and ignored for maintenance checks' : 'Customer is active for maintenance checks'" placement="bottom">
                                 <i>block</i>
                             </button>
-                            <button type="button" class="btn btn-sm flex-fill d-flex align-items-center justify-content-center" [class.btn-warning]="_company.requires_po" [class.text-muted]="!_company.requires_po" (click)="_company.update({requires_po: !_company.requires_po}).subscribe()" [ngbTooltip]="_company.requires_po ? 'Customer requires purchase orders before invoicing' : 'No purchase order required'" placement="bottom">
+                            <button type="button" class="btn btn-sm btn-plain hover-primary flex-fill d-flex align-items-center justify-content-center" [class.text-warning]="_company.requires_po" [class.text-muted]="!_company.requires_po" (click)="_company.update({requires_po: !_company.requires_po}).subscribe()" [ngbTooltip]="_company.requires_po ? 'Customer requires purchase orders before invoicing' : 'No purchase order required'" placement="bottom">
                                 <i>receipt_long</i>
                             </button>
-                            <button type="button" class="btn btn-sm flex-fill d-flex align-items-center justify-content-center" [class.btn-info]="_company.has_nda" [class.text-muted]="!_company.has_nda" (click)="_company.update({has_nda: !_company.has_nda}).subscribe()" [ngbTooltip]="_company.has_nda ? 'NDA is in place' : 'No NDA signed'" placement="bottom">
+                            <button type="button" class="btn btn-sm btn-plain hover-primary flex-fill d-flex align-items-center justify-content-center" [class.text-info]="_company.has_nda" [class.text-muted]="!_company.has_nda" (click)="_company.update({has_nda: !_company.has_nda}).subscribe()" [ngbTooltip]="_company.has_nda ? 'NDA is in place' : 'No NDA signed'" placement="bottom">
                                 <i>policy</i>
                             </button>
-                            <button type="button" class="btn btn-sm flex-fill d-flex align-items-center justify-content-center" [class.btn-success]="_company.accepts_support" [class.text-muted]="!_company.accepts_support" (click)="_company.update({accepts_support: !_company.accepts_support}).subscribe()" [ngbTooltip]="_company.accepts_support ? 'Customer accepts support invoicing without prior notice' : 'Customer requires notification before support invoicing'" placement="bottom">
+                            <button type="button" class="btn btn-sm btn-plain hover-primary flex-fill d-flex align-items-center justify-content-center" [class.text-success]="_company.accepts_support" [class.text-muted]="!_company.accepts_support" (click)="_company.update({accepts_support: !_company.accepts_support}).subscribe()" [ngbTooltip]="_company.accepts_support ? 'Customer accepts support invoicing without prior notice' : 'Customer requires notification before support invoicing'" placement="bottom">
                                 <i>support_agent</i>
                             </button>
                         </ng-container>
                         <div ngbDropdown class="flex-fill">
                             @let _remarketing = _company.remarketingOption();
-                            <button type="button" class="btn btn-sm w-100 d-flex align-items-center justify-content-center gap-1 dropdown-toggle-simple" [class.btn-primary]="_company.remarketing_interval" [class.text-muted]="!_company.remarketing_interval" ngbDropdownToggle [ngbTooltip]="'Remarketing interval: ' + _remarketing.label" placement="bottom">
+                            <button type="button" class="btn btn-sm btn-plain hover-primary w-100 d-flex align-items-center justify-content-center gap-1 dropdown-toggle-simple" [class.text-primary]="_company.remarketing_interval" [class.text-muted]="!_company.remarketing_interval" ngbDropdownToggle [ngbTooltip]="'Remarketing interval: ' + _remarketing.label" placement="bottom">
                                 <n>marketing</n>
                                 <span class="small">{{_remarketing.short}}</span>
                             </button>
@@ -128,10 +171,11 @@
                 <div class="col-12 col-xl-4">
                     
                     @if (_hasInvoicingRole) {
+                    @if (_company.hasBusinessHistory()) {
                     <div class="card chart-card mb-3">
                         <customer-quickstats [company]="_company"></customer-quickstats>
                     </div>
-                    
+
                     <div class="card chart-card mb-3">
                         <div class="card-header hstack gap-2">
                             <span i18n="@@i18n.common.revenue">revenue</span>
@@ -165,6 +209,15 @@
                         <echarts-range-card keyPath="{{_company.getParamPath('INVOICE_REVENUE_12M')}}" [color]="['primary']"></echarts-range-card>
                     </div>
 
+                    } @else {
+                    <div class="card mb-3">
+                        <div class="card-body hstack gap-2 small text-muted">
+                            <i>insights</i>
+                            <span i18n="@@i18n.customers.keyFiguresLater">key figures and forecasts appear as soon as this customer has invoices.</span>
+                        </div>
+                    </div>
+                    }
+                    @if (_company.hasMlInsights()) {
                     <div class="card chart-card mb-3">
                         <div class="card-header hstack gap-2">
                             <n class="local-ai-icon">local_ai</n>
@@ -184,7 +237,7 @@
                                 <div class="hstack gap-2">
                                     <div class="flex-fill text-muted" i18n="@@i18n.customers.mlNextPurchase">predicted next purchase</div>
                                     @if (_mlNextPurchaseAt) {
-                                    <div [class.text-danger]="_mlOverdueForContact" [class.text-primary]="!_mlOverdueForContact" [mlReliability]="'customer_interval'" placement="left">
+                                    <div [class.text-danger]="_mlOverdueForContact" [mlReliability]="'customer_interval'" placement="left">
                                         {{_mlNextPurchaseAt.format('YYYY-MM-DD')}}
                                         @if (_mlOverdueForContact) {
                                         <i class="ms-1" ngbTooltip="predicted next purchase date is in the past — contact this customer" i18n-ngbTooltip="@@i18n.customers.contactNowTip">notification_important</i>
@@ -214,12 +267,8 @@
                         </ul>
                     </div>
 
-                    <div class="card chart-card mb-3">
-                        <div class="card-header hstack gap-2">
-                            <span i18n="@@i18n.widget-prediction-bias" class="flex-fill text-truncate">prediction bias</span>
-                        </div>
-                        <customer-prediction-bias-chart [company]="_company"></customer-prediction-bias-chart>
-                    </div>
+                    }
+                    <customer-prediction-bias-chart [company]="_company"></customer-prediction-bias-chart>
                     }
 
                     <project-team-planning [entity]="_company"></project-team-planning>

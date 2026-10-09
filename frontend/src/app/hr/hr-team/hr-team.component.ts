@@ -35,7 +35,7 @@ export class HrTeamComponent {
 
     constructor() {
         this.#global.init.pipe(takeUntilDestroyed()).subscribe(() => {
-            this.team.set(this.#global.teamAll.filter((_) => _.id != '1'));
+            this.team.set(this.#global.teamAll);
         });
         this.#route.params.pipe(takeUntilDestroyed()).subscribe((params) => {
             if ('id' in params) this.id.set(params.id);

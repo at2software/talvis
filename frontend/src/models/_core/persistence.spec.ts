@@ -1,7 +1,7 @@
 import { of } from 'rxjs';
 import type { Dictionary } from '@constants/constants';
 import type { HttpWrapper } from '@models/http/http.wrapper';
-import { setNxBridge, TBroadcast, type BroadcastPayload, type NxBridge } from '@models/_core/nx-bridge';
+import { setNxBridge, TBroadcast, type BroadcastPayload, type NxBridge, nx } from '@models/_core/nx-bridge';
 import * as Persistence from '@models/_core/persistence';
 import { Serializable } from '@models/_core/serializable';
 
@@ -29,6 +29,10 @@ const note = (json: Dictionary = {}, response?: unknown): Note => {
     model.httpService = response === undefined ? http() : http(response);
     return model;
 };
+
+const originalBridge = nx();
+
+afterAll(() => setNxBridge(originalBridge));
 
 beforeAll(() => {
     setNxBridge({

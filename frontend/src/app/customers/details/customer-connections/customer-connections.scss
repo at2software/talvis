@@ -10,7 +10,7 @@
   position: relative;
   z-index: 1;
 }
-.chart {
+network-chart.chart {
   height: calc(100vh - $header-height - 1 * $grid-width) !important;
   position: sticky;
   top: 0;

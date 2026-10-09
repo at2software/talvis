@@ -39,6 +39,14 @@ return [
     'quarterly_recurring' => 'Quartalsmäßige Wiederholung',
     'yearly_recurring'    => 'Jährliche Wiederholung',
 
+    // Letterhead
+    'web'             => 'Web',
+    'fax'             => 'Fax',
+    'register_number' => 'Handelsregister',
+    'company_owners'  => 'Geschäftsführer',
+    'vat_id'          => 'USt-IdNr.',
+    'tax_id'          => 'Steuernummer',
+
     // Page counter
     'page'    => 'Seite',
     'page_of' => 'von',
@@ -52,4 +60,5 @@ return [
     // Document titles
     'quote'         => 'Angebot',
     'draft_invoice' => 'Rechnungsentwurf',
+    'quote_preview' => 'Angebotsvorschau',
 ];

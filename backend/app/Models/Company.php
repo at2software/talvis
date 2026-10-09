@@ -10,6 +10,7 @@ use App\Enums\InvoiceItemType;
 use App\Enums\Recurrence;
 use App\Helpers\NLog;
 use App\Queries\FociTimelineQuery;
+use App\Support\Iban;
 use App\Traits\CanMakeInvoiceTrait;
 use App\Traits\HasAssignmentsTrait;
 use App\Traits\HasAvatarProjection;
@@ -42,10 +43,20 @@ class Company extends BaseModel {
     use SoftDeletes;
     use VcardTrait;
 
-    public const FLAG_DRAFT = 0x01;
+    public const FLAG_DRAFT    = 0x01;
+    public const SENDER_PARAMS = [
+        'ME_NAME'           => 'name',
+        'ME_EMAIL'          => 'email',
+        'ME_PHONE'          => 'phone',
+        'ME_IBAN'           => 'iban',
+        'ME_BIC'            => 'bic',
+        'ME_TAX_ID'         => 'tax_id',
+        'ME_VAT_ID'         => 'vat_id',
+        'ME_COMPANY_OWNERS' => 'owners',
+    ];
 
-    protected $fillable = ['vcard', 'created_at', 'updated_at', 'customer_number', 'company_id', 'contact_id', 'net', 'flags', 'vat_id', 'commercial_register', 'invoice_email', 'is_deprecated', 'requires_po', 'has_nda', 'accepts_support', 'remarketing_interval', 'default_product_id', 'source_id', 'source_type'];
-    protected $appends  = ['icon', 'class', 'path', 'name', 'needs_vat_handling', 'address', 'has_time_budget'];
+    protected $fillable = ['vcard', 'created_at', 'updated_at', 'customer_number', 'company_id', 'contact_id', 'net', 'flags', 'vat_id', 'commercial_register', 'managing_director', 'invoice_email', 'is_deprecated', 'requires_po', 'has_nda', 'accepts_support', 'remarketing_interval', 'default_product_id', 'source_id', 'source_type'];
+    protected $appends  = ['icon', 'class', 'path', 'name', 'needs_vat_handling', 'is_domestic', 'address', 'has_time_budget'];
     protected $hidden   = ['deleted_at'];
 
     protected function casts(): array {
@@ -55,12 +66,12 @@ class Company extends BaseModel {
             'total_time'           => Precomputed::class,
             'remarketing_interval' => Recurrence::class,
             'discount'             => 'double',
-            'has_direct_debit'     => 'boolean',
             'requires_po'          => 'boolean',
             'has_nda'              => 'boolean',
             'is_deprecated'        => 'boolean',
             'accepts_support'      => 'boolean',
             'needs_vat_handling'   => 'boolean',
+            'is_domestic'          => 'boolean',
             'has_time_budget'      => 'boolean',
         ];
     }
@@ -69,6 +80,60 @@ class Company extends BaseModel {
     }
     public static function myName(): string {
         return trim((string)(Param::get('ME_NAME')->value ?? '')) ?: trim((string)(self::me()?->name ?? ''));
+    }
+    public static function senderData(): array {
+        $vcard = self::me()?->vcard;
+        $adr   = $vcard?->getFirstAttr('ADR') ?? [];
+        $data  = [
+            'name'    => self::myName(),
+            'street'  => $adr[2] ?? '',
+            'zip'     => $adr[5] ?? '',
+            'city'    => $adr[3] ?? '',
+            'country' => strtoupper($adr[6] ?? ''),
+            'url'     => $vcard?->getFirstValue('URL') ?? '',
+        ];
+        foreach (self::SENDER_PARAMS as $key => $field) {
+            $data[$field] ??= (string)(Param::get($key)->value ?? '');
+        }
+        return array_map(fn ($_) => trim((string)$_), $data);
+    }
+    public static function senderReadiness(): array {
+        $data    = self::senderData();
+        $missing = self::me() ? [] : ['company'];
+        foreach (['name', 'street', 'zip', 'city', 'country', 'email', 'iban'] as $field) {
+            if ($data[$field] === '') {
+                $missing[] = $field;
+            }
+        }
+        if ($data['tax_id'] === '' && $data['vat_id'] === '') {
+            $missing[] = 'tax_id';
+        }
+        return $missing;
+    }
+    public static function updateMe(array $data): self {
+        $clean   = fn ($_) => str_replace([';', "\r", "\n"], [',', '', ' '], trim((string)$_));
+        $name    = $clean($data['name']);
+        $suffix  = $clean($data['legal_form'] ?? '');
+        $name    = ($suffix === '' || str_ends_with($name, $suffix)) ? $name : "$name $suffix";
+        $company = self::me() ?? new self;
+
+        $vcard = $company->vcard->remove(['FN', 'ORG', 'ADR', 'URL', 'EMAIL', 'TEL']);
+        $vcard->setProperty('FN', $name);
+        $vcard->setProperty('ORG', $name);
+        $vcard->setProperty('ADR', ['', '', $clean($data['street']), $clean($data['city']), '', $clean($data['zip']), strtoupper($clean($data['country']))], ['TYPE' => 'work']);
+        foreach (['URL' => 'url', 'EMAIL' => 'email', 'TEL' => 'phone'] as $property => $field) {
+            if (! empty($data[$field])) {
+                $vcard->setProperty($property, $clean($data[$field]), ['TYPE' => 'work']);
+            }
+        }
+        $company->setVcardAttribute($vcard, false);
+        $company->save();
+
+        Param::put('ME_ID', $company->id);
+        foreach (self::SENDER_PARAMS as $key => $field) {
+            Param::put($key, $field === 'name' ? $name : ($data[$field] ?? ''));
+        }
+        return $company;
     }
     public function newCollection(array $models = []) {
         return new CompanyCollection($models);
@@ -148,8 +213,39 @@ class Company extends BaseModel {
         $projects = $this->projects()->whereHasDesicion()->get()->filter(fn ($_) => $_->desicionAt !== null);
         return count($projects) ? $projects->reduce(fn ($a, $b) => $a - $b->desicionAt->diffInDays($b->created_at)) / count($projects) : 0;
     }
+
+    /** @return array{iban: string, bic: ?string, reference: string, signed_at: ?string, holder: string}|null */
+    public function directDebitMandate(): ?array {
+        $params    = $this->getParamsAttribute();
+        $iban      = Iban::normalize((string)($params['INVOICE_DD_IBAN'] ?? ''));
+        $reference = trim((string)($params['INVOICE_DD_MANDATE'] ?? ''));
+        if ($iban === '' || $reference === '') {
+            return null;
+        }
+        return [
+            'iban'      => $iban,
+            'bic'       => trim((string)($params['INVOICE_DD_BIC'] ?? '')) ?: null,
+            'reference' => $reference,
+            'signed_at' => trim((string)($params['INVOICE_DD_MANDATE_DATE'] ?? '')) ?: null,
+            'holder'    => trim((string)($params['INVOICE_DD_ACCOUNT_HOLDER'] ?? '')) ?: (string)$this->name,
+        ];
+    }
+
+    public function toWebhookReference(): array {
+        return ['id' => $this->id, 'name' => $this->name, 'customer_number' => $this->customer_number];
+    }
+    public function toWebhookPayload(): array {
+        return [...$this->toWebhookReference(), 'vat_id' => $this->vat_id, 'created_at' => $this->created_at?->toIso8601String()];
+    }
+    public function getHasDirectDebitAttribute(): bool {
+        return $this->directDebitMandate() !== null;
+    }
     public function getNeedsVatHandlingAttribute(): bool {
         return $this->vcard->needsVatHandling();
+    }
+    public function getIsDomesticAttribute(): bool {
+        $countryCode = $this->vcard->getCountryCode();
+        return ! $countryCode || $countryCode === strtoupper((string)Param::get('SYS_COUNTRY')->value);
     }
     public function invoiceRecipients(): array {
         $addresses = preg_split('/[;,]/', (string)$this->invoice_email) ?: [];
@@ -206,11 +302,8 @@ class Company extends BaseModel {
         return $this->invoices()->sum('net');
     }
     public function precomputeTotalTimeAttribute() {
-        $total = $this->foci()->sum('duration');
-        foreach ($this->projects as $p) {
-            $total += $p->foci()->sum('duration');
-        }
-        return $total;
+        return $this->foci()->sum('duration')
+            + Focus::where('parent_type', Project::class)->whereIn('parent_id', $this->projects()->select('projects.id'))->sum('duration');
     }
     public function comments() {
         return $this->hasManyMorph(Comment::class, 'parent');
@@ -296,8 +389,25 @@ class Company extends BaseModel {
         }
         $this->delete();
     }
-    public function createEmployee() {
-        $contact = Contact::create(['vcard' => "FN:New Employee\nN:Employee;New;;;"]);
+    public static function assignMissingCustomerNumbers(): void {
+        $counter = Param::get('CUSTOMER_NUMBER_CURRENT');
+        $prefix  = Param::get('CUSTOMER_NUMBER_PREFIX')->value;
+        $suffix  = Param::get('CUSTOMER_NUMBER_SUFFIX')->value;
+        $current = (int)($counter->value ?? 1);
+        $smart   = new SmartSql('companies', 'customer_number');
+        foreach (static::whereCustomerNumberIsMissing()->pluck('id') as $id) {
+            while (static::where('customer_number', $prefix.$current.$suffix)->exists()) {
+                $current++;
+            }
+            $smart->add($id, $prefix.$current.$suffix);
+            $current++;
+        }
+        $smart->save();
+        $counter->value = $current;
+        $counter->save();
+    }
+    public function createEmployee(string $name = '') {
+        $contact = Contact::create(['vcard' => Vcard::forName($name ?: 'New Employee')->toVCardString(false)]);
         return CompanyContact::create(['vcard' => "EMAIL:\nTEL;type=voice,work:\nTEL;type=cell,work:", 'company_id' => $this->id, 'contact_id' => $contact->id])->load('contact.companies');
     }
     public function createProject(string $name = 'New project', ?int $parentProjectId = null, ?int $userId = null) {

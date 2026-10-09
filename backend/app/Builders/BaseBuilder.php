@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 
 class BaseBuilder extends Builder {
+    private const VCARD_BINARY_PROPERTIES = "\n(PHOTO|LOGO|SOUND|KEY)[;:][^\n]*(\n[ \t][^\n]*)*";
+
     public function maxCarbon($field = 'created_at'): ?Carbon {
         $max = $this->max($field);
         if (! $max) {
@@ -62,6 +64,10 @@ class BaseBuilder extends Builder {
     public function whereLike(string $column, string $like): static {
         $col = $this->getQuery()->getGrammar()->wrap($column);
         return $this->whereRaw("UPPER($col) LIKE CONCAT('%', UPPER(?), '%')", [$like]);
+    }
+    public function whereVcardLike(string $like): static {
+        return $this->whereLike('vcard', $like)
+            ->whereRaw("UPPER(REGEXP_REPLACE(vcard, ?, '')) LIKE CONCAT('%', UPPER(?), '%')", [self::VCARD_BINARY_PROPERTIES, $like]);
     }
     public function whereFlag(int $flag, string $column = 'flags', $cmp = '='): BaseBuilder {
         $col = $this->getQuery()->getGrammar()->wrap($column);

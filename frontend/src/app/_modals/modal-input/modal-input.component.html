@@ -8,14 +8,14 @@
                 @if (infoMessage) {
                     <div class="alert alert-info mb-3" [innerHTML]="infoMessage | safe: 'html'"></div>
                 }
-                <input #inputField type="text" class="form-control" [(ngModel)]="result" />
+                <input ngbAutofocus type="text" class="form-control" [(ngModel)]="result" (keydown.enter)="submit()" />
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn" (click)="decline()" data-bs-dismiss="modal" i18n="@@i18n.common.cancel">cancel</button>
                 @if (hasMore()) {
-                    <button type="button" class="btn btn-primary" (click)="more()" hotkey="CTRL+SHIFT+ENTER" i18n="@@i18n.common.okAndNext">ok & next</button>
+                    <button type="button" class="btn btn-plain text-primary" [disabled]="!canAccept" (click)="more()" hotkey="CTRL+SHIFT+ENTER" i18n="@@i18n.common.okAndNext">ok & next</button>
                 }
-                <button type="button" class="btn btn-primary" (click)="accept()" hotkey="CTRL+ENTER" i18n="@@i18n.common.ok">ok</button>
+                <button type="button" class="btn btn-primary" [disabled]="!canAccept" (click)="submit()" hotkey="CTRL+ENTER" i18n="@@i18n.common.ok">ok</button>
             </div>
         </div>
     </div>

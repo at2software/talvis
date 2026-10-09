@@ -10,7 +10,7 @@ import { ProjectComponent } from '@shards/project/project.component';
 import { ActivityTabComponent } from '@activity/activity-tab.component';
 import { TabCommentsComponent } from '@activity/tab-comments/tab-comments.component';
 import { HeaderComponent } from '@app/app/header/header.component';
-import { NgbDropdownModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbDropdownModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { SmartLinkDirective } from '@directives/smart-link.directive';
 import { HeaderRouteNavComponent } from '@app/app/header/header-route-nav/header-route-nav.component';
 
@@ -18,7 +18,7 @@ import { HeaderRouteNavComponent } from '@app/app/header/header-route-nav/header
     selector: 'project-detail',
     templateUrl: './project-detail.component.html',
     styleUrls: ['./project-detail.component.scss'],
-    imports: [HeaderComponent, ProjectComponent, HeaderRouteNavComponent, RouterModule, ActivityTabComponent, TabCommentsComponent, ProjectComponent, NgbDropdownModule, SmartLinkDirective],
+    imports: [HeaderComponent, ProjectComponent, HeaderRouteNavComponent, RouterModule, ActivityTabComponent, TabCommentsComponent, NgbDropdownModule, NgbTooltipModule, SmartLinkDirective],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProjectDetailComponent {
@@ -46,7 +46,7 @@ export class ProjectDetailComponent {
         const object = this.parent.object();
         object.update({ state: requestedState }).subscribe(() => {
             if (['3', '9'].contains('' + requestedState)) {
-                this.#router.navigate(['/projects/' + object.id + '/invoicing']);
+                this.#router.navigate(['/projects/' + object.id + '/invoicing/final']);
             }
         });
     };
@@ -62,5 +62,5 @@ export class ProjectDetailComponent {
             this.#router.navigate(['/customers/' + object.company_id + '/billing']);
         });
     }
-    isStateAllowed = (_: ProjectState) => ProjectState.StateChangeWorkflow['' + this.parent.object().state.id].contains('' + _.id);
+    isStateAllowed = (_: ProjectState) => ProjectState.allowedTargetIds(this.parent.object().state.id, this.global.user).contains('' + _.id);
 }

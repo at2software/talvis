@@ -6,7 +6,7 @@
                 <div class="card-header p-1 d-flex">
                     <list-group-item-contact class="flex-fill text-truncate" [contact]="_company" [nx]="_company" [showQuickContact]="true" routerLink="."> </list-group-item-contact>
                     <div roles="project_manager|marketing">
-                        <button class="card-header-action btn text-primary" type="submit" (click)="onAddEmployee()" title="add" i18n-title="@@i18n.common.add">
+                        <button class="card-header-action btn text-primary" type="submit" (click)="onAddEmployee()" title="add contact person" i18n-title="@@i18n.contacts.addContactPerson">
                             <i class="text-primary">add</i>
                         </button>
                     </div>
@@ -18,7 +18,9 @@
         </div>
         <div class="col-md-6">
             <router-outlet></router-outlet>
+            @if (!_company.var.selectedEmployee) {
             <app-vcard [object]="_company"></app-vcard>
+            }
         </div>
         <div class="col-md-3">
             @let _employee = _company.var.selectedEmployee;
@@ -37,20 +39,34 @@
                     </div>
                 </div>
             } @else {
+            @let _register = _company.commercialRegisterParts();
             <div class="card">
                 <div class="card-header" i18n="@@i18n.common.companyInformation">company information</div>
-                <div class="card-body">
-                    <div class="form-floating w-100 mb-2">
-                        <input type="text" class="form-control" tabindex="1" [autosave]="_company" [(ngModel)]="_company.vat_id" placeholder="" />
-                        <div i18n="@@i18n.common.VATID">VAT-ID</div>
+                <div class="card-body vstack gap-2">
+                    <div class="form-floating">
+                        <input id="companyCustomerNumber" type="text" class="form-control" [autosave]="_company" autosaveKey="customer_number" [(ngModel)]="_company.customer_number" placeholder="" />
+                        <label for="companyCustomerNumber" i18n="@@i18n.customers.customerNumber">customer number</label>
                     </div>
-                    <div class="form-floating w-100 mb-2">
-                        <input type="text" class="form-control" tabindex="2" [autosave]="_company" [(ngModel)]="_company.commercial_register" placeholder="" />
-                        <div i18n="@@i18n.common.commercial_register">commercial_register</div>
+                    <div class="form-floating">
+                        <input id="companyVatId" type="text" class="form-control" [autosave]="_company" autosaveKey="vat_id" [(ngModel)]="_company.vat_id" placeholder="" />
+                        <label for="companyVatId" i18n="@@i18n.common.VATID">VAT-ID</label>
                     </div>
-                    <div class="form-floating w-100 mb-2">
-                        <input type="text" class="form-control" tabindex="2" [autosave]="_company" [(ngModel)]="_company.managing_director" placeholder="" />
-                        <div i18n="@@i18n.common.managing_director">managing_director</div>
+                    <div class="form-floating">
+                        <input id="companyManagingDirector" type="text" class="form-control" [autosave]="_company" autosaveKey="managing_director" [(ngModel)]="_company.managing_director" placeholder="" />
+                        <label for="companyManagingDirector" i18n="@@i18n.common.managing_director">managing director</label>
+                    </div>
+                    <div>
+                        <div class="small text-muted mb-1 ms-1" i18n="@@i18n.common.commercial_register">commercial register</div>
+                        <div class="input-group">
+                            <select #registerType class="form-select flex-grow-0 w-auto" [ngModel]="_register.type" (change)="saveRegister(registerType.value, registerNumber.value, registerCourt.value)" aria-label="register type" i18n-aria-label="@@i18n.common.type">
+                                <option value="">–</option>
+                                @for (_ of registerTypes; track _) {
+                                    <option [value]="_">{{ _ }}</option>
+                                }
+                            </select>
+                            <input #registerNumber type="text" class="form-control" [ngModel]="_register.number" (blur)="saveRegister(registerType.value, registerNumber.value, registerCourt.value)" placeholder="number" i18n-placeholder="@@i18n.customers.registerNumber" />
+                            <input #registerCourt type="text" class="form-control" [ngModel]="_register.court" (blur)="saveRegister(registerType.value, registerNumber.value, registerCourt.value)" placeholder="court" i18n-placeholder="@@i18n.customers.registerCourt" />
+                        </div>
                     </div>
                 </div>
             </div>

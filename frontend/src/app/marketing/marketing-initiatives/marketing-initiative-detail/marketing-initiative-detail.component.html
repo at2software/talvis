@@ -112,7 +112,7 @@
                         @if (_initiative.workflows?.length) {
                             <div class="hstack gap-1">
                                 @for (workflow of _initiative.workflows; track workflow.id) {
-                                    <span class="badge bg-dark cursor-pointer" [nx]="workflow" [tables]="_initiative.workflows" [nxContext]="{ initiative: _initiative, component: this }" [class.text-white]="workflow.is_active" [class.text-muted]="!workflow.is_active" context="initiative_details" tabindex="0">
+                                    <span class="badge bg-dark" [nx]="workflow" [tables]="_initiative.workflows" [nxContext]="{ initiative: _initiative, component: this }" [class.text-white]="workflow.is_active" [class.text-muted]="!workflow.is_active" context="initiative_details" tabindex="0">
                                         {{ workflow.name }}
                                     </span>
                                 }
@@ -174,7 +174,7 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary" (click)="showChannelModal.set(false)" tabindex="0" (keydown.enter)="showChannelModal.set(false)" i18n="@@i18n.common.cancel">cancel</button>
+                <button type="button" class="btn" (click)="showChannelModal.set(false)" tabindex="0" (keydown.enter)="showChannelModal.set(false)" i18n="@@i18n.common.cancel">cancel</button>
                 <button type="button" class="btn btn-primary" hotkey="CTRL+ENTER" (click)="assignChannel()" tabindex="0" (keydown.enter)="assignChannel()" [disabled]="!selectedChannelId" i18n="@@i18n.marketing.assign_channel">assign channel</button>
             </div>
         </div>
@@ -224,7 +224,7 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" (click)="resetWorkflowForm()" tabindex="0" (keydown.enter)="resetWorkflowForm()" i18n="@@i18n.common.cancel">cancel</button>
+                <button type="button" class="btn" (click)="resetWorkflowForm()" tabindex="0" (keydown.enter)="resetWorkflowForm()" i18n="@@i18n.common.cancel">cancel</button>
                 <button type="button" class="btn btn-primary" hotkey="CTRL+ENTER" (click)="attachWorkflow()" tabindex="0" (keydown.enter)="attachWorkflow()" [disabled]="!selectedWorkflowId" i18n="@@i18n.marketing.attach_workflow">attach workflow</button>
             </div>
         </div>
@@ -264,7 +264,7 @@
                 </form>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" (click)="resetMetricForm()" tabindex="0" (keydown.enter)="resetMetricForm()" i18n="@@i18n.common.cancel">cancel</button>
+                <button type="button" class="btn" (click)="resetMetricForm()" tabindex="0" (keydown.enter)="resetMetricForm()" i18n="@@i18n.common.cancel">cancel</button>
                 <button type="button" class="btn btn-primary" hotkey="CTRL+ENTER" (click)="attachMetric()" tabindex="0" (keydown.enter)="attachMetric()" [disabled]="!selectedMetricId" i18n="@@i18n.marketing.add_metric">add metric</button>
             </div>
         </div>

@@ -18,12 +18,12 @@
                         </span>
                         <input type="number" class="form-control" [ngModel]="_basePrice" (ngModelChange)="basePrice.set($event)" />
                         <span class="input-group-text">{{ global.currencySymbol() }}</span>
-                        <button type="button" class="btn btn-outline-info btn-sm ms-2" (click)="calculatePercentage(5)">5%</button>
-                        <button type="button" class="btn btn-outline-info btn-sm" (click)="calculatePercentage(10)">10%</button>
-                        <button type="button" class="btn btn-outline-info btn-sm" (click)="calculatePercentage(15)">15%</button>
-                        <button type="button" class="btn btn-outline-info btn-sm" (click)="calculatePercentage(20)">20%</button>
-                        <button type="button" class="btn btn-outline-info btn-sm" (click)="calculatePercentage(25)">25%</button>
-                        <button type="button" class="btn btn-outline-info btn-sm" (click)="calculatePercentage(30)">30%</button>
+                        <button type="button" class="btn btn-sm btn-plain text-primary ms-2" (click)="calculatePercentage(5)">5%</button>
+                        <button type="button" class="btn btn-sm btn-plain text-primary" (click)="calculatePercentage(10)">10%</button>
+                        <button type="button" class="btn btn-sm btn-plain text-primary" (click)="calculatePercentage(15)">15%</button>
+                        <button type="button" class="btn btn-sm btn-plain text-primary" (click)="calculatePercentage(20)">20%</button>
+                        <button type="button" class="btn btn-sm btn-plain text-primary" (click)="calculatePercentage(25)">25%</button>
+                        <button type="button" class="btn btn-sm btn-plain text-primary" (click)="calculatePercentage(30)">30%</button>
                     </div>
                 }
                 <div class="input-group mb-3">

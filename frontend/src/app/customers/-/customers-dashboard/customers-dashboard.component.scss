@@ -3,11 +3,3 @@
     display: inline;
 }
 
-.sortable {
-    cursor: pointer;
-    user-select: none;
-
-    &:hover {
-        background-color: rgba(0, 0, 0, 0.04);
-    }
-}

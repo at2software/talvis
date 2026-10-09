@@ -2,9 +2,9 @@
 <toolbar>
     <div class="btn-group" ngbDropdown>
         @if (hasNewSet('item')) {
-        <button type="button" class="btn btn-primary" (click)="onNewItem()" ngbTooltip="CTRL+ALT+N" hotkey="CTRL+ALT+N"><i>add</i><span i18n="invoice item|short description for invoice item@@i18n.invoice.item">item</span></button>
+        <button type="button" class="btn btn-plain text-primary" (click)="onNewItem()" ngbTooltip="CTRL+ALT+N" hotkey="CTRL+ALT+N"><i>add</i><span i18n="invoice item|short description for invoice item@@i18n.invoice.item">item</span></button>
         }
-        <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split" ngbDropdownToggle>
+        <button type="button" class="btn btn-plain text-primary dropdown-toggle dropdown-toggle-split" ngbDropdownToggle>
             <span class="visually-hidden" i18n="@@i18n.invoices.toggleDropdown">toggle dropdown</span>
         </button>
         <div class="dropdown-menu dropdown-menu-end" ngbDropdownMenu>
@@ -30,20 +30,20 @@
 }
 
 <div class="card">
-    <table stackedTable class="table mb-0 table-ext">
+    <table stackedTable enableTableExport [filenamePrefix]="parent().getName()" class="table mb-0 table-ext">
         <colgroup>
-            <col style="width: 0px" />
             <col style="width: 30px" />
             <col />
+            <col style="width: 1%" />
             <col style="width: 100px" />
             <col style="width: 80px" />
             <col style="width: 100px" />
         </colgroup>
         <thead>
             <tr>
-                <th class="p-0"></th>
                 <th>#</th>
                 <th i18n="@@i18n.common.description">description</th>
+                <th data-export-hidden></th>
                 <th class="text-end" i18n="@@i18n.common.price">price</th>
                 <th class="text-end" i18n="@@i18n.common.qty">qty</th>
                 <th class="text-end" i18n="@@i18n.common.total">total</th>
@@ -56,8 +56,12 @@
                     <spinner [size]="48" [centered]="true"></spinner>
                 </td>
             </tr>
+            } @else if (!regularItems().length) {
+            <tr>
+                <td colspan="6" class="text-center text-muted py-4" i18n="@@i18n.invoice.noItemsYet">no items yet</td>
+            </tr>
             } @for (item of regularItems(); track ('regularItems:' + item.track_id); let i = $index) {
-            <tr cdkDrag [nx]="item" [tables]="_items()" [nxContext]="{company: companyRef()}" cdkDragLockAxis="y" invoice-item-row [company]="effectiveCompany()" [item]="item" [annotationType]="annotationType()" [extIssues]="extIssues()" (singleActionResolved)="singleActionResolved($event)" class="{{item.markerClass()}}"></tr>
+            <tr cdkDrag [nx]="item" [tables]="_items()" [nxContext]="{company: companyRef()}" cdkDragLockAxis="y" invoice-item-row [company]="effectiveCompany()" [item]="item" [infoType]="infoType()" [extIssues]="extIssues()" (singleActionResolved)="singleActionResolved($event)" class="{{item.markerClass()}}"></tr>
             } @if (lastGroup()) {
             <tr>
                 <td class="small text-end" colspan="6">{{lastGroup()!.var.sum | money}}</td>
@@ -72,8 +76,8 @@
             </tr>
             @for (v of vat(); track ('vat:' + v.title)) {
             <tr>
-                <td colspan="2"></td>
-                <td colspan="3">{{v.title}}</td>
+                <td></td>
+                <td colspan="4">{{v.title}}</td>
                 <td class="text-end text-muted">{{v.value | money}}</td>
             </tr>
             }
@@ -84,8 +88,8 @@
             </tr>
             @if (instalmentItems().length) { @for (i of instalmentItems(); track ('instalments:' + i.track_id)) {
             <tr [nx]="i" [tables]="_items()" (actionsResolved)="reload()">
-                <td colspan="2"></td>
-                <td colspan="3">{{i.text}}</td>
+                <td></td>
+                <td colspan="4">{{i.text}}</td>
                 <td class="text-end text-muted">{{i.gross | money}}</td>
             </tr>
             }
@@ -96,8 +100,8 @@
             </tr>
             }
             <tr class="sticky-footer selection-row" [class.d-none]="selection().length === 0">
-                <td colspan="2"></td>
-                <td>
+                <td></td>
+                <td colspan="2">
                     <span i18n="@@i18n.common.selection">selection</span>
                     @if (selectionNotTimeBasedCount()) {
                     <span class="text-muted small ms-2" i18n-ngbTooltip="@@i18n.invoices.notTimeBasedSelection" ngbTooltip="items whose unit could not be mapped to a time-based quantity">

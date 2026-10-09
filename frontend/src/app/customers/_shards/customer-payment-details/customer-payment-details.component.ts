@@ -3,9 +3,11 @@ import { CustomerDetailGuard } from '../../customers.details.guard';
 import { InputModalService } from '@app/_modals/modal-input/modal-input.service';
 import { forkJoin } from 'rxjs';
 import { Company } from '@models/company/company.model';
+import { dayjs } from '@constants/date/dates';
+import { Toast } from '@shards/toast/toast';
 
 import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
-import { NgTemplateOutlet } from '@angular/common';
+import { DatePipe, NgTemplateOutlet } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CompanyLocaleSelectorComponent } from '../company-locale-selector/company-locale-selector.component';
 
@@ -13,7 +15,7 @@ import { CompanyLocaleSelectorComponent } from '../company-locale-selector/compa
     changeDetection: ChangeDetectionStrategy.OnPush,
     selector: 'customer-payment-details',
     templateUrl: './customer-payment-details.component.html',
-    imports: [NgbTooltipModule, NgTemplateOutlet, FormsModule, CompanyLocaleSelectorComponent],
+    imports: [NgbTooltipModule, NgTemplateOutlet, DatePipe, FormsModule, CompanyLocaleSelectorComponent],
 })
 export class CustomerPaymentDetailsComponent {
     company = input<Company>();
@@ -26,6 +28,7 @@ export class CustomerPaymentDetailsComponent {
     hasProjectPaymentDuration = computed(() => !!this.projectPaymentDuration());
     effectivePaymentDuration = computed(() => this.projectPaymentDuration() || this.current()?.getParam('INVOICE_PAYMENT_DURATION') || '14');
     hasDiscount = computed(() => parseFloat(this.current()?.getParam('INVOICE_DISCOUNT') ?? '0') > 0);
+    sepaMandateDateMissing = computed(() => !!this.current()?.isSepaMandateDateMissing());
     hasCustomerPaymentDuration = computed(() => !this.projectPaymentDuration() && !!this.current()?.getParam('INVOICE_PAYMENT_DURATION'));
 
     parent = inject(CustomerDetailGuard, { optional: true });
@@ -55,9 +58,34 @@ export class CustomerPaymentDetailsComponent {
     }
 
     async onChangeSepa() {
+        const company = this.current()!;
         const mandate = (await this.inputModal.open($localize`:@@i18n.customers.set_mandate_reference:set mandate reference`))?.text ?? undefined;
         const iban = (await this.inputModal.open($localize`:@@i18n.customers.set_iban:set IBAN`))?.text ?? undefined;
-        forkJoin([this.current()!.updateParam('INVOICE_DD_MANDATE', { value: mandate }), this.current()!.updateParam('INVOICE_DD_IBAN', { value: iban })]).subscribe(() => this.parent?.reload());
+        const mandateDate = await this.#promptMandateDate();
+        const bic = (await this.inputModal.open($localize`:@@i18n.customers.set_bic:set BIC`, false, $localize`:@@i18n.common.optional:(optional)`, company.getParam('INVOICE_DD_BIC') ?? ''))?.text;
+        const holder = (await this.inputModal.open($localize`:@@i18n.customers.set_account_holder:set account holder`, false, $localize`:@@i18n.customers.accountHolderHint:optional, defaults to the customer name`, company.getParam('INVOICE_DD_ACCOUNT_HOLDER') ?? ''))?.text;
+        const optional = Object.entries({ INVOICE_DD_MANDATE_DATE: mandateDate, INVOICE_DD_BIC: bic, INVOICE_DD_ACCOUNT_HOLDER: holder })
+            .filter((entry): entry is [string, string] => entry[1] !== undefined)
+            .map(([param, value]) => company.updateParam(param, { value: value.trim() || null }));
+        forkJoin([company.updateParam('INVOICE_DD_MANDATE', { value: mandate }), company.updateParam('INVOICE_DD_IBAN', { value: iban }), ...optional]).subscribe(() => this.parent?.reload());
+    }
+
+    async onChangeMandateDate() {
+        const date = await this.#promptMandateDate();
+        if (date === undefined) return;
+        this.current()!
+            .updateParam('INVOICE_DD_MANDATE_DATE', { value: date || null })
+            .subscribe(() => this.parent?.reload());
+    }
+
+    async #promptMandateDate(): Promise<string | undefined> {
+        const hint = $localize`:@@i18n.customers.mandateDateHint:date the mandate was signed (YYYY-MM-DD), needed for SEPA direct debit`;
+        const text = (await this.inputModal.open($localize`:@@i18n.customers.set_mandate_date:set mandate date`, false, hint, this.current()?.getParam('INVOICE_DD_MANDATE_DATE') ?? ''))?.text?.trim();
+        if (!text) return text;
+        const date = dayjs(text, ['YYYY-MM-DD', 'DD.MM.YYYY'], true);
+        if (date.isValid()) return date.format('YYYY-MM-DD');
+        Toast.warn($localize`:@@i18n.customers.invalidMandateDate:invalid mandate date, expected YYYY-MM-DD`);
+        return undefined;
     }
 
     removeDiscount() {
@@ -67,7 +95,8 @@ export class CustomerPaymentDetailsComponent {
     }
 
     removeSepa() {
-        forkJoin([this.current()!.updateParam('INVOICE_DD_MANDATE', { value: null }), this.current()!.updateParam('INVOICE_DD_IBAN', { value: null })]).subscribe(() => this.parent?.reload());
+        const params = ['INVOICE_DD_MANDATE', 'INVOICE_DD_IBAN', 'INVOICE_DD_MANDATE_DATE', 'INVOICE_DD_BIC', 'INVOICE_DD_ACCOUNT_HOLDER'];
+        forkJoin(params.map((param) => this.current()!.updateParam(param, { value: null }))).subscribe(() => this.parent?.reload());
     }
 
     removePaymentDuration() {
@@ -91,6 +120,14 @@ export class CustomerPaymentDetailsComponent {
                     .subscribe(() => this.parent?.reload());
             }
         });
+    }
+
+    onChangeCustomerNumber() {
+        this.inputModal.open($localize`:@@i18n.customers.customerNumber:customer number`, false, undefined, this.current()?.customer_number ?? '').confirmed(({ text }) =>
+            this.current()!
+                .update({ customer_number: text.trim() })
+                .subscribe(() => this.parent?.reload()),
+        );
     }
 
     onChangeVat() {

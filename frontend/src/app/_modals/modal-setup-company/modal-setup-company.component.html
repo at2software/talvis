@@ -1,0 +1,113 @@
+@let _company = company();
+@let _errors = errors();
+<div class="modal d-block" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-title" i18n="@@i18n.setup.company.title">your company</span>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted" i18n="@@i18n.setup.company.description">These details appear as the sender on your invoices, quotes and e-invoices (XRechnung).</p>
+                @if (_company) {
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-8 form-floating">
+                            <input id="setupCompanyName" class="form-control" placeholder="" [class.is-invalid]="_errors['name']" [(ngModel)]="_company.name" />
+                            <label for="setupCompanyName" i18n="@@i18n.setup.company.name">company name</label>
+                            <div class="invalid-feedback">{{ _errors['name'] }}</div>
+                        </div>
+                        <div class="col-md-4 form-floating">
+                            <input id="setupLegalForm" class="form-control" placeholder="" list="setupLegalForms" [(ngModel)]="_company.legal_form" />
+                            <label for="setupLegalForm" i18n="@@i18n.setup.company.legalForm">legal form (optional)</label>
+                            <datalist id="setupLegalForms">
+                                @for (form of LEGAL_FORMS; track form) {
+                                    <option [value]="form"></option>
+                                }
+                            </datalist>
+                        </div>
+                        <div class="col-12 form-floating">
+                            <input id="setupOwners" class="form-control" placeholder="" [(ngModel)]="_company.owners" />
+                            <label for="setupOwners" i18n="@@i18n.setup.company.owners">owner / managing director</label>
+                        </div>
+                    </div>
+
+                    <h6 i18n="@@i18n.setup.company.address">address</h6>
+                    <div class="row g-2 mb-3">
+                        <div class="col-12 form-floating">
+                            <input id="setupStreet" class="form-control" placeholder="" autocomplete="street-address" [class.is-invalid]="_errors['street']" [(ngModel)]="_company.street" />
+                            <label for="setupStreet" i18n="@@i18n.setup.company.street">street and number</label>
+                            <div class="invalid-feedback">{{ _errors['street'] }}</div>
+                        </div>
+                        <div class="col-md-3 form-floating">
+                            <input id="setupZip" class="form-control" placeholder="" autocomplete="postal-code" [class.is-invalid]="_errors['zip']" [(ngModel)]="_company.zip" />
+                            <label for="setupZip" i18n="@@i18n.setup.company.zip">postal code</label>
+                            <div class="invalid-feedback">{{ _errors['zip'] }}</div>
+                        </div>
+                        <div class="col-md-5 form-floating">
+                            <input id="setupCity" class="form-control" placeholder="" autocomplete="address-level2" [class.is-invalid]="_errors['city']" [(ngModel)]="_company.city" />
+                            <label for="setupCity" i18n="@@i18n.setup.company.city">city</label>
+                            <div class="invalid-feedback">{{ _errors['city'] }}</div>
+                        </div>
+                        <div class="col-md-4 form-floating">
+                            <select id="setupCountry" class="form-select" [class.is-invalid]="_errors['country']" [(ngModel)]="_company.country">
+                                @for (country of countries(); track country.key) {
+                                    <option [value]="country.key">{{ country.name }}</option>
+                                }
+                            </select>
+                            <label for="setupCountry" i18n="@@i18n.setup.company.country">country</label>
+                            <div class="invalid-feedback">{{ _errors['country'] }}</div>
+                        </div>
+                    </div>
+
+                    <h6 i18n="@@i18n.setup.company.contact">contact</h6>
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-6 form-floating">
+                            <input id="setupEmail" type="email" class="form-control" placeholder="" [class.is-invalid]="_errors['email']" [(ngModel)]="_company.email" />
+                            <label for="setupEmail" i18n="@@i18n.setup.company.email">invoice e-mail address</label>
+                            <div class="invalid-feedback">{{ _errors['email'] }}</div>
+                        </div>
+                        <div class="col-md-6 form-floating">
+                            <input id="setupPhone" type="tel" class="form-control" placeholder="" [class.is-invalid]="_errors['phone']" [(ngModel)]="_company.phone" />
+                            <label for="setupPhone" i18n="@@i18n.setup.company.phone">phone (optional)</label>
+                            <div class="invalid-feedback">{{ _errors['phone'] }}</div>
+                        </div>
+                        <div class="col-12 form-floating">
+                            <input id="setupUrl" class="form-control" placeholder="" [(ngModel)]="_company.url" />
+                            <label for="setupUrl" i18n="@@i18n.setup.company.website">website (optional)</label>
+                        </div>
+                    </div>
+
+                    <h6 i18n="@@i18n.setup.company.bankAndTax">bank account &amp; tax</h6>
+                    <div class="row g-2">
+                        <div class="col-md-8 form-floating">
+                            <input id="setupIban" class="form-control font-monospace" placeholder="" [class.is-invalid]="_errors['iban']" [(ngModel)]="_company.iban" />
+                            <label for="setupIban" i18n="@@i18n.common.IBAN">IBAN</label>
+                            <div class="invalid-feedback">{{ _errors['iban'] }}</div>
+                        </div>
+                        <div class="col-md-4 form-floating">
+                            <input id="setupBic" class="form-control font-monospace" placeholder="" [class.is-invalid]="_errors['bic']" [(ngModel)]="_company.bic" />
+                            <label for="setupBic" i18n="@@i18n.setup.company.bic">BIC (optional)</label>
+                            <div class="invalid-feedback">{{ _errors['bic'] }}</div>
+                        </div>
+                        <div class="col-md-6 form-floating">
+                            <input id="setupTaxId" class="form-control" placeholder="" [class.is-invalid]="_errors['tax_id']" [(ngModel)]="_company.tax_id" />
+                            <label for="setupTaxId" i18n="@@i18n.setup.company.taxId">tax number</label>
+                            <div class="invalid-feedback">{{ _errors['tax_id'] }}</div>
+                        </div>
+                        <div class="col-md-6 form-floating">
+                            <input id="setupVatId" class="form-control" placeholder="" [class.is-invalid]="_errors['vat_id']" [(ngModel)]="_company.vat_id" />
+                            <label for="setupVatId" i18n="@@i18n.setup.company.vatId">VAT ID (e.g. DE123456789)</label>
+                            <div class="invalid-feedback">{{ _errors['vat_id'] }}</div>
+                        </div>
+                        <small class="text-muted" i18n="@@i18n.setup.company.taxHint">A tax number or a VAT ID is required – one of the two is enough.</small>
+                    </div>
+                } @else {
+                    <spinner [size]="32"></spinner>
+                }
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn" (click)="decline()" i18n="@@i18n.common.cancel">cancel</button>
+                <button type="button" class="btn btn-primary" [disabled]="!_company || saving()" (click)="save()" hotkey="CTRL+ENTER" i18n="@@i18n.setup.save">save</button>
+            </div>
+        </div>
+    </div>
+</div>

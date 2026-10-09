@@ -10,6 +10,18 @@ import { Dictionary } from '@constants/constants';
 
 export type TPluginStates = 'idle' | 'connecting' | 'connected' | 'connection fail' | 'no token';
 
+export interface LinkableProject {
+    id: string;
+    name: string;
+    description?: string;
+}
+
+export interface ILinkableProjects {
+    indexLinkableProjects(): Observable<LinkableProject[]>;
+}
+
+export const hasLinkableProjects = (instance: object): instance is ILinkableProjects => 'indexLinkableProjects' in instance;
+
 export abstract class IPlugin {
     IPluginProperty!: boolean;
     init!: ReplaySubject<void>;

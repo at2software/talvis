@@ -1,0 +1,8 @@
+.user-card.selected {
+    background-color: rgba(var(--bs-primary-rgb), 0.15);
+}
+
+.user-list {
+    max-height: 400px;
+    overflow-y: auto;
+}

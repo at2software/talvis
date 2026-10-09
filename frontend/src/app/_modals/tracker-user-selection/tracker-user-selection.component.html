@@ -1,0 +1,49 @@
+@let _plugin = plugin();
+@let _users = users();
+<div class="modal d-block" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-title hstack gap-2">
+                    <n>{{ _plugin?.icon() }}</n>
+                    <span i18n="@@i18n.plugins.selectUser">select user</span>
+                </span>
+                <button type="button" class="btn-close" (click)="decline()" tabindex="0" (keydown.enter)="decline()" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                @if (isRootInstance()) {
+                    <div class="card card-info mb-3" i18n="@@i18n.plugins.rootInstanceUsersInfo">Showing global users. For project-specific users, add a plugin link for this tracker to the project.</div>
+                }
+                <div class="mb-3">
+                    <input type="text" class="form-control" [ngModel]="searchTerm()" (ngModelChange)="searchTerm.set($event || '')" placeholder="Search users..." i18n-placeholder="@@i18n.git.search_users" />
+                </div>
+                <div class="user-list">
+                    @if (_users.length === 0) {
+                        <div class="text-center text-muted py-4">
+                            <p i18n="@@i18n.common.noUsersFound">no users found</p>
+                        </div>
+                    }
+                    @for (u of _users; track u.id) {
+                        <div class="card mb-2 user-card cursor-pointer" [class.border-primary]="isSelected(u.id)" [class.selected]="isSelected(u.id)" (click)="selectUser(u.id)" tabindex="0" (keydown.enter)="selectUser(u.id)">
+                            <div class="card-body py-2 px-3">
+                                <div class="d-flex align-items-center gap-3">
+                                    <span class="flex-shrink-0">{{ u.getName() }}</span>
+                                    @if (u.var.data?.email) {
+                                        <small class="text-muted text-truncate">{{ u.var.data.email }}</small>
+                                    }
+                                    @if (isSelected(u.id)) {
+                                        <i class="ms-auto text-success">check_circle</i>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn" (click)="decline()" tabindex="0" (keydown.enter)="decline()" i18n="@@i18n.common.cancel">cancel</button>
+                <button type="button" class="btn btn-primary" (click)="accept()" tabindex="0" (keydown.enter)="accept()" [disabled]="!selectedUserId()" i18n="@@i18n.common.ok">ok</button>
+            </div>
+        </div>
+    </div>
+</div>

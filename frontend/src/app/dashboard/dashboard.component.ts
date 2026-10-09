@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { merge, switchMap, tap } from 'rxjs';
 import { InputModalService } from '@app/_modals/modal-input/modal-input.service';
@@ -20,7 +20,7 @@ import { NgbDropdownModule } from '@ng-bootstrap/ng-bootstrap';
 import { ActivityService } from '@app/_activity/activity.service';
 import { TabAttentionComponent } from '@app/_activity/tab-attention/tab-attention.component';
 import { GuidedTourComponent } from '@shards/guided-tour/guided-tour.component';
-import { WidgetSuperadminWarningComponent } from './widgets/widget-superadmin-warning/widget-superadmin-warning.component';
+import { WidgetGettingStartedComponent } from './widgets/widget-getting-started/widget-getting-started.component';
 
 @Component({
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -28,7 +28,7 @@ import { WidgetSuperadminWarningComponent } from './widgets/widget-superadmin-wa
     templateUrl: './dashboard.component.html',
     styleUrls: ['./dashboard.component.scss'],
     host: { '[class.is_editing]': 'is_editing()' },
-    imports: [HeaderComponent, HeaderLinkItemComponent, ToolbarComponent, ScrollbarComponent, NgComponentOutlet, CdkDropList, EmptyStateComponent, NgbDropdownModule, CdkDrag, GuidedTourComponent, WidgetSuperadminWarningComponent],
+    imports: [HeaderComponent, HeaderLinkItemComponent, ToolbarComponent, ScrollbarComponent, NgComponentOutlet, CdkDropList, EmptyStateComponent, NgbDropdownModule, CdkDrag, GuidedTourComponent, WidgetGettingStartedComponent],
 })
 export class DashboardComponent {
     is_editing = signal(false);
@@ -39,6 +39,7 @@ export class DashboardComponent {
     #input = inject(InputModalService);
     #confirm = inject(ConfirmationService);
     #route = inject(ActivatedRoute);
+    #cdr = inject(ChangeDetectorRef);
     #listener = inject(BaseWidgetListener);
     #activityService = inject(ActivityService);
 
@@ -54,9 +55,11 @@ export class DashboardComponent {
                     return merge(
                         this.#listener.updated.pipe(tap((args) => this.#onWidgetOptionsChanged(...args))),
                         this.#listener.deleted.pipe(tap((args) => this.#onWidgetDelete(...args))),
+                        this.#listener.added.pipe(tap((key) => this.#onWidgetAdd(key))),
                         this.#route.params.pipe(
                             tap((_) => {
-                                this.currentDashboard.set('dashboard' in _ ? parseInt(_['dashboard']) : 0);
+                                const requested = 'dashboard' in _ ? parseInt(_['dashboard']) : 0;
+                                this.currentDashboard.set(requested >= 0 && requested < this.global.dashboards.length ? requested : 0);
                                 NxStatic.setTitle(this.global.dashboards[this.currentDashboard()]?.title ?? '');
                             }),
                         ),
@@ -112,15 +115,25 @@ export class DashboardComponent {
             })
             .catch();
 
+    #onWidgetAdd = (key: string) => {
+        const cols = this.global.dashboards[this.currentDashboard()]?.cols;
+        if (!cols) return;
+        const shortest = cols.reduce((min, col) => (col.length < min.length ? col : min), cols[0]);
+        shortest.push({ widget: key, options: {} });
+        this.#updateDashboards(true);
+    };
+
     #onWidgetOptionsChanged = ($event: TOptions, col: number, pos: number) => {
         this.global.dashboards[this.currentDashboard()].cols[col][pos].options = $event;
         this.#updateDashboards();
     };
 
-    #updateDashboards = (triggerReload = false) =>
-        this.global.user?.updateParam('DASHBOARDS', { value: JSON.stringify(this.global.dashboards) }).subscribe(() => {
+    #updateDashboards = (triggerReload = false) => {
+        this.#cdr.markForCheck();
+        return this.global.user?.updateParam('DASHBOARDS', { value: JSON.stringify(this.global.dashboards) }).subscribe(() => {
             if (triggerReload) {
                 this.#listener.reloadRequested.next();
             }
         });
+    };
 }

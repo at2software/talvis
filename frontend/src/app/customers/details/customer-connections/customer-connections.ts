@@ -8,7 +8,8 @@ import { Serializable } from '@models/_core/serializable';
 import { CustomerDetailGuard } from '@app/customers/customers.details.guard';
 import { NetworkChart } from '@shards/network-chart/network-chart.component';
 import { ScrollbarComponent } from '@app/app/scrollbar/scrollbar.component';
-import { NgbPopoverModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbPopoverModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
+import { EmptyStateComponent } from '@shards/empty-state/empty-state.component';
 import { SearchInputComponent } from '@shards/search-input/search-input.component';
 import { Nx } from '@app/nx/nx.directive';
 import { AvatarComponent } from '@shards/avatar/avatar.component';
@@ -18,7 +19,7 @@ import { modelListResource } from '@models/http/model-resource';
     selector: 'customer-connections',
     templateUrl: './customer-connections.html',
     styleUrls: ['./customer-connections.scss'],
-    imports: [ScrollbarComponent, NgbPopoverModule, SearchInputComponent, Nx, AvatarComponent, NetworkChart],
+    imports: [ScrollbarComponent, NgbPopoverModule, NgbTooltipModule, SearchInputComponent, Nx, AvatarComponent, NetworkChart, EmptyStateComponent],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CustomerConnections {

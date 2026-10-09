@@ -71,7 +71,7 @@
                 <ul-compact class="list-group">
                     @for (con of _connections; track con.id) {
                         <li class="list-group-item d-flex text-nowrap p-0" [class.active]="isSelected(con.otherCompany(_company))" [compact]="true" [nx]="con" [tables]="_connections">
-                            <div class="hstack gap-2 p-2 w-100" (click)="selectItem(con, $event)" (keyup.enter)="selectItem(con, $event)" tabindex="0">
+                            <div class="hstack gap-2 p-2 w-100 cursor-pointer" (click)="selectItem(con, $event)" (keyup.enter)="selectItem(con, $event)" tabindex="0">
                                 <div>
                                     <avatar [object]="con.otherCompany(_company)"></avatar>
                                 </div>
@@ -170,7 +170,7 @@
         <div>
             <ul-compact class="list-group">
                 @for (item of items; track item.id) {
-                    <li class="list-group-item p-0" [compact]="asProject(item).state.progress === 2">
+                    <li class="list-group-item p-0" [compact]="isFinishedProject(item)">
                         <div class="hstack gap-2 p-2" [class.active]="isSelected(item)" [nx]="item" (click)="selectItem(item, $event)" (keyup.enter)="selectItem(item, $event)" tabindex="0">
                             <div>
                                 <project [project]="item"></project>

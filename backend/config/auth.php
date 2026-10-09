@@ -1,5 +1,6 @@
 <?php
 
+use App\Flow\Models\Machine;
 use App\Models\User;
 
 return [
@@ -39,19 +40,20 @@ return [
 
     'guards' => [
         'web' => [
-            'driver'   => env('APP_AUTH'),
+            'driver'   => env('APP_AUTH') === 'token' ? 'sanctum' : env('APP_AUTH'),
             'provider' => 'users',
         ],
         'api' => [
-            'driver'   => env('APP_AUTH'),
+            'driver'   => env('APP_AUTH') === 'token' ? 'sanctum' : env('APP_AUTH'),
             'provider' => 'users',
         ],
         'api-token' => [
-            'driver'      => 'token',
-            'provider'    => 'users',
-            'hash'        => false,
-            'input_key'   => 'api_token',
-            'storage_key' => 'api_token',
+            'driver'   => 'sanctum',
+            'provider' => 'users',
+        ],
+        'machine' => [
+            'driver'   => 'sanctum',
+            'provider' => 'machines',
         ],
     ],
 
@@ -76,6 +78,10 @@ return [
         'users' => [
             'driver' => 'eloquent',
             'model'  => User::class,
+        ],
+        'machines' => [
+            'driver' => 'eloquent',
+            'model'  => Machine::class,
         ],
     ],
 

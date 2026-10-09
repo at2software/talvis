@@ -6,6 +6,7 @@ use App\Http\Controllers\Traits\MarketingControllerHelpers;
 use App\Http\Requests\Marketing\ConvertProspectRequest;
 use App\Http\Requests\Marketing\ProspectRequest;
 use App\Http\Requests\Marketing\StoreProspectFromAddonRequest;
+use App\Http\Requests\PhoneLookupRequest;
 use App\Models\MarketingProspect;
 use App\Models\MarketingProspectActivity;
 use App\Services\MarketingDashboardService;
@@ -31,8 +32,8 @@ class MarketingProspectController extends Controller {
             'companyContact.company',
         ]);
     }
-    public function showProspectByPhone(Request $request): JsonResponse {
-        $prospect = MarketingProspect::searchByPhone($request->input('phone_number', ''));
+    public function showProspectByPhone(PhoneLookupRequest $request): JsonResponse {
+        $prospect = MarketingProspect::searchByPhone($request->validated('phone_number'));
         if (! $prospect) {
             return response()->json(null);
         }
@@ -93,7 +94,7 @@ class MarketingProspectController extends Controller {
         return response()->json(['message' => 'Prospect deleted successfully']);
     }
     public function linkProspectToCompany(Request $request, MarketingProspect $marketingProspect) {
-        $validated = $request->validate(['company_id' => 'required|exists:companies,id']);
+        $validated = $request->validate(['company_id' => 'required|integer|exists:companies,id,deleted_at,NULL']);
 
         return $marketingProspect->linkToCompany($validated['company_id']);
     }
@@ -107,7 +108,11 @@ class MarketingProspectController extends Controller {
         );
 
         if (isset($result['error'])) {
-            $statusCode = str_contains($result['error'], 'already converted') ? 400 : 500;
+            $statusCode = match (true) {
+                str_contains($result['error'], 'already converted') => 400,
+                str_contains($result['error'], 'no vcard data')     => 422,
+                default                                             => 500,
+            };
 
             return response()->json(['error' => $result['error']], $statusCode);
         }

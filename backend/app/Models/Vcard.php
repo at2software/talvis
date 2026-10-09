@@ -27,6 +27,19 @@ class Vcard implements Arrayable, JsonSerializable {
         }
         return $this;
     }
+
+    /** @return array{string, string} */
+    public static function splitName(string $name): array {
+        $parts = explode(' ', trim($name), 2);
+        return [$parts[0], trim($parts[1] ?? '')];
+    }
+
+    public static function forName(string $name): self {
+        [$firstName, $familyName] = self::splitName($name);
+        return (new self)
+            ->setProperty('FN', trim($name))
+            ->setProperty('N', [$familyName, $firstName, '', '', '']);
+    }
     public function getRows(): array {
         return $this->rows;
     }

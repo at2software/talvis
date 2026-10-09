@@ -52,7 +52,7 @@
         }
 
         @if (totalPercentage(tier) < 100) {
-            <button class="btn btn-sm btn-outline-primary mt-1" (click)="addStep(tier)"><i>add</i> <span i18n="@@i18n.payment.addStep">add step</span></button>
+            <button class="btn btn-sm btn-plain text-primary mt-1" (click)="addStep(tier)"><i>add</i> <span i18n="@@i18n.payment.addStep">add step</span></button>
         }
         @if (totalPercentage(tier) > 100) {
             <small class="text-warning d-block mt-1"

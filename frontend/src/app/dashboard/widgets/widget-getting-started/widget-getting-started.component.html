@@ -1,0 +1,68 @@
+@if (visible()) {
+    @let _required = required();
+    <div class="card mb-3">
+        <div class="card-header gap-2">
+            <i>rocket_launch</i>
+            <span class="flex-fill text-truncate" i18n="@@i18n.setup.gettingStarted">getting started</span>
+            @if (is_editing()) {
+                <button type="button" class="btn btn-sm btn-plain" (click)="hide()" i18n-title="@@i18n.common.delete" title="Delete"><i class="text-danger">delete</i></button>
+            } @else {
+                <button type="button" class="btn btn-sm btn-plain text-primary" (click)="hide()" i18n-title="@@i18n.setup.hide" title="hide – you can show it again in settings > general">
+                    <i>visibility_off</i>
+                </button>
+            }
+        </div>
+        <div class="card-body">
+            <div class="small text-muted mb-1" i18n="@@i18n.setup.progress">{{ requiredDone() }} of {{ _required.length }} required steps done</div>
+            <div class="progress mb-3" style="height: 4px">
+                <div class="progress-bar" [class.bg-success]="requiredDone() === _required.length" [style.width.%]="progress()"></div>
+            </div>
+            <ul class="list-unstyled mb-0">
+                @for (step of _required; track step.key) {
+                    @let info = STEPS[step.key];
+                    <li class="d-flex gap-2 mb-3">
+                        <i [class.text-success]="step.done" [class.text-muted]="!step.done">{{ step.done ? 'check_circle' : 'radio_button_unchecked' }}</i>
+                        <div class="flex-fill">
+                            <div class="fw-semibold" [class.text-muted]="step.done">{{ info.title }}</div>
+                            @if (!step.done) {
+                                <div class="small text-muted">{{ info.description }}</div>
+                                @if (step.missing.length) {
+                                    <div class="small text-warning"><span i18n="@@i18n.setup.missing">missing:</span> {{ missingLabels(step) }}</div>
+                                }
+                                @if (info.modal) {
+                                    <button type="button" class="btn btn-sm btn-plain text-primary mt-1 px-0" (click)="open(step)" i18n="@@i18n.setup.doItNow">do it now</button>
+                                }
+                            }
+                        </div>
+                        @if (step.done && info.modal) {
+                            <button type="button" class="btn btn-sm btn-plain text-primary" (click)="open(step)" i18n-title="@@i18n.common.edit" title="edit"><i>edit</i></button>
+                        }
+                    </li>
+                }
+            </ul>
+            <button type="button" class="btn btn-sm btn-plain text-primary px-0" (click)="showOptional.set(!showOptional())">
+                <i>{{ showOptional() ? 'expand_less' : 'expand_more' }}</i>
+                <span i18n="@@i18n.setup.nextUp">next up</span>
+            </button>
+            @if (showOptional()) {
+                <ul class="list-unstyled mt-2 mb-0">
+                    @for (step of optional(); track step.key) {
+                        @let info = STEPS[step.key];
+                        <li class="d-flex gap-2 mb-2">
+                            <i [class.text-success]="step.done" [class.text-muted]="!step.done">{{ step.done ? 'check_circle' : 'radio_button_unchecked' }}</i>
+                            <div class="flex-fill">
+                                <div [class.text-muted]="step.done">{{ info.title }}</div>
+                                @if (!step.done) {
+                                    <div class="small text-muted">{{ info.description }}</div>
+                                }
+                            </div>
+                            @if (!step.done && info.link) {
+                                <a class="btn btn-sm btn-plain text-primary" [routerLink]="info.link"><i>arrow_forward</i></a>
+                            }
+                        </li>
+                    }
+                </ul>
+            }
+        </div>
+    </div>
+}

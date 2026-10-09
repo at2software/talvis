@@ -132,7 +132,7 @@
                 @if (_currentGrant.vacations.length > 0) {
                     <ul class="list-group">
                         @for (vacation of _currentGrant.vacations; track vacation.id) {
-                            <li class="list-group-item" [nx]="vacation" [class.text-decoration-line-through]="[2, 4].contains(vacation.state)" [class.text-dark-grey]="vacation.state === 2" [class.text-primary]="vacation.state === 0" (actionsResolved)="reload()">
+                            <li class="list-group-item" [nx]="vacation" [class.text-decoration-line-through]="[2, 4].contains(vacation.state)" [class.text-dark-grey]="vacation.state === 2" [class.text-warning]="vacation.state === 0" (actionsResolved)="reload()">
                                 <div class="d-flex justify-content-between align-items-center">
                                     <div class="flex-fill">
                                         <div class="d-flex justify-content-between align-items-center mb-1">

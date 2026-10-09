@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "abc82e23c567cc6663c8a09ba6c8bcd7",
+    "content-hash": "014df59618dd819493f7d7bdaa967fed",
     "packages": [
         {
             "name": "amphp/amp",
@@ -1283,6 +1283,74 @@
             "time": "2024-07-08T12:26:09+00:00"
         },
         {
+            "name": "digitick/sepa-xml",
+            "version": "3.2.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/php-sepa-xml/php-sepa-xml.git",
+                "reference": "1b876013bee9c49d9d9e61e6d17e195898a12037"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/php-sepa-xml/php-sepa-xml/zipball/1b876013bee9c49d9d9e61e6d17e195898a12037",
+                "reference": "1b876013bee9c49d9d9e61e6d17e195898a12037",
+                "shasum": ""
+            },
+            "require": {
+                "ext-dom": "*",
+                "ext-libxml": "*",
+                "php": ">=7.2"
+            },
+            "require-dev": {
+                "ext-simplexml": "*",
+                "ext-xml": "*",
+                "fakerphp/faker": "^1.24",
+                "friendsofphp/php-cs-fixer": "^3.86",
+                "phpstan/phpstan": "^2.0",
+                "phpunit/phpunit": "^10.0",
+                "ramsey/uuid": "^4.2.3",
+                "rector/rector": "^2.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Digitick\\Sepa\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "LGPL-3.0-or-later"
+            ],
+            "authors": [
+                {
+                    "name": "Ianaré Sévi"
+                },
+                {
+                    "name": "Digitick, SA",
+                    "email": "info@digitick.net"
+                },
+                {
+                    "name": "Sören Rohweder (monofone)",
+                    "email": "s.rohweder@blage.net"
+                },
+                {
+                    "name": "Borislav Sabev (Borkata)",
+                    "email": "contact@borkata.mailer.me"
+                }
+            ],
+            "description": "Creates Single Euro Payments Area (SEPA) XML files for the Direct Debit and Credit Transfer operations.",
+            "keywords": [
+                "Banking",
+                "sepa",
+                "xml"
+            ],
+            "support": {
+                "issues": "https://github.com/php-sepa-xml/php-sepa-xml/issues",
+                "source": "https://github.com/php-sepa-xml/php-sepa-xml/tree/3.2.0"
+            },
+            "time": "2026-09-14T12:57:50+00:00"
+        },
+        {
             "name": "doctrine/inflector",
             "version": "2.1.0",
             "source": {
@@ -1853,16 +1921,16 @@
         },
         {
             "name": "firebase/php-jwt",
-            "version": "v7.1.1",
+            "version": "v7.2.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/googleapis/php-jwt.git",
-                "reference": "9bc93bd7e3ee5bead4cd23c365ec12f3c1fb0a6a"
+                "reference": "0501f5729b9e2448516674aff07c7d1727869b8e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/googleapis/php-jwt/zipball/9bc93bd7e3ee5bead4cd23c365ec12f3c1fb0a6a",
-                "reference": "9bc93bd7e3ee5bead4cd23c365ec12f3c1fb0a6a",
+                "url": "https://api.github.com/repos/googleapis/php-jwt/zipball/0501f5729b9e2448516674aff07c7d1727869b8e",
+                "reference": "0501f5729b9e2448516674aff07c7d1727869b8e",
                 "shasum": ""
             },
             "require": {
@@ -1872,7 +1940,7 @@
                 "guzzlehttp/guzzle": "^7.4||^8.0",
                 "phpfastcache/phpfastcache": "^9.2",
                 "phpseclib/phpseclib": "~3.0",
-                "phpspec/prophecy-phpunit": "^2.0",
+                "phpspec/prophecy-phpunit": "^2.2",
                 "phpunit/phpunit": "^9.5",
                 "psr/cache": "^2.0||^3.0",
                 "psr/http-client": "^1.0",
@@ -1884,6 +1952,14 @@
                 "phpseclib/phpseclib": "Support PS256 (RSASSA-PSS) signatures"
             },
             "type": "library",
+            "extra": {
+                "component": {
+                    "id": "jwt",
+                    "path": "Jwt",
+                    "entry": "README.md",
+                    "target": "googleapis/php-jwt.git"
+                }
+            },
             "autoload": {
                 "psr-4": {
                     "Firebase\\JWT\\": "src"
@@ -1913,9 +1989,9 @@
             ],
             "support": {
                 "issues": "https://github.com/googleapis/php-jwt/issues",
-                "source": "https://github.com/googleapis/php-jwt/tree/v7.1.1"
+                "source": "https://github.com/googleapis/php-jwt/tree/v7.2.1"
             },
-            "time": "2026-09-14T17:48:47+00:00"
+            "time": "2026-09-28T17:51:46+00:00"
         },
         {
             "name": "fruitcake/php-cors",

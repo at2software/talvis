@@ -22,7 +22,6 @@ import { Serializable } from '@models/_core/serializable';
 import { ExtIssueResolverService, ExtIssueRef } from '@models/ext-issue/ext-issue-resolver.service';
 import { PluginInstanceFactory } from '@models/http/plugins/plugin.instance.factory';
 import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
-import { EmptyStateComponent } from '@shards/empty-state/empty-state.component';
 import { SearchInputComponent } from '@shards/search-input/search-input.component';
 import { SpinnerComponent } from '@shards/spinner/spinner.component';
 import { DatePipe, DecimalPipe } from '@angular/common';
@@ -36,7 +35,7 @@ import { StackedTableDirective } from '@directives/stacked-table.directive';
 @Component({
     changeDetection: ChangeDetectionStrategy.OnPush,
     selector: 'project-support',
-    imports: [StackedTableDirective, AvatarComponent, CdkTableModule, DatePipe, DecimalPipe, FormsModule, RouterLink, Nx, NComponent, AffixInputDirective, NgbTooltipModule, NgxDaterangepickerMd, EmptyStateComponent, SearchInputComponent, SpinnerComponent, MoneyPipe],
+    imports: [StackedTableDirective, AvatarComponent, CdkTableModule, DatePipe, DecimalPipe, FormsModule, RouterLink, Nx, NComponent, AffixInputDirective, NgbTooltipModule, NgxDaterangepickerMd, SearchInputComponent, SpinnerComponent, MoneyPipe],
     templateUrl: './project-support.component.html',
     styleUrl: './project-support.component.scss',
 })
@@ -90,6 +89,7 @@ export class ProjectSupportComponent {
     });
 
     readonly #foci = modelListResource(this.#parentId, () => this.#focusService.uninvoicedFoci(this.parent()));
+    readonly fociLoading = this.#foci.isLoading;
     readonly allFoci = linkedSignal(this.#foci.value);
     readonly foci = computed(() => {
         const span = this.span();
@@ -129,7 +129,7 @@ export class ProjectSupportComponent {
                     this.selectionDescription.set(s.comment);
                 }
             });
-            if (foci.length) this.descField()?.nativeElement.focus();
+            if (foci.length) this.descField()?.nativeElement.focus({ preventScroll: true });
         });
     }
 

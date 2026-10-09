@@ -5,7 +5,8 @@ import { TalvisHttpService, Page } from '../http/http.talvis';
 import { InvoiceItem } from '../invoice/invoice-item.model';
 import { Project } from '../project/project.model';
 import { Company } from '../company/company.model';
-import { Observable } from 'rxjs';
+import { map, Observable } from 'rxjs';
+import { IHasFoci } from './has-foci.interface';
 import { User } from '../user/user.model';
 
 @Service()
@@ -40,9 +41,9 @@ export class FocusService extends TalvisHttpService<Focus> {
         if (endDate) {
             params.end_date = endDate;
         }
-        return this.paginate(`${_.apiPathWithId()}/foci`, params);
+        return this.paginate(`${_.apiPathWithId()}/foci`, params).pipe(map((page: Page<Focus>) => ({ ...page, data: page.data.map((f) => f.adoptParent(_)) })));
     }
-    uninvoicedFoci = (_: Serializable) => this.aget(`foci/uninvoiced/${_.apiPathWithId()}`);
+    uninvoicedFoci = (_: IHasFoci) => this.aget(`foci/uninvoiced/${_.apiPathWithId()}`).pipe(map((foci) => foci.map((f) => f.adoptParent(_))));
 
     createForProject = (project: Project, payload: { duration: number; started_at: string; comment?: string; ext_issue_plugin_link_id?: string; ext_issue_id?: string }) =>
         this.post('timetracker', { project_id: project.id, ...payload }, Focus);

@@ -61,7 +61,7 @@
                         <span class="flex-fill"></span>
                         <span class="input-group-text bg-transparent" i18n="@@i18n.common.price">price</span>
                         <span class="input-group-text bg-transparent">
-                            <span #p1 (click)="onTogglePriceVisiblity(p1, p2)" (keyup.enter)="onTogglePriceVisiblity(p1, p2)" tabindex="0">{{ _item.price }} {{ global.currencySymbol() }} x</span>
+                            <span #p1 class="cursor-pointer" (click)="onTogglePriceVisiblity(p1, p2)" (keyup.enter)="onTogglePriceVisiblity(p1, p2)" tabindex="0">{{ _item.price }} {{ global.currencySymbol() }} x</span>
                             <span #p2 class="d-none">
                                 <input type="number" class="form-control text-end" [(ngModel)]="_item.price" style="width: 100px" [suffix]="global.currencySymbol()" />
                             </span>
@@ -70,7 +70,7 @@
                             <input type="number" class="form-control text-end" placeholder="qty" style="width: 100px" [(ngModel)]="_item.qty" i18n-placeholder="@@i18n.common.qty" />
                         </span>
                         <span class="input-group-text bg-transparent">
-                            <span #q1 (click)="onTogglePriceVisiblity(q1, q2)" (keyup.enter)="onTogglePriceVisiblity(q1, q2)" tabindex="0">{{ _item.unit_name }}</span>
+                            <span #q1 class="cursor-pointer" (click)="onTogglePriceVisiblity(q1, q2)" (keyup.enter)="onTogglePriceVisiblity(q1, q2)" tabindex="0">{{ _item.unit_name }}</span>
                             <span #q2 class="d-none"><input type="text" class="form-control" placeholder="unit name" style="width: 75px" [(ngModel)]="_item.unit_name" i18n-placeholder="@@i18n.common.unitName" /></span>
                         </span>
                         <span class="input-group-text bg-transparent"> = {{ _item.qty * _item.price }} {{ global.currencySymbol() }} </span>
@@ -97,9 +97,9 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-danger" (click)="decline()" data-bs-dismiss="modal" i18n="@@i18n.common.cancel">cancel</button>
+                <button type="button" class="btn" (click)="decline()" data-bs-dismiss="modal" i18n="@@i18n.common.cancel">cancel</button>
                 @if (_okNextButtonText) {
-                    <button type="button" class="btn btn-primary" (click)="acceptNext()" hotkey="CTRL+SHIFT+ENTER">{{ _okNextButtonText }}</button>
+                    <button type="button" class="btn btn-plain text-primary" (click)="acceptNext()" hotkey="CTRL+SHIFT+ENTER">{{ _okNextButtonText }}</button>
                 }
                 <button type="button" class="btn btn-primary" (click)="accept()" hotkey="CTRL+ENTER">{{ okButtonText() }}</button>
             </div>

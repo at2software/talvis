@@ -6,8 +6,11 @@ use App\Models\Encryption;
 
 class EncryptionController extends Controller {
     public function encrypt() {
-        $data = (array)($this->getBody());
-        $enc  = Encryption::create([
+        $data = request()->validate([
+            'key'  => 'required|string|max:255',
+            'data' => 'required|string',
+        ]);
+        $enc = Encryption::create([
             'key'     => $data['key'],
             'value'   => $data['data'],
             'user_id' => request()->user()->id,
@@ -19,6 +22,6 @@ class EncryptionController extends Controller {
         return $encryption->applyAndSave(request());
     }
     public function destroy(Encryption $encryption) {
-        return $encryption->delete();
+        return response()->json($encryption->delete());
     }
 }

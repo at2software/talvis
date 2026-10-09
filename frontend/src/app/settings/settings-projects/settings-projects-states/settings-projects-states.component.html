@@ -1,53 +1,63 @@
 <div class="card">
-    <div class="card-header" i18n="@@i18n.project.projectStates">project states</div>
-    <table stackedTable class="table table-hover mb-0 align-middle">
-        <thead>
-            <tr>
-                <th></th>
-                <th i18n="@@i18n.common.name">name</th>
-                <th i18n="@@i18n.common.color">color</th>
-                <th i18n="@@i18n.common.progress">progress</th>
-                <th class="text-center" i18n="@@i18n.project.inStats">in stats</th>
-                <th class="text-center" i18n="@@i18n.project.successful">successful</th>
-            </tr>
-        </thead>
-        <tbody>
-            @for (state of global.project_states; track state.id) {
+    <div class="card-header d-flex align-items-center">
+        <span class="flex-fill" i18n="@@i18n.project.projectStates">project states</span>
+        <div class="btn-group btn-group-sm" role="group">
+            <button type="button" class="btn btn-outline-primary" [class.active]="view() === 'table'" (click)="view.set('table')" i18n-ngbTooltip="@@i18n.flow.viewTable" ngbTooltip="table"><i>table_rows</i></button>
+            <button type="button" class="btn btn-outline-primary" [class.active]="view() === 'diagram'" (click)="view.set('diagram')" i18n-ngbTooltip="@@i18n.flow.viewDiagram" ngbTooltip="flow diagram"><i>account_tree</i></button>
+        </div>
+    </div>
+    @if (view() === 'diagram') {
+        <state-flow-diagram [states]="global.project_states"></state-flow-diagram>
+    } @else {
+        <table stackedTable class="table table-hover mb-0 align-middle">
+            <thead>
                 <tr>
-                    <td>
-                        <project [noRouting]="true" [project]="dummyFor(state)" [title]="state.name"></project>
-                    </td>
-                    <td>
-                        <input type="text" class="form-control" [autosave]="state" [(ngModel)]="state.name" />
-                    </td>
-                    <td>
-                        <input
-                            type="text"
-                            class="form-control color-input"
-                            [style.background]="state.color"
-                            [autosave]="state"
-                            [(colorPicker)]="state.color"
-                            [(ngModel)]="state.color"
-                            [cpOKButton]="true"
-                            [cpSaveClickOutside]="false"
-                            [cpOKButtonClass]="'btn btn-primary btn-xs'"
-                        />
-                    </td>
-                    <td>
-                        <select class="form-select" [autosave]="state" [(ngModel)]="state.progress">
-                            <option [ngValue]="0" i18n="@@i18n.project.prepared">prepared</option>
-                            <option [ngValue]="1" i18n="@@i18n.project.running">running</option>
-                            <option [ngValue]="2" i18n="@@i18n.project.finished">finished</option>
-                        </select>
-                    </td>
-                    <td class="text-center">
-                        <input type="checkbox" class="form-check-input" [autosave]="state" [(ngModel)]="state.is_in_stats" />
-                    </td>
-                    <td class="text-center">
-                        <input type="checkbox" class="form-check-input" [autosave]="state" [(ngModel)]="state.is_successful" />
-                    </td>
+                    <th></th>
+                    <th i18n="@@i18n.common.name">name</th>
+                    <th i18n="@@i18n.common.color">color</th>
+                    <th i18n="@@i18n.common.progress">progress</th>
+                    <th class="text-center" i18n="@@i18n.project.inStats">in stats</th>
+                    <th class="text-center" i18n="@@i18n.project.successful">successful</th>
                 </tr>
-            }
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                @for (state of global.project_states; track state.id) {
+                    <tr>
+                        <td>
+                            <project [noRouting]="true" [project]="dummyFor(state)" [title]="state.name"></project>
+                        </td>
+                        <td>
+                            <input type="text" class="form-control" [autosave]="state" [(ngModel)]="state.name" />
+                        </td>
+                        <td>
+                            <input
+                                type="text"
+                                class="form-control color-input"
+                                [style.background]="state.color"
+                                [autosave]="state"
+                                [(colorPicker)]="state.color"
+                                [(ngModel)]="state.color"
+                                [cpOKButton]="true"
+                                [cpSaveClickOutside]="false"
+                                [cpOKButtonClass]="'btn btn-primary btn-xs'"
+                            />
+                        </td>
+                        <td>
+                            <select class="form-select" [autosave]="state" [(ngModel)]="state.progress">
+                                <option [ngValue]="0" i18n="@@i18n.project.prepared">prepared</option>
+                                <option [ngValue]="1" i18n="@@i18n.project.running">running</option>
+                                <option [ngValue]="2" i18n="@@i18n.project.finished">finished</option>
+                            </select>
+                        </td>
+                        <td class="text-center">
+                            <input type="checkbox" class="form-check-input" [autosave]="state" [(ngModel)]="state.is_in_stats" />
+                        </td>
+                        <td class="text-center">
+                            <input type="checkbox" class="form-check-input" [autosave]="state" [(ngModel)]="state.is_successful" />
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
 </div>

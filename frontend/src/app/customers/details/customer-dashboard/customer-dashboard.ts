@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, inject, linkedSignal, signal } from '@angular/core';
 import { tracked } from '@constants/tracked';
-import { Router, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { CompanyService } from '@models/company/company.service';
 import { Invoice } from '@models/invoice/invoice.model';
-import { InputModalService } from '@app/_modals/modal-input/modal-input.service';
 import { CompanyContact } from '@models/company/company-contact.model';
 import { GlobalService } from '@models/global.service';
 import { EchartsRangeCardComponent } from '@charts/echarts-card/echarts-range-card.component';
@@ -45,13 +45,16 @@ import { RECURRENCES } from '@enums/recurrence.type';
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CustomerDashboard {
+    static readonly VISIBLE_CONTACTS = 5;
+
     #parent = inject(CustomerDetailGuard);
-    #router = inject(Router);
     #global = inject(GlobalService);
-    #inputModalService = inject(InputModalService);
     #projectService = inject(ProjectService);
     #invoiceService = inject(InvoiceService);
     #productService = inject(ProductService);
+    #companyService = inject(CompanyService);
+    #router = inject(Router);
+    #route = inject(ActivatedRoute);
 
     company = tracked(this.#parent.object);
 
@@ -73,15 +76,19 @@ export class CustomerDashboard {
     );
     readonly product = linkedSignal(() => this.#defaultProduct.value());
 
-    readonly quickContacts = computed<CompanyContact[]>(() => this.company().employees.filter((_) => _.is_favorite));
+    readonly #activeContacts = computed<CompanyContact[]>(() => this.company().employees.filter((_) => !_.is_retired).sort((a, b) => Number(b.is_favorite) - Number(a.is_favorite)));
+    readonly contactPersons = computed<CompanyContact[]>(() => this.#activeContacts().slice(0, CustomerDashboard.VISIBLE_CONTACTS));
+    readonly hiddenContactCount = computed(() => this.#activeContacts().length - this.contactPersons().length);
 
     reload = () => this.#parent.reload();
 
-    onAddProject = () => {
-        this.#inputModalService.open('@@i18n.common.name').confirmed(({ text }) => {
-            this.#projectService.addProject(this.company().id, text).subscribe((x) => this.#router.navigate(['/projects/' + x.id]));
+    onAddProject = () => this.#projectService.promptAddProject(this.company().id);
+
+    onAddContact = () =>
+        this.#companyService.promptAddEmployee(this.company(), (created) => {
+            this.#parent.touch();
+            this.#router.navigate(['contacts', created.id], { relativeTo: this.#route });
         });
-    };
 
     onProductSelect = (selected: Serializable) => {
         const product = selected.assert(Product);

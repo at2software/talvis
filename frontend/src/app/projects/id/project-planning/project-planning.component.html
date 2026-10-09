@@ -9,12 +9,14 @@
     <div class="col-12 col-xl-8" [class.col-8]="!_showPredictions" [class.col-12]="_showPredictions">
         <ng-content></ng-content>
 
-        <media-preview [parent]="_project"></media-preview>
-
-        @if (_project && _project.state.isPrepared()) {
-            <div class="card mb-3" [dnd]="''" [collect]="true" (dndDrop)="onPlanningFileDropped($event)">
+        @if (_project && (_project.state.isPrepared() || _isRunning)) {
+            <div class="card mb-3" [dnd]="''" [dndHoverHint]="false" [collect]="true" (dndDrop)="onPlanningFileDropped($event)">
                 <div class="card-header">
-                    <span i18n="@@i18n.common.planning">planning</span>
+                    @if (_isRunning) {
+                        <span i18n="@@i18n.common.budget">budget</span>
+                    } @else {
+                        <span i18n="@@i18n.common.planning">planning</span>
+                    }
                     <div class="card-header-actions">
                         <i (click)="onSampleDownload()" tabindex="0" (keydown.enter)="onSampleDownload()" class="text-primary cursor-pointer" ngbTooltip="download a sample planning file — drop a filled in copy onto this card to create the items" i18n-ngbTooltip="@@i18n.projects.planningSampleHint">download</i>
                         @if (_showPredictions) {
@@ -38,7 +40,11 @@
                                 <th style="width: 25px"></th>
                                 <th i18n="@@i18n.common.description">description</th>
                                 @if (!_showPredictions) {
-                                    <th style="width: 60px" class="text-truncate" i18n="@@i18n.project.myPrediction">my prediction</th>
+                                    @if (_isRunning) {
+                                        <th style="width: 120px" class="text-truncate text-end" i18n="@@i18n.common.qty">qty</th>
+                                    } @else {
+                                        <th style="width: 60px" class="text-truncate" i18n="@@i18n.project.myPrediction">my prediction</th>
+                                    }
                                 }
                                 @if (!_showPredictions) {
                                     <th style="width: 25px"></th>
@@ -82,7 +88,7 @@
                                         </div>
                                                     }
                                                     @if (_isRunning) {
-                                                        <span>{{ item.qty }} {{ item.unit_name }}</span>
+                                                        <div class="text-end text-nowrap">{{ item.qty | number: '1.0-2' }} <span class="text-muted small">{{ item.unit_name }}</span></div>
                                                     }
                                                 </td>
                                             }
@@ -141,7 +147,7 @@
                                 <td></td>
                                 <td>&sum;</td>
                                 @if (!_showPredictions) {
-                                    <td class="text-end">{{ sumForMy() }}</td>
+                                    <td class="text-end">{{ _isRunning ? sumForQty() : sumForMy() }}</td>
                                 }
                                 @if (!_showPredictions) {
                                     <td></td>
@@ -170,6 +176,8 @@
                 }
             </div>
         }
+
+        <media-preview [parent]="_project"></media-preview>
     </div>
     <div class="col-12 col-xl-4" [class.d-none]="_showPredictions">
         <project-info [project]="_project"></project-info>

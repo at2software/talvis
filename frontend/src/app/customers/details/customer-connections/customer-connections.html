@@ -4,11 +4,11 @@
 <scrollbar>
     <div class="row">
         <div class="col-md-3">
-            <div class="card sticky-side info-box-card">
+            <div class="card info-box-card" [class.sticky-side]="_connections.length">
                 <div class="card-header">
-                    connections
+                    <span i18n="@@i18n.common.connections">connections</span>
                     <div class="card-header-actions">
-                        <i class="text-primary cursor-pointer" [ngbPopover]="popContent" placement="end" container="body" [autoClose]="'outside'" (shown)="onPopoverShown()" popoverTitle="Add connection">add</i>
+                        <i class="text-primary cursor-pointer" [ngbPopover]="popContent" placement="end" container="body" [autoClose]="'outside'" (shown)="onPopoverShown()" popoverTitle="add connection" i18n-popoverTitle="@@i18n.customers.addConnection" ngbTooltip="add connection" i18n-ngbTooltip="@@i18n.customers.addConnection">add</i>
 
                         <ng-template #popContent>
                             <search-input #popSearch only="Company" (itemSelected)="onCompanySelect($event)">
@@ -32,11 +32,18 @@
                         <div class="me-3"><avatar [object]="con.otherCompany(_myCompany)"></avatar></div>
                         <div class="text-truncate">{{con.otherCompany(_myCompany)?.getName()}}</div>
                     </li>
+                    } @empty {
+                    <li class="list-group-item small text-muted" i18n="@@i18n.customers.noConnectionsYet">no connections yet</li>
                     }
                 </ul>
             </div>
         </div>
         <div class="col-md-9">
+            @if (!_connections.length) {
+            <empty-state [card]="true" class="chart" i18n-title="@@i18n.customers.noConnectionsYet" title="no connections yet">
+                <p class="text-muted small" i18n="@@i18n.customers.connectionsEmptyBody">Link partner companies such as agencies, suppliers or subcontractors with the + in the connections card to see who works with whom.</p>
+            </empty-state>
+            }
             @if (_connections.length) {
             <network-chart class="card chart" [root]="_myCompany" [data]="_connections" [focus]="_myCompany" (nodeSelected)="onNodeSelected($event)"></network-chart>
             } @if (_selectedCompany) {

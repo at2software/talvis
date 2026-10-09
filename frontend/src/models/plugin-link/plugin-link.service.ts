@@ -3,7 +3,7 @@ import { PluginLink } from './plugin-link.model';
 import { TalvisHttpService } from './../http/http.talvis';
 import { Serializable } from '@models/_core/serializable';
 
-export type PluginLinkType = 'mattermost' | 'git';
+export type PluginLinkType = 'mattermost' | 'slack' | 'git' | 'jira' | 'github';
 
 @Service()
 export class PluginLinkService extends TalvisHttpService<PluginLink> {

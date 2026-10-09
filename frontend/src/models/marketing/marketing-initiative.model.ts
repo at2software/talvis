@@ -70,4 +70,6 @@ export class MarketingInitiative extends Serializable {
             },
         ];
     }
+
+    leadSourceId = (): number | null => this.channels?.find((c) => c.pivot?.is_primary)?.id ?? this.channels?.[0]?.id ?? null;
 }

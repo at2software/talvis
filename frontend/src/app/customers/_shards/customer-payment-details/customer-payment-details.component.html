@@ -3,22 +3,26 @@
 @let _hasDiscount = hasDiscount();
 @let _onRemoveProjectPaymentDuration = onRemoveProjectPaymentDuration();
 @let _hasProjectPaymentDuration = hasProjectPaymentDuration();
-<div class="card mb-3 h-100">
-    <div class="card-header">
-        <span i18n="@@i18n.invoice.paymentInformation">payment information</span>
-        <div class="card-header-actions">
+<div class="card mb-3">
+    <div class="card-header hstack gap-2">
+        <span class="flex-fill text-truncate" i18n="@@i18n.invoice.paymentInformation">payment information</span>
+        <div class="card-header-actions text-nowrap">
             @if (!_hasDiscount) {
-                <i (click)="onChangeParam('INVOICE_DISCOUNT')" (keyup.enter)="onChangeParam('INVOICE_DISCOUNT')" tabindex="0" class="text-primary pointer ms-1" ngbTooltip="add discount">discount</i>
+                <i (click)="onChangeParam('INVOICE_DISCOUNT')" (keyup.enter)="onChangeParam('INVOICE_DISCOUNT')" tabindex="0" class="text-primary pointer ms-1" ngbTooltip="add discount" i18n-ngbTooltip="@@i18n.customers.addDiscount">discount</i>
             }
             @if (!_current?.getParam('INVOICE_DD_IBAN')) {
-                <i (click)="onChangeSepa()" (keyup.enter)="onChangeSepa()" tabindex="0" class="text-primary pointer ms-1" ngbTooltip="add SEPA">account_balance</i>
+                <i (click)="onChangeSepa()" (keyup.enter)="onChangeSepa()" tabindex="0" class="text-primary pointer ms-1" ngbTooltip="add SEPA direct debit" i18n-ngbTooltip="@@i18n.customers.addSepa">account_balance</i>
             }
             @if (!_current?.vat_id) {
-                <i (click)="onChangeVat()" (keyup.enter)="onChangeVat()" tabindex="0" class="text-primary pointer ms-1" ngbTooltip="add VAT ID">fingerprint</i>
+                <i (click)="onChangeVat()" (keyup.enter)="onChangeVat()" tabindex="0" class="text-primary pointer ms-1" ngbTooltip="add VAT ID" i18n-ngbTooltip="@@i18n.customers.addVatId">fingerprint</i>
             }
         </div>
     </div>
     <ul class="list-group">
+        <li class="list-group-item list-group-item-action d-flex py-1">
+            <div ngbTooltip="customer number" i18n-ngbTooltip="@@i18n.customers.customerNumber" class="text-muted me-2"><i>tag</i></div>
+            <div (click)="onChangeCustomerNumber()" (keyup.enter)="onChangeCustomerNumber()" tabindex="0" class="text-primary text-truncate pointer flex-fill">{{ _current?.customer_number || '–' }}</div>
+        </li>
         @if (_additionalItems) {
             <ng-container *ngTemplateOutlet="_additionalItems"></ng-container>
         }
@@ -46,8 +50,14 @@
             }
         </li>
         <li class="list-group-item list-group-item-action d-flex py-1">
-            <div ngbTooltip="invoicing email" i18n-ngbTooltip="@@i18n.invoices.invoicingEmail" class="text-truncate me-2"><i>email</i></div>
-            <div (click)="onChangeEmail()" (keyup.enter)="onChangeEmail()" tabindex="0" class="text-primary text-truncate pointer flex-fill" [ngbTooltip]="_current?.invoice_email">{{ _current?.invoice_email }}</div>
+            <div ngbTooltip="invoicing email" i18n-ngbTooltip="@@i18n.invoices.invoicingEmail" class="text-muted me-2"><i>email</i></div>
+            @if (_current?.invoice_email) {
+                <div (click)="onChangeEmail()" (keyup.enter)="onChangeEmail()" tabindex="0" class="text-primary text-truncate pointer flex-fill" [ngbTooltip]="_current?.invoice_email">{{ _current?.invoice_email }}</div>
+            } @else {
+                <div class="flex-fill">
+                    <i (click)="onChangeEmail()" (keyup.enter)="onChangeEmail()" tabindex="0" class="text-warning pointer" ngbTooltip="missing, required for e-invoices (XRechnung)" i18n-ngbTooltip="@@i18n.customers.invoiceEmailMissing">warning</i>
+                </div>
+            }
         </li>
         @if (_current?.getParam('INVOICE_DD_MANDATE')) {
             <li class="list-group-item list-group-item-action d-flex py-1">
@@ -56,8 +66,26 @@
                     <span ngbTooltip="mandate reference" i18n-ngbTooltip="@@i18n.invoice.mandateReference">{{ _current?.getParam('INVOICE_DD_MANDATE') }}</span>
                     <br />
                     <span ngbTooltip="IBAN" i18n-ngbTooltip="@@i18n.common.IBAN">{{ _current?.getParam('INVOICE_DD_IBAN') }}</span>
+                    @if (_current?.getParam('INVOICE_DD_BIC')) {
+                        <br />
+                        <span ngbTooltip="BIC" i18n-ngbTooltip="@@i18n.common.BIC">{{ _current?.getParam('INVOICE_DD_BIC') }}</span>
+                    }
+                    @if (_current?.getParam('INVOICE_DD_ACCOUNT_HOLDER')) {
+                        <br />
+                        <span ngbTooltip="account holder" i18n-ngbTooltip="@@i18n.customers.accountHolder">{{ _current?.getParam('INVOICE_DD_ACCOUNT_HOLDER') }}</span>
+                    }
                 </div>
                 <div><i class="text-primary pointer" (click)="removeSepa()" (keyup.enter)="removeSepa()" tabindex="0">close</i></div>
+            </li>
+            <li class="list-group-item list-group-item-action d-flex py-1">
+                <div ngbTooltip="mandate date" i18n-ngbTooltip="@@i18n.customers.mandateDate" class="text-muted me-2"><i>event</i></div>
+                @if (sepaMandateDateMissing()) {
+                    <div class="flex-fill">
+                        <i (click)="onChangeMandateDate()" (keyup.enter)="onChangeMandateDate()" tabindex="0" class="text-warning pointer" ngbTooltip="mandate date missing, needed for SEPA direct debit" i18n-ngbTooltip="@@i18n.customers.mandateDateMissing">warning</i>
+                    </div>
+                } @else {
+                    <div (click)="onChangeMandateDate()" (keyup.enter)="onChangeMandateDate()" tabindex="0" class="text-primary pointer flex-fill">{{ (_current?.getParam('INVOICE_DD_MANDATE_DATE') | date) || '–' }}</div>
+                }
             </li>
         }
         @if (_current?.vat_id) {

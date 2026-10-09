@@ -56,6 +56,9 @@
                     </ng-container>
                     <tr cdk-row class="align-middle border-black text-truncate {{ row.markerClass() }}" [nx]="row" (actionsResolved)="onFociActionsResolved()" *cdkRowDef="let row; columns: fociColumns()"></tr>
                 </table>
+                @if (!fociLoading() && !foci().length) {
+                    <div class="px-3 py-2 small text-muted" i18n="@@i18n.projects.noUnbilledTime">no unbilled time in this period</div>
+                }
             </div>
         </div>
     </div>
@@ -66,7 +69,7 @@
                     <i>checklist</i>
                     <span i18n="@@i18n.invoice.noItemsSelected">no items selected</span>
                 </div>
-                <empty-state [card]="false" class="select" [size]="3"></empty-state>
+                <div class="card-body py-2 small text-muted" i18n="@@i18n.projects.selectFociHint">select unbilled entries to turn them into a support item</div>
             </div>
         } @else {
             <div class="card mb-3">
@@ -108,11 +111,11 @@
                 @if (supportItems().length > 0) {
                     <div class="card-header-actions d-flex">
                         @if (isProject()) {
-                            <button class="btn btn-sm text-primary" ngbTooltip="move to customer" i18n-ngbTooltip="@@i18n.projects.moveToCustomer" (click)="onMoveSupportToCustomer()">
+                            <button class="btn btn-sm btn-plain text-primary" ngbTooltip="move to customer" i18n-ngbTooltip="@@i18n.projects.moveToCustomer" (click)="onMoveSupportToCustomer()">
                                 <i>call_made</i>
                             </button>
                         }
-                        <a [routerLink]="invoicingRoute()" class="btn btn-sm text-primary" ngbTooltip="go to invoicing" i18n-ngbTooltip="@@i18n.projects.goToInvoicing">
+                        <a [routerLink]="invoicingRoute()" class="btn btn-sm btn-plain text-primary" ngbTooltip="go to invoicing" i18n-ngbTooltip="@@i18n.projects.goToInvoicing">
                             <i>arrow_forward</i>
                         </a>
                     </div>
@@ -120,7 +123,7 @@
             </div>
             <div class="card-body p-0">
                 @if (supportItems().length === 0) {
-                    <empty-state [card]="false" [size]="3"></empty-state>
+                    <div class="px-3 py-2 small text-muted" i18n="@@i18n.projects.noOpenSupportItems">no open support items</div>
                 } @else {
                     <table stackedTable cdk-table [dataSource]="supportItems()" class="table mb-0">
                         <ng-container cdkColumnDef="text">

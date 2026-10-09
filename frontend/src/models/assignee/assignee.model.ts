@@ -38,7 +38,7 @@ export class Assignee extends Serializable {
     };
 
     isUser = () => this.assignee?.class === 'User';
-    role = () => ({ 1: 'Developer', 2: 'Project Manager', 3: 'Designer', 4: 'Customer' }[this.role_id] ?? '');
+    role = () => ({ 1: 'Project Manager', 2: 'Developer', 3: 'Customer' }[this.role_id] ?? '');
     route() {
         if (this.apiPath() == 'companies') return '/customers/' + this.id;
         return '/' + this.apiPath() + '/' + this.id;

@@ -89,7 +89,7 @@ class InvoiceItemEnhancementService {
         if ($item->vat_rate == 0) {
             if ($company->needs_vat_handling) {
                 $handling = __('pdf.vat_exempt_eu', [], $this->lang).'<br>';
-                $handling .= __('pdf.our_vat_id', [], $this->lang).' '.Param::get('ME_VATID')->value.'<br>';
+                $handling .= __('pdf.our_vat_id', [], $this->lang).' '.Param::get('ME_VAT_ID')->value.'<br>';
                 $handling .= __('pdf.your_vat_id', [], $this->lang).' '.$company->vat_id;
             } else {
                 $handling = __('pdf.vat_exempt_export', [], $this->lang).'<br>';

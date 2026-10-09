@@ -9,8 +9,10 @@ use App\Jobs\GitPipelineWebhookJob;
 use App\Jobs\GitPushWebhookJob;
 use App\Models\PluginLink;
 use App\Services\FrameworkDetectionService;
+use App\Support\ChatProps;
 use App\Traits\HasVaultCredentials;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 
 class PluginGitController extends PluginController {
@@ -49,12 +51,7 @@ class PluginGitController extends PluginController {
         return $this->env('TOKEN');
     }
     public function props($name = 'GitLab Webhook') {
-        return [
-            'from_webhook'         => 'true',
-            'webhook_display_name' => $name,
-            'override_username'    => $name,
-            'override_icon_url'    => asset('icons/icon.git.big.png'),
-        ];
+        return ChatProps::sender($name, asset('icons/icon.git.big.png'));
     }
     // ############ Incoming
 
@@ -100,7 +97,7 @@ class PluginGitController extends PluginController {
             $sastFile = $this->get("$baseUrl/jobs/$jobId/artifacts/download?file_type=sast");
         }
     }
-    public function onWebhook(Request $data): void {
+    public function onWebhook(Request $data): Response {
         $data->validate(['object_kind' => 'required|string']);
         $projectUrl = PluginLink::buildApiPathFromProject($data->project);
         $links      = PluginLink::where('url', $projectUrl)->with('parent')->get();
@@ -126,6 +123,7 @@ class PluginGitController extends PluginController {
         }
         // $localai = app(PluginLocalAIController::class);
         // if($localai) $localai->onWebhook($data);
+        return response()->noContent();
     }
 
     // ########### Outgoing

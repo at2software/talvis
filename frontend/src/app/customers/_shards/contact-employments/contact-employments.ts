@@ -25,7 +25,7 @@ export class ContactEmployments {
     readonly #trackedCard = tracked(this.card);
     readonly #revision = signal(0);
 
-    readonly siblings = computed(() => this.#trackedCard().contact.company_contacts);
+    readonly siblings = computed(() => this.#trackedCard().contact.company_contacts ?? []);
     readonly employments = computed(() => {
         this.#revision();
         return this.siblings().filter((_) => _.company && _.company_id !== this.card().company_id);
@@ -53,7 +53,7 @@ export class ContactEmployments {
                 vcard: 'TEL:\nEMAIL:\nTEL;type=cell:\nTITLE:',
             })
             .subscribe((response) => {
-                this.siblings().push(CompanyContact.fromJson(response));
+                (card.contact.company_contacts ??= []).push(CompanyContact.fromJson(response));
                 this.onActionsResolved();
             });
     }

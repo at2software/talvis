@@ -74,17 +74,22 @@
         </div>
     </div>
     <div class="col-md-9">
-        @if (hasLoaded() && projects.length === 0) {
+        @let _projects = projects();
+        @if (hasLoaded() && _projects.length === 0) {
             <div class="card">
-                <empty-state [card]="false" class="projects" i18n-title="@@i18n.projects.noProjectsYet" title="No projects yet">
-                    <p i18n="@@i18n.projects.emptyStateDescription">Projects are born in the customer detail view — find a customer, open their profile, and create a project from there. Every great project starts with a relationship.</p>
+                <empty-state [card]="false" class="filter" i18n-title="@@i18n.projects.noMatchingProjects" title="no projects match the current filters">
+                    <p class="text-muted" i18n="@@i18n.projects.noMatchingProjectsHint">Widen the state filter on the left to see more projects, or start a new one for a customer.</p>
+                    <div class="vstack gap-2 col-md-6 mx-auto mt-3">
+                        <span i18n="@@i18n.projects.createProjectSelectCustomer">create a project for customer:</span>
+                        <search-input only="Company" (itemSelected)="onCustomerSelected($event)"></search-input>
+                    </div>
                 </empty-state>
             </div>
         }
-        @if (!hasLoaded() || projects.length > 0) {
+        @if (!hasLoaded() || _projects.length > 0) {
             <div class="card">
-                <projects-table [projects]="projects" (sortingChanged)="onSortChange($event)"></projects-table>
-                <continuous-marker [observer]="observer" (dataReceived)="onResult($event)"></continuous-marker>
+                <projects-table [projects]="_projects" (sortingChanged)="onSortChange($event)"></projects-table>
+                <continuous-marker [observer]="observer()" (dataReceived)="onResult($event)"></continuous-marker>
             </div>
         }
     </div>

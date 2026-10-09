@@ -38,6 +38,7 @@ class ProjectSuccessQuoteQuery {
             ->whereHas('lastFinishedState')
             ->with(['lastFinishedState' => fn ($q) => $q->withTimestamps()])
             ->get()
+            ->toBase()
             ->map(function ($project) {
                 $state = $project->lastFinishedState->first();
                 return [
@@ -53,6 +54,7 @@ class ProjectSuccessQuoteQuery {
             ->whereHas('firstStartedState')
             ->with(['firstStartedState' => fn ($q) => $q->withTimestamps()])
             ->get()
+            ->toBase()
             ->map(function ($project) {
                 $state = $project->firstStartedState->first();
                 return [

@@ -33,4 +33,8 @@ export class ProductGroup extends Serializable {
     put = (path: string) => nx().service.put(`product_groups/${this.id}/${path}`, {}).subscribe((_) => this.patch(_ as Dictionary));
 
     static createWithParentId = (name: string = 'New product group', parentId: string | undefined = undefined): Observable<ProductGroup> => nx().service.post('product_groups', { name: name, product_group_id: parentId }).pipe(map((x) => ProductGroup.fromJson(x)));
+    static promptCreate = () =>
+        nx()
+            .promptInput($localize`:@@i18n.common.name:name`)
+            .confirmed(({ text }) => ProductGroup.createWithParentId(text).subscribe((x) => nx().navigateTo('/products/group/' + x.id)));
 }

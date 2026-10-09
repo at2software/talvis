@@ -2,11 +2,13 @@
 @let _project = project();
 @let _pluginEncryptions = pluginEncryptions();
 @if (_user) {
-    <activity-tab icon="security" [badge]="encryptionsValid() ? undefined : '!'">
+    <activity-tab icon="security" i18n-label="@@i18n.common.plugins" label="plugins" [badge]="encryptionsValid() ? undefined : '!'">
         <div class="container">
             @if (!_user.public_key) {
                 <scrollbar>
-                    <rsa-settings-empty [user]="_user"></rsa-settings-empty>
+                    <div class="card">
+                        <rsa-settings-empty [user]="_user"></rsa-settings-empty>
+                    </div>
                 </scrollbar>
             }
             @if (_user.public_key) {
@@ -46,7 +48,7 @@
                                 }
                                 @if (_project) {
                                     <div>
-                                        @if (_instance?.icon() === 'mattermost') {
+                                        @if (_instance?.getInterfacePropertyName() === 'IChatPluginProperty') {
                                             <i class="text-primary cursor-pointer" (click)="onNewPluginChannel(_instance!)" (keyup.enter)="onNewPluginChannel(_instance!)" tabindex="0" ngbTooltip="create new channel">add_comment</i>
                                         }
                                         <i class="text-primary cursor-pointer" (click)="onNewPluginLink(_instance!)" (keyup.enter)="onNewPluginLink(_instance!)" tabindex="0" ngbTooltip="link ID">add</i>

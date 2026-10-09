@@ -1,17 +1,15 @@
-@use 'sass:map';
 @use 'colors';
-@use 'var';
+
+$nx-trigger-zone: 28px;
+
+table:has(tr.nx:not(.nx-no-trigger, .nx-no-trigger *)) tr > :last-child { padding-right: $nx-trigger-zone !important; box-sizing: content-box; }
 
 .nx {
     -webkit-user-select: none;
-    -ms-user-select: none;
-    -moz-user-select: none;
     user-select: none;
-    -webkit-transition: background-color 0.05s linear;
-    -ms-transition: background-color 0.05s linear;
-    -moz-transition: background-color 0.05s linear;
     transition: background-color 0.05s linear;
     cursor: context-menu;
+    &:is(li, div):not(.avatar, .nx-no-trigger, .nx-no-trigger *) { padding-right: $nx-trigger-zone !important; }
     &:hover { background-color: rgba(colors.$primary, 0.1) !important; }
     &.active { background-color: rgba(colors.$primary, 0.2) !important; }
     &.active:hover { background-color: rgba(colors.$primary, 0.3) !important; }
@@ -19,7 +17,7 @@
         cursor: pointer;
     }
     &.avatar:hover {
-        box-shadow: 0 0 3px rgba(colors.$primary, 1) !important;
+        box-shadow: 0 0 3px colors.$primary !important;
     }
     &.avatar.active img {
         border: 3px colors.$primary solid;
@@ -47,20 +45,24 @@
         opacity: 1;
     }
 }
+
 nx-contextmenu {
     position: fixed;
     top: 0;
     left: 0;
     z-index: 1050;
 }
-nx-dropdown {
-    li {
-        cursor: pointer;
-        position: relative;
-        text-transform: capitalize;
-    }
+
+nx-dropdown li {
+    position: relative;
+    text-transform: capitalize;
 }
 
+nx-dropdown li,
 .nx-dropdown li {
     cursor: pointer;
+}
+
+nx-dropdown.dropstart > .dropdown-menu {
+    transform: translateX(-100%) translateZ(0) !important;
 }

@@ -64,12 +64,12 @@
                 <input class="d-none" ngbDatepicker #d="ngbDatepicker" [footerTemplate]="footerTemplate" [(ngModel)]="x.due_at" (dateSelect)="x.update()" [positionTarget]="datediv" placement="bottom-left" />
 
                 <button class="btn btn-plain">
-                    <i #datediv (click)="d.toggle()" tabindex="0" (keydown.enter)="d.toggle()" class="{{ x?.deadlineColor() }}" ngbTooltip="{{ x.due_at | date }}">calendar_month</i>
+                    <i #datediv (click)="d.toggle()" tabindex="0" (keydown.enter)="d.toggle()" class="cursor-pointer {{ x?.deadlineColor() }}" ngbTooltip="{{ x.due_at | date }}">calendar_month</i>
                 </button>
 
                 <ng-template #footerTemplate>
                     <hr class="my-0" />
-                    <button class="btn btn-fancy btn-fancy-be float-end text-white" (click)="clearClicked(d, x)" tabindex="0" (keydown.enter)="clearClicked(d, x)" i18n="@@i18n.projects.removeDueDate">remove due date</button>
+                    <button class="btn btn-sm btn-plain text-primary float-end" (click)="clearClicked(d, x)" tabindex="0" (keydown.enter)="clearClicked(d, x)" i18n="@@i18n.projects.removeDueDate">remove due date</button>
                 </ng-template>
             </div>
         </td>

@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Http\Controllers\PluginChatController;
 use App\Models\PluginLink;
+use App\Support\ChatProps;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -58,11 +59,7 @@ class GitIssueWebhookJob implements ShouldQueue {
             $message .= " → opened by $by";
             $desc = trim($this->objectAttributes['description']);
             if ($desc !== '') {
-                $props['attachments'] = [[
-                    'author_name' => $this->user['name'],
-                    'text'        => $this->objectAttributes['description'],
-                    'color'       => '#FFA200',
-                ]];
+                $props['attachments'] = [ChatProps::attachment($this->objectAttributes['description'], $this->user['name'], '#FFA200')];
             }
         } elseif ($action === 'close') {
             $message .= " → closed by $by";
@@ -76,7 +73,7 @@ class GitIssueWebhookJob implements ShouldQueue {
 
         $siblings = $this->links->siblingsOfType(PluginChatController::class)->unique('channelId')->values();
         foreach ($siblings as $chatInfo) {
-            ChatSendMessageJob::dispatch($message, $props, channelId: $chatInfo['channelId']);
+            ChatSendMessageJob::dispatch($message, $props, channelId: $chatInfo['channelId'], chatKey: $chatInfo['controller']::getKey());
         }
     }
     private function assigneesSuffix(): string {
@@ -116,12 +113,7 @@ class GitIssueWebhookJob implements ShouldQueue {
         return " → updated by $by";
     }
     private function props(string $name): array {
-        return [
-            'from_webhook'         => 'true',
-            'webhook_display_name' => $name,
-            'override_username'    => $name,
-            'override_icon_url'    => asset('icons/icon.git.big.png'),
-        ];
+        return ChatProps::sender($name, asset('icons/icon.git.big.png'));
     }
     private function emojiForIssueState(string $status): string {
         return match ((int)$status) {

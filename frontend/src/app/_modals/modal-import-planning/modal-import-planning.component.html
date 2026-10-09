@@ -3,7 +3,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <span class="modal-title">
-                    <i class="text-primary">upload_file</i>
+                    <i>upload_file</i>
                     <span class="ms-1" i18n="@@i18n.projects.importPlanningTitle">import planning</span>
                     <span class="ms-2 text-muted small">{{ fileName }}</span>
                 </span>
@@ -14,7 +14,7 @@
                     <div class="text-center text-muted py-4" i18n="@@i18n.projects.importPlanningNothing">nothing recognised in this file</div>
                 } @else {
                     <div class="hstack gap-2 mb-2">
-                        <button type="button" class="btn btn-sm btn-outline-primary" (click)="toggleSelectAll()">
+                        <button type="button" class="btn btn-sm btn-plain text-primary" (click)="toggleSelectAll()">
                             @if (allSelected()) {
                                 <span i18n="@@i18n.issues.deselectAll">deselect all</span>
                             } @else {
@@ -46,7 +46,7 @@
                                                 <span class="badge bg-darker text-muted ms-2" i18n="@@i18n.common.header">header</span>
                                             }
                                             @if (row.type === type.Optional) {
-                                                <span class="badge bg-darker text-primary ms-2" i18n="@@i18n.projects.planningRowOptional">optional</span>
+                                                <span class="badge bg-darker text-muted ms-2" i18n="@@i18n.projects.planningRowOptional">optional</span>
                                             }
                                             @if (row.type === type.Inactive) {
                                                 <span class="badge bg-darker text-muted ms-2" i18n="@@i18n.common.disabled">disabled</span>

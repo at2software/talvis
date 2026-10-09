@@ -1,12 +1,12 @@
 <router-outlet></router-outlet>
 
-<activity-tab icon="payments">
+<activity-tab icon="payments" i18n-label="@@i18n.activityTab.latestInvoices" label="latest invoices">
     <actions-invoice-latest></actions-invoice-latest>
 </activity-tab>
 
 <app-header>
     <div class="logo" style="background-image: url(assets/images/invoice.jpg)"></div>
-    <h1 i18n="@@i18n.common.invoices">invoices</h1>
+    <h1 i18n="@@i18n.common.financial">financial</h1>
     <ul class="nav">
         <header-link-item hotkey="CTRL+ALT+1" routerLink="invoices" title="invoices" i18n-title="@@i18n.common.invoices" icon="dashboard"></header-link-item>
         <header-link-item hotkey="CTRL+ALT+2" routerLink="standing" title="standing orders" i18n-title="@@i18n.common.standingOrders" icon="repeat"></header-link-item>
@@ -15,6 +15,6 @@
         <header-link-item hotkey="CTRL+ALT+5" routerLink="stats" title="statistics" i18n-title="@@i18n.common.statistics" icon="bar_chart"></header-link-item>
         <header-link-item hotkey="CTRL+ALT+6" routerLink="cashregisters" title="cash registers" i18n-title="@@i18n.common.cashRegisters" icon="bar_chart"></header-link-item>
         <header-link-item hotkey="CTRL+ALT+7" routerLink="liquidity" title="liquidity" i18n-title="@@i18n.financial.liquidity" icon="waterfall_chart"></header-link-item>
-        <header-link-item hotkey="CTRL+ALT+8" routerLink="bank" title="bank balance" icon="account_balance"></header-link-item>
+        <header-link-item hotkey="CTRL+ALT+8" routerLink="bank" title="bank balance" i18n-title="@@i18n.invoices.bankBalance" icon="account_balance"></header-link-item>
     </ul>
 </app-header>

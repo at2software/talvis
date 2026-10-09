@@ -100,7 +100,7 @@ export class ProjectBillingComponent {
                 this.selectionDescription.set(s.comment);
             }
         });
-        if (sel.length) this.descField()?.nativeElement.focus();
+        if (sel.length) this.descField()?.nativeElement.focus({ preventScroll: true });
     }
 
     readonly userIconFor = (user_id: string) => User.iconPathFor(user_id);

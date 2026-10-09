@@ -1,0 +1,57 @@
+<div class="modal d-block" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-title" i18n="@@i18n.slack.select_user">select Slack user</span>
+                <button type="button" class="btn-close" (click)="decline()" tabindex="0" (keydown.enter)="decline()" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                @if (isRootInstance()) {
+                    <div class="alert alert-info mb-3" role="alert">
+                        <i class="bi bi-info-circle me-2"></i>
+                        <span i18n="@@i18n.slack.root_instance_info">Showing global users. For channel-specific users, add a Slack plugin link to this project.</span>
+                    </div>
+                }
+                <div class="mb-3">
+                    <input type="text" class="form-control" [ngModel]="searchTerm()" (ngModelChange)="searchTerm.set($event || '')" placeholder="Search users..." i18n-placeholder="@@i18n.git.search_users" />
+                </div>
+                <div class="user-list" style="max-height: 400px; overflow-y: auto">
+                    @if (getSlackUsers().length === 0) {
+                        <div class="text-center text-muted py-4">
+                            <p i18n="@@i18n.common.noUsersFound">no users found</p>
+                        </div>
+                    }
+                    @for (u of getSlackUsers(); track u.id) {
+                        <div class="card mb-2 user-card cursor-pointer" [class.border-primary]="isSelected(u.id.toString())" [class.selected]="isSelected(u.id.toString())" (click)="selectUser(u.id.toString())" tabindex="0" (keydown.enter)="selectUser(u.id.toString())">
+                            <div class="card-body py-2 px-3">
+                                <div class="d-flex align-items-center gap-3">
+                                    @if (u.var.icon) {
+                                        <img [src]="u.var.icon" alt="" class="avatar avatar-xs rounded-circle flex-shrink-0" />
+                                    }
+                                    <div class="text-truncate flex-shrink-1" style="min-width: 0">
+                                        <span class="text-truncate d-block">{{ u.getName() }}</span>
+                                    </div>
+                                    @if (u.var.data?.username) {
+                                        <div class="text-muted flex-shrink-0">
+                                            <small>@{{ u.var.data.username }}</small>
+                                        </div>
+                                    }
+                                    @if (u.var.data?.email) {
+                                        <div class="text-muted text-truncate flex-shrink-1" style="min-width: 0">
+                                            <small class="text-truncate d-block">{{ u.var.data.email }}</small>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn" (click)="decline()" tabindex="0" (keydown.enter)="decline()" i18n="@@i18n.common.cancel">cancel</button>
+                <button type="button" class="btn btn-primary" [disabled]="!selectedUserId()" (click)="accept()" tabindex="0" (keydown.enter)="accept()" i18n="@@i18n.common.select">select</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal-backdrop fade show"></div>

@@ -32,7 +32,15 @@ class ChatRemoveUsersJob implements ShouldQueue {
         foreach (PluginController::getPluginControllers(PluginChatController::class) as $chatController) {
             try {
                 if ($channelId = $chatController->getChannelIdFor($this->project)) {
-                    foreach ($users as $user) {
+                    $stillNeeded = Project::whereKeyNot($this->project->id)
+                        ->whereTrackable()
+                        ->whereLinkedToChannel($chatController::getKey(), $channelId)
+                        ->with('assigned_users')
+                        ->get()
+                        ->flatMap->assigned_users
+                        ->pluck('id');
+
+                    foreach ($users->whereNotIn('id', $stillNeeded) as $user) {
                         $chatController->removeUserFromChannel($channelId, $user);
                     }
                 }

@@ -31,4 +31,8 @@ export class ConfirmationService {
                 .catch(() => reject(false));
         });
     }
+
+    public ask(args: ConfirmationArguments): Promise<boolean> {
+        return this.confirm(args).catch(() => false);
+    }
 }

@@ -86,27 +86,6 @@
         </div>
         @if (obj.card(); as card) {
             <ul class="list-group list-group-dark">
-                <!-- Business Register Information -->
-                @if (_isCompany && isRealCompany()) {
-                    <li class="list-group-item">
-                        <div class="input-group">
-                            <span class="input-group-text" style="width: auto; min-width: 50px">
-                                <i ngbTooltip="Business Register">business</i>
-                            </span>
-                            <select class="form-control" [ngModel]="getRegisterType()" (ngModelChange)="setRegisterType($event)" (change)="updateCommercialRegister()">
-                                <option value="" i18n="@@i18n.common.type">type</option>
-                                <option value="HRA" i18n="@@i18n.common.hra">HRA</option>
-                                <option value="HRB" i18n="@@i18n.common.hrb">HRB</option>
-                                <option value="GnR" i18n="@@i18n.common.gnr">GnR</option>
-                                <option value="PR" i18n="@@i18n.common.pr">PR</option>
-                                <option value="VR" i18n="@@i18n.common.vr">VR</option>
-                            </select>
-                            <input type="text" class="form-control" [ngModel]="getRegisterNumber()" (ngModelChange)="setRegisterNumber($event)" (blur)="updateCommercialRegister()" placeholder="123456" />
-                            <input type="text" class="form-control" [ngModel]="getRegisterCourt()" (ngModelChange)="setRegisterCourt($event)" (blur)="updateCommercialRegister()" placeholder="München" i18n-placeholder="@@i18n.common.münchen" />
-                        </div>
-                    </li>
-                }
-
                 @if (_isContact || _isUser || _isProspect) {
                     <li [nx]="card.get('FN').first()!" (singleActionResolved)="singleActionResolved($event)" [class]="liClass">
                         <div class="mb-1">
@@ -115,7 +94,7 @@
                                     <i ngbTooltip="name" i18n-ngbTooltip="@@i18n.common.name">badge</i>
                                 </span>
                                 <input (blur)="updateVcard()" (keyup)="onFnChange($event)" type="text" class="form-control" id="floatingInput" placeholder="name" [(ngModel)]="card.get('FN').first()!.vals[0]" i18n-placeholder="@@i18n.common.name" />
-                                <div (click)="showNameDetails.set(!_showNameDetails)" (keyup.enter)="showNameDetails.set(!_showNameDetails)" tabindex="0">
+                                <div class="cursor-pointer" (click)="showNameDetails.set(!_showNameDetails)" (keyup.enter)="showNameDetails.set(!_showNameDetails)" tabindex="0">
                                     <i class="p-2 pointer text-primary">{{ _showNameDetails ? 'expand_less' : 'expand_more' }}</i>
                                 </div>
                             </div>
@@ -136,46 +115,46 @@
                     }
                 }
 
-                @for (row of card.rows; track i; let i = $index) {
+                @for (row of card.rows; track row.track_id; let i = $index) {
                     @let _rowType = row.getType();
 
                     @switch (row.key) {
                         @case ('ADR') {
                             <li class="d-flex" [nx]="row" (singleActionResolved)="singleActionResolved($event)" [class]="liClass" [class.accent-danger]="needsWarning(row)" [attr.title]="needsWarning(row) || null">
-                                <div class="flex-fill me-3">
+                                <div class="flex-fill me-3" (focusout)="onAdrFocusOut($event, row)">
                                     <div class="form-floating mb-2">
-                                        <input (blur)="updateVcard()" autocomplete="off" type="text" class="form-control" id="adr-{{ i }}-1" placeholder="{{ obj.descAdr(1) }}" [(ngModel)]="card.rows[i].vals[1]" />
-                                        <label for="adr-{{ i }}-1">{{ obj.descAdr(1) }}</label>
+                                        <input autocomplete="off" type="text" class="form-control" id="adr-{{ row.track_id }}-1" placeholder="{{ obj.descAdr(1) }}" [(ngModel)]="row.vals[1]" />
+                                        <label for="adr-{{ row.track_id }}-1">{{ obj.descAdr(1) }}</label>
                                     </div>
                                     <div class="form-floating mb-2">
-                                        <input (blur)="updateVcard()" autocomplete="off" type="text" class="form-control" id="adr-{{ i }}-2" placeholder="{{ obj.descAdr(2) }}" [(ngModel)]="card.rows[i].vals[2]" />
-                                        <label for="adr-{{ i }}-2">{{ obj.descAdr(2) }}</label>
+                                        <input autocomplete="off" type="text" class="form-control" id="adr-{{ row.track_id }}-2" placeholder="{{ obj.descAdr(2) }}" [(ngModel)]="row.vals[2]" />
+                                        <label for="adr-{{ row.track_id }}-2">{{ obj.descAdr(2) }}</label>
                                     </div>
                                     <div class="row g-2 mb-2">
                                         <div class="col-auto" style="width: 150px">
                                             <div class="form-floating">
-                                                <input (blur)="updateVcard()" autocomplete="off" type="text" class="form-control" id="adr-{{ i }}-5" placeholder="{{ obj.descAdr(5) }}" [(ngModel)]="card.rows[i].vals[5]" (keyup)="onPlzUpdate(row)" />
-                                                <label for="adr-{{ i }}-5">{{ obj.descAdr(5) }}</label>
+                                                <input autocomplete="off" type="text" class="form-control" id="adr-{{ row.track_id }}-5" placeholder="{{ obj.descAdr(5) }}" [(ngModel)]="row.vals[5]" (keyup)="onPlzUpdate(row)" />
+                                                <label for="adr-{{ row.track_id }}-5">{{ obj.descAdr(5) }}</label>
                                             </div>
                                         </div>
                                         <div class="col">
                                             <div class="form-floating">
-                                                <input (blur)="updateVcard()" autocomplete="off" type="text" class="form-control" id="adr-{{ i }}-3" placeholder="{{ obj.descAdr(3) }}" [(ngModel)]="card.rows[i].vals[3]" />
-                                                <label for="adr-{{ i }}-3">{{ obj.descAdr(3) }}</label>
+                                                <input autocomplete="off" type="text" class="form-control" id="adr-{{ row.track_id }}-3" placeholder="{{ obj.descAdr(3) }}" [(ngModel)]="row.vals[3]" />
+                                                <label for="adr-{{ row.track_id }}-3">{{ obj.descAdr(3) }}</label>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="form-floating mb-2">
-                                        <input (blur)="updateVcard()" autocomplete="off" type="text" class="form-control" id="adr-{{ i }}-4" placeholder="{{ obj.descAdr(4) }}" [(ngModel)]="card.rows[i].vals[4]" />
-                                        <label for="adr-{{ i }}-4">{{ obj.descAdr(4) }}</label>
+                                        <input autocomplete="off" type="text" class="form-control" id="adr-{{ row.track_id }}-4" placeholder="{{ obj.descAdr(4) }}" [(ngModel)]="row.vals[4]" />
+                                        <label for="adr-{{ row.track_id }}-4">{{ obj.descAdr(4) }}</label>
                                     </div>
                                     <div class="form-floating">
-                                        <select (change)="updateVcard()" class="form-select" id="adr-{{ i }}-6" [(ngModel)]="card.rows[i].vals[6]">
+                                        <select class="form-select" id="adr-{{ row.track_id }}-6" [(ngModel)]="row.vals[6]">
                                             @for (c of db_countries; track c) {
                                                 <option [ngValue]="c.alpha2">{{ c.name }}</option>
                                             }
                                         </select>
-                                        <label for="adr-{{ i }}-6">{{ obj.descAdr(6) }}</label>
+                                        <label for="adr-{{ row.track_id }}-6">{{ obj.descAdr(6) }}</label>
                                     </div>
                                 </div>
                                 @if (hasGeoForAddress(i); as geoRow) {
@@ -220,7 +199,7 @@
                                     }
 
                                     @for (val of row.vals; track j; let j = $index) {
-                                        <input (blur)="updateVcard()" type="text" class="form-control" placeholder="{{ row.key }}" [attr.aria-label]="row.key" [(ngModel)]="card.rows[i].vals[j]" />
+                                        <input (blur)="updateVcard()" type="text" class="form-control" placeholder="{{ row.key }}" [attr.aria-label]="row.key" [(ngModel)]="row.vals[j]" />
                                     }
 
                                     @if (!row.isSocialMedia()) {
@@ -337,6 +316,22 @@
                             </ng-template>
                             <ng-container *ngTemplateOutlet="fieldRow; context: { row: row, header: mantisHeader, dClass: _isCompany }"></ng-container>
                         }
+                        @case ('X-NEXUS-JIRA') {
+                            <ng-template #jiraHeader>
+                                <span class="input-group-text col-desc">
+                                    <n class="text-blue" ngbTooltip="jira" i18n-ngbTooltip="@@i18n.common.jira">jira</n>
+                                </span>
+                            </ng-template>
+                            <ng-container *ngTemplateOutlet="fieldRow; context: { row: row, header: jiraHeader, dClass: _isCompany }"></ng-container>
+                        }
+                        @case ('X-NEXUS-GITHUB') {
+                            <ng-template #githubHeader>
+                                <span class="input-group-text col-desc">
+                                    <n class="text-blue" ngbTooltip="github" i18n-ngbTooltip="@@i18n.common.github">github</n>
+                                </span>
+                            </ng-template>
+                            <ng-container *ngTemplateOutlet="fieldRow; context: { row: row, header: githubHeader, dClass: _isCompany }"></ng-container>
+                        }
                         @case ('X-NEXUS-MATTERMOST') {
                             <ng-template #mattermostHeader>
                                 <span class="input-group-text col-desc">
@@ -344,6 +339,14 @@
                                 </span>
                             </ng-template>
                             <ng-container *ngTemplateOutlet="fieldRow; context: { row: row, header: mattermostHeader, dClass: _isCompany }"></ng-container>
+                        }
+                        @case ('X-NEXUS-SLACK') {
+                            <ng-template #slackHeader>
+                                <span class="input-group-text col-desc">
+                                    <n class="text-blue" ngbTooltip="slack" i18n-ngbTooltip="@@i18n.common.slack">slack</n>
+                                </span>
+                            </ng-template>
+                            <ng-container *ngTemplateOutlet="fieldRow; context: { row: row, header: slackHeader, dClass: _isCompany }"></ng-container>
                         }
                         @default {
                             <ng-template #defaultHeader>

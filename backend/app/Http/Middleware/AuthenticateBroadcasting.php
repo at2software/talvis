@@ -24,7 +24,7 @@ class AuthenticateBroadcasting {
             ]);
 
             if (strlen($token) > 0) {
-                $user = User::where('api_token', $token)->first();
+                $user = User::findByApiToken($token);
 
                 if (! $user && str_contains($token, '.')) {
                     try {

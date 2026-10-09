@@ -12,6 +12,7 @@ import { EmptyStateComponent } from '@shards/empty-state/empty-state.component';
 import { GuidedTourComponent } from '@shards/guided-tour/guided-tour.component';
 import { ColorPickerDirective } from 'ngx-color-picker';
 import { StackedTableDirective } from '@directives/stacked-table.directive';
+import { ConfirmationService } from '@app/_modals/modal-confirm/confirmation.service';
 
 const ActivityStatsColors = MarketingActivity.STATS_COLORS;
 
@@ -25,6 +26,7 @@ const ActivityStatsColors = MarketingActivity.STATS_COLORS;
 export class MarketingMetricsComponent {
     #marketingService = inject(MarketingService);
     #cdr = inject(ChangeDetectorRef);
+    #confirm = inject(ConfirmationService);
 
     #loaded = modelListResource(() => this.#marketingService.indexMetrics());
     metrics = linkedSignal(() => this.#loaded.value());
@@ -173,8 +175,8 @@ export class MarketingMetricsComponent {
         }
     }
 
-    deleteMetric(metric: MarketingPerformanceMetric) {
-        if (!confirm(`Delete metric "${metric.name}"? This will remove it from all initiatives and activities.`)) return;
+    async deleteMetric(metric: MarketingPerformanceMetric) {
+        if (!(await this.#confirm.ask({ title: $localize`:@@i18n.common.delete:delete`, message: $localize`:@@i18n.marketing.confirmDeleteMetric:delete metric "${metric.name}"? This will remove it from all initiatives and activities.` }))) return;
 
         this.#marketingService.destroyMetric(metric.id!).subscribe(() => {
             this.metrics.update((metrics) => metrics.filter((m) => m.id !== metric.id));

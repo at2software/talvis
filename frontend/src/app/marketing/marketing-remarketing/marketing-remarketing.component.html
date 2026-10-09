@@ -3,7 +3,7 @@
 <div class="card mb-3">
     <div class="card-header hstack gap-2">
         <span class="flex-fill" i18n="@@i18n.marketing.suggested_for_remarketing">suggested for remarketing</span>
-        <span class="badge bg-primary rounded-pill">{{ _suggested.length }}</span>
+        <span class="badge bg-dark rounded-pill">{{ _suggested.length }}</span>
     </div>
     <ul class="list-group list-group-flush">
         @for (item of _suggested; track item.id) {
@@ -18,7 +18,7 @@
 <div class="card mb-3">
     <div class="card-header hstack gap-2">
         <span class="flex-fill" i18n="@@i18n.common.remarketing_intervals">remarketing intervals</span>
-        <span class="badge bg-primary rounded-pill">{{ _observed.length }}</span>
+        <span class="badge bg-dark rounded-pill">{{ _observed.length }}</span>
     </div>
     <ul class="list-group list-group-flush">
         @for (item of _observed; track item.id) {

@@ -7,7 +7,7 @@
                 <div class="font-monospace fs-5">{{ number() }}</div>
                 @if (_info) {
                     <div class="hstack gap-2 mt-3">
-                        <i [class.text-warning]="_info.warn" [class.text-primary]="!_info.warn">{{ _info.icon }}</i>
+                        <i [class.text-warning]="_info.warn" [class.text-muted]="!_info.warn">{{ _info.icon }}</i>
                         <div class="vstack gap-0">
                             <span>{{ _info.label }}</span>
                             <small class="text-muted">{{ _info.detail }}</small>

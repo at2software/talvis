@@ -75,7 +75,7 @@ class InvoiceReminder extends BaseModel {
 <table class="reminder-table"><tbody>'.$rows.'</tbody></table>';
         $content .= $invoice->company->param($pre.'SUFFIX', true)->localizedValue($lang, $formality);
 
-        $template = Document::getPdfTemplate($title);
+        $template = Document::getPdfTemplate($title, lang: $lang);
         $template = str_replace('[content]', $content, $template);
         $template = Document::personalized($template, $invoice->company);
 

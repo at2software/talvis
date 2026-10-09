@@ -11,7 +11,7 @@ import { MoneyPipe } from '@pipes/money.pipe';
 import { MILESTONE_STATES } from '@models/milestone/milestone-state.enum';
 import { EchartsComponent } from '@charts/echarts-wrapper/echarts-wrapper.component';
 import { Color } from '@constants/Color';
-import { ECHARTS_DEFAULT_TOOLTIP_OPTIONS, ECHARTS_DONUT_ITEM_STYLE } from '@charts/echarts-presets';
+import { ECHARTS_DEFAULT_TOOLTIP_OPTIONS, ECHARTS_DONUT_CENTER_TEXT, ECHARTS_DONUT_ITEM_STYLE, ECHARTS_DONUT_SERIES, ECHARTS_DONUT_TRACK_COLOR } from '@charts/echarts-presets';
 import { ProjectState } from '@models/project/project-state.model';
 import { NComponent } from '@shards/n/n.component';
 import { MlReliabilityDirective } from '@directives/ml-reliability.directive';
@@ -54,7 +54,7 @@ export class ProjectInfoComponent {
             itemStyle: { color: u.color, ...ECHARTS_DONUT_ITEM_STYLE },
         }));
 
-        const pieData = timePercentage < 1 ? [...baseData, { value: (p.work_estimated ?? 0) - p.hours_invested, name: 'remaining', itemStyle: { color: '#6c757d', ...ECHARTS_DONUT_ITEM_STYLE } }] : baseData;
+        const pieData = timePercentage < 1 ? [...baseData, { value: (p.work_estimated ?? 0) - p.hours_invested, name: 'remaining', itemStyle: { color: ECHARTS_DONUT_TRACK_COLOR, ...ECHARTS_DONUT_ITEM_STYLE } }] : baseData;
 
         const centerText = `${(timePercentage * 100).toFixed(0)}%`;
         const centerColor = timePercentage >= 1 ? dangerColor : '#ffffff';
@@ -69,14 +69,9 @@ export class ProjectInfoComponent {
                     ...ECHARTS_DEFAULT_TOOLTIP_OPTIONS,
                     formatter: (params: { name: string; value: number }) => `${params.name}: ${params.value.toFixed(1)}h`,
                 },
-                graphic: [{ type: 'text', left: 'center', top: 'center', style: { text: centerText, fill: centerColor, fontSize: 20, fontFamily: 'BrunoAce' } }],
+                graphic: [{ type: 'text', left: 'center', top: 'center', style: { ...ECHARTS_DONUT_CENTER_TEXT, text: centerText, fill: centerColor, fontFamily: 'BrunoAce' } }],
                 series: [
-                    {
-                        type: 'pie',
-                        radius: ['35%', '70%'],
-                        data: pieData,
-                        label: { show: false },
-                    },
+                    { ...ECHARTS_DONUT_SERIES, data: pieData },
                 ],
             },
             wrapperStyle:
@@ -93,9 +88,9 @@ export class ProjectInfoComponent {
         const counts = this.project().milestone_state_counts;
         if (!counts) return [];
         return [
-            { name: MILESTONE_STATES[2].name, count: counts.done, color: 'var(--bs-success)', bgClass: 'bg-success' },
-            { name: MILESTONE_STATES[1].name, count: counts.in_progress, color: 'var(--bs-primary)', bgClass: 'bg-primary' },
-            { name: MILESTONE_STATES[0].name, count: counts.todo, color: '#6c757d', bgClass: 'bg-secondary' },
+            { ...MILESTONE_STATES[2], count: counts.done },
+            { ...MILESTONE_STATES[1], count: counts.in_progress },
+            { ...MILESTONE_STATES[0], count: counts.todo },
         ].filter((s) => s.count > 0);
     });
 

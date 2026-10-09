@@ -20,13 +20,14 @@ $image-size: 9rem;
         flex-shrink: 0;
         border-radius: 50%;
         opacity: 0.5;
+        filter: grayscale(1);
         width: $image-size;
         height: $image-size;
         margin-bottom: 1.25rem;
         box-shadow: shadow-down(5px, 12px);
 
         background-image: url('../../../assets/empty-state/empty-projects.webp');
-        background-size: contain;
+        background-size: 60%;
         background-repeat: no-repeat;
         background-position: center center;
 

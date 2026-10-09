@@ -44,7 +44,7 @@ class ProductGroupController extends Controller {
     }
     public function destroy(Request $request, int $id) {
         ProductGroup::findOrFail($id)->delete();
-        return response()->make('success', 202);
+        return response()->json(true, 202);
     }
     public function store(Request $request) {
         $new = new ProductGroup;

@@ -3,9 +3,16 @@
 namespace App\Traits;
 
 trait VcardGenderTrait {
-    public static $_genderDatabase = null;
+    public static $_genderDatabase      = null;
+    private static array $_genderByName = [];
 
     public static function findGenderInDatabase($name) {
+        if (! array_key_exists($name, self::$_genderByName)) {
+            self::$_genderByName[$name] = self::searchGenderDatabase($name);
+        }
+        return self::$_genderByName[$name];
+    }
+    private static function searchGenderDatabase($name) {
         self::$_genderDatabase || self::$_genderDatabase = file_get_contents(resource_path('first_names.db')); // load DB
         preg_match('/^'.preg_quote(mb_strtoupper($name, 'UTF-8'), '/').'.*?,(.*?),.*$/im', self::$_genderDatabase, $attr);
         if (count($attr) == 2) {

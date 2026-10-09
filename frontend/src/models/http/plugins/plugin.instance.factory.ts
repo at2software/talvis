@@ -1,6 +1,6 @@
 import { Dictionary } from '@constants/constants';
 import { inject, Type, Service } from '@angular/core';
-import { IPlugin, PluginInstance } from './plugin.instance';
+import { hasLinkableProjects, IPlugin, PluginInstance } from './plugin.instance';
 import { Encryption } from '@models/encryption/encryption.model';
 import { MattermostPlugin } from './plugin.mattermost';
 import { GitLabPlugin } from './plugin.gitlab';
@@ -9,14 +9,23 @@ import { HttpClient } from '@angular/common/http';
 import { MantisPlugin } from './plugin.mantis';
 import { SlackPlugin } from './plugin.slack';
 import { LocalAIPlugin } from './plugin.localai';
+import { JiraPlugin } from './plugin.jira';
+import { GitHubPlugin } from './plugin.github';
 import { PluginLink } from '@models/plugin-link/plugin-link.model';
 import { TaskService } from '@models/task/task.service';
 import type { INxModal } from '@models/_core/nx.modal.interface';
 
 let MantisSubPlugin: Type<PluginInstance> | null = null;
 let GitLabSubPlugin: Type<PluginInstance> | null = null;
+let JiraSubPlugin: Type<PluginInstance> | null = null;
+let GitHubSubPlugin: Type<PluginInstance> | null = null;
 
-Promise.all([import('./plugin.mantis-sub').then((m) => (MantisSubPlugin = m.MantisSubPlugin)), import('./plugin.gitlab-sub').then((m) => (GitLabSubPlugin = m.GitLabSubPlugin))]).catch();
+Promise.all([
+    import('./plugin.mantis-sub').then((m) => (MantisSubPlugin = m.MantisSubPlugin)),
+    import('./plugin.gitlab-sub').then((m) => (GitLabSubPlugin = m.GitLabSubPlugin)),
+    import('./plugin.jira-sub').then((m) => (JiraSubPlugin = m.JiraSubPlugin)),
+    import('./plugin.github-sub').then((m) => (GitHubSubPlugin = m.GitHubSubPlugin)),
+]).catch();
 
 export interface TPluginAllocations {
     type: Type<PluginInstance>;
@@ -27,6 +36,8 @@ const PLUGIN_TYPES: Dictionary<TPluginAllocations> = {
     mattermost: { type: MattermostPlugin },
     git: { type: GitLabPlugin, sub: () => GitLabSubPlugin },
     mantis: { type: MantisPlugin, sub: () => MantisSubPlugin },
+    jira: { type: JiraPlugin, sub: () => JiraSubPlugin },
+    github: { type: GitHubPlugin, sub: () => GitHubSubPlugin },
     slack: { type: SlackPlugin },
     local_ai: { type: LocalAIPlugin },
 };
@@ -50,6 +61,11 @@ export class PluginInstanceFactory {
                     return (await import('@app/_modals/git-user-selection/git-user-selection.component')).GitUserSelectionComponent;
                 case 'mattermost':
                     return (await import('@app/_modals/mattermost-user-selection/mattermost-user-selection.component')).MattermostUserSelectionComponent;
+                case 'slack':
+                    return (await import('@app/_modals/slack-user-selection/slack-user-selection.component')).SlackUserSelectionComponent;
+                case 'jira':
+                case 'github':
+                    return (await import('@app/_modals/tracker-user-selection/tracker-user-selection.component')).TrackerUserSelectionComponent;
                 default:
                     console.warn(`No modal component found for plugin type: ${pluginTypeName}`);
                     return null;
@@ -58,6 +74,21 @@ export class PluginInstanceFactory {
             console.error(`Failed to load modal component for plugin type ${pluginTypeName}:`, error);
             return null;
         }
+    }
+
+    static async promptLinkId(pluginInstance: PluginInstance): Promise<string | undefined> {
+        const { ModalBaseService } = await import('@app/_modals/modal-base-service');
+        if (pluginInstance instanceof MantisPlugin) {
+            const { MantisProjectSelectionComponent } = await import('@app/_modals/mantis-project-selection/mantis-project-selection.component');
+            return ModalBaseService.open(MantisProjectSelectionComponent, pluginInstance);
+        }
+        if (hasLinkableProjects(pluginInstance)) {
+            const { TrackerProjectSelectionComponent } = await import('@app/_modals/tracker-project-selection/tracker-project-selection.component');
+            return ModalBaseService.open(TrackerProjectSelectionComponent, pluginInstance);
+        }
+        const { InputModalService } = await import('@app/_modals/modal-input/modal-input.service');
+        const response = await nx().getService(InputModalService).open(pluginInstance.newPluginText);
+        return response && 'text' in response ? response.text : undefined;
     }
 
     constructor() {

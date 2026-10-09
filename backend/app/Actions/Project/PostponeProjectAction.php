@@ -26,7 +26,7 @@ class PostponeProjectAction {
         $project->remind_at = now()->$method($config['amount'])->toDateTimeString();
         $project->save();
 
-        $text = ($comment ? $comment.'<br>' : '').'Frist verlängert ('.$config['label'].')';
+        $text = ($comment ? strip_tags($comment).'<br>' : '').'Frist verlängert ('.$config['label'].')';
         Comment::create([
             ...$project->toPoly(),
             'text'    => $text,

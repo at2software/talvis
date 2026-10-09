@@ -83,7 +83,7 @@
                 <div class="event-lanes">
                     @for (bar of week.bars; track trackByBar($index, bar)) {
                         <div
-                            class="event-bar"
+                            class="event-bar nx-no-trigger"
                             [class.continues-left]="bar.continuesLeft"
                             [class.continues-right]="bar.continuesRight"
                             [class.bg-danger]="isMilestoneOverdue(bar.milestone)"
@@ -126,7 +126,7 @@
             <div class="d-flex align-items-center justify-content-between">
                 <strong>{{ day.date }}</strong>
                 @if (!day.is_break) {
-                    <button type="button" class="btn btn-sm text-primary p-0" (click)="onAddClick(day, popover)" i18n-ngbTooltip="@@i18n.common.addMilestone" ngbTooltip="add milestone">
+                    <button type="button" class="btn btn-sm btn-plain text-primary p-0" (click)="onAddClick(day, popover)" i18n-ngbTooltip="@@i18n.common.addMilestone" ngbTooltip="add milestone">
                         <i>add</i>
                     </button>
                 }

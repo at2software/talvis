@@ -27,15 +27,15 @@ class SearchController extends Controller {
             $allowed = fn ($class) => (! $only || in_array($class, $only));
 
             if (empty($input->query)) {
-                return response()->make(null, 400);
+                return response()->json(['message' => 'query is required'], 400);
             }
 
-            $allowed('Company') && $collection        = $collection->merge(Company::select()->whereNotDraft()->whereLike('vcard', $input->query)->get());
-            $allowed('User') && $collection           = $collection->merge(User::select()->whereLike('vcard', $input->query)->get());
-            $allowed('CompanyContact') && $collection = $collection->merge(CompanyContact::select()->whereLike('vcard', $input->query)->with('company', 'contact')->get());
+            $allowed('Company') && $collection        = $collection->merge(Company::select()->whereNotDraft()->whereVcardLike($input->query)->get());
+            $allowed('User') && $collection           = $collection->merge(User::select()->whereVcardLike($input->query)->get());
+            $allowed('CompanyContact') && $collection = $collection->merge(CompanyContact::select()->whereVcardLike($input->query)->with('company', 'contact')->get());
 
             if ($allowed('Contact')) {
-                $contactIds = Contact::select('id')->whereLike('vcard', $input->query)->pluck('id');
+                $contactIds = Contact::select('id')->whereVcardLike($input->query)->pluck('id');
                 $collection = $collection->merge(
                     CompanyContact::select()->whereIn('contact_id', $contactIds)->whereHas('company')->with('company', 'contact')->get()
                 );
@@ -45,7 +45,7 @@ class SearchController extends Controller {
             $allowed('Product') && $collection           = $collection->merge(Product::select()->whereLike('name', $input->query)->with('invoiceItems')->get());
             $allowed('Invoice') && $collection           = $collection->merge(Invoice::select()->whereLike('name', $input->query)->get());
             $allowed('LeadSource') && $collection        = $collection->merge(LeadSource::select()->whereLike('name', $input->query)->get());
-            $allowed('MarketingProspect') && $collection = $collection->merge(MarketingProspect::select()->whereLike('vcard', $input->query)->get());
+            $allowed('MarketingProspect') && $collection = $collection->merge(MarketingProspect::select()->whereVcardLike($input->query)->get());
 
             $collection = $collection->reject(fn ($m) => $m instanceof CompanyContact && $m->company?->isDraft());
             $collection = self::keepPreferredEmployment($collection);
@@ -54,7 +54,7 @@ class SearchController extends Controller {
             return $collection;
         } catch (Exception $ex) {
             NLog::error($ex);
-            return $ex;
+            throw $ex;
         }
     }
     private static function keepPreferredEmployment(Collection $collection): Collection {
@@ -65,7 +65,7 @@ class SearchController extends Controller {
     }
     protected static function GetProductGroups($query): Collection {
         $products = collect();
-        if ($group = ProductGroup::whereRaw('UPPER(symbol) LIKE "%'.strtoupper($query).'%"')->with('products', 'products.invoiceItems')->first()) {
+        if ($group = ProductGroup::whereLike('symbol', $query)->with('products', 'products.invoiceItems')->first()) {
             foreach ($group->products as $_) {
                 $_->name = "[$group->symbol] ".$_->name;
                 $_->load('invoiceItems');

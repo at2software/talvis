@@ -38,6 +38,7 @@ import { CdkDrag, CdkDropList } from '@angular/cdk/drag-drop';
 import { PermissionsDirective } from '@directives/permissions.directive';
 import { SafePipe } from '@pipes/safe.pipe';
 import { MediaPreviewComponent } from '../project-media/media-preview/media-preview.component';
+import { ActivatedRoute } from '@angular/router';
 import type { PredictionEntryDto } from '@models/_core/api-response';
 import { AvatarComponent } from '@shards/avatar/avatar.component';
 import { StackedTableDirective } from '@directives/stacked-table.directive';
@@ -61,7 +62,7 @@ export class ProjectPlanningComponent {
     factory = inject(PluginInstanceFactory);
     #modal = inject(ModalBaseService);
 
-    displayField!: DisplayFieldType;
+    displayField: DisplayFieldType = inject(ActivatedRoute).snapshot.data['target'] ?? 'my_prediction';
     project = this.parent.object();
     showPredictions = signal(false);
 
@@ -216,7 +217,7 @@ export class ProjectPlanningComponent {
             .filter((_): _ is InvoiceItem => !!_);
         if (!items.length) return;
 
-        const progressToast = Toast.show($localize`:@@i18n.projects.planningImporting:creating planning items…`, { classname: 'bg-info bg-gradient text-dark', icon: 'upload_file', progress: 0, autohide: false });
+        const progressToast = Toast.show($localize`:@@i18n.projects.planningImporting:creating planning items…`, { classname: 'bg-info bg-gradient', icon: 'upload_file', progress: 0, autohide: false });
         let done = 0;
         concat(...items.map((item) => item.store(item.toPayload(['my_prediction']), true)))
             .pipe(

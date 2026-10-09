@@ -6,7 +6,7 @@
             <button type="button" class="btn btn-primary me-2" i18n="@@i18n.common.addInstalment" (click)="onInstalmentButtonClicked()">add instalment</button>
         }
         @if (_invoice.needs_reminder()) {
-            <button type="button" class="btn btn-primary me-2" i18n="@@i18n.invoice.sendDueReminder">send due reminder</button>
+            <button type="button" class="btn btn-plain text-primary me-2" i18n="@@i18n.invoice.sendDueReminder">send due reminder</button>
         }
     </toolbar>
 }

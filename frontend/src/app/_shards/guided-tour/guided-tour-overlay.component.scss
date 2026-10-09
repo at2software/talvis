@@ -17,7 +17,7 @@
 .gt-ring {
     position: fixed;
     z-index: 1061;
-    border-radius: 6px;
+    border-radius: var(--bs-border-radius);
     box-shadow: 0 0 0 3px var(--bs-primary), 0 0 20px rgba(var(--bs-primary-rgb), 0.5);
     pointer-events: none;
     transition: all 0.25s ease;
@@ -36,7 +36,7 @@
     max-width: calc(100vw - 3rem);
     background: #1a1d23;
     border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 12px;
+    border-radius: var(--bs-border-radius);
     box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6);
     animation: gt-fade-in 0.2s ease;
     overflow: hidden;

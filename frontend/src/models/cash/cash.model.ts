@@ -1,6 +1,5 @@
 import { Serializable } from '@models/_core/serializable';
 import { NxAction } from '@models/_core/nx.actions';
-import { Observable } from 'rxjs';
 import { getCashActions } from './cash.actions';
 import { Model } from '@constants/model/type-discriminators';
 
@@ -8,14 +7,11 @@ import { Model } from '@constants/model/type-discriminators';
 export class Cash extends Serializable {
     static API_PATH = (): string => 'cashes';
 
+    override apiPathWithId(): string { return `cash/entries/${this.id}` }
+    protected override buildActions(): NxAction[] { return getCashActions(this) }
+
     description: string = '';
     approver: string = '';
     occured_at: string = '';
     value: number = 0;
-
-    protected override buildActions(): NxAction[] { return getCashActions(this) }
-
-    delete(): Observable<any> {
-        return this.httpService.delete('cash/entries/' + this.id);
-    }
 }

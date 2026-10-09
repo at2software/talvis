@@ -20,7 +20,7 @@
                     @if (_defaultProduct) {
                         <div class="d-flex align-items-center gap-2">
                             <span class="text-white flex-fill">{{ _defaultProduct.name }}</span>
-                            <button class="btn btn-sm text-primary p-0" (click)="clearDefaultProduct()" [disabled]="savingProduct()">
+                            <button class="btn btn-sm btn-plain text-primary p-0" (click)="clearDefaultProduct()" [disabled]="savingProduct()">
                                 <i>close</i>
                             </button>
                         </div>
@@ -33,7 +33,7 @@
 
         <div class="col-12 col-md-9">
             @if (!_projects.length) {
-                <empty-state [card]="false" class="audit" title="no audit pipelines configured"></empty-state>
+                <empty-state [card]="true" class="audit" title="no audit pipelines configured"></empty-state>
             } @else {
                 @for (project of _projects; track project.id) {
                     <div class="card mb-3">
@@ -41,7 +41,7 @@
                             @if (project.company) {
                                 <avatar [object]="project.company"></avatar>
                             } @else {
-                                <n class="text-primary">git</n>
+                                <n>git</n>
                             }
                             <span class="fw-semibold">{{ project.project_name }}</span>
                             <small class="text-muted">{{ project.namespace_with_path }}</small>

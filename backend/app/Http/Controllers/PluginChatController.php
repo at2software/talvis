@@ -28,7 +28,6 @@ abstract class PluginChatController extends PluginController {
     abstract public function createOrUpdatePost(string $cacheId, string $channelId, string $message, $props = null);
     abstract public function createPost(string $channelId, string $message, $props = null);
     abstract public function updatePost(string $id, string $message, $props = null, ?string $channelId = null);
-    abstract public function deletePost(string $id): void;
 
     /** Returns ['posts' => [id => post], 'order' => [id, ...]] or empty array on failure */
     abstract public function getChannelPosts(string $channelId, int $page = 0, int $perPage = 200): array;
@@ -45,13 +44,14 @@ abstract class PluginChatController extends PluginController {
     abstract public function updatePosition(string $position, string $userId): void;
     abstract public function updateStatus(string $status, string $userId): void;
     public function _createOrUpdatePost(string $cacheId, string $channelId, string $message, $props, string $dataKey) {
+        $props  = [...($props ?? []), 'cache_id' => $cacheId];
         $key    = static::getKey().'_'.$cacheId;
         $postId = Cache::get($key) ?? $this->findExistingPost($cacheId, $channelId);
         if (! $postId) {
             $data   = $this->createPost($channelId, $message, $props);
             $postId = $data[$dataKey] ?? null;
         } else {
-            $this->updatePost($postId, $message, $props);
+            $this->updatePost($postId, $message, $props, $channelId);
         }
         if ($postId) {
             Cache::put($key, $postId, now()->addHours(24));
@@ -70,6 +70,10 @@ abstract class PluginChatController extends PluginController {
         return $this->createChannel($this->getChannelNameFor($project).$postfix, $project->name.' '.$postfix, $purpose, $header);
     }
     public function getChannelIdFor(Project $project, ?string $postfix = null): ?string {
+        $linked = $project->pluginLinks()->where('type', static::getKey())->value('url');
+        if ($linked && count($parts = explode('/', $linked)) > 4) {
+            return end($parts);
+        }
         if (! empty($postfix)) {
             $postfix = '_'.strtolower($postfix);
         }

@@ -366,6 +366,7 @@ class ModelRelationship {
             'unpaid_invoice_count'  => 'number',
             'unpaid_invoice_value'  => 'number',
             'needs_vat_handling'    => 'boolean',
+            'is_domestic'           => 'boolean',
         ],
         'company_contacts' => [
             'name'       => 'string',        // Forwarded from contact

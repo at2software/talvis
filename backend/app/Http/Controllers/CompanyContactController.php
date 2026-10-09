@@ -13,7 +13,7 @@ class CompanyContactController extends Controller {
         return $company_contact;
     }
     public function destroy(Request $request, CompanyContact $companyContact) {
-        return $companyContact->delete();
+        return response()->json($companyContact->delete());
     }
     public function show(CompanyContact $company_contact): CompanyContact {
         $company_contact->projects;
@@ -22,8 +22,8 @@ class CompanyContactController extends Controller {
     }
     public function store(Request $request) {
         $request->validate([
-            'company_id' => 'required|integer|exists:companies,id',
-            'contact_id' => 'nullable|integer|exists:contacts,id',
+            'company_id' => 'required|integer|exists:companies,id,deleted_at,NULL',
+            'contact_id' => 'required|integer|exists:contacts,id',
         ]);
         $new = new CompanyContact;
         $new->applyAndSave($request);

@@ -5,18 +5,22 @@ namespace App\Models;
 use App\Http\Controllers\PluginFintsController;
 use App\Http\Controllers\PluginGitController;
 use App\Http\Controllers\PluginLocalAiController;
+use App\Http\Controllers\PluginM365Controller;
+use App\Http\Controllers\PluginMantisController;
 use App\Http\Controllers\PluginMattermostController;
-use Crypt;
+use App\Http\Controllers\PluginSlackController;
 use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Crypt;
 
 class Vault extends Model {
     public $incrementing  = false;
     protected $primaryKey = 'key';
     protected $keyType    = 'string';
     protected $fillable   = ['key', 'value'];
+    protected $hidden     = ['value'];
 
     protected function value(): Attribute {
         return Attribute::make(
@@ -44,8 +48,19 @@ class Vault extends Model {
                     'LOGIN_ID'        => 'login',
                     'PASSWORD'        => 'password',
                     'TOWN_SQUARE'     => 'broadcast channel id',
-                    'DEFAULT_USER_ID' => 'default user ID',
                 ]),
+            ],
+            [
+                'prefix'     => 'SLACK',
+                'name'       => 'Slack',
+                'controller' => PluginSlackController::class,
+                'active'     => false,
+                'keys'       => collect([
+                    'TOKEN'       => 'bot token (xoxb-…)',
+                    'TOWN_SQUARE' => 'broadcast channel id',
+                    'USER_TOKEN'  => 'admin user token (xoxp-…, optional)',
+                ]),
+                'optional'   => ['USER_TOKEN'],
             ],
             [
                 'prefix'     => 'GITLAB',
@@ -57,6 +72,31 @@ class Vault extends Model {
                     'TOKEN'  => 'access token',
                     'APIKEY' => 'api key for webhooks',
                 ]),
+            ],
+            [
+                'prefix'     => 'MANTIS',
+                'name'       => 'MantisBT',
+                'controller' => PluginMantisController::class,
+                'active'     => false,
+                'keys'       => collect([
+                    'URL'   => 'Mantis URL',
+                    'TOKEN' => 'API token',
+                ]),
+            ],
+            [
+                'prefix'     => 'M365',
+                'name'       => 'Microsoft 365',
+                'controller' => PluginM365Controller::class,
+                'active'     => false,
+                'keys'       => collect([
+                    'TENANT_ID'         => 'tenant id',
+                    'CLIENT_ID'         => 'client id',
+                    'CLIENT_SECRET'     => 'client secret',
+                    'SECRET_EXPIRES_AT' => 'secret expiry (YYYY-MM-DD, optional)',
+                    'TEAM_ID'           => 'Teams team id for project channels (optional)',
+                    'TOWN_SQUARE'       => 'Teams broadcast channel id (optional)',
+                ]),
+                'optional'   => ['SECRET_EXPIRES_AT', 'TEAM_ID', 'TOWN_SQUARE'],
             ],
             [
                 'prefix'     => 'FINTS',
@@ -87,7 +127,7 @@ class Vault extends Model {
     public static function indexVaults(): Collection {
         $response = Vault::allVaults();
         $response = $response->map(function ($item) {
-            $keys     = Vault::getVaultKeys($item['prefix']);
+            $keys     = Vault::getRequiredVaultKeys($item['prefix']);
             $existing = Vault::whereIn('key', $keys)->get()
                 ->filter(fn ($_) => $_->value ? true : false)
                 ->map(fn ($_) => $_->key);
@@ -108,8 +148,12 @@ class Vault extends Model {
         }
         return null;
     }
+    public static function getRequiredVaultKeys($prefix): ?Collection {
+        $optional = collect(Vault::getVault($prefix)['optional'] ?? [])->map(fn ($_) => $prefix.'_'.$_);
+        return Vault::getVaultKeys($prefix)?->diff($optional)->values();
+    }
     public static function isActive($prefix): bool {
-        if ($keys = Vault::getVaultKeys($prefix)) {
+        if ($keys = Vault::getRequiredVaultKeys($prefix)) {
             $existing = Vault::whereIn('key', $keys)->get()
                 ->filter(fn ($_) => $_->value ? true : false)
                 ->map(fn ($_) => $_->key);

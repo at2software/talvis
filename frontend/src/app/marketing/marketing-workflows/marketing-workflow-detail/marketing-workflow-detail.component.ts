@@ -15,6 +15,8 @@ import { I18nTextareaComponent } from '@app/_shards/i18n-textarea/i18n-textarea.
 import { ScrollbarComponent } from '@app/app/scrollbar/scrollbar.component';
 import { ActivityTableComponent } from '@app/marketing/shared/activity-table/activity-table.component';
 import { Dictionary } from '@constants/constants';
+import { Toast } from '@shards/toast/toast';
+import { ConfirmationService } from '@app/_modals/modal-confirm/confirmation.service';
 
 const ActivityStatsColors = MarketingActivity.STATS_COLORS;
 
@@ -29,6 +31,7 @@ export class MarketingWorkflowDetailComponent {
     #marketingService = inject(MarketingService);
     #route = inject(ActivatedRoute);
     #router = inject(Router);
+    #confirm = inject(ConfirmationService);
 
     #workflowId = toSignal(this.#route.params.pipe(map((params) => params['id'] as string | undefined)));
     #workflow = modelResource(this.#workflowId, (id) => this.#marketingService.showWorkflow(id));
@@ -116,10 +119,10 @@ export class MarketingWorkflowDetailComponent {
         this.showActivityModal.set(true);
     }
 
-    deleteActivity(activity: MarketingActivity) {
+    async deleteActivity(activity: MarketingActivity) {
         const wf = this.selectedWorkflow();
         if (!wf) return;
-        if (!confirm(`Delete activity "${activity.name}"?`)) return;
+        if (!(await this.#confirm.ask({ title: $localize`:@@i18n.common.delete:delete`, message: $localize`:@@i18n.marketing.confirmDeleteActivity:delete activity "${activity.name}"?` }))) return;
 
         this.#marketingService.destroyWorkflowActivity(wf.id, activity.id).subscribe(() => this.loadWorkflow());
     }
@@ -160,19 +163,19 @@ export class MarketingWorkflowDetailComponent {
         if (!targetActivity) return;
         this.#marketingService.updateWorkflowActivity(wf.id, targetActivity.id, { parent_activity_id: event.sourceId }).subscribe({
             next: () => this.loadWorkflow(),
-            error: () => alert('Failed to create dependency. Please try again.'),
+            error: () => Toast.error($localize`:@@i18n.marketing.dependencyCreateFailed:failed to create dependency – please try again`),
         });
     }
 
-    onDependencyRemoved(event: { activityId: string }) {
+    async onDependencyRemoved(event: { activityId: string }) {
         const wf = this.selectedWorkflow();
         if (!wf) return;
         const activity = wf.marketing_activities?.find((a) => a.id === event.activityId);
         if (!activity || !activity.parent_activity_id) return;
-        if (!confirm(`Remove dependency from "${activity.name}"?`)) return;
+        if (!(await this.#confirm.ask({ title: $localize`:@@i18n.common.remove:remove`, message: $localize`:@@i18n.marketing.confirmRemoveDependency:remove dependency from "${activity.name}"?` }))) return;
         this.#marketingService.updateWorkflowActivity(wf.id, activity.id, { parent_activity_id: null }).subscribe({
             next: () => this.loadWorkflow(),
-            error: () => alert('Failed to remove dependency. Please try again.'),
+            error: () => Toast.error($localize`:@@i18n.marketing.dependencyRemoveFailed:failed to remove dependency – please try again`),
         });
     }
 

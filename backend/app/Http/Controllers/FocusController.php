@@ -32,6 +32,6 @@ class FocusController extends Controller {
         ]);
     }
     public function destroy(Focus $focus) {
-        return $focus->delete();
+        return response()->json($focus->delete());
     }
 }

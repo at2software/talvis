@@ -13,7 +13,7 @@ class InvoiceBuilder extends BaseBuilder {
             ->get()->append('net');
     }
     public function revenue_12(Carbon $date) {
-        return $this->last12($date)->sum('net');
+        return $this->last12($date)->sum(fn ($_) => $_->unmaskedNet());
     }
     public function withItems() {
         return $this->join('invoice_items', 'invoice_items.invoice_id', '=', 'invoices.id');

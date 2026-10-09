@@ -221,7 +221,7 @@ export class CustomersKnownSequiturComponent {
             });
     }
 
-    asProject = (_: Serializable) => _ as Project;
+    isFinishedProject = (_: Serializable) => !!(_ as Project).state?.isFinishedAny();
     birthdayMissing = (item: Serializable) => this.isInstanceOf(item, 'CompanyContact') && !(item as unknown as { contact?: { card?: { get?: (k: string) => unknown[] } } }).contact?.card?.get?.('BDAY')?.length;
     linkedinMissing = (item: Serializable) => this.isInstanceOf(item, 'CompanyContact') && !(item as unknown as { contact?: { card?: { get?: (k: string) => VcardRow[] } } }).contact?.card?.get?.('URL')?.filter((row: VcardRow) => row.getType() == 'linkedin')?.length;
 

@@ -20,10 +20,14 @@ use App\Traits\HasTasksTrait;
 use App\Traits\VcardGenderTrait;
 use App\Traits\VcardTrait;
 use Carbon\Carbon;
+use Carbon\CarbonInterface;
 use Carbon\CarbonPeriod;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Laravel\Sanctum\HasApiTokens;
+use Laravel\Sanctum\PersonalAccessToken;
 use Spatie\Permission\Traits\HasRoles;
 
 class User extends BaseAuthenticatable {
@@ -43,10 +47,20 @@ class User extends BaseAuthenticatable {
     use VcardGenderTrait;
     use VcardTrait;
 
-    protected $hidden   = ['password', 'remember_token', 'created_at', 'updated_at', 'deleted_at', 'api_token'];
-    protected $with     = ['activeEmployment'];
-    protected $appends  = ['icon', 'class', 'is_retired', 'name', 'path', 'gender'];
-    protected $fillable = ['color', 'current_focus_id', 'current_focus_type', 'name', 'email', 'password', 'vcard', 'work_zip'];
+    protected $guard_name = 'api';
+    protected $hidden     = ['password', 'remember_token', 'created_at', 'updated_at', 'deleted_at'];
+    protected $with       = ['activeEmployment'];
+    protected $appends    = ['icon', 'class', 'is_retired', 'name', 'path', 'gender'];
+    protected $fillable   = ['color', 'current_focus_id', 'current_focus_type', 'name', 'email', 'password', 'vcard', 'work_zip'];
+
+    public const API_TOKEN_NAME             = 'api';
+    public const SESSION_TOKEN_DAYS         = 7;
+    private const DEFAULT_DASHBOARD_WIDGETS = [
+        ['widget-my-working-time' => null, 'widget-project-running' => 'project_manager'],
+        ['widget-prepared-invoices' => 'financial', 'widget-unpaid-invoices' => 'financial'],
+        ['widget-revenue-current-year' => 'financial', 'widget-revenue-monthly' => 'financial'],
+        ['widget-hr-team' => null, 'widget-project-acquisitions' => 'project_manager'],
+    ];
 
     /** @var array<int|string, string[]> */
     private static array $roleNames = [];
@@ -241,6 +255,20 @@ class User extends BaseAuthenticatable {
     public function vacations() {
         return $this->hasManyThrough(Vacation::class, VacationGrant::class);
     }
+    public function microsoft365Mailbox(): ?string {
+        return $this->m365_object_id;
+    }
+    public function usesMicrosoft365(string $toggle): bool {
+        return $this->m365_object_id && $this->param($toggle)->value === '1';
+    }
+    public function upcomingVacation(int $withinDays): ?Vacation {
+        return $this->vacations()
+            ->where('vacations.state', VacationState::Approved)
+            ->where('vacations.started_at', '<=', today()->addDays($withinDays))
+            ->where('vacations.ended_at', '>=', today())
+            ->orderBy('vacations.started_at')
+            ->first();
+    }
     public function approvedVacations(?Carbon $after = null, ?Carbon $before = null) {
         $query = $this->vacations()->where('state', VacationState::Approved)->where('vacations.amount', '<', '0');
         if ($after) {
@@ -373,15 +401,58 @@ class User extends BaseAuthenticatable {
     public function getAddressBook(): array {
         return app(GetUserAddressBook::class)->execute($this);
     }
-    public function getDashboards() {
-        $dashboards = $this->param('DASHBOARDS')?->value;
-        if (! $dashboards) {
-            $dashboards            = '[]';
-            $dashboardParam        = $this->param('DASHBOARDS');
+    public function getDashboards(): array {
+        return json_decode($this->ensureDefaultDashboard());
+    }
+    public function ensureDefaultDashboard(): string {
+        $dashboardParam = $this->param('DASHBOARDS');
+        $dashboards     = $dashboardParam->value;
+        if (! self::isValidDashboards($dashboards)) {
+            $dashboards            = $this->defaultDashboards();
             $dashboardParam->value = $dashboards;
             $dashboardParam->save();
         }
-        return json_decode($dashboards);
+        return $dashboards;
+    }
+    public function defaultDashboards(): string {
+        $cols = array_map(
+            fn ($col) => collect($col)
+                ->filter(fn ($role) => $role === null || $this->hasRole($role))
+                ->map(fn ($_, $widget) => ['widget' => $widget, 'options' => (object)[]])
+                ->values()
+                ->all(),
+            self::DEFAULT_DASHBOARD_WIDGETS
+        );
+        return json_encode([['title' => 'Dashboard', 'cols' => $cols]]);
+    }
+    public static function isValidDashboards(mixed $json): bool {
+        $dashboards = is_string($json) ? json_decode($json) : null;
+        if (! is_array($dashboards)) {
+            return false;
+        }
+        foreach ($dashboards as $dashboard) {
+            if (! is_object($dashboard) || ! is_string($dashboard->title ?? null) || ! is_array($dashboard->cols ?? null)) {
+                return false;
+            }
+        }
+        return true;
+    }
+    public static function findByApiToken(string $token): ?static {
+        $accessToken = PersonalAccessToken::findToken($token);
+        if (! $accessToken || $accessToken->expires_at?->isPast()) {
+            return null;
+        }
+        $user = $accessToken->tokenable;
+        return $user instanceof static ? $user : null;
+    }
+    public function issueApiToken(?CarbonInterface $expiresAt = null): string {
+        return $this->createToken(self::API_TOKEN_NAME, ['*'], $expiresAt)->plainTextToken;
+    }
+    public function issueSessionToken(): string {
+        return $this->issueApiToken(now()->addDays(self::SESSION_TOKEN_DAYS));
+    }
+    public function isLastAdmin(): bool {
+        return $this->hasRole('admin') && ! static::role('admin')->whereKeyNot($this->getKey())->exists();
     }
     public function getTimeBasedEmploymentInfo(): ?array {
         return app(TimeBasedEmploymentQuery::class)->getInfo($this);
@@ -394,5 +465,80 @@ class User extends BaseAuthenticatable {
     }
     public function getWorkloadStats(array $workData, array $holidays): array {
         return app(CalculateUserWorkloadStats::class)->execute($this, $workData, $holidays);
+    }
+    public static function register(array $data): self {
+        $firstName  = $data['first_name'] ?? '';
+        $familyName = $data['family_name'] ?? '';
+
+        if (! $firstName && ! $familyName && ($data['name'] ?? null)) {
+            [$firstName, $familyName] = Vcard::splitName($data['name']);
+        }
+
+        $fullName = trim($firstName.' '.$familyName) ?: $data['name'];
+
+        $vcard = new Vcard;
+        $vcard->setProperty('FN', $fullName);
+        $vcard->setProperty('N', [$familyName, $firstName, '', '', ''], ['charset' => 'utf-8']);
+        $vcard->setProperty('EMAIL', $data['email'], ['type' => 'work']);
+
+        $user = static::forceCreate([
+            'name'      => $fullName,
+            'email'     => $data['email'],
+            'password'  => Hash::make($data['password']),
+            'vcard'     => $vcard->toVCardString(false),
+        ]);
+
+        if (isset($data['employment'])) {
+            $emp = $data['employment'];
+            $hpd = (float)($emp['hpw'] ?? 40) / 5;
+            $user->assignWorkingHours(
+                ['mo' => $hpd, 'tu' => $hpd, 'we' => $hpd, 'th' => $hpd, 'fr' => $hpd, 'sa' => 0, 'su' => 0],
+                $emp['type'] ?? UserEmployment::DEFAULT_TYPE,
+                $emp['started_at'] ?? null,
+            );
+        }
+        return $user;
+    }
+    public static function seedAdmin(): ?self {
+        return static::where('email', config('services.admin.email'))->first();
+    }
+    public static function isSeedAdminRetired(): bool {
+        return (bool)Param::get('SYS_SEED_ADMIN_RETIRED')->value;
+    }
+    public function isSeedAdmin(): bool {
+        return $this->getRawOriginal('email') === config('services.admin.email') && ! self::isSeedAdminRetired();
+    }
+    public function retireSeedAdmin(): void {
+        $this->password = Hash::make(Str::random(64));
+        $this->save();
+        $this->tokens()->delete();
+        $this->syncRoles([]);
+        $this->employments()->update(['is_active' => false]);
+        Param::put('SYS_SEED_ADMIN_RETIRED', 1);
+    }
+    public function assignWorkingHours(array $hours, string $type = UserEmployment::DEFAULT_TYPE, ?string $startedAt = null): UserEmployment {
+        $employment = $this->activeEmployment ?? new UserEmployment([
+            'user_id'       => $this->id,
+            'description'   => $type,
+            'is_time_based' => in_array($type, UserEmployment::TIME_BASED_TYPES),
+            'started_at'    => $startedAt ?? now()->format('Y-m-d'),
+            'is_active'     => true,
+        ]);
+        $employment->fill($hours)->save();
+        $this->setRelation('activeEmployment', $employment);
+        return $employment;
+    }
+    public function hasValidVacationGrant(): bool {
+        return $this->vacation_grants()->where('expires_at', '>', now())->exists();
+    }
+    public function grantVacationDays(float $days): VacationGrant {
+        $year = now()->year;
+        return VacationGrant::updateOrCreate(
+            ['user_id' => $this->id, 'name' => 'Urlaubsanspruch '.$year],
+            [
+                'amount'     => $days * ($this->activeEmployment?->averageHoursPerWorkday() ?? 8),
+                'expires_at' => Carbon::create($year + 1, 3, 31),
+            ],
+        );
     }
 }

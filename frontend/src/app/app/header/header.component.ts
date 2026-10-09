@@ -18,9 +18,9 @@ import { ToolbarComponent } from '../toolbar/toolbar.component';
 export class HeaderComponent implements AfterViewInit {
     toolbar = viewChild<ElementRef>('toolbar');
     content = viewChild.required<ElementRef>('content');
-    isScrolled = signal(false);
 
     readonly globalService = inject(GlobalService);
+    isScrolled = signal(false);
 
     #toolbarService = inject(ToolbarService);
     #re = inject(Renderer2);

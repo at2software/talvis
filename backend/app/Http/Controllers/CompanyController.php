@@ -3,17 +3,20 @@
 namespace App\Http\Controllers;
 
 use App\Enums\InvoiceItemType;
+use App\Enums\WebhookEvent;
 use App\Helpers\NLog;
 use App\Http\Controllers\Traits\HasFociController;
 use App\Http\Requests\Company\StoreConnectionRequest;
+use App\Http\Requests\PhoneLookupRequest;
 use App\Models\Company;
 use App\Models\Connection;
 use App\Models\Param;
+use App\Models\WebhookEndpoint;
 use App\Services\FocusStatisticsService;
 use App\Traits\HasParams;
-use Illuminate\Console\Command;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
 
@@ -148,11 +151,10 @@ class CompanyController extends Controller {
         });
         return $replies;
     }
-    public function showByPhone(Request $request): ?JsonResponse {
-        $phoneNumber = $request->input('phone_number');
-        $company     = Company::searchByPhone($phoneNumber);
+    public function showByPhone(PhoneLookupRequest $request): JsonResponse|Response {
+        $company = Company::searchByPhone($request->validated('phone_number'));
         if (empty($company)) {
-            return null;
+            return response()->noContent();
         }
         $user = Auth::user();
         $company->employees;
@@ -278,13 +280,17 @@ class CompanyController extends Controller {
             $company->append('params', 'billing_considerations');
             $company->upcomingRepeatingInvoiceItems;
         }
-        return $company->toJson();
+        return $company;
     }
     public function store(Request $request) {
         $request->validate(['name' => 'required|string']);
         $data = $this->getBody();
         if (preg_match("/^https?:\/\//is", $data->name)) {
-            $vcard = Company::scrapeWebpage($data->name);
+            try {
+                $vcard = Company::scrapeWebpage($data->name);
+            } catch (\Exception $e) {
+                abort(422, $e->getMessage());
+            }
         } else {
             $vcard = 'FN:'.$data->name.PHP_EOL;
             $vcard .= 'ORG:'.$data->name.PHP_EOL;
@@ -294,8 +300,9 @@ class CompanyController extends Controller {
         $new        = new Company;
         $new->vcard = $vcard;
         $new->save();
-        while (Artisan::call('customers:fixMissingNumbers') != Command::SUCCESS) {
-        } // Add missing customer numbers
+        Company::assignMissingCustomerNumbers();
+        $new = $new->fresh();
+        WebhookEndpoint::dispatch(WebhookEvent::CompanyCreated, $new->toWebhookPayload());
         return $new;
     }
     public function storeDraft(Request $request) {
@@ -322,42 +329,39 @@ class CompanyController extends Controller {
         $_->flags = (int)$_->flags & ~Company::FLAG_DRAFT;
         $_->vcard = preg_replace('/^X-KNOWNSEQ-DRAFT:.*\R?/m', '', (string)$_->vcard);
         $_->save();
-        while (Artisan::call('customers:fixMissingNumbers') != Command::SUCCESS) {
-        }
+        Company::assignMissingCustomerNumbers();
         return response()->json($_->fresh());
     }
     public function discardDraft(Company $_) {
         if (! $_->isDraft()) {
-            return response()->make('not a draft', 403);
+            abort(403, 'not a draft');
         }
         $_->purgeDraft();
-        return response()->make('success', 202);
+        return response()->json(true, 202);
     }
     public function storeProject(Request $request, Company $_) {
+        $data = $request->validate([
+            'name'       => 'nullable|string|max:255',
+            'project_id' => 'nullable|integer|exists:projects,id,deleted_at,NULL',
+        ]);
         return $_->createProject(
-            $request->input('name', 'New project'),
-            $request->input('project_id'),
+            $data['name'] ?? 'New project',
+            $data['project_id'] ?? null,
             $request->user()->id
         );
     }
     public function storeAssignee(Request $request, Company $_) {
         return $_->addAssigneeFromRequest($request);
     }
-    public function storeEmployee(Company $_) {
-        return $_->createEmployee();
+    public function storeEmployee(Request $request, Company $_) {
+        $request->validate(['name' => 'nullable|string|max:255']);
+        return $_->createEmployee((string)$request->input('name'));
     }
     public function storeConnection(StoreConnectionRequest $request) {
         $q  = ['company1_id' => $request->validated('company1_id'), 'company2_id' => $request->validated('company2_id')];
         $q2 = ['company1_id' => $request->validated('company2_id'), 'company2_id' => $request->validated('company1_id')];
-        if (Connection::where($q)->exists()) {
-            return response('connection already exists', 405);
-        }
-        if (Connection::where($q2)->exists()) {
-            return response('connection already exists', 405);
-        }
-        if (request('company1_id') == request('company2_id')) {
-            return response('cannot connect to itself', 405);
-        }
+        abort_if(Connection::where($q)->orWhere(fn ($_) => $_->where($q2))->exists(), 405, 'connection already exists');
+        abort_if(request('company1_id') == request('company2_id'), 405, 'cannot connect to itself');
         $con = Connection::create($q);
         $con->company1;
         $con->company2;
@@ -394,7 +398,7 @@ class CompanyController extends Controller {
                 NLog::info('ImportImprint: Successfully scraped and saved imprint data');
             } catch (\Exception $e) {
                 NLog::error('ImportImprint: Error scraping webpage', ['error' => $e->getMessage(), 'url' => $url]);
-                throw $e;
+                abort(422, $e->getMessage());
             }
         } else {
             NLog::warning('ImportImprint: No URL found in company vcard', ['company_id' => $_->id]);
@@ -406,7 +410,7 @@ class CompanyController extends Controller {
     }
     public function destroy(Request $request, Company $company) {
         $company->delete();
-        return response()->make('success', 202);
+        return response()->json(true, 202);
     }
     public function makeInvoice(Company $_) {
         return $_->makeInvoiceFor();

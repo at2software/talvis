@@ -13,7 +13,7 @@ class HasAccessTokenMiddleware {
             $token = $request->{$key}; // check POST and GET variables as well
         }
         if ($token !== $value) {
-            return response('Not authenticated', 401);
+            return response()->json(['message' => 'Not authenticated'], 401);
         }
         return $next($request);
     }

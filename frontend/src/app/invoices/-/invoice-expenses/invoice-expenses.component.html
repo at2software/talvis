@@ -9,8 +9,8 @@
         </div>
     }
     @if (_lopsHeaders) {
-        <span class="badge text-bg-primary me-2">{{ _lopsHeaders!.length }} columns</span>
-        <button class="btn btn-sm btn-primary me-1" (click)="onLopsUpdate()" i18n="@@i18n.invoices.updateLops">update LOPS</button>
+        <span class="badge bg-dark me-2">{{ _lopsHeaders!.length }} columns</span>
+        <button class="btn btn-sm btn-plain text-primary me-1" (click)="onLopsUpdate()" i18n="@@i18n.invoices.updateLops">update LOPS</button>
         <button class="btn btn-sm text-muted" (click)="lopsHeaders.set(undefined); lopsItems.set(undefined)" i18n="@@i18n.common.cancel">cancel</button>
     }
 </toolbar>
@@ -28,7 +28,9 @@
             <div class="card-header hstack gap-2">
                 <div class="flex-fill text-truncate" i18n="@@i18n.common.categories">categories</div>
                 <div>
-                    <i class="cursor-pointer text-primary" tabindex="0" (click)="onNewExpenseCategory()" (keyup.enter)="onNewExpenseCategory()">add</i>
+                    <button class="btn btn-plain text-primary p-0" ngbTooltip="New category" i18n-ngbTooltip="@@i18n.invoices.newCategory" aria-label="New category" i18n-aria-label="@@i18n.invoices.newCategory" (click)="onNewExpenseCategory()">
+                        <i class="text-primary">add</i>
+                    </button>
                 </div>
             </div>
             <ul class="list-group">
@@ -54,6 +56,7 @@
             <div class="card">
                 <empty-state [card]="false" class="invoices" i18n-title="@@i18n.invoices.noExpensesYet" title="No expenses yet">
                     <p i18n="@@i18n.invoices.expensesEmptyDescription">Track every cost, master every margin. Add your first expense and gain complete visibility into your operational spending.</p>
+                    <button type="button" class="btn btn-primary" (click)="onNewExpense()"><i>add</i><span i18n="@@i18n.invoices.newExpense">new expense</span></button>
                 </empty-state>
             </div>
         }
@@ -123,7 +126,7 @@
                                     <td class="pe-3 text-end text-monospace">{{ _.yearlyPrice | money }}</td>
                                     <td class="pe-3 float-end text-nowrap hstack gap-2">
                                         @if (_.invoice_item_id) {
-                                            <div class="cursor-pointer" ngbTooltip="linked to recurring invoice" i18n-ngbTooltip="@@i18n.invoicing.linkedToRecurringInvoice">
+                                            <div ngbTooltip="linked to recurring invoice" i18n-ngbTooltip="@@i18n.invoicing.linkedToRecurringInvoice">
                                                 <n class="text-success">invoice</n>
                                             </div>
                                         }

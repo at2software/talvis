@@ -57,7 +57,7 @@
                                                         <button class="btn btn-sm" (click)="cancelResetPassword()"><i style="font-size: 0.9rem">close</i></button>
                                                     </div>
                                                 } @else {
-                                                    <button class="btn btn-sm btn-outline-primary" (click)="startResetPassword(user)" i18n="@@i18n.user.resetPassword">reset password</button>
+                                                    <button class="btn btn-sm btn-plain text-primary" (click)="startResetPassword(user)" i18n="@@i18n.user.resetPassword">reset password</button>
                                                 }
                                             </td>
                                         }
@@ -66,7 +66,7 @@
                                             @for (role of _roles; track role.id) {
                                                 <td class="text-center align-middle px-1">
                                                     @if (role.name === 'admin') {
-                                                        <button class="btn btn-sm btn-primary px-2" [disabled]="isDisabled(user, role)" (click)="toggle(user, role)">
+                                                        <button class="btn btn-sm btn-plain hover-primary text-primary px-2" [disabled]="isDisabled(user, role)" (click)="toggle(user, role)">
                                                             <i style="font-size: 0.9rem">check</i>
                                                         </button>
                                                     } @else {
@@ -78,11 +78,11 @@
                                             @for (role of _roles; track role.id) {
                                                 <td class="text-center align-middle px-1">
                                                     @if (role.name === 'admin') {
-                                                        <button class="btn btn-sm btn-outline-primary px-2" (click)="toggle(user, role)">
+                                                        <button class="btn btn-sm btn-plain text-primary px-2" (click)="toggle(user, role)">
                                                             <i style="font-size: 0.9rem">add_moderator</i>
                                                         </button>
                                                     } @else {
-                                                        <button class="btn btn-sm px-2" [class.btn-primary]="hasRole(user, role.name)" [class.btn-outline-secondary]="!hasRole(user, role.name)" [disabled]="isDisabled(user, role)" (click)="toggle(user, role)">
+                                                        <button class="btn btn-sm btn-plain hover-primary px-2" [class.text-primary]="hasRole(user, role.name)" [class.text-muted]="!hasRole(user, role.name)" [disabled]="isDisabled(user, role)" (click)="toggle(user, role)">
                                                             <i style="font-size: 0.9rem">{{ hasRole(user, role.name) ? 'check' : 'add' }}</i>
                                                         </button>
                                                     }

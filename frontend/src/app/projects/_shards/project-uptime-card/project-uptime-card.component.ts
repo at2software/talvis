@@ -57,19 +57,7 @@ export class ProjectUptimeCardComponent {
     }
 
     #testMonitor(monitor: UptimeMonitor) {
-        this.#service.testCheck(monitor).subscribe({
-            next: (result) => {
-                const check = result.check;
-                let message = $localize`:@@i18n.uptime.testComplete:Test complete` + '\n\n';
-                message += $localize`:@@i18n.common.status:status` + `: ${check.status.toUpperCase()}\n`;
-                if (check.status_code) message += $localize`:@@i18n.uptime.statusCode:status code` + `: ${check.status_code}\n`;
-                if (check.response_time) message += $localize`:@@i18n.uptime.responseTime:response time` + `: ${check.response_time}ms\n`;
-                if (check.error_message) message += '\n' + $localize`:@@i18n.common.error:error` + `:\n${check.error_message}`;
-                alert(message);
-                this.#monitors.reload();
-            },
-            error: (err) => alert($localize`:@@i18n.uptime.testFailed:test failed` + `:\n${err?.error?.message || err?.message || 'Unknown error'}`),
-        });
+        this.#service.testCheckAndReport(monitor).subscribe(() => this.#monitors.reload());
     }
 
     createNew() {

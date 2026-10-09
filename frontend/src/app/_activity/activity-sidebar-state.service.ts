@@ -27,6 +27,11 @@ export class ActivitySidebarStateService {
         }
     }
 
+    applyViewport(narrow: boolean): void {
+        document.body.classList.toggle('activity-hidden', narrow);
+        document.body.classList.toggle('activity-collapsed', narrow || storageGet<boolean | null>(this.#STORAGE_KEY, null) === true);
+    }
+
     #saveSidebarState(isCollapsed: boolean): void {
         storageSet(this.#STORAGE_KEY, isCollapsed);
     }

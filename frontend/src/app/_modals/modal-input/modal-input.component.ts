@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, ElementRef, afterNextRender, inject, signal, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { NgbActiveModal, NgbModalOptions } from '@ng-bootstrap/ng-bootstrap';
 import { FormsModule } from '@angular/forms';
 import { HotkeyDirective } from '@directives/hotkey.directive';
@@ -22,26 +22,29 @@ export interface ModalInputArgs {
 export class ModalInputComponent extends ModalBaseComponent<ModalInputResult> {
     static override modalOptions: NgbModalOptions = { size: 'lg' };
 
-    readonly inputField = viewChild.required<ElementRef>('inputField');
-
     modalTitle = '';
     result = '';
     hasMore = signal(false);
     infoMessage?: string;
+    required = true;
 
     #activeModal = inject(NgbActiveModal);
-
-    constructor() {
-        super();
-        afterNextRender(() => this.inputField().nativeElement.focus());
-    }
 
     init(args: ModalInputArgs): void {
         this.modalTitle = args.title;
         this.infoMessage = args.message;
         if (args.hasMore !== undefined) this.hasMore.set(args.hasMore);
-        if (args.initialValue !== undefined) this.result = args.initialValue;
+        if (args.initialValue !== undefined) {
+            this.result = args.initialValue;
+            this.required = false;
+        }
     }
+    get canAccept() {
+        return !this.required || this.result.trim() !== '';
+    }
+    submit = () => {
+        if (this.canAccept) this.accept();
+    };
     onSuccess(): ModalInputResult {
         return { text: this.result, more: false };
     }

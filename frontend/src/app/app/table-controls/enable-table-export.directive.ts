@@ -1,5 +1,5 @@
 import { CdkTable } from '@angular/cdk/table';
-import { Directive, ElementRef, effect, inject, input } from '@angular/core';
+import { DestroyRef, Directive, ElementRef, effect, inject, input } from '@angular/core';
 import { TableExportService } from '@models/table-export.service';
 
 @Directive({
@@ -11,6 +11,7 @@ export class EnableTableExportDirective {
     #el: ElementRef = inject(ElementRef);
     #tableExportService: TableExportService = inject(TableExportService);
     #initialized = false;
+    #button?: HTMLButtonElement;
 
     constructor() {
         effect(() => {
@@ -20,7 +21,7 @@ export class EnableTableExportDirective {
             const host = this.#el.nativeElement as HTMLElement;
             const table = host as HTMLTableElement | CdkTable<unknown>;
 
-            const button = document.createElement('button');
+            const button = (this.#button = document.createElement('button'));
             button.type = 'button';
             button.innerText = 'excel';
             button.style.fontFamily = 'NxIcons';
@@ -38,11 +39,12 @@ export class EnableTableExportDirective {
 
             if (header) {
                 header.classList.add('d-flex', 'align-items-center');
-                if (header.childNodes.length) {
-                    const label = document.createElement('span');
-                    label.classList.add('flex-fill', 'text-truncate');
-                    while (header.firstChild) label.appendChild(header.firstChild);
-                    header.appendChild(label);
+                const label = header.querySelector(':scope > .table-export-label');
+                if (!label && header.childNodes.length) {
+                    const wrapper = document.createElement('span');
+                    wrapper.classList.add('table-export-label', 'flex-fill', 'text-truncate');
+                    while (header.firstChild) wrapper.appendChild(header.firstChild);
+                    header.appendChild(wrapper);
                 }
                 button.classList.add('ms-auto');
                 header.appendChild(button);
@@ -52,5 +54,6 @@ export class EnableTableExportDirective {
 
             this.#initialized = true;
         });
+        inject(DestroyRef).onDestroy(() => this.#button?.remove());
     }
 }

@@ -27,7 +27,7 @@
 
     @if (project.milestones.length) {
         <div class="btn-group ms-2" ngbDropdown>
-            <button type="button" class="btn btn-outline-primary dropdown-toggle" ngbDropdownToggle><i class="me-1">calendar_view_month</i>{{ currentViewMode }}</button>
+            <button type="button" class="btn btn-plain text-primary dropdown-toggle" ngbDropdownToggle><i class="me-1">calendar_view_month</i>{{ currentViewMode }}</button>
             <div class="dropdown-menu" ngbDropdownMenu>
                 <button class="dropdown-item" (click)="onViewModeChange('Day')" [class.active]="currentViewMode === 'Day'"><i class="me-2">view_day</i>Day</button>
                 <button class="dropdown-item" (click)="onViewModeChange('Week')" [class.active]="currentViewMode === 'Week'"><i class="me-2">view_week</i>Week</button>
@@ -46,8 +46,30 @@
             </div>
         }
         @if (!isLoading() && project.milestones.length) {
-            <div class="flex-grow-1 overflow-hidden d-flex">
+            <div class="overflow-hidden d-flex gantt-area">
                 <custom-gantt class="flex-fill" [rows]="ganttRows()" [viewMode]="currentViewMode" (addMilestone)="onAddButton()" (addTask)="onAddTask($event)" [showProjectHeaders]="false"> </custom-gantt>
+            </div>
+            <div class="flex-grow-1 overflow-auto pt-3">
+                <div class="card">
+                    <ul class="list-group">
+                        @for (m of milestoneList(); track m.id) {
+                            @let _state = stateInfo(m.state);
+                            <li class="list-group-item hstack gap-3" [nx]="m" [tables]="milestoneList()" (actionsResolved)="loadMilestones()">
+                                <i [class]="_state.textClass" [ngbTooltip]="_state.name">{{ m.state === 2 ? 'check_circle' : m.state === 1 ? 'timelapse' : 'radio_button_unchecked' }}</i>
+                                <span class="flex-fill text-truncate">{{ m.name }}</span>
+                                @if (m.started_at && m.due_at) {
+                                    <span class="small text-nowrap" [class.text-danger]="isOverdue(m)" [class.text-muted]="!isOverdue(m)">{{ m.started_at | date: 'dd.MM.' }} – {{ m.due_at | date: 'dd.MM.yyyy' }}</span>
+                                }
+                                @if (m.workload_hours) {
+                                    <span class="small text-muted text-nowrap">{{ m.workload_hours | number: '1.0-1' }} h</span>
+                                }
+                                @if (m.user_id) {
+                                    <avatar [object]="userFor(m)" size="xs"></avatar>
+                                }
+                            </li>
+                        }
+                    </ul>
+                </div>
             </div>
         }
         @if (!isLoading() && !project.milestones.length) {
@@ -55,7 +77,7 @@
                 <div class="card mx-auto" style="width: 36rem">
                     <div class="row align-items-center g-0">
                         <div class="col-md-6">
-                            <img src="assets/empty-state/empty-milestones.webp" alt="No milestones" class="img-fluid p-4" style="max-height: 300px; width: 100%; object-fit: contain" />
+                            <empty-state class="milestones"></empty-state>
                         </div>
                         <div class="col-md-6">
                             <div class="card-body">
@@ -65,12 +87,12 @@
                                 </h4>
                                 <p class="text-muted mb-4" i18n="@@i18n.projects.noMilestonesSubtitle">Add milestones manually or track your invoice items with milestones to get started.</p>
                                 <div class="d-flex flex-column gap-2">
-                                    <button type="button" class="btn btn-primary" (click)="onAddButton()">
+                                    <button type="button" class="btn btn-plain text-primary" (click)="onAddButton()">
                                         <i class="me-2">add</i>
                                         <span i18n="@@i18n.common.addMilestone">add milestone</span>
                                     </button>
                                     @if (project.invoice_items && project.invoice_items.length > 0) {
-                                        <button type="button" class="btn btn-outline-primary" (click)="onConvertInvoiceItems()">
+                                        <button type="button" class="btn btn-plain text-primary" (click)="onConvertInvoiceItems()">
                                             <i class="me-2">auto_awesome</i>
                                             <span i18n="@@i18n.projects.trackInvoiceItems">track invoice items</span>
                                         </button>

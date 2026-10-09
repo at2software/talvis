@@ -11,6 +11,7 @@ import { Nx } from '@app/nx/nx.directive';
 import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { EmptyStateComponent } from '@shards/empty-state/empty-state.component';
 import { GuidedTourComponent } from '@shards/guided-tour/guided-tour.component';
+import { ConfirmationService } from '@app/_modals/modal-confirm/confirmation.service';
 
 const ActivityStatsColors = MarketingActivity.STATS_COLORS;
 
@@ -25,6 +26,7 @@ export class MarketingWorkflowsComponent {
     #marketingService = inject(MarketingService);
     #route = inject(ActivatedRoute);
     #router = inject(Router);
+    #confirm = inject(ConfirmationService);
     #destroyRef = inject(DestroyRef);
 
     readonly STATS_COLORS = ActivityStatsColors;
@@ -67,8 +69,8 @@ export class MarketingWorkflowsComponent {
             });
     }
 
-    deleteWorkflow(workflow: MarketingWorkflow) {
-        if (!confirm(`Delete workflow "${workflow.name}"?`)) return;
+    async deleteWorkflow(workflow: MarketingWorkflow) {
+        if (!(await this.#confirm.ask({ title: $localize`:@@i18n.common.delete:delete`, message: $localize`:@@i18n.marketing.confirmDeleteWorkflow:delete workflow "${workflow.name}"?` }))) return;
 
         this.#marketingService.destroyWorkflow(workflow.id).subscribe(() => {
             this.workflows.update((arr) => arr.filter((w) => w.id !== workflow.id));

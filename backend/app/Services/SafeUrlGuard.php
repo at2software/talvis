@@ -5,7 +5,8 @@ namespace App\Services;
 use App\Exceptions\SsrfException;
 
 class SafeUrlGuard {
-    public function validate(string $url): void {
+    /** @return list<string> */
+    public function validate(string $url): array {
         $parsed = parse_url($url);
 
         if (! $parsed || ! isset($parsed['scheme'], $parsed['host'])) {
@@ -32,7 +33,7 @@ class SafeUrlGuard {
                 throw new SsrfException('Requests to private or reserved IP addresses are not allowed.');
             }
 
-            return;
+            return [$host];
         }
 
         $ips = $this->resolveHost($host);
@@ -46,6 +47,21 @@ class SafeUrlGuard {
                 throw new SsrfException("Resolved IP {$ip} is in a private or reserved range.");
             }
         }
+
+        return $ips;
+    }
+
+    public function pinnedCurlOptions(string $url): array {
+        $ips    = $this->validate($url);
+        $parsed = parse_url($url);
+        $host   = trim($parsed['host'], '[]');
+        if (filter_var($host, FILTER_VALIDATE_IP)) {
+            return [];
+        }
+        $port      = $parsed['port'] ?? ($parsed['scheme'] === 'https' ? 443 : 80);
+        $addresses = array_map(fn (string $ip) => str_contains($ip, ':') ? "[$ip]" : $ip, $ips);
+
+        return [CURLOPT_RESOLVE => ["$host:$port:".implode(',', $addresses)]];
     }
     private function resolveHost(string $host): array {
         $ips = gethostbynamel($host) ?: [];

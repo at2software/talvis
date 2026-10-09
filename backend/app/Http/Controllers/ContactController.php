@@ -24,7 +24,7 @@ class ContactController extends Controller {
     }
     public function unlink(Contact $_, Company $company) {
         CompanyContact::whereCompanyId($company->id)->whereContactId($_->id)->delete();
-        return true;
+        return response()->json(true);
     }
     public function maintenanceMissingBirthday() {
         return Contact::whereHasActiveCompanies()->whereMissingBirthday()->with('companies')->get();

@@ -21,7 +21,7 @@
             @if (hasRecurrence(p)) {
                 <i class="tree-icon text-cyan" ngbTooltip="recurring product" i18n-ngbTooltip="@@i18n.products.recurringProduct">repeat</i>
             } @else if (p.time_based === 1) {
-                <i class="tree-icon text-teal" ngbTooltip="time based (hour)" i18n-ngbTooltip="@@i18n.products.timeBasedHour">schedule</i>
+                <i class="tree-icon text-cyan" ngbTooltip="time based (hour)" i18n-ngbTooltip="@@i18n.products.timeBasedHour">schedule</i>
             } @else if (p.time_based === 8) {
                 <i class="tree-icon text-cyan" ngbTooltip="time based (day)" i18n-ngbTooltip="@@i18n.products.timeBasedDay">schedule</i>
             } @else {

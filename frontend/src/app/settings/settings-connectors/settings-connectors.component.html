@@ -3,7 +3,7 @@
 <div class="row row-cols-2 row-cols-md-4 row-cols-xl-6 g-3">
     @for (vault of vaults(); track vault.prefix) {
         <div class="col">
-            <div class="card h-100 cursor-pointer" (click)="openVaultModal(vault, vaultModal)" (keyup.enter)="openVaultModal(vault, vaultModal)" tabindex="0">
+            <div class="card h-100 cursor-pointer" [class.bg-dark-grey]="!vault.active" (click)="openVaultModal(vault, vaultModal)" (keyup.enter)="openVaultModal(vault, vaultModal)" tabindex="0">
                 <div class="card-body text-center">
                     <n class="display-6 mb-3">{{ vaultIcon(vault) }}</n>
                     <div class="card-title">{{ vault.name }}</div>
@@ -11,7 +11,7 @@
                         <span class="badge" [class.bg-success]="vault.active" [class.bg-secondary]="!vault.active">
                             {{ vault.active ? 'active' : 'inactive' }}
                         </span>
-                        @if (vault.missing?.length) {
+                        @if (vault.active && vault.missing?.length) {
                             <span class="badge bg-danger ms-1">{{ vault.missing!.length }} missing</span>
                         }
                     </div>
@@ -29,6 +29,8 @@
     }
 </div>
 
+<settings-webhooks class="d-block mt-3"></settings-webhooks>
+
 <ng-template #vaultModal let-modal>
     @let _cv = currentVault();
     @if (_cv) {
@@ -41,6 +43,14 @@
 
             <!-- ── Credential fields (hidden while TAN challenge is active) ── -->
             @if (!_tanChallenge) {
+                @if (descriptionFor(_cv); as description) {
+                    <p class="text-muted small">{{ description }}</p>
+                }
+                @if (_cv.prefix === 'M365') {
+                    <button type="button" class="btn btn-sm btn-plain text-primary px-0 mb-3" (click)="openM365SetupGuide()">
+                        <i class="me-1">menu_book</i><span i18n="@@i18n.m365Guide.open">setup guide</span>
+                    </button>
+                }
                 <ul class="list-group">
                     @for (key of keysFor(_cv); track key; let i = $index) {
                         <li class="list-group-item" [class.text-danger]="isKeyMissing(key)">
@@ -59,7 +69,7 @@
                                 <div class="text-muted small mt-1">{{ infoFor(_cv)[i].description }}</div>
                             }
                             @if (key === 'IBAN' && _cv.prefix === 'FINTS' && bankName()) {
-                                <div class="text-primary small mt-1">
+                                <div class="text-muted small mt-1">
                                     <n>bank</n> {{ bankName() }}
                                 </div>
                             }
@@ -71,7 +81,7 @@
                     <div class="hstack gap-2 mt-4 mb-2">
                         <span class="fw-bold" i18n="@@i18n.settings.pipelineJobs">pipeline jobs</span>
                         <div class="ms-auto" ngbDropdown placement="bottom-end">
-                            <button class="btn btn-sm text-primary dropdown-toggle-simple" ngbDropdownToggle>+</button>
+                            <button class="btn btn-sm btn-plain text-primary dropdown-toggle-simple" ngbDropdownToggle>+</button>
                             <div ngbDropdownMenu>
                                 @for (preset of jobPresets; track preset.type) {
                                     <button ngbDropdownItem (click)="addPipelineJob(preset)">{{ preset.job }}</button>
@@ -85,7 +95,7 @@
                                 <small class="text-muted" style="width:5rem;flex-shrink:0">{{ job.type || 'new job' }}</small>
                                 <input class="form-control form-control-sm" [ngModel]="job.job" (ngModelChange)="updatePipelineJob(i, 'job', $event)" [name]="'job_' + i" i18n-placeholder="@@i18n.settings.jobName" placeholder="job name" i18n-ngbTooltip="@@i18n.settings.jobNameTooltip" ngbTooltip="The CI pipeline job name as defined in .gitlab-ci.yml" placement="left" />
                                 <input class="form-control form-control-sm" [ngModel]="job.artifact" (ngModelChange)="updatePipelineJob(i, 'artifact', $event)" [name]="'artifact_' + i" i18n-placeholder="@@i18n.settings.artifactFile" placeholder="artifact file" i18n-ngbTooltip="@@i18n.settings.artifactFileTooltip" ngbTooltip="Path to the artifact file produced by the job (e.g. gl-sast-report.json)" placement="left" />
-                                <button class="btn btn-sm text-danger" (click)="removePipelineJob(i)">×</button>
+                                <button class="btn btn-sm btn-plain text-danger" (click)="removePipelineJob(i)">×</button>
                             </li>
                         }
                     </ul>
@@ -97,7 +107,7 @@
                 <div class="d-flex flex-column align-items-center gap-3 py-2">
 
                     @if (tan.type === 'decoupled') {
-                        <n class="display-4 text-primary">phone</n>
+                        <n class="display-4 text-muted">phone</n>
                         <div class="text-center">
                             <div class="fw-semibold mb-1" i18n="@@i18n.settings.confirmInBankingApp">Confirm in your banking app</div>
                             @if (tan.text) { <div class="text-muted small">{{ tan.text }}</div> }
@@ -122,7 +132,7 @@
                     }
 
                     @if (tan.type === 'tan') {
-                        <n class="display-4 text-primary">security</n>
+                        <n class="display-4 text-muted">security</n>
                         @if (tan.text) { <div class="text-muted small text-center">{{ tan.text }}</div> }
                         @if (tan.medium) { <div class="text-muted small">Device: {{ tan.medium }}</div> }
                         <input class="form-control" style="max-width:260px" i18n-placeholder="@@i18n.settings.enterTan" placeholder="Enter TAN" [ngModel]="tanInput()" (ngModelChange)="tanInput.set($event)" />
@@ -134,7 +144,7 @@
         </div>
         <div class="modal-footer">
             @if (_cv.prefix === 'GITLAB' && !_tanChallenge) {
-                <button class="btn btn-outline-primary me-auto" (click)="savePipelineJobs()" i18n="@@i18n.common.save">save jobs</button>
+                <button class="btn btn-plain text-primary me-auto" (click)="savePipelineJobs()" i18n="@@i18n.common.save">save jobs</button>
             }
             @if (!_tanChallenge) {
                 <button class="btn btn-success" (click)="checkCredentials()" i18n="@@i18n.settings.checkSave">check & save</button>
@@ -142,7 +152,7 @@
             @if (_tanChallenge && _tanChallenge!.type !== 'decoupled') {
                 <button class="btn btn-success" (click)="submitTan()" [disabled]="!tanInput()">confirm TAN</button>
             }
-            <button class="btn btn-secondary" (click)="_tanChallenge ? cancelTan() : modal.dismiss()" i18n="@@i18n.common.cancel">cancel</button>
+            <button class="btn" (click)="_tanChallenge ? cancelTan() : modal.dismiss()" i18n="@@i18n.common.cancel">cancel</button>
         </div>
     }
 </ng-template>

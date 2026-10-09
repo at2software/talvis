@@ -20,7 +20,7 @@
         <div class="btn-group" ngbDropdown>
             <button class="btn" [class.btn-primary]="!_isCreating && !_hasBillingConcerns" [class.btn-danger]="!_isCreating && _hasBillingConcerns" [class.btn-dark]="_isCreating" role="alert" (click)="makeInvoice()" [disabled]="_isCreating" [ngbTooltip]="_hasBillingConcerns ? _billingConcernsTooltip : ''">
                 <n>invoice</n>
-                <div i18n="@@i18n.invoice.create{invoiceNumber}">create {{ invoiceNumber }}</div>
+                <div i18n="@@i18n.invoice.create{invoiceNumber}">create invoice {{ invoiceNumber }}</div>
             </button>
             <button type="button" class="btn dropdown-toggle dropdown-toggle-split" [class.btn-primary]="!_isCreating && !_hasBillingConcerns" [class.btn-danger]="!_isCreating && _hasBillingConcerns" [class.btn-dark]="_isCreating" ngbDropdownToggle [disabled]="_isCreating">
                 <span class="visually-hidden" i18n="@@i18n.invoices.toggleDropdown">toggle dropdown</span>
@@ -37,17 +37,17 @@
     @if (_invoicingType > 0 && project.company.requires_po && !project.po_number?.length) {
         <button class="btn btn-dark" role="alert" ngbTooltip="requires PO#" i18n-ngbTooltip="@@i18n.projects.requiresPo">
             <n>invoice</n>
-            <div i18n="@@i18n.invoice.create{invoiceNumber}">create {{ invoiceNumber }}</div>
+            <div i18n="@@i18n.invoice.create{invoiceNumber}">create invoice {{ invoiceNumber }}</div>
         </button>
     }
 
     @if (_invoicingType === 1) {
         <div class="btn-group" ngbDropdown>
-            <button type="button" class="btn btn-primary" (click)="onCreateDownpaymentInstalmentItem()">
+            <button type="button" class="btn btn-plain text-primary" (click)="onCreateDownpaymentInstalmentItem()">
                 <i>add</i>
                 <span i18n="invoice item|short description for invoice item@@i18n.invoice.item">item</span>
             </button>
-            <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split" ngbDropdownToggle>
+            <button type="button" class="btn btn-plain text-primary dropdown-toggle dropdown-toggle-split" ngbDropdownToggle>
                 <span class="visually-hidden" i18n="@@i18n.invoices.toggleDropdown">toggle dropdown</span>
             </button>
             <div class="dropdown-menu dropdown-menu-end" ngbDropdownMenu>
@@ -63,11 +63,11 @@
 
     @if (_invoicingType === 2) {
         <div class="btn-group" ngbDropdown>
-            <button type="button" class="btn btn-primary" (click)="onCreateSupportRegularItem()">
+            <button type="button" class="btn btn-plain text-primary" (click)="onCreateSupportRegularItem()">
                 <i>add</i>
                 <span i18n="invoice item|short description for invoice item@@i18n.invoice.item">item</span>
             </button>
-            <button type="button" class="btn btn-primary dropdown-toggle dropdown-toggle-split" ngbDropdownToggle>
+            <button type="button" class="btn btn-plain text-primary dropdown-toggle dropdown-toggle-split" ngbDropdownToggle>
                 <span class="visually-hidden" i18n="@@i18n.invoices.toggleDropdown">toggle dropdown</span>
             </button>
             <div class="dropdown-menu dropdown-menu-end" ngbDropdownMenu>
@@ -83,7 +83,7 @@
 
     @if (_invoicingType === 2 || (_invoicingType !== 2 && finalItems().length)) {
         <div ngbDropdown>
-            <button class="btn btn-plain dropdown-toggle-simple" ngbDropdownToggle>
+            <button class="btn btn-plain text-primary dropdown-toggle-simple" ngbDropdownToggle i18n-aria-label="@@i18n.common.more" aria-label="more">
                 <i>more_vert</i>
             </button>
             <div ngbDropdownMenu>
@@ -102,201 +102,197 @@
     }
 
     @if (_invoicingType === 0) {
-        <button id="btnGroupDrop2" type="button" class="btn" [class.btn-primary]="!_warningMissingContact && !_isCreating" [class.btn-dark]="_isCreating" [class.btn-dark]="_warningMissingContact && !_isCreating" [disabled]="_warningMissingContact || _isCreating" [ngbTooltip]="_warningMissingContact ? 'requires contact person' : 'create quote'" i18n-ngbTooltip="@@i18n.project.createQuote" (click)="makeInvoice()" hotkey="CTRL+ALT+Q">
-            @if (_isCreating) {
-                <spinner [size]="20" [inline]="true"></spinner>
-            } @else {
-                <i>picture_as_pdf</i>
-            }
-            <span i18n="@@i18n.common.quote">quote</span>
+        <button type="button" class="btn btn-plain text-primary" [disabled]="_warningMissingContact || _isCreating" (click)="previewQuote()" ngbTooltip="preview" i18n-ngbTooltip="@@i18n.common.preview">
+            <i>visibility</i>
         </button>
+        <span [ngbTooltip]="quoteTooltip()">
+            <button id="btnGroupDrop2" type="button" class="btn btn-primary" [disabled]="_warningMissingContact || _isCreating" (click)="makeInvoice()" hotkey="CTRL+ALT+Q">
+                @if (_isCreating) {
+                    <spinner [size]="20" [inline]="true"></spinner>
+                } @else {
+                    <i>picture_as_pdf</i>
+                }
+                <span i18n="@@i18n.project.createQuote">create quote</span>
+            </button>
+        </span>
     }
 </toolbar>
 
 @for (current of [project]; track current.id) {
-<div class="row">
-    <div class="col-md-3">
-
-        <!-- Downpayment invoice card -->
-        @if (_invoicingType === 1 && project) {
-            <div class="card mb-3">
-                <div class="card-header" i18n="@@i18n.invoices.downpayment-invoice">downpayment invoice</div>
-                <ul class="list-group">
-                    <li class="list-group-item hstack gap-2 py-1">
-                        <div class="flex-fill text-muted small" i18n="@@i18n.common.totalBudget">total budget</div>
-                        <div class="small">{{ project.net | money }}</div>
-                    </li>
-                    @if (_pendingDownpayments > 0) {
-                        <li class="list-group-item hstack gap-2 py-1">
-                            <div class="flex-fill text-muted small" i18n="@@i18n.invoices.pending">pending</div>
-                            <div class="small text-warning">{{ _pendingDownpayments | money }}</div>
-                        </li>
-                    }
-                    <li class="list-group-item hstack gap-2 py-1">
-                        <div class="flex-fill text-muted small" i18n="@@i18n.invoices.invoiced">invoiced</div>
-                        <div class="small" [class.text-success]="_invoicedDownpayments > 0" [class.text-muted]="_invoicedDownpayments === 0">{{ _invoicedDownpayments | money }}</div>
-                    </li>
-                    <li class="list-group-item hstack gap-2 py-1">
-                        <div class="flex-fill text-muted small" i18n="@@i18n.common.remaining">remaining</div>
-                        <div class="small">{{ _downpaymentRemaining | money }}</div>
-                    </li>
-                </ul>
-            </div>
+    @switch (_invoicingType) {
+        @case (1) {
+            <invoice-prepare-wrapper [parent]="project" [stageFilter]="2" [infoType]="'invoice'" [allowedNewItems]="[]" [additionalBillingConsiderations]="_backendConsiderations" [additionalItems]="projectPaymentDetails" [projectPaymentDuration]="project.getParam('INVOICE_PAYMENT_DURATION')" [onChangeProjectPaymentDuration]="onChangePaymentDuration" [onRemoveProjectPaymentDuration]="removePaymentDuration" (considerationsChanged)="onConsiderationsChanged($event)">
+                <div sidebar><ng-container *ngTemplateOutlet="summaryCards"></ng-container></div>
+            </invoice-prepare-wrapper>
         }
-
-        <!-- Support invoice card -->
-        @if (_invoicingType === 2 && project) {
-            <div class="card mb-3">
-                <div class="card-header" i18n="@@i18n.invoices.support-invoice">support invoice</div>
-                <ul class="list-group">
-                    <li class="list-group-item hstack gap-2 py-1 cursor-pointer" [class.text-warning]="project.uninvoiced_hours > 0" [class.text-muted]="project.uninvoiced_hours === 0" (click)="navigateToSupport($event)" (keyup.enter)="navigateToSupport($event)" tabindex="0">
-                        @if (project.uninvoiced_hours > 0) {
-                            <i class="text-warning">schedule</i>
-                            <div class="flex-fill small" i18n="@@i18n.common.unbilledFoci">unbilled foci</div>
-                            <div class="small">{{ project.uninvoiced_hours | number: '1.1-1' }}h</div>
-                            <i class="small">chevron_right</i>
-                        } @else {
-                            <i>check_circle</i>
-                            <div class="flex-fill small" i18n="@@i18n.common.unbilledFoci">unbilled foci</div>
-                            <div class="small text-muted">0h</div>
-                        }
-                    </li>
-                    @if (project.oldest_unbilled_focus_at) {
-                        <li class="list-group-item hstack gap-2 py-1 text-muted">
-                            <i class="small">history</i>
-                            <div class="flex-fill small" i18n="@@i18n.invoices.oldestUnbilledFocus">oldest unbilled</div>
-                            <div class="small">{{ project.oldest_unbilled_focus_at | date: 'dd.MM.yy' }}</div>
-                        </li>
-                    }
-                </ul>
-            </div>
+        @case (2) {
+            <invoice-prepare-wrapper [parent]="project" [stageFilter]="1" [infoType]="'support'" [allowedNewItems]="[]" [additionalBillingConsiderations]="_backendConsiderations" [additionalItems]="projectPaymentDetails" [projectPaymentDuration]="project.getParam('INVOICE_PAYMENT_DURATION')" [onChangeProjectPaymentDuration]="onChangePaymentDuration" [onRemoveProjectPaymentDuration]="removePaymentDuration" (considerationsChanged)="onConsiderationsChanged($event)">
+                <div sidebar><ng-container *ngTemplateOutlet="summaryCards"></ng-container></div>
+            </invoice-prepare-wrapper>
         }
-
-        <!-- Final invoice card -->
-        @if (_invoicingType === 3 && project) {
-            <div class="card mb-3">
-                <div class="card-header" i18n="@@i18n.invoices.final-invoice">final invoice</div>
-                <ul class="list-group">
-                    <li class="list-group-item d-flex flex-column gap-1 py-2 px-2">
-                        <div class="hstack gap-2">
-                            <div class="flex-fill text-muted small" i18n="@@i18n.invoices.invoiced">invoiced</div>
-                            <div class="small">{{ _invoicedTotal | money }}</div>
-                        </div>
-                        <div class="progress" style="height: 4px">
-                            <div class="progress-bar bg-success" [style.width.%]="_invoicingProgress * 100"></div>
-                        </div>
-                        <div class="hstack gap-2">
-                            <div class="flex-fill text-muted small" i18n="@@i18n.common.remaining">remaining</div>
-                            <div class="small" [class.text-warning]="project.net_remaining > 0">{{ project.net_remaining | money }}</div>
-                        </div>
-                    </li>
-                    @if (project.work_estimated) {
-                        <li class="list-group-item d-flex flex-column gap-1 py-2 px-2">
-                            <div class="hstack gap-2">
-                                <div class="flex-fill text-muted small" i18n="@@i18n.common.time">time</div>
-                                <div class="small">{{ project.hours_invested | number: '1.1-1' }}h / {{ project.work_estimated | number: '1.0-0' }}h</div>
-                            </div>
-                            <div class="progress" style="height: 4px">
-                                <div class="progress-bar" [class.bg-primary]="_timePercentage <= 1" [class.bg-danger]="_timePercentage > 1" [style.width.%]="(_timePercentage > 1 ? 1 : _timePercentage) * 100"></div>
-                            </div>
-                        </li>
-                    }
-                    <li class="list-group-item hstack gap-2 py-1">
-                        <div class="flex-fill text-muted small" i18n="@@i18n.invoices.avgPaymentDays">avg. payment</div>
-                        @if (project.company.avg_payment_days !== null) {
-                            <div class="small">{{ project.company.avg_payment_days }} d</div>
-                        } @else {
-                            <div class="small text-muted">—</div>
-                        }
-                    </li>
-                </ul>
-            </div>
+        @case (3) {
+            <invoice-prepare-wrapper [parent]="project" [stageFilter]="0" [infoType]="'invoice'" [additionalBillingConsiderations]="_backendConsiderations" [additionalItems]="projectPaymentDetails" [projectPaymentDuration]="project.getParam('INVOICE_PAYMENT_DURATION')" [onChangeProjectPaymentDuration]="onChangePaymentDuration" [onRemoveProjectPaymentDuration]="removePaymentDuration" (considerationsChanged)="onConsiderationsChanged($event)">
+                <div sidebar><ng-container *ngTemplateOutlet="summaryCards"></ng-container></div>
+            </invoice-prepare-wrapper>
         }
-
-        <!-- Quote acceptance prediction card (on demand, never persisted — see App\ML\ProjectQuoteModel) -->
-        @if (_invoicingType === 0 && project && _quoteReliable && _quotePrediction) {
-            <div class="card mb-3">
-                <div class="card-header gap-2">
-                    <n class="local-ai-icon" [mlReliability]="'project_quote_acceptance'">local_ai</n>
-                    <span class="flex-fill" i18n="@@i18n.projects.quoteAcceptance">quote acceptance</span>
-                </div>
-                <ul class="list-group">
-                    @if (_quotePrediction.decided) {
-                        <li class="list-group-item hstack gap-2 py-1">
-                            <div class="flex-fill text-muted" i18n="@@i18n.projects.quoteOutcome">outcome</div>
-                            @if (_quotePrediction.actual_outcome) {
-                                <span class="badge bg-success" i18n="@@i18n.projects.quoteAccepted">accepted</span>
-                            } @else {
-                                <span class="badge bg-danger" i18n="@@i18n.projects.quoteRejected">rejected</span>
-                            }
-                        </li>
-                    } @else if (_quotePrediction.probability !== null) {
-                        <li class="list-group-item hstack gap-2 py-1">
-                            <div class="flex-fill" i18n="@@i18n.projects.acceptanceProbability">acceptance probability</div>
-                            <div class="small" [class.text-success]="_quotePrediction.probability >= 0.5" [class.text-warning]="_quotePrediction.probability < 0.5">{{ _quotePrediction.probability | percent: '1.0-0' }}</div>
-                        </li>
-                        @if (_quotePrediction.suggestions.length) {
-                            <li class="list-group-item d-flex flex-column">
-                                <div class="text-muted" i18n="@@i18n.projects.quoteSuggestions">could improve the odds</div>
-                            </li>
-                            
-                            @for (s of _quotePrediction.suggestions; track s.feature) {
-                                <li class="list-group-item hstack gap-2">
-                                    <span class="flex-fill">{{ suggestionText(s) }}</span>
-                                    <span class="text-success">+{{ s.delta | percent: '1.0-0' }}</span>
-                                </li>
-                            }
-                        }
-                    }
-                </ul>
-            </div>
-        }
-    </div>
-
-    <div class="col-md-9 annotate annotate-left">
-        @if (_invoicingType > 0) {
-            <div>
-                <!-- downpayment invoice -->
-                @if (_invoicingType === 1) {
-                    <invoice-prepare-wrapper [parent]="project" [stageFilter]="2" [annotationType]="'invoice'" [allowedNewItems]="[]" [additionalBillingConsiderations]="_backendConsiderations" [additionalItems]="projectPaymentDetails" [projectPaymentDuration]="project.getParam('INVOICE_PAYMENT_DURATION')" [onChangeProjectPaymentDuration]="onChangePaymentDuration" [onRemoveProjectPaymentDuration]="removePaymentDuration" (considerationsChanged)="onConsiderationsChanged($event)"> </invoice-prepare-wrapper>
-                }
-                <!-- support invoice -->
-                @if (_invoicingType === 2) {
-                    <invoice-prepare-wrapper [parent]="project" [stageFilter]="1" [annotationType]="'support'" [allowedNewItems]="[]" [additionalBillingConsiderations]="_backendConsiderations" [additionalItems]="projectPaymentDetails" [projectPaymentDuration]="project.getParam('INVOICE_PAYMENT_DURATION')" [onChangeProjectPaymentDuration]="onChangePaymentDuration" [onRemoveProjectPaymentDuration]="removePaymentDuration" (considerationsChanged)="onConsiderationsChanged($event)"> </invoice-prepare-wrapper>
-                }
-                <!-- final invoice -->
-                @if (_invoicingType === 3) {
-                    <invoice-prepare-wrapper [parent]="project" [stageFilter]="0" [annotationType]="'invoice'" [additionalBillingConsiderations]="_backendConsiderations" [additionalItems]="projectPaymentDetails" [projectPaymentDuration]="project.getParam('INVOICE_PAYMENT_DURATION')" [onChangeProjectPaymentDuration]="onChangePaymentDuration" [onRemoveProjectPaymentDuration]="removePaymentDuration" (considerationsChanged)="onConsiderationsChanged($event)"> </invoice-prepare-wrapper>
-                }
-            </div>
-        }
-
-        @if (_invoicingType === 0) {
-            <div>
-                <!-- quote -->
-                <invoice-prepare-wrapper [parent]="project" [stageFilter]="0" [mode]="'quote'" [annotationType]="'invoice'" [allowedNewItems]="['item', 'group', 'discount']" [additionalBillingConsiderations]="_backendConsiderations" [additionalItems]="projectPaymentDetails" [projectPaymentDuration]="project.getParam('INVOICE_PAYMENT_DURATION')" [onChangeProjectPaymentDuration]="onChangePaymentDuration" [onRemoveProjectPaymentDuration]="removePaymentDuration" (considerationsChanged)="onConsiderationsChanged($event)">
-                    @if (_quoteDescs.length) {
-                        @for (desc of _quoteDescs; track desc.key) {
-                            <div class="card mb-3" [class.opacity-50]="desc.disabled">
-                                <div class="card-header d-flex justify-content-end py-1">
-                                    <button type="button" class="btn btn-plain text-primary p-0" (click)="toggleQuoteDescription(desc.key)" [ngbTooltip]="desc.disabled ? 'enable in this project' : 'disable in this project'">
-                                        <i>{{ desc.disabled ? 'undo' : 'close' }}</i>
-                                    </button>
-                                </div>
-                                @if (!desc.disabled) {
-                                    <div class="card-body">
-                                        <div [innerHTML]="desc.html | safe: 'html'"></div>
-                                    </div>
+        @default {
+            <invoice-prepare-wrapper [parent]="project" [stageFilter]="0" [mode]="'quote'" [infoType]="'invoice'" [allowedNewItems]="['item', 'group', 'discount']" [additionalBillingConsiderations]="_backendConsiderations" [additionalItems]="projectPaymentDetails" [projectPaymentDuration]="project.getParam('INVOICE_PAYMENT_DURATION')" [onChangeProjectPaymentDuration]="onChangePaymentDuration" [onRemoveProjectPaymentDuration]="removePaymentDuration" (considerationsChanged)="onConsiderationsChanged($event)">
+                <div sidebar><ng-container *ngTemplateOutlet="summaryCards"></ng-container></div>
+                @if (_quoteDescs.length) {
+                    @for (desc of _quoteDescs; track desc.key) {
+                        <div class="card mb-3 p-3 pt-4">
+                            <div class="hstack gap-2 position-absolute top-0 end-0 px-2 pt-1">
+                                <span class="small text-muted" i18n="@@i18n.projects.fromProductCatalog">from product catalog</span>
+                                @if (desc.disabled) {
+                                    <i class="text-primary cursor-pointer" (click)="toggleQuoteDescription(desc.key)" (keyup.enter)="toggleQuoteDescription(desc.key)" tabindex="0" i18n-ngbTooltip="@@i18n.projects.includeInQuote" ngbTooltip="include in this quote">undo</i>
+                                } @else {
+                                    <i class="text-danger cursor-pointer" (click)="toggleQuoteDescription(desc.key)" (keyup.enter)="toggleQuoteDescription(desc.key)" tabindex="0" i18n-ngbTooltip="@@i18n.projects.excludeFromQuote" ngbTooltip="exclude from this quote">close</i>
                                 }
                             </div>
+                            @if (desc.disabled) {
+                                <div class="small text-muted text-truncate" [innerHTML]="desc.html | safe: 'html'"></div>
+                            } @else {
+                                <div [innerHTML]="desc.html | safe: 'html'"></div>
+                            }
+                        </div>
+                    }
+                }
+            </invoice-prepare-wrapper>
+        }
+    }
+}
+
+<ng-template #summaryCards>
+    @if (_invoicingType === 1 && project) {
+        <div class="card mb-3">
+            <div class="card-header" i18n="@@i18n.invoices.downpayment-invoice">downpayment invoice</div>
+            <ul class="list-group">
+                <li class="list-group-item hstack gap-2 py-1">
+                    <div class="flex-fill text-muted small" i18n="@@i18n.common.totalBudget">total budget</div>
+                    <div class="small">{{ project.net | money }}</div>
+                </li>
+                @if (_pendingDownpayments > 0) {
+                    <li class="list-group-item hstack gap-2 py-1">
+                        <div class="flex-fill text-muted small" i18n="@@i18n.invoices.pending">pending</div>
+                        <div class="small text-warning">{{ _pendingDownpayments | money }}</div>
+                    </li>
+                }
+                <li class="list-group-item hstack gap-2 py-1">
+                    <div class="flex-fill text-muted small" i18n="@@i18n.invoices.invoiced">invoiced</div>
+                    <div class="small" [class.text-success]="_invoicedDownpayments > 0" [class.text-muted]="_invoicedDownpayments === 0">{{ _invoicedDownpayments | money }}</div>
+                </li>
+                <li class="list-group-item hstack gap-2 py-1">
+                    <div class="flex-fill text-muted small" i18n="@@i18n.common.remaining">remaining</div>
+                    <div class="small">{{ _downpaymentRemaining | money }}</div>
+                </li>
+            </ul>
+        </div>
+    }
+
+    @if (_invoicingType === 2 && project) {
+        <div class="card mb-3">
+            <div class="card-header" i18n="@@i18n.invoices.support-invoice">support invoice</div>
+            <ul class="list-group">
+                <li class="list-group-item hstack gap-2 py-1 cursor-pointer" [class.text-warning]="project.uninvoiced_hours > 0" [class.text-muted]="project.uninvoiced_hours === 0" (click)="navigateToSupport($event)" (keyup.enter)="navigateToSupport($event)" tabindex="0">
+                    @if (project.uninvoiced_hours > 0) {
+                        <i class="text-warning">schedule</i>
+                        <div class="flex-fill small" i18n="@@i18n.common.unbilledFoci">unbilled foci</div>
+                        <div class="small">{{ project.uninvoiced_hours | number: '1.1-1' }}h</div>
+                        <i class="small">chevron_right</i>
+                    } @else {
+                        <i>check_circle</i>
+                        <div class="flex-fill small" i18n="@@i18n.common.unbilledFoci">unbilled foci</div>
+                        <div class="small text-muted">0h</div>
+                    }
+                </li>
+                @if (project.oldest_unbilled_focus_at) {
+                    <li class="list-group-item hstack gap-2 py-1 text-muted">
+                        <i class="small">history</i>
+                        <div class="flex-fill small" i18n="@@i18n.invoices.oldestUnbilledFocus">oldest unbilled</div>
+                        <div class="small">{{ project.oldest_unbilled_focus_at | date: 'dd.MM.yy' }}</div>
+                    </li>
+                }
+            </ul>
+        </div>
+    }
+
+    @if (_invoicingType === 3 && project) {
+        <div class="card mb-3">
+            <div class="card-header" i18n="@@i18n.invoices.final-invoice">final invoice</div>
+            <ul class="list-group">
+                <li class="list-group-item d-flex flex-column gap-1 py-2 px-2">
+                    <div class="hstack gap-2">
+                        <div class="flex-fill text-muted small" i18n="@@i18n.invoices.invoiced">invoiced</div>
+                        <div class="small">{{ _invoicedTotal | money }}</div>
+                    </div>
+                    <div class="progress" style="height: 4px">
+                        <div class="progress-bar bg-success" [style.width.%]="_invoicingProgress * 100"></div>
+                    </div>
+                    <div class="hstack gap-2">
+                        <div class="flex-fill text-muted small" i18n="@@i18n.common.remaining">remaining</div>
+                        <div class="small" [class.text-warning]="project.net_remaining > 0">{{ project.net_remaining | money }}</div>
+                    </div>
+                </li>
+                @if (project.work_estimated) {
+                    <li class="list-group-item d-flex flex-column gap-1 py-2 px-2">
+                        <div class="hstack gap-2">
+                            <div class="flex-fill text-muted small" i18n="@@i18n.common.time">time</div>
+                            <div class="small">{{ project.hours_invested | number: '1.1-1' }}h / {{ project.work_estimated | number: '1.0-0' }}h</div>
+                        </div>
+                        <div class="progress" style="height: 4px">
+                            <div class="progress-bar" [class.bg-primary]="_timePercentage <= 1" [class.bg-danger]="_timePercentage > 1" [style.width.%]="(_timePercentage > 1 ? 1 : _timePercentage) * 100"></div>
+                        </div>
+                    </li>
+                }
+                <li class="list-group-item hstack gap-2 py-1">
+                    <div class="flex-fill text-muted small" i18n="@@i18n.invoices.avgPaymentDays">avg. payment</div>
+                    @if (project.company.avg_payment_days !== null) {
+                        <div class="small">{{ project.company.avg_payment_days }} d</div>
+                    } @else {
+                        <div class="small text-muted">—</div>
+                    }
+                </li>
+            </ul>
+        </div>
+    }
+
+    @if (_invoicingType === 0 && project && _quoteReliable && _quotePrediction) {
+        <div class="card mb-3">
+            <div class="card-header gap-2">
+                <n class="local-ai-icon" [mlReliability]="'project_quote_acceptance'">local_ai</n>
+                <span class="flex-fill" i18n="@@i18n.projects.quoteAcceptance">quote acceptance</span>
+            </div>
+            <ul class="list-group">
+                @if (_quotePrediction.decided) {
+                    <li class="list-group-item hstack gap-2 py-1">
+                        <div class="flex-fill text-muted" i18n="@@i18n.projects.quoteOutcome">outcome</div>
+                        @if (_quotePrediction.actual_outcome) {
+                            <span class="badge bg-success" i18n="@@i18n.projects.quoteAccepted">accepted</span>
+                        } @else {
+                            <span class="badge bg-danger" i18n="@@i18n.projects.quoteRejected">rejected</span>
+                        }
+                    </li>
+                } @else if (_quotePrediction.probability !== null) {
+                    <li class="list-group-item hstack gap-2 py-1">
+                        <div class="flex-fill" i18n="@@i18n.projects.acceptanceProbability">acceptance probability</div>
+                        <div class="small" [class.text-success]="_quotePrediction.probability >= 0.5" [class.text-warning]="_quotePrediction.probability < 0.5">{{ _quotePrediction.probability | percent: '1.0-0' }}</div>
+                    </li>
+                    @if (_quotePrediction.suggestions.length) {
+                        <li class="list-group-item d-flex flex-column">
+                            <div class="text-muted" i18n="@@i18n.projects.quoteSuggestions">could improve the odds</div>
+                        </li>
+                        @for (s of _quotePrediction.suggestions; track s.feature) {
+                            <li class="list-group-item hstack gap-2">
+                                <span class="flex-fill">{{ suggestionText(s) }}</span>
+                                <span class="text-success">+{{ s.delta | percent: '1.0-0' }}</span>
+                            </li>
                         }
                     }
-                </invoice-prepare-wrapper>
-            </div>
-        }
-    </div>
-</div>
-}
+                }
+            </ul>
+        </div>
+    }
+</ng-template>
 
 <ng-template #projectPaymentDetails>
     @if (project.company.requires_po) {

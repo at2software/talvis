@@ -8,7 +8,7 @@ import type { ProjectTimelineEntryDto } from '@models/_core/api-response';
 import { ProjectService } from '@models/project/project.service';
 import { WidgetService } from '@models/widget.service';
 import { Color } from '@constants/Color';
-import { ECHARTS_DEFAULT_TOOLTIP_OPTIONS, ECHARTS_DONUT_ITEM_STYLE } from '@charts/echarts-presets';
+import { ECHARTS_DEFAULT_TOOLTIP_OPTIONS, ECHARTS_DONUT_CENTER_TEXT, ECHARTS_DONUT_ITEM_STYLE, ECHARTS_DONUT_SERIES, ECHARTS_DONUT_TRACK_COLOR } from '@charts/echarts-presets';
 import { ChartProgressComponent } from '@charts/chart-progress/chart-progress.component';
 import { MILESTONE_STATES } from '@models/milestone/milestone-state.enum';
 import { ProjectState } from '@models/project/project-state.model';
@@ -86,7 +86,7 @@ export class WidgetProjectAnalysisComponent extends BaseWidgetComponent {
         const centerColor = timePercentage >= 1 ? dangerColor : '#ffffff';
 
         const pieData = timePercentage < 1
-            ? [...workShares.map((u) => ({ value: u.val, name: u.name, itemStyle: { color: u.color, ...ECHARTS_DONUT_ITEM_STYLE } })), { value: (project.work_estimated ?? 0) - project.hours_invested, name: 'remaining', itemStyle: { color: '#6c757d', ...ECHARTS_DONUT_ITEM_STYLE } }]
+            ? [...workShares.map((u) => ({ value: u.val, name: u.name, itemStyle: { color: u.color, ...ECHARTS_DONUT_ITEM_STYLE } })), { value: (project.work_estimated ?? 0) - project.hours_invested, name: 'remaining', itemStyle: { color: ECHARTS_DONUT_TRACK_COLOR, ...ECHARTS_DONUT_ITEM_STYLE } }]
             : workShares.map((u) => ({ value: u.val, name: u.name, itemStyle: { color: u.color, ...ECHARTS_DONUT_ITEM_STYLE } }));
 
         return {
@@ -94,8 +94,8 @@ export class WidgetProjectAnalysisComponent extends BaseWidgetComponent {
                 backgroundColor: 'transparent',
                 animation: false,
                 tooltip: { trigger: 'item', ...ECHARTS_DEFAULT_TOOLTIP_OPTIONS, formatter: (params: TopLevelFormatterParams) => { const p = Array.isArray(params) ? params[0] : params; return `${p.name}: ${(p.value as number).toFixed(1)}h`; } },
-                graphic: [{ type: 'text', left: 'center', top: 'center', style: { text: centerText, fill: centerColor, fontSize: 20, fontFamily: 'BrunoAce' } }],
-                series: [{ type: 'pie', radius: ['35%', '70%'], data: pieData, label: { show: false } }],
+                graphic: [{ type: 'text', left: 'center', top: 'center', style: { ...ECHARTS_DONUT_CENTER_TEXT, text: centerText, fill: centerColor, fontFamily: 'BrunoAce' } }],
+                series: [{ ...ECHARTS_DONUT_SERIES, data: pieData }],
             } satisfies EChartsOption,
             wrapperStyle: (timePercentage >= 1
                 ? { '--budget-over-percentage': `${Math.min(timePercentage - 1, 1) * 360}deg`, '--budget-danger-color': dangerColor }
@@ -106,9 +106,9 @@ export class WidgetProjectAnalysisComponent extends BaseWidgetComponent {
     #computeMilestoneStates(project: Project) {
         if (!project.milestone_state_counts) return [];
         return [
-            { name: MILESTONE_STATES[2].name, count: project.milestone_state_counts.done, color: 'var(--bs-success)' },
-            { name: MILESTONE_STATES[1].name, count: project.milestone_state_counts.in_progress, color: 'var(--bs-primary)' },
-            { name: MILESTONE_STATES[0].name, count: project.milestone_state_counts.todo, color: '#6c757d' },
+            { ...MILESTONE_STATES[2], count: project.milestone_state_counts.done },
+            { ...MILESTONE_STATES[1], count: project.milestone_state_counts.in_progress },
+            { ...MILESTONE_STATES[0], count: project.milestone_state_counts.todo },
         ].filter((s) => s.count > 0);
     }
 

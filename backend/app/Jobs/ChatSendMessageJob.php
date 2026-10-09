@@ -13,7 +13,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
 /**
- * @method static \Illuminate\Foundation\Bus\PendingDispatch dispatch(string $message, array $props = [], ?Project $project = null, ?string $channelEnvKey = null, ?string $imagePath = null, bool $appendProjectIcon = false, ?string $channelId = null, ?string $cacheId = null, ?User $user = null)
+ * @method static \Illuminate\Foundation\Bus\PendingDispatch dispatch(string $message, array $props = [], ?Project $project = null, ?string $channelEnvKey = null, ?string $imagePath = null, bool $appendProjectIcon = false, ?string $channelId = null, ?string $cacheId = null, ?User $user = null, ?string $chatKey = null)
  */
 class ChatSendMessageJob implements ShouldQueue {
     use Dispatchable;
@@ -31,10 +31,14 @@ class ChatSendMessageJob implements ShouldQueue {
         private ?string $channelId = null,
         private ?string $cacheId = null,
         private ?User $user = null,
+        private ?string $chatKey = null,
     ) {}
 
     public function handle(): void {
         foreach (PluginController::getPluginControllers(PluginChatController::class) as $chatController) {
+            if ($this->chatKey && $chatController::getKey() !== $this->chatKey) {
+                continue;
+            }
             try {
                 $userChannelId = null;
                 if ($this->user && $userId = $chatController->getUserId($this->user)) {

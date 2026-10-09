@@ -1,9 +1,8 @@
 .node {
   padding: 10px;
-  border-radius: 8px;
+  border-radius: var(--bs-border-radius);
   width: 100%;
   max-width: 360px;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   position: relative;
 }
 

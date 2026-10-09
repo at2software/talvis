@@ -83,9 +83,7 @@ class PluginLocalAiController extends PluginController {
                     $message = $data['choices'][0]['message']['content'];
                     $answer  = $this->extractJson($message);
 
-                    foreach ($links->siblingsOfType('mattermost') as $channel) {
-                        $parts     = explode('/', $channel);
-                        $channelId = array_pop($parts);
+                    foreach ($links->siblingsOfType(PluginChatController::class) as $chatInfo) {
 
                         $message = 'New commit by '.$commit['author']['name'].":\n";
                         foreach ($answer as $answerParts) {
@@ -95,7 +93,7 @@ class PluginLocalAiController extends PluginController {
                         $props = [
                             ...$git->props('GitLab Commit Review'),
                         ];
-                        ChatSendMessageJob::dispatch($message, $props, channelId: $channelId);
+                        ChatSendMessageJob::dispatch($message, $props, channelId: $chatInfo['channelId'], chatKey: $chatInfo['controller']::getKey());
                     }
                 }
                 break;

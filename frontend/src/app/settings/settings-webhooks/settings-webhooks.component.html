@@ -1,0 +1,76 @@
+@let _endpoints = endpoints();
+<div class="card">
+    <div class="card-header">
+        <span i18n="@@i18n.webhooks.title">webhooks</span>
+        <div class="card-header-actions">
+            <button class="card-header-action btn text-primary" type="button" (click)="create()" i18n-ngbTooltip="@@i18n.webhooks.create" ngbTooltip="new webhook">
+                <i>add</i>
+            </button>
+        </div>
+    </div>
+    @if (loading() && !_endpoints.length) {
+        <spinner class="py-4"></spinner>
+    } @else if (!_endpoints.length) {
+        <empty-state [card]="false" class="workflows" i18n-title="@@i18n.webhooks.noEndpoints" title="no webhooks yet"></empty-state>
+    } @else {
+        <ul class="list-group list-group-flush">
+            @for (endpoint of _endpoints; track endpoint.id) {
+                <li class="list-group-item hstack gap-3 py-2" [nx]="endpoint" (actionsResolved)="reload()">
+                    <div class="flex-fill overflow-hidden">
+                        <div class="hstack gap-2">
+                            <span class="fw-semibold text-truncate" [class.text-muted]="!endpoint.is_active">{{ endpoint.name }}</span>
+                            <code class="text-muted small text-truncate notranslate">{{ endpoint.url }}</code>
+                        </div>
+                        <div class="d-flex flex-wrap gap-1 mt-1">
+                            @for (event of endpoint.events; track event) {
+                                <span class="badge bg-dark text-muted fw-normal" [ngbTooltip]="event">{{ eventLabel(event) }}</span>
+                            }
+                        </div>
+                    </div>
+                    <div class="small text-end text-nowrap">
+                        @if (endpoint.last_delivered_at) {
+                            <div class="text-success" [ngbTooltip]="endpoint.last_delivered_at | date: 'medium'">
+                                <ng-container i18n="@@i18n.webhooks.lastDelivered">last delivered</ng-container> {{ endpoint.last_delivered_at | relativeTime }}
+                            </div>
+                        } @else {
+                            <div class="text-muted" i18n="@@i18n.webhooks.neverDelivered">nothing delivered yet</div>
+                        }
+                        @if (endpoint.hasFailures()) {
+                            <div class="text-danger" [ngbTooltip]="endpoint.last_failed_at | date: 'medium'">
+                                <span class="badge bg-danger me-1">{{ endpoint.failure_count }}</span>
+                                <ng-container i18n="@@i18n.webhooks.lastFailed">last failed</ng-container> {{ endpoint.last_failed_at | relativeTime }}
+                            </div>
+                        }
+                    </div>
+                    <div class="hstack gap-1" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()" role="group">
+                        <div class="form-check form-switch mb-0" i18n-ngbTooltip="@@i18n.common.active" ngbTooltip="active">
+                            <input type="checkbox" class="form-check-input" [checked]="endpoint.is_active" (change)="setActive(endpoint, $any($event.target).checked)" i18n-aria-label="@@i18n.common.active" aria-label="active" />
+                        </div>
+                        <button type="button" class="btn btn-sm btn-plain text-primary" [disabled]="pinging() === endpoint.id" (click)="ping(endpoint)" i18n-ngbTooltip="@@i18n.webhooks.ping" ngbTooltip="send test event">
+                            @if (pinging() === endpoint.id) {
+                                <spinner [size]="20" [inline]="true"></spinner>
+                            } @else {
+                                <i>send</i>
+                            }
+                        </button>
+                        <button type="button" class="btn btn-sm btn-plain text-primary" (click)="endpoint.openDeliveries()" i18n-ngbTooltip="@@i18n.webhooks.deliveries" ngbTooltip="deliveries"><i>history</i></button>
+                        <button type="button" class="btn btn-sm btn-plain text-primary" (click)="edit(endpoint)" i18n-ngbTooltip="@@i18n.common.edit" ngbTooltip="edit"><i>edit</i></button>
+                        <button type="button" class="btn btn-sm btn-plain text-danger" (click)="remove(endpoint)" i18n-ngbTooltip="@@i18n.common.delete" ngbTooltip="delete"><i>delete</i></button>
+                    </div>
+                </li>
+            }
+        </ul>
+    }
+    <div class="card-body text-muted small">
+        <div class="mb-1">
+            <ng-container i18n="@@i18n.webhooks.signatureHelp">Every delivery is a signed JSON POST. Receivers verify it with the signing secret as described in the Standard Webhooks specification:</ng-container>
+            <a class="notranslate" [href]="specUrl" target="_blank" rel="noopener noreferrer">standardwebhooks.com</a>
+        </div>
+        <ul class="mb-1 ps-3">
+            <li><span i18n="@@i18n.webhooks.headers">headers</span>: <code class="notranslate">webhook-id</code>, <code class="notranslate">webhook-timestamp</code>, <code class="notranslate">webhook-signature</code></li>
+            <li><span i18n="@@i18n.webhooks.signature">signature</span>: <code class="notranslate">v1,base64(HMAC-SHA256(base64decode(secret without "whsec_"), "id.timestamp.body"))</code></li>
+            <li><span i18n="@@i18n.webhooks.payload">payload</span>: <code class="notranslate">{{ '{' }} id, type, timestamp, data {{ '}' }}</code></li>
+        </ul>
+        <div i18n="@@i18n.webhooks.retryHelp">Failed deliveries are retried up to 8 times, from after 1 minute up to after 1 day.</div>
+    </div>
+</div>

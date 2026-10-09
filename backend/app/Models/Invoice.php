@@ -7,12 +7,15 @@ use App\Actions\CreateInvoiceAction;
 use App\Actions\UpdateInvoiceStatisticsAction;
 use App\Builders\InvoiceBuilder;
 use App\Casts\CurrencyFormatCast;
+use App\Casts\Precomputed;
 use App\Casts\PrecomputedAuth;
 use App\Enums\InvoiceItemType;
+use App\Enums\WebhookEvent;
 use App\Jobs\SendInvoiceMailJob;
 use App\Jobs\SendInvoiceReminderJob;
 use App\Services\InvoiceItemEnhancementService;
 use App\Services\InvoicePdfService;
+use App\Support\Iban;
 use App\Traits\HasInvoiceItemsTrait;
 use App\Traits\LogsDeletionTrait;
 use App\Traits\PrecomputedTrait;
@@ -20,6 +23,7 @@ use horstoeko\zugferd\codelists\ZugferdInvoiceType;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Storage;
 
 class Invoice extends BaseModel {
     use HasFactory;
@@ -31,6 +35,7 @@ class Invoice extends BaseModel {
     const kNET                    = 'Nettowert';
     const kGROSS                  = 'Bruttowert';
     const FLAG_SENT_TO_DATEV      = 1;
+    const FLAG_SEPA_COLLECTED     = 2;
     const ITEMS_WITH_NUMBER       = [InvoiceItemType::Default, InvoiceItemType::Discount];
     const ITEMS_ADDING_TO_PROJECT = [InvoiceItemType::Default, InvoiceItemType::Discount];
     const ITEMS_ADDING_TO_INVOICE = [InvoiceItemType::Default, InvoiceItemType::Discount, InvoiceItemType::Paydown];
@@ -57,6 +62,50 @@ class Invoice extends BaseModel {
     public function precomputeNetAttribute() {
         return $this->invoiceItems()->whereIn('type', InvoiceItemType::Total)->sum('net');
     }
+    public function unmaskedNet(): float {
+        return (float)(new Precomputed)->get($this, 'net', $this->getRawOriginal('net'), $this->getAttributes());
+    }
+    protected static function booted() {
+        parent::booted();
+        static::updated(function (self $invoice) {
+            if (! $invoice->isPropagating && $invoice->wasChanged('paid_at') && $invoice->getOriginal('paid_at') === null && $invoice->paid_at && ! $invoice->is_cancelled) {
+                WebhookEndpoint::dispatch(WebhookEvent::InvoicePaid, $invoice->toWebhookPayload());
+            }
+        });
+    }
+    public function toWebhookPayload(): array {
+        $precomputed = new Precomputed;
+        return [
+            'id'                      => $this->id,
+            'number'                  => $this->name,
+            'company'                 => $this->company?->toWebhookReference(),
+            'net'                     => $this->unmaskedNet(),
+            'gross'                   => (float)$precomputed->get($this, 'gross', $this->getRawOriginal('gross'), $this->getAttributes()),
+            'gross_remaining'         => $this->unmaskedGrossRemaining(),
+            'created_at'              => $this->created_at?->toIso8601String(),
+            'due_at'                  => $this->due_at?->toIso8601String(),
+            'paid_at'                 => $this->paid_at?->toIso8601String(),
+            'is_cancelled'            => (bool)$this->is_cancelled,
+            'cancellation_invoice_id' => $this->cancellation_invoice_id,
+        ];
+    }
+    public function unmaskedGrossRemaining(): float {
+        return (float)(new Precomputed)->get($this, 'gross_remaining', $this->getRawOriginal('gross_remaining'), $this->getAttributes());
+    }
+
+    /** @return list<'no_mandate'|'mandate_date_missing'|'iban_invalid'|'nothing_due'> */
+    public function sepaDirectDebitIssues(): array {
+        $mandate = $this->company?->directDebitMandate();
+        if (! $mandate) {
+            return ['no_mandate'];
+        }
+        return array_values(array_filter([
+            $mandate['signed_at'] ? null : 'mandate_date_missing',
+            Iban::isValid($mandate['iban']) ? null : 'iban_invalid',
+            $this->unmaskedGrossRemaining() > 0 ? null : 'nothing_due',
+        ]));
+    }
+
     public function precomputeGrossAttribute() {
         return $this->invoiceItems()->whereIn('type', InvoiceItemType::Total)->sum('gross');
     }
@@ -105,17 +154,23 @@ class Invoice extends BaseModel {
         $this->paid_at      = now();
         $this->resetPrecomputedAttributes();
     }
+    public function hasPdf(): bool {
+        return $this->file_dir && Storage::exists($this->file_dir);
+    }
     public function cancel() {
+        abort_if($this->is_cancelled, 409, 'Invoice is already cancelled');
         [$zugferdPdf, $filename] = app(CancelInvoiceAction::class)->execute($this);
         return response($zugferdPdf)->withHeaders(File::headers($filename, 'application/pdf'));
     }
     public function sendMail() {
+        abort_unless($this->hasPdf(), 409, 'Invoice has no PDF to send');
         $this->sent = 1;
         $this->save();
         SendInvoiceMailJob::dispatch($this);
         return $this;
     }
     public function sendReminder() {
+        abort_unless($this->hasPdf(), 409, 'Invoice has no PDF to attach to the reminder');
         $this->sent = 1;
 
         $projectId       = $this->invoiceItems()->whereNotNull('project_id')->value('project_id');
@@ -140,8 +195,8 @@ class Invoice extends BaseModel {
         }
         return ['value' => $prefix.$current.$suffix];
     }
-    public static function getCurrentInvoiceNumberInt() {
-        return Param::get('INVOICE_NO_CURRENT')->value;
+    public static function getCurrentInvoiceNumberInt(): int {
+        return (int)Param::get('INVOICE_NO_CURRENT')->value;
     }
     public static function batchAssign($items, $invoice_id, $company_id) {
         $ss1 = new SmartSql('invoice_items', 'invoice_id');
@@ -218,6 +273,7 @@ class Invoice extends BaseModel {
         Invoice::batchAssign($items, $invoice->id, null);
         $invoice->stage = $stage;
         $invoice->save();
+        WebhookEndpoint::dispatch(WebhookEvent::InvoiceCreated, $invoice->fresh()->toWebhookPayload());
 
         $company->invoice_correction = '';
         $company->save();
@@ -268,7 +324,7 @@ class Invoice extends BaseModel {
         }
         Artisan::call('vat_id:check', ['company' => $company]);
         $output = json_decode(Artisan::output());
-        return $output->is_valid ? null : response($output->error_description, 400);
+        return $output->is_valid ? null : response()->json(['message' => $output->error_description], 400);
     }
     private static function activateRepeatingItems(Company $company): void {
         $company->repeatingItems->each(fn ($item) => $item->next_recurrence_at ?: $item->update(['next_recurrence_at' => now()]));

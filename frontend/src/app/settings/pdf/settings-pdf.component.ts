@@ -1,10 +1,11 @@
 import { ChangeDetectionStrategy, Component, computed, DestroyRef, effect, ElementRef, HostListener, inject, linkedSignal, signal, viewChild } from '@angular/core';
 import { modelResource } from '@models/http/model-resource';
+import { NgTemplateOutlet } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ToolbarComponent } from '@app/app/toolbar/toolbar.component';
 import { CodeEditorComponent } from '@app/_shards/code-editor/code-editor.component';
-import { PdfTemplateService } from '@models/pdf-template.service';
+import { PdfLogo, PdfTemplateService } from '@models/pdf-template.service';
 import { Toast } from '@shards/toast/toast';
 
 const A4_WIDTH_PX = (210 * 96) / 25.4;
@@ -13,7 +14,7 @@ const SHIM_CSS = `
 html,body{margin:0;padding:0;background:#525659;}
 body{padding:24px 0;}
 .pdf-page{position:relative;width:210mm;min-height:297mm;margin:0 auto;background:#fff;color:#000;
-  padding:125mm 20mm 30pt 25mm;box-sizing:border-box;box-shadow:0 4px 24px rgba(0,0,0,.5);overflow:hidden;}
+  padding:125mm 20mm 30pt 25mm;box-sizing:border-box;box-shadow:0 4px 24px rgba(0,0,0,.5);overflow:hidden;counter-reset:page 1;}
 .pdf-flow{position:relative;}
 .pdf-flow .footer{position:absolute;}
 [data-pdfedit-id]{cursor:pointer;}
@@ -58,13 +59,55 @@ interface Selected {
     paddingBottom: string;
 }
 
+const TOKEN_LABELS: Record<string, string> = {
+    companyName: $localize`:@@i18n.settings.pdf.token.companyName:company name`,
+    companyAddress: $localize`:@@i18n.settings.pdf.token.companyAddress:address in one line`,
+    companyStreet: $localize`:@@i18n.settings.pdf.token.companyStreet:street`,
+    companyPostcode: $localize`:@@i18n.settings.pdf.token.companyPostcode:postcode`,
+    companyCity: $localize`:@@i18n.settings.pdf.token.companyCity:city`,
+    companyCountry: $localize`:@@i18n.settings.pdf.token.companyCountry:country`,
+    companyWeb: $localize`:@@i18n.settings.pdf.token.companyWeb:website`,
+    companyMail: $localize`:@@i18n.settings.pdf.token.companyMail:email`,
+    companyPhone: $localize`:@@i18n.settings.pdf.token.companyPhone:phone`,
+    companyFax: $localize`:@@i18n.settings.pdf.token.companyFax:fax`,
+    companyOwners: $localize`:@@i18n.settings.pdf.token.companyOwners:managing directors`,
+    companyRegisterNumber: $localize`:@@i18n.settings.pdf.token.companyRegisterNumber:commercial register number`,
+    companyRegisterCourt: $localize`:@@i18n.settings.pdf.token.companyRegisterCourt:register court`,
+    companyVatId: $localize`:@@i18n.settings.pdf.token.companyVatId:VAT ID`,
+    companyTaxId: $localize`:@@i18n.settings.pdf.token.companyTaxId:tax number`,
+    companyIban: $localize`:@@i18n.settings.pdf.token.companyIban:IBAN`,
+    companyBic: $localize`:@@i18n.settings.pdf.token.companyBic:BIC`,
+    companyContact: $localize`:@@i18n.settings.pdf.token.companyContact:contact block`,
+    companyRegistration: $localize`:@@i18n.settings.pdf.token.companyRegistration:registration block`,
+    companyBankDetails: $localize`:@@i18n.settings.pdf.token.companyBankDetails:bank details block`,
+    companyHeader: $localize`:@@i18n.settings.pdf.token.companyHeader:footer table with contact, registration and bank details`,
+    senderAddress: $localize`:@@i18n.settings.pdf.token.senderAddress:sender line above the address`,
+    place: $localize`:@@i18n.settings.pdf.token.place:place in the date line`,
+    logo: $localize`:@@i18n.settings.pdf.token.logo:logo, use as image source`,
+    documentTitle: $localize`:@@i18n.settings.pdf.token.documentTitle:document title`,
+    address: $localize`:@@i18n.settings.pdf.token.address:recipient address`,
+    headerInfo: $localize`:@@i18n.settings.pdf.token.headerInfo:info block with contact person and customer number`,
+    dayNow: $localize`:@@i18n.settings.pdf.token.dayNow:date`,
+    content: $localize`:@@i18n.settings.pdf.token.content:document content`,
+    footerContext: $localize`:@@i18n.settings.pdf.token.footerContext:document name in the footer`,
+    pageLabel: $localize`:@@i18n.settings.pdf.token.pageLabel:word "page"`,
+    pageOfLabel: $localize`:@@i18n.settings.pdf.token.pageOfLabel:word "of"`,
+    pageCount: $localize`:@@i18n.settings.pdf.token.pageCount:total number of pages`,
+};
+
+interface Placeholder {
+    token: string;
+    label: string;
+    value: string;
+}
+
 type StyleProp = 'fontSize' | 'color' | 'fontWeight' | 'fontStyle' | 'textAlign' | 'marginTop' | 'marginBottom' | 'paddingTop' | 'paddingBottom';
 
 @Component({
     selector: 'app-settings-pdf',
     templateUrl: './settings-pdf.component.html',
     styleUrl: './settings-pdf.component.scss',
-    imports: [FormsModule, ToolbarComponent, CodeEditorComponent],
+    imports: [FormsModule, NgTemplateOutlet, ToolbarComponent, CodeEditorComponent],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SettingsPdfComponent {
@@ -72,7 +115,7 @@ export class SettingsPdfComponent {
     readonly rendering = signal(false);
     readonly dirty = signal(false);
 
-    readonly panelTab = signal<'element' | 'code'>('element');
+    readonly panelTab = signal<'element' | 'placeholders' | 'code'>('element');
     readonly selected = signal<Selected | null>(null);
     readonly selectedHtml = signal('');
     readonly pdfUrl = signal<SafeResourceUrl | null>(null);
@@ -94,7 +137,12 @@ export class SettingsPdfComponent {
     readonly html = linkedSignal(() => this.#template.value()?.html ?? '');
     readonly css = linkedSignal(() => this.#template.value()?.css ?? '');
     readonly logoUrl = linkedSignal(() => this.#template.value()?.logoUrl ?? '');
-    readonly hasOriginal = linkedSignal(() => this.#template.value()?.hasOriginal ?? false);
+    readonly hasCustomLogo = linkedSignal(() => this.#template.value()?.hasCustomLogo ?? false);
+    readonly customized = linkedSignal(() => this.#template.value()?.customized ?? false);
+    readonly #tokens = computed(() => this.#template.value()?.tokens ?? {});
+    readonly #logoSources = computed(() => this.#template.value()?.logoSources ?? []);
+    readonly senderPlaceholders = computed(() => this.#placeholders(this.#template.value()?.senderTokens ?? []));
+    readonly documentPlaceholders = computed(() => this.#placeholders(this.#template.value()?.documentTokens ?? []));
 
     constructor() {
         inject(DestroyRef).onDestroy(() => {
@@ -146,10 +194,17 @@ export class SettingsPdfComponent {
         const base = doc.querySelector('base') ?? doc.head.insertBefore(doc.createElement('base'), doc.head.firstChild);
         base.setAttribute('href', this.baseUrl());
 
-        doc.querySelectorAll('link[href*="styles.css"]').forEach((l) => l.remove());
         const userCss = doc.createElement('style');
         userCss.textContent = this.css().replace(/url\(\s*(['"]?)(?!https?:|data:|\/|#)/gi, `url($1${this.pdfBase()}`);
-        doc.head.appendChild(userCss);
+        const links = doc.querySelectorAll('link[href*="styles.css"]');
+        if (links.length) links[0].replaceWith(userCss);
+        else doc.head.insertBefore(userCss, base.nextSibling);
+        links.forEach((l) => l.remove());
+
+        const logoSources = this.#logoSources();
+        doc.querySelectorAll('img').forEach((img) => {
+            if (logoSources.includes(img.getAttribute('src') ?? '')) img.setAttribute('src', this.logoUrl());
+        });
 
         const shim = doc.createElement('style');
         shim.textContent = SHIM_CSS + `\nhtml{zoom:${this.#zoom};}`;
@@ -167,29 +222,8 @@ export class SettingsPdfComponent {
         script.textContent = CLIENT_SCRIPT;
         doc.body.appendChild(script);
 
-        return this.#fillDummy('<!DOCTYPE html>\n' + doc.documentElement.outerHTML);
-    }
-
-    #fillDummy(s: string): string {
-        const row = (k: string, v: string) =>
-            `<div style="display:block;width:100%;"><div style="float:right;display:inline-block;">${v}</div><div style="display:inline-block;font-weight:bold;">${k}</div></div>`;
-        const tokens: Record<string, string> = {
-            '[documentTitle]': 'Rechnung 2026-0042',
-            '[address]': 'Musterfirma GmbH<br>Herr Max Mustermann<br>Musterstraße 1<br>12345 Musterstadt',
-            '[headerInfo]': row('Kundennummer', '10042') + '<br>' + row('Ansprechpartner', 'Erika Beispiel') + '<br>' + row('Telefon', '+49 (0)123 456789'),
-            '[dayNow]': new Date().toLocaleDateString('de-DE'),
-            '[pageLabel]': 'Seite',
-            '[content]':
-                '<p>Sehr geehrte Damen und Herren,</p><p>vielen Dank für Ihr Vertrauen. Nachfolgend stellen wir Ihnen die vereinbarten Leistungen in Rechnung.</p>' +
-                '<table class="content-table"><thead><tr><th class="text-start">Position</th><th class="text-end">Menge</th><th class="text-end">Einzelpreis</th><th class="text-end">Gesamt</th></tr></thead>' +
-                '<tbody><tr><td>Beratung &amp; Konzeption</td><td class="text-end">8,00 h</td><td class="text-end">120,00 €</td><td class="text-end">960,00 €</td></tr>' +
-                '<tr><td>Entwicklung</td><td class="text-end">24,00 h</td><td class="text-end">120,00 €</td><td class="text-end">2.880,00 €</td></tr></tbody>' +
-                '<tfoot><tr class="net-row"><td colspan="3" class="text-end">Netto</td><td class="text-end">3.840,00 €</td></tr>' +
-                '<tr><td colspan="3" class="text-end">zzgl. 19% USt.</td><td class="text-end">729,60 €</td></tr>' +
-                '<tr class="gross-row"><td colspan="3" class="text-end">Gesamtbetrag</td><td class="text-end">4.569,60 €</td></tr></tfoot></table>' +
-                '<p>Bitte überweisen Sie den Betrag innerhalb von 14 Tagen.</p>',
-        };
-        return s.replace(/\[(documentTitle|address|headerInfo|dayNow|pageLabel|content)\]/g, (m) => tokens[m] ?? m);
+        const tokens = this.#tokens();
+        return ('<!DOCTYPE html>\n' + doc.documentElement.outerHTML).replace(/\[(\w+)\]/g, (m, key: string) => tokens[key] ?? m);
     }
 
     @HostListener('window:message', ['$event'])
@@ -351,7 +385,7 @@ export class SettingsPdfComponent {
             next: () => {
                 this.saving.set(false);
                 this.dirty.set(false);
-                this.hasOriginal.set(true);
+                this.customized.set(true);
                 Toast.success($localize`:@@i18n.settings.pdf.saved:PDF template saved`);
             },
             error: () => this.saving.set(false),
@@ -374,7 +408,7 @@ export class SettingsPdfComponent {
             this.html.set(t.html);
             this.css.set(t.css);
             this.logoUrl.set(t.logoUrl);
-            this.hasOriginal.set(t.hasOriginal);
+            this.customized.set(t.customized);
             this.dirty.set(false);
             this.selected.set(null);
             this.reloadPreview();
@@ -386,10 +420,43 @@ export class SettingsPdfComponent {
         const file = (event.target as HTMLInputElement).files?.[0];
         if (!file) return;
         this.#svc.uploadLogo(file).subscribe((r) => {
-            this.logoUrl.set(r.logoUrl);
-            this.reloadPreview();
+            this.#applyLogo(r);
             Toast.success($localize`:@@i18n.settings.pdf.logoUpdated:Logo updated`);
         });
+    }
+
+    removeLogo() {
+        this.#svc.removeLogo().subscribe((r) => {
+            this.#applyLogo(r);
+            Toast.success($localize`:@@i18n.settings.pdf.logoRemoved:uploaded logo removed`);
+        });
+    }
+
+    insertPlaceholder(token: string) {
+        const placeholder = `[${token}]`;
+        const sel = this.selected();
+        if (sel?.text != null) {
+            this.setText(sel.text + placeholder);
+            this.reloadPreview();
+            return;
+        }
+        navigator.clipboard.writeText(placeholder).catch(console.error);
+        Toast.success($localize`:@@i18n.settings.pdf.placeholderCopied:placeholder copied to the clipboard`);
+    }
+
+    #applyLogo(logo: PdfLogo) {
+        this.logoUrl.set(logo.logoUrl);
+        this.hasCustomLogo.set(logo.hasCustomLogo);
+        this.reloadPreview();
+    }
+
+    #placeholders(keys: string[]): Placeholder[] {
+        const tokens = this.#tokens();
+        return keys.map((token) => ({
+            token,
+            label: TOKEN_LABELS[token] ?? token,
+            value: (tokens[token] ?? '').replace(/<br\s*\/?>/gi, ' · ').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim(),
+        }));
     }
 
     closePdf() {

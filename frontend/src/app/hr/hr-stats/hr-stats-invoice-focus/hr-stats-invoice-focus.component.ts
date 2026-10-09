@@ -5,7 +5,7 @@ import { StatsService } from '@models/stats.service';
 import { GlobalService } from '@models/global.service';
 import { NgxEchartsModule } from 'ngx-echarts';
 import { Color } from '@constants/Color';
-import { EChartsSimpleOptions, ECHARTS_DONUT_ITEM_STYLE } from '@charts/echarts-presets';
+import { EChartsSimpleOptions, ECHARTS_DONUT_ITEM_STYLE, ECHARTS_DONUT_SERIES, ECHARTS_DONUT_TRACK_COLOR } from '@charts/echarts-presets';
 import { EmptyStateComponent } from '@shards/empty-state/empty-state.component';
 import type { EChartsOption } from 'echarts';
 import { ChartAxisTooltipParamDto } from '@models/_core/api-response';
@@ -136,7 +136,7 @@ export class HrStatsInvoiceFocusComponent {
             series: [
                 {
                     type: 'pie',
-                    radius: ['75%', '90%'],
+                    radius: ECHARTS_DONUT_SERIES.radius,
                     center: ['50%', '50%'],
                     startAngle: 90,
                     endAngle: 450,
@@ -149,15 +149,15 @@ export class HrStatsInvoiceFocusComponent {
                         {
                             value: remaining,
                             name: $localize`:@@i18n.hr.unfocused:Unfocused`,
-                            itemStyle: { color: '#333333', ...ECHARTS_DONUT_ITEM_STYLE },
+                            itemStyle: { color: ECHARTS_DONUT_TRACK_COLOR, ...ECHARTS_DONUT_ITEM_STYLE },
                         },
                     ],
                     label: {
                         show: true,
                         position: 'center',
                         formatter: `${overallCountAccuracy.toFixed(0)}%`,
-                        fontSize: 18,
-                        fontWeight: 'bold',
+                        fontSize: 16,
+                        fontWeight: 300,
                         color: '#ccc',
                     },
                     labelLine: {

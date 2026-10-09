@@ -3,6 +3,7 @@ import { ChangeDetectionStrategy, Component, computed, input, output, signal, Te
 import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { TextParamEditorComponent } from '@shards/text-param-editor/text-param-editor.component';
 import { InvoicePrepare } from '@app/invoices/_shards/invoice-prepare/invoice-prepare';
+import { InvoiceItemInfoMode } from '@app/invoices/_shards/invoice-prepare/invoice-item/invoice-item-row.component';
 import { CustomerPaymentDetailsComponent } from '@app/customers/_shards/customer-payment-details/customer-payment-details.component';
 import { Company } from '@models/company/company.model';
 import { BillingConsiderationDto } from '@models/_core/api-response';
@@ -15,13 +16,12 @@ import { SafePipe } from '@pipes/safe.pipe';
     changeDetection: ChangeDetectionStrategy.OnPush,
     imports: [NgbTooltipModule, TextParamEditorComponent, InvoicePrepare, CustomerPaymentDetailsComponent, SafePipe],
     templateUrl: './invoice-prepare-wrapper.html',
-    styleUrls: ['./invoice-prepare-wrapper.scss'],
 })
 export class InvoicePrepareWrapper {
     parent = input.required<Company | Project>();
     items = input<InvoiceItem[] | undefined>(undefined);
     stageFilter = input<number | undefined>(undefined);
-    annotationType = input<'invoice' | 'quote' | 'support' | 'none'>('invoice');
+    infoType = input<InvoiceItemInfoMode>('invoice');
     showMiniCards = input<boolean>(true);
     additionalBillingConsiderations = input<BillingConsiderationDto[]>([]);
     allowedNewItems = input<('item' | 'paydown' | 'group' | 'discount')[]>(['item', 'paydown', 'group', 'discount']);

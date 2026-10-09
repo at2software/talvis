@@ -1,4 +1,4 @@
-<activity-tab icon="attach_money">
+<activity-tab icon="attach_money" i18n-label="@@i18n.activityTab.invoiceable" label="invoiceable items">
     @let _user = user();
     <div class="container">
         @if (_user?.hasRole('financial') && opened()) {

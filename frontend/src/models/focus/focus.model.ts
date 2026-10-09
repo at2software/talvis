@@ -69,6 +69,10 @@ export class Focus extends Serializable implements IHasMarker, IHasExtIssue {
         if (_ instanceof Project) { this.update({ parent_id: _.id, parent_type: 'App\\Models\\Project' }).subscribe(); return; }
         console.error('setting parent class ' + _.class + ' is not implemented yet');
     };
+    adoptParent(parent: IHasFoci): this {
+        this.parent ??= parent;
+        return this;
+    }
     fixParent() {
         if (this.parent.id !== '') return;
         switch (this.parent_type) {

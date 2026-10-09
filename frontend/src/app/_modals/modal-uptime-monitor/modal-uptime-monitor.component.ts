@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { UptimeMonitor } from '@models/uptime/uptime-monitor.model';
 import { SpinnerComponent } from '@shards/spinner/spinner.component';
 import { Dictionary } from '@constants/constants';
+import { Toast } from '@shards/toast/toast';
 
 @Component({
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -27,7 +28,7 @@ export class ModalUptimeMonitorComponent {
 
     save() {
         if (!this.isValid()) {
-            alert('Please fill in all required fields (Name and URL)');
+            Toast.warn($localize`:@@i18n.uptime.requiredFields:please fill in all required fields (name and URL)`);
             return;
         }
 
@@ -54,14 +55,14 @@ export class ModalUptimeMonitorComponent {
             next: (result) => {
                 this.isSaving.set(false);
                 if (Array.isArray(result) && result.length === 0) {
-                    alert('Failed to save monitor: Server returned empty response.');
+                    Toast.error($localize`:@@i18n.uptime.saveFailed:failed to save monitor` + ': ' + $localize`:@@i18n.uptime.emptyResponse:server returned an empty response`);
                     return;
                 }
                 this.activeModal.close(true);
             },
             error: (err) => {
                 this.isSaving.set(false);
-                alert(`Failed to save monitor: ${err?.error?.message || err?.message || 'Unknown error'}`);
+                Toast.error($localize`:@@i18n.uptime.saveFailed:failed to save monitor` + `: ${err?.error?.message || err?.message || 'Unknown error'}`);
             },
         });
     }

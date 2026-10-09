@@ -7,6 +7,7 @@ use App\Mail\UptimeDownMail;
 use App\Mail\UptimeUpMail;
 use App\Models\UptimeCheck;
 use App\Models\UptimeMonitor;
+use App\Support\ChatProps;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
@@ -110,15 +111,9 @@ class UptimeNotificationService {
         $uniqueProjects = $monitor->projects->unique('id');
         $message        = $this->formatChatMessage($monitor, $check, $isRecovery);
 
-        $props = $isRecovery ? [
-            'from_webhook'         => 'true',
-            'override_username'    => 'Service Recovered',
-            'override_icon_url'    => asset('icons/icon-uptime-recovered.png'),
-        ] : [
-            'from_webhook'         => 'true',
-            'override_username'    => 'Uptime Alert',
-            'override_icon_url'    => asset('icons/icon-uptime-warning.png'),
-        ];
+        $props = $isRecovery
+            ? ChatProps::sender('Service Recovered', asset('icons/icon-uptime-recovered.png'))
+            : ChatProps::sender('Uptime Alert', asset('icons/icon-uptime-warning.png'));
 
         foreach ($uniqueProjects as $project) {
             ChatSendMessageJob::dispatch($message, $props, project: $project);

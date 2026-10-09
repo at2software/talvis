@@ -22,6 +22,7 @@ import { ActivityTableComponent } from '@app/marketing/shared/activity-table/act
 import { SpinnerComponent } from '@shards/spinner/spinner.component';
 import type { EChartsOption } from 'echarts';
 import { ActivityStatsMapDto, InitiativeTimelineEntryDto } from '@models/_core/api-response';
+import { ConfirmationService } from '@app/_modals/modal-confirm/confirmation.service';
 
 const ActivityStatsColors = MarketingActivity.STATS_COLORS;
 
@@ -37,6 +38,7 @@ export class MarketingInitiativeDetailComponent {
     #router = inject(Router);
     #marketingService = inject(MarketingService);
     #global = inject(GlobalService);
+    #confirm = inject(ConfirmationService);
     #cd = inject(ChangeDetectorRef);
 
     readonly STATS_COLORS = ActivityStatsColors;
@@ -100,7 +102,7 @@ export class MarketingInitiativeDetailComponent {
     });
 
     #buildCharts(timeline: InitiativeTimelineEntryDto[]): { line: EChartsOption; donut: EChartsOption } {
-        const primaryColor = '#00c9a7';
+        const primaryColor = Color.fromVar('primary').toHexString();
         const totalData = timeline.map((t) => [t.timestamp, (t.new || 0) + (t.engaged || 0) + (t.unresponsive || 0) + (t.converted || 0)]);
 
         const line: EChartsOption = {
@@ -158,7 +160,7 @@ export class MarketingInitiativeDetailComponent {
             series: [
                 {
                     type: 'pie',
-                    radius: ['35%', '65%'],
+                    radius: ['62%', '76%'],
                     data: [
                         { value: totalNew, name: 'New', itemStyle: { color: Color.fromVar('info').toHexString(), ...ECHARTS_DONUT_ITEM_STYLE } },
                         { value: totalEngaged, name: 'Engaged', itemStyle: { color: Color.fromVar('warning').toHexString(), ...ECHARTS_DONUT_ITEM_STYLE } },
@@ -195,10 +197,10 @@ export class MarketingInitiativeDetailComponent {
         });
     }
 
-    unsubscribe() {
+    async unsubscribe() {
         const initiative = this.initiative();
         if (!initiative || !this.#global.user) return;
-        if (!confirm('Unsubscribe from this initiative?')) return;
+        if (!(await this.#confirm.ask({ title: $localize`:@@i18n.marketing.unsubscribe:unsubscribe`, message: $localize`:@@i18n.marketing.confirmUnsubscribe:unsubscribe from this initiative?` }))) return;
 
         this.#marketingService.unsubscribeFromInitiative(initiative.id, this.#global.user.id.toString()).subscribe(() => {
             if (this.initiative()) {
@@ -214,16 +216,16 @@ export class MarketingInitiativeDetailComponent {
             case 'paused':
                 return 'bg-warning';
             case 'completed':
-                return 'bg-primary';
+                return 'bg-dark';
             default:
                 return 'bg-secondary';
         }
     }
 
-    removeChannel(channelId: number) {
+    async removeChannel(channelId: number) {
         const initiative = this.initiative();
         if (!initiative) return;
-        if (!confirm('Remove this channel from the initiative?')) return;
+        if (!(await this.#confirm.ask({ title: $localize`:@@i18n.common.remove:remove`, message: $localize`:@@i18n.marketing.confirmRemoveChannel:remove this channel from the initiative?` }))) return;
 
         this.#marketingService.removeInitiativeChannel(initiative.id, channelId).subscribe(() => {
             if (this.initiative()) {

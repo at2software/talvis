@@ -41,7 +41,7 @@ export class MarketingAssetsComponent {
     #tagSelected = false;
 
     defaultCategories: AssetCategory[] = [
-        { name: 'Brand Assets', icon: 'branding_watermark', color: 'primary', count: 0 },
+        { name: 'Brand Assets', icon: 'branding_watermark', color: 'cyan', count: 0 },
         { name: 'Social Media', icon: 'share', color: 'info', count: 0 },
         { name: 'Email Templates', icon: 'email', color: 'success', count: 0 },
         { name: 'Presentations', icon: 'slideshow', color: 'warning', count: 0 },

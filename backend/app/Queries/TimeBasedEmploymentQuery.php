@@ -6,6 +6,7 @@ use App\Models\Project;
 use App\Models\User;
 use App\Models\UserPaidTime;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\DB;
 
 class TimeBasedEmploymentQuery {
@@ -16,13 +17,10 @@ class TimeBasedEmploymentQuery {
 
         $projects = [];
         $orga     = 0;
-        $query    = $user->foci();
-        $query->select('project_id', 'company_id', 'user_id', DB::raw('sum(duration) as duration'));
-        $query->whereDate('started_at', '>', $user->activeEmployment->started_at);
-        if ($user->activeEmployment->ended_at) {
-            $query->whereDate('ended_at', '<', $user->activeEmployment->ended_at);
-        }
-        $query->groupBy(['project_id', 'user_id', 'company_id']);
+        $query    = $this->employmentFoci($user)
+            ->select('parent_type', 'parent_id', DB::raw('sum(duration) as duration'))
+            ->groupBy('parent_type', 'parent_id')
+            ->with('parent');
 
         foreach ($query->get() as $focus) {
             if ($parent = $focus->parent) {
@@ -44,20 +42,17 @@ class TimeBasedEmploymentQuery {
             return null;
         }
 
-        $query = $user->foci();
-        $query->select('project_id', DB::raw("DATE_FORMAT(started_at, '%Y-%m') AS month"), DB::raw('sum(duration) as duration'));
-        $query->whereDate('started_at', '>', $user->activeEmployment->started_at);
-        if ($user->activeEmployment->ended_at) {
-            $query->whereDate('ended_at', '<', $user->activeEmployment->ended_at);
-        }
-        $query->groupBy('project_id', 'month');
+        $query = $this->employmentFoci($user)
+            ->select('parent_type', 'parent_id', DB::raw("DATE_FORMAT(started_at, '%Y-%m') AS month"), DB::raw('sum(duration) as duration'))
+            ->groupBy('parent_type', 'parent_id', 'month')
+            ->with('parent');
 
         $times = [];
         foreach ($query->get() as $focusData) {
             if (! isset($times[$focusData->month])) {
                 $times[$focusData->month] = ['month' => $focusData->month, 'duration' => 0, 'type' => 0, 'excluded' => 0];
             }
-            if ($focusData->project_id && ($project = Project::find($focusData->project_id)) && $project->exclude_from_tbe) {
+            if ($focusData->parent instanceof Project && $focusData->parent->exclude_from_tbe) {
                 $times[$focusData->month]['excluded'] += $focusData->duration;
             } else {
                 $times[$focusData->month]['duration'] += $focusData->duration;
@@ -84,5 +79,11 @@ class TimeBasedEmploymentQuery {
         $data = array_merge($times, $paid->all());
         usort($data, fn ($a, $b) => strcmp($a['month'], $b['month']));
         return $data;
+    }
+    private function employmentFoci(User $user): HasMany {
+        $employment = $user->activeEmployment;
+        return $user->foci()
+            ->whereDate('started_at', '>', $employment->started_at)
+            ->when($employment->ended_at, fn ($_) => $_->whereDate('started_at', '<', $employment->ended_at));
     }
 }

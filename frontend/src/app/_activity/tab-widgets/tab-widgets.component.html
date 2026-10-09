@@ -1,12 +1,17 @@
-<activity-tab icon="widgets" [hidden]="!isEditMode()">
+<activity-tab icon="widgets" i18n-label="@@i18n.activityTab.widgets" label="widgets" [hidden]="!isEditMode()">
     <div class="container">
         <scrollbar>
             @if (isEditMode()) {
                 <div cdkDropList id="widget-list" [cdkDropListData]="allWidgets()" class="widget-list" [cdkDropListConnectedTo]="['col-0', 'col-1', 'col-2', 'col-3']">
                     @for (widget of allWidgets(); track widget.key) {
                         @let _isUsed = isUsedWidget(widget.key);
-                        <div cdkDrag [cdkDragData]="widget" class="widget-preview" [class.widget-used]="_isUsed" [ngbTooltip]="_isUsed ? 'Widget already in use' : 'Drag to add widget'">
-                            <ng-container [ngComponentOutlet]="widget.widget" [ngComponentOutletInputs]="{ options: {}, is_editing: false }"></ng-container>
+                        <div cdkDrag [cdkDragData]="widget" class="widget-preview" [class.widget-used]="_isUsed">
+                            <div class="widget-preview-body" [ngbTooltip]="_isUsed ? 'Widget already in use' : 'Drag to add widget'">
+                                <ng-container [ngComponentOutlet]="widget.widget" [ngComponentOutletInputs]="{ options: {}, is_editing: false }"></ng-container>
+                            </div>
+                            <button type="button" class="btn btn-plain text-primary px-1" [disabled]="_isUsed" i18n-ngbTooltip="@@i18n.dashboard.addWidget" ngbTooltip="add to dashboard" i18n-aria-label="@@i18n.dashboard.addWidget" aria-label="add to dashboard" (click)="addWidget(widget.key)">
+                                <i>add</i>
+                            </button>
                         </div>
                     }
                 </div>

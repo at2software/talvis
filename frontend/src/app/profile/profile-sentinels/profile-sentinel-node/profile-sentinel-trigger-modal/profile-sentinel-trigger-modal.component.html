@@ -9,7 +9,7 @@
                 <div class="form-group mb-3">
                     <div i18n="@@i18n.common.trigger">trigger</div>
                     <div ngbDropdown class="sentinel-dropdown">
-                        <button type="button" class="btn btn-outline-secondary w-100 text-start d-flex align-items-center" ngbDropdownToggle>
+                        <button type="button" class="btn btn-dark w-100 text-start d-flex align-items-center" ngbDropdownToggle>
                             <span class="sentinel-pill bg-{{ getTriggerColor(sentinel.trigger) }}">{{ ObserverTrigger[sentinel.trigger] }}</span>
                         </button>
                         <div ngbDropdownMenu class="w-100">
@@ -27,7 +27,7 @@
                     <div class="form-group mb-3">
                         <div i18n="@@i18n.common.table">table</div>
                         <div ngbDropdown class="sentinel-dropdown">
-                            <button type="button" class="btn btn-outline-secondary w-100 text-start d-flex align-items-center" ngbDropdownToggle>
+                            <button type="button" class="btn btn-dark w-100 text-start d-flex align-items-center" ngbDropdownToggle>
                                 <span class="sentinel-table">{{ sentinel.table_name || 'Select table...' }}</span>
                             </button>
                             <div ngbDropdownMenu class="w-100 dropdown-menu-scroll">
@@ -52,7 +52,7 @@
                     <div class="form-group mb-3">
                         <div i18n="@@i18n.common.time">time</div>
                         <div ngbDropdown class="sentinel-dropdown">
-                            <button type="button" class="btn btn-outline-secondary w-100 text-start d-flex align-items-center" ngbDropdownToggle>
+                            <button type="button" class="btn btn-dark w-100 text-start d-flex align-items-center" ngbDropdownToggle>
                                 <span class="sentinel-value">{{ sentinel.table_name || 'Select time...' }}</span>
                             </button>
                             <div ngbDropdownMenu class="w-100">

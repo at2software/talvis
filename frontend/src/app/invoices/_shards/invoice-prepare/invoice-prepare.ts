@@ -15,7 +15,7 @@ import { InputModalService } from '@app/_modals/modal-input/modal-input.service'
 import { moveInvoiceItems, reindexInvoiceItems } from './invoice-item.reorder.const';
 import { HasInvoiceItems } from '@interfaces/hasInvoiceItems.interface';
 import { Dictionary } from '@constants/constants';
-import { InvoiceItemAnnotationType, InvoiceItemRowComponent } from './invoice-item/invoice-item-row.component';
+import { InvoiceItemInfoMode, InvoiceItemRowComponent } from './invoice-item/invoice-item-row.component';
 import { ModalInvoiceDiscountComponent } from '@app/_modals/modal-invoice-discount/modal-invoice-discount.component';
 import { CdkDrag, CdkDragDrop, CdkDropList } from '@angular/cdk/drag-drop';
 import { debounceTime, filter, forkJoin, map } from 'rxjs';
@@ -34,6 +34,7 @@ import { ModalBaseService } from '@app/_modals/modal-base-service';
 import { SpinnerComponent } from '@shards/spinner/spinner.component';
 import { ExtIssueResolverService, ExtIssueRef } from '@models/ext-issue/ext-issue-resolver.service';
 import { StackedTableDirective } from '@directives/stacked-table.directive';
+import { EnableTableExportDirective } from '@app/app/table-controls/enable-table-export.directive';
 
 const LIVE_RELOAD_DEBOUNCE_MS = 400;
 
@@ -48,7 +49,7 @@ interface VatEntry {
     changeDetection: ChangeDetectionStrategy.OnPush,
     templateUrl: './invoice-prepare.html',
     styleUrls: ['./invoice-prepare.scss'],
-    imports: [StackedTableDirective, ToolbarComponent, DecimalPipe, Nx, CdkTableModule, InvoiceItemRowComponent, MoneyPipe, NgbDropdownModule, NgbTooltipModule, CdkDrag, CdkDropList, HotkeyDirective, SpinnerComponent],
+    imports: [StackedTableDirective, EnableTableExportDirective, ToolbarComponent, DecimalPipe, Nx, CdkTableModule, InvoiceItemRowComponent, MoneyPipe, NgbDropdownModule, NgbTooltipModule, CdkDrag, CdkDropList, HotkeyDirective, SpinnerComponent],
 })
 export class InvoicePrepare {
     #invoiceService = inject(InvoiceItemService);
@@ -65,7 +66,7 @@ export class InvoicePrepare {
     showTools = input<boolean>(true);
     allowedNewItems = input<TNewItems[]>(['item', 'paydown', 'group', 'discount']);
     withInstalments = input<boolean>(true);
-    annotationType = input<InvoiceItemAnnotationType>('invoice');
+    infoType = input<InvoiceItemInfoMode>('invoice');
 
     dataLoaded = output<InvoiceItem[]>();
 
@@ -214,7 +215,7 @@ export class InvoicePrepare {
         const company = this.companyRef();
         if (!company) return;
         this.#modalService
-            .open(ModalEditInvoiceItemComponent, item, company, 'Add', '@@i18n.invoice.addNewInvoiceItem', 'Add & next')
+            .open(ModalEditInvoiceItemComponent, item, company, 'Add', $localize`:@@i18n.invoice.addNewInvoiceItem:add new invoice item`, 'Add & next')
             .then((_) => {
                 if (_ && 'item' in _) {
                     const key = InvoiceItem.parentField(this.parent());
@@ -276,7 +277,7 @@ export class InvoicePrepare {
 
     onNewGroup = () =>
         this.#modalGroups
-            .open('@@i18n.common.title')
+            .open($localize`:@@i18n.common.title:title`)
             .then((result) => {
                 if (result) {
                     const { text } = result;

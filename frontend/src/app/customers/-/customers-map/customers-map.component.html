@@ -2,7 +2,7 @@
 @let _customers = customers();
 <toolbar>
     @if (!_loading) {
-        <span class="badge bg-primary me-2"> {{ _customers.length }} customers with locations </span>
+        <span class="badge bg-dark me-2"> {{ _customers.length }} customers with locations </span>
     }
     @if (_loading) {
         <spinner [size]="20" [inline]="true"></spinner>

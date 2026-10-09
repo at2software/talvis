@@ -13,7 +13,7 @@ import { VcardRow } from '@models/vcard/vcard-row';
         @if (company().card()) {
             @if (mode() === 'dropdown') {
                 <div ngbDropdown class="d-inline-block">
-                    <button type="button" class="btn btn-sm btn-outline-primary dropdown-toggle-simple" ngbDropdownToggle ngbTooltip="language & formality" i18n-ngbTooltip="@@i18n.common.languageFormality">
+                    <button type="button" class="btn btn-sm btn-plain text-primary dropdown-toggle-simple" ngbDropdownToggle ngbTooltip="language & formality" i18n-ngbTooltip="@@i18n.common.languageFormality">
                         <i class="me-1">translate</i>
                         <span class="small">{{ currentLocaleLabel() }}</span>
                     </button>

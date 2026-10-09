@@ -177,7 +177,7 @@ export class GitLabPlugin extends PluginInstance implements ITaskPlugin, IReposi
                             user_id: resolvedUser?.id,
                             is_mini: true,
                             icon: resolvedUser?.getAvatar?.(),
-                            var: { source: 'git', ...(resolvedUser ? {} : { nicon: 'git' }) },
+                            var: { source: 'gitlab', ...(resolvedUser ? {} : { nicon: 'git' }) },
                             itemCount: events.length,
                         };
                     });
@@ -214,7 +214,7 @@ export class GitLabPlugin extends PluginInstance implements ITaskPlugin, IReposi
                         user_id: resolvedUser?.id,
                         is_mini: true,
                         icon: resolvedUser?.getAvatar?.(),
-                        var: { source: 'git', ...(resolvedUser ? {} : { nicon: 'git' }) },
+                        var: { source: 'gitlab', ...(resolvedUser ? {} : { nicon: 'git' }) },
                         itemCount: issues.length,
                     };
                 });

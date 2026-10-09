@@ -49,7 +49,7 @@
         <div class="card mb-3">
             <div class="card-header hstack gap-2">
                 <div class="flex-fill text-truncate" i18n="@@i18n.projects.finishedProjectsOverTime">finished projects over time</div>
-                <button type="button" class="btn btn-sm btn-outline-primary border-0" (click)="toggleTimelineMode()" tabindex="0" [ngbTooltip]="timelineMode() === 'count' ? 'switch to net value' : 'switch to count'">
+                <button type="button" class="btn btn-sm btn-plain text-primary" (click)="toggleTimelineMode()" tabindex="0" [ngbTooltip]="timelineMode() === 'count' ? 'switch to net value' : 'switch to count'">
                     <i>{{ timelineMode() === 'count' ? 'attach_money' : 'format_list_numbered' }}</i>
                 </button>
             </div>

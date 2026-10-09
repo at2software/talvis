@@ -32,6 +32,10 @@ export class ProjectService extends TalvisHttpService<Project> {
     indexOverrunRisk = () => this.aget('projects/overrun-risk');
     assigned = (id: string) => this.get(`projects/${id}/assigned`);
     addProject = (customerId: string, name: string = 'New Project') => this.post(`companies/${customerId}/projects`, { name: name });
+    promptAddProject = (customerId: string) =>
+        nx()
+            .promptInput($localize`:@@i18n.customers.project_name:Project name`)
+            .confirmed(({ text }) => this.addProject(customerId, text).subscribe((x) => nx().navigateTo('/projects/' + x.id)));
     addMilestone = (id: string) => this.post(`projects/${id}/milestones`, {});
     indexMilestones = (id: string): Observable<MilestonesDto> =>
         this.get(`projects/${id}/milestones`, {}, Object).pipe(

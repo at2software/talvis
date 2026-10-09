@@ -15,7 +15,7 @@
         <label for="projectUrl" class="form-label text-muted small" i18n="@@i18n.invoices.gitlabProjectUrl">GitLab project URL</label>
         <div class="input-group">
             <input id="projectUrl" class="form-control" [ngModel]="_projectUrl" (ngModelChange)="projectUrl.set($event)" i18n-placeholder="@@i18n.invoices.gitlabProjectUrlPlaceholder" placeholder="https://gitlab.example.com/namespace/project" (keyup.enter)="check()" />
-            <button class="btn btn-outline-primary" (click)="check()" [disabled]="!_projectUrl || _checking">
+            <button class="btn btn-plain text-primary" (click)="check()" [disabled]="!_projectUrl || _checking">
                 @if (_checking) {
                     <spinner [size]="20" [inline]="true"></spinner>
                 } @else {
@@ -33,7 +33,7 @@
         @if (_selectedCompany) {
             <div class="d-flex align-items-center gap-2">
                 <span class="text-white">{{ _selectedCompany.getName() }}</span>
-                <button class="btn btn-sm text-primary p-0" (click)="selectedCompany.set(undefined)">
+                <button class="btn btn-sm btn-plain text-primary p-0" (click)="selectedCompany.set(undefined)">
                     <i>close</i>
                 </button>
             </div>
@@ -44,7 +44,7 @@
 
     @if (_candidates; as candidates) {
         <div class="d-flex align-items-center gap-2 mb-4 p-2 border rounded">
-            <n class="text-primary">git</n>
+            <n>git</n>
             <div>
                 <div class="fw-semibold text-white">{{ candidates.project.name }}</div>
                 <small class="text-muted">{{ candidates.project.path_with_namespace }}</small>
@@ -105,7 +105,7 @@
 </div>
 
 <div class="modal-footer">
-    <button class="btn btn-outline-primary" (click)="activeModal.dismiss()" i18n="@@i18n.common.cancel">cancel</button>
+    <button class="btn" (click)="activeModal.dismiss()" i18n="@@i18n.common.cancel">cancel</button>
     <button class="btn btn-primary" (click)="create()" [disabled]="!canCreate() || _creating">
         @if (_creating) {
             <spinner [size]="20" [inline]="true" class="me-1"></spinner>

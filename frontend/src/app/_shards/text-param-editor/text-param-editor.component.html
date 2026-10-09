@@ -1,5 +1,5 @@
 @let _param = param();
-@let _annotations = annotations();
+@let _showTextSource = showTextSource();
 @let _maxHeight = maxHeight();
 @let _object = object();
 @let _isExpanded = isExpanded();
@@ -11,24 +11,17 @@
 @let _loadingImages = loadingImages();
 @let _images = images();
 
-@if (_param && _annotations) {
-    <div class="annotation">
-        @if (_param.fallback) {
-            <div class="d-flex small text-muted">
-                <div role="button" class="me-1 text-primary" smartLink="/settings/projects"><i>info</i></div>
-                <div class="flex-fill text-muted" i18n="@@i18n.common.defaultText">default text</div>
-            </div>
-        } @else {
-            <div class="d-flex small text-muted">
-                <div role="button" class="me-1 text-danger cursor-pointer"><i (click)="resetParam()" (keyup.enter)="resetParam()" tabindex="0">delete</i></div>
-                <div class="flex-fill text-muted" i18n="@@i18n.common.customText">custom text</div>
-            </div>
-        }
-    </div>
-}
-
 @if (_param) {
-    <div class="hstack gap-2 btn btn-fancy btn-fancy-te">
+    <div class="hstack gap-2 position-absolute top-0 end-0 px-2 pt-1">
+        @if (_showTextSource) {
+            @if (_param.fallback) {
+                <span class="small text-muted" i18n="@@i18n.common.defaultText">default text</span>
+                <i class="text-primary cursor-pointer" smartLink="/settings/projects" i18n-ngbTooltip="@@i18n.common.editDefaultText" ngbTooltip="edit default text">settings</i>
+            } @else {
+                <span class="small text-muted" i18n="@@i18n.common.customText">custom text</span>
+                <i class="text-danger cursor-pointer" (click)="resetParam()" (keyup.enter)="resetParam()" tabindex="0" i18n-ngbTooltip="@@i18n.common.resetToDefaultText" ngbTooltip="reset to default text">restart_alt</i>
+            }
+        }
         @if (_showModalLocalizationControls) {
             @if (_isLocalized) {
                 <div ngbTooltip="Localized" i18n-ngbTooltip="@@i18n.common.localized"><i class="text-success">translate</i></div>
@@ -36,12 +29,15 @@
                 <div class="cursor-pointer" (click)="localize()" tabindex="0" (keyup.enter)="localize()" ngbTooltip="localize" i18n-ngbTooltip="@@i18n.common.localize"><i class="text-primary">translate</i></div>
             }
         }
-        <div class="cursor-pointer" (click)="open(content)" (keyup.enter)="open(content)" tabindex="0"><i>edit</i></div>
+        <div class="cursor-pointer" (click)="open(content)" (keyup.enter)="open(content)" tabindex="0"><i class="text-primary">edit</i></div>
     </div>
 }
 
 <div class="preview-container" [class.has-max-height]="_maxHeight && !_isExpanded">
     <div class="preview" [style.maxHeight]="!_isExpanded && _maxHeight ? _maxHeight : null" [style.overflow]="!_isExpanded && _maxHeight ? 'hidden' : null">
+        @if (_param && isEmpty()) {
+            <div class="small text-muted" i18n="@@i18n.common.noTextYet">no text yet</div>
+        }
         @if (_param) {
             @for (seg of contentSegments(); track $index) {
                 @if (seg.type === 'html') {

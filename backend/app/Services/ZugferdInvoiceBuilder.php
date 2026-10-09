@@ -21,10 +21,11 @@ class ZugferdInvoiceBuilder {
         $params = $company->getParamsAttribute();
         $p      = Document::personalizationArray($company);
 
-        $me = Company::me();
-        if (! $me) {
-            throw new InvoiceDataException('Param ME_ID does not resolve to a company; the invoice sender is not configured.');
+        $missingSenderData = array_diff(Company::senderReadiness(), ['email']);
+        if ($missingSenderData) {
+            throw new InvoiceDataException('Your company data is incomplete ('.implode(', ', $missingSenderData).'). Complete it on the dashboard under "Getting started" → "Your company".');
         }
+        $me = Company::me();
 
         $buyerEmail = $company->invoiceRecipients()[0] ?? '';
         if ($buyerEmail === '') {
@@ -39,15 +40,8 @@ class ZugferdInvoiceBuilder {
             throw new InvoiceDataException('Neither Param ME_EMAIL nor mail.from.address is set; XRechnung requires the seller electronic address (BT-58).');
         }
 
-        $sellerName = Company::myName();
-        if ($sellerName === '') {
-            throw new InvoiceDataException('Neither Param ME_NAME nor the company behind Param ME_ID has a name; XRechnung requires the seller name (BT-27).');
-        }
-
+        $sellerName    = Company::myName();
         $sellerCountry = trim((string)$me->vcard?->getCountryCode());
-        if ($sellerCountry === '') {
-            throw new InvoiceDataException('The company behind Param ME_ID has no country in its vCard address; the seller country decides whether a sale is domestic or intra-community.');
-        }
 
         $isReverseCharge = self::isReverseCharge(
             $sellerCountry,
@@ -165,19 +159,13 @@ class ZugferdInvoiceBuilder {
         $paymentDuration      = $paymentDurationParam->value;
         $due_date             = now()->addDays($paymentDuration);
 
-        $hasDirectDebitMandate = ! empty($params['INVOICE_DD_MANDATE']) &&
-                                ! empty($params['INVOICE_DD_IBAN']) &&
-                                trim($params['INVOICE_DD_MANDATE']) !== '' &&
-                                trim($params['INVOICE_DD_IBAN']) !== '';
-
-        if ($hasDirectDebitMandate) {
-            $debitedAccount = trim($params['INVOICE_DD_IBAN']);
-            $creditorId     = trim(Param::get('ME_CREDITOR_ID')->value ?? '');
+        if ($mandate = $company->directDebitMandate()) {
+            $creditorId = trim(Param::get('ME_CREDITOR_ID')->value ?? '');
             if ($creditorId === '') {
                 throw new InvoiceDataException("Company {$company->id} has a direct debit mandate, but Param ME_CREDITOR_ID is empty.");
             }
-            $document->addDocumentPaymentMeanToDirectDebit($debitedAccount, $creditorId);
-            $document->addDocumentPaymentTerm(null, $due_date->toDateTime(), trim($params['INVOICE_DD_MANDATE']));
+            $document->addDocumentPaymentMeanToDirectDebit($mandate['iban'], $creditorId);
+            $document->addDocumentPaymentTerm(null, $due_date->toDateTime(), $mandate['reference']);
         } else {
             $document->addDocumentPaymentMeanToCreditTransfer(
                 $iban, $sellerName, null,

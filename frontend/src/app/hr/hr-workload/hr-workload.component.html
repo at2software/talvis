@@ -47,7 +47,7 @@
                             @if (hasTimeBudget) {
                                 <div>
                                     <div class="input-group hstack flex-nowrap">
-                                        <span class="input-group-text text-dark" [class.text-primary]="p.pivot.hours_planned > 0" i18n-ngbTooltip="@@i18n.info.estimatedRemainingTimeToComplete" ngbTooltip="estimated remaining time to complete (without weekly)" i18n="@@i18n.common.budget">budget</span>
+                                        <span class="input-group-text text-dark" [class.text-white]="p.pivot.hours_planned > 0" i18n-ngbTooltip="@@i18n.info.estimatedRemainingTimeToComplete" ngbTooltip="estimated remaining time to complete (without weekly)" i18n="@@i18n.common.budget">budget</span>
 
                                         <input type="text" class="form-control" roles="hr" style="width: 75px" [(ngModel)]="p.pivot.hours_planned" (change)="updateAssignment(p.pivot)" />
 
@@ -59,9 +59,9 @@
                             @if (!hasTimeBudget) {
                                 <div>
                                     <div class="input-group hstack flex-nowrap">
-                                        <span class="input-group-text" [class.text-primary]="p.pivot.hours_planned > 0" i18n-ngbTooltip="@@i18n.info.estimatedRemainingTimeToComplete" ngbTooltip="estimated remaining time to complete (without weekly)" i18n="@@i18n.common.budget">budget</span>
+                                        <span class="input-group-text" [class.text-white]="p.pivot.hours_planned > 0" i18n-ngbTooltip="@@i18n.info.estimatedRemainingTimeToComplete" ngbTooltip="estimated remaining time to complete (without weekly)" i18n="@@i18n.common.budget">budget</span>
                                         <input type="text" class="form-control" style="width: 75px" [(ngModel)]="p.pivot.hours_planned" (change)="updateAssignment(p.pivot)" />
-                                        <span class="input-group-text text-dark" [class.text-primary]="p.pivot.hours_weekly > 0" i18n-ngbTooltip="@@i18n.info.estimated-recurring-workload-per-week" [class.text-danger]="p.pivot.hours_weekly > 0" ngbTooltip="estimated recurring workload per week" i18n="@@i18n.common.weekly">weekly</span>
+                                        <span class="input-group-text text-dark" [class.text-white]="p.pivot.hours_weekly > 0" i18n-ngbTooltip="@@i18n.info.estimated-recurring-workload-per-week" [class.text-danger]="p.pivot.hours_weekly > 0" ngbTooltip="estimated recurring workload per week" i18n="@@i18n.common.weekly">weekly</span>
                                         <input type="text" class="form-control" style="width: 75px" [(ngModel)]="p.pivot.hours_weekly" ngbTooltip="computed: {{ p.pivot.avg_hpd * 5 }}" (change)="updateAssignment(p.pivot)" />
                                     </div>
                                 </div>

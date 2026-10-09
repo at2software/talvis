@@ -76,7 +76,7 @@
                     @if (global.user?.hasAnyRole(['admin', 'hr']) && _request.state === 0) {
                         <div class="card-footer">
                             <div class="d-flex gap-2 justify-content-end">
-                                <button class="btn btn-outline-danger" (click)="onDeny()" i18n="@@i18n.common.reject">reject</button>
+                                <button class="btn btn-plain text-danger" (click)="onDeny()" i18n="@@i18n.common.reject">reject</button>
                                 <button class="btn btn-success" (click)="onApprove()" i18n="@@i18n.common.approve">approve</button>
                             </div>
                         </div>

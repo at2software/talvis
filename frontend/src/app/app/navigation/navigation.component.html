@@ -2,54 +2,51 @@
 @let _isMenuOpen = isMenuOpen();
 @let _navItems = navigationItems();
 @let _bottomNavItems = bottomNavigationItems();
-<!-- Mobile Burger Button (fixed bottom left) -->
 @if (_isMobile) {
-    <button class="btn btn-primary mobile-burger-btn position-fixed rounded-circle shadow d-flex align-items-center justify-content-center" (click)="toggleMobileMenu()" [class.active]="_isMenuOpen">
+    <button class="btn btn-primary mobile-burger-btn position-fixed rounded-circle d-flex align-items-center justify-content-center" (click)="toggleMobileMenu()" [class.active]="_isMenuOpen">
         <n>nexus</n>
     </button>
 }
 
-<!-- Mobile Overlay -->
 @if (_isMobile && _isMenuOpen) {
-    <div class="position-fixed w-100 h-100 mobile-overlay" (click)="closeMobileMenu()" (keyup.enter)="closeMobileMenu()" tabindex="0" style="top: 0; left: 0; background-color: rgba(0, 0, 0, 0.3); z-index: 99"></div>
+    <div class="mobile-overlay position-fixed top-0 start-0 w-100 h-100 bg-black bg-opacity-25" (click)="closeMobileMenu()" (keyup.enter)="closeMobileMenu()" tabindex="0"></div>
 }
 
-<!-- Navigation Container -->
 <div class="nav-container h-100" [class.mobile-open]="_isMobile && _isMenuOpen" [class.mobile-closed]="_isMobile && !_isMenuOpen" [class.is-mobile]="_isMobile">
-    <ul class="nav vstack gap-1">
-        <li class="nav-item mod-icon" tabindex="0" (click)="onSearchExpand()" (keyup.enter)="onSearchExpand()" placement="right" tabindex="-1">
-            <a hotkey="CTRL+ALT+F" class="nav-search" [class.search-expanded]="searchExpanded()">
+    <ul class="nav flex-column">
+        <li class="nav-item mod-icon" (click)="onSearchExpand()" (keyup.enter)="onSearchExpand()">
+            <a hotkey="CTRL+ALT+F" class="nav-search" [class.search-expanded]="searchExpanded()" role="button" tabindex="0" i18n-aria-label="@@i18n.common.search" aria-label="search">
+                <img src="./assets/modules/search.svg" alt="" />
                 <div class="label" style="width: 200px">
                     <search-input #search [openableOnly]="true" (itemSelected)="onSelect($event)"></search-input>
                 </div>
-                <img src="./assets/modules/search.svg" alt="" />
             </a>
         </li>
     </ul>
-    <ul class="nav vstack gap-1">
+    <ul class="nav flex-column">
         @for (item of _navItems; track item.link) {
             <li class="nav-item mod-icon" [hidden]="!item.visible" [attr.data-nav-tour]="item.logo">
-                <a placement="right" tabindex="-1" [routerLink]="item.link" routerLinkActive="active" (click)="_isMobile && closeMobileMenu()">
-                    <div class="label">{{ item.tooltip }}</div>
+                <a [routerLink]="item.link" routerLinkActive="active" [attr.aria-label]="item.tooltip" (click)="_isMobile && closeMobileMenu()">
                     <img src="./assets/modules/{{ item.logo }}.svg" alt="" />
+                    <div class="label">{{ item.tooltip }}</div>
                 </a>
             </li>
         }
     </ul>
-    <ul class="nav vstack gap-1 nav-bottom">
+    <ul class="nav flex-column nav-bottom">
         @if (global.user) {
-            <li class="nav-item mod-icon" placement="right" tabindex="-1" data-nav-tour="profile">
-                <a routerLink="/profile" (click)="_isMobile && closeMobileMenu()">
-                    <div class="label" i18n="@@i18n.common.profile">profile</div>
+            <li class="nav-item mod-icon" data-nav-tour="profile">
+                <a routerLink="/profile" routerLinkActive="active" i18n-aria-label="@@i18n.common.profile" aria-label="profile" (click)="_isMobile && closeMobileMenu()">
                     <img src="{{ global.user!.getAvatar() }}" class="img-round" alt="" />
+                    <div class="label" i18n="@@i18n.common.profile">profile</div>
                 </a>
             </li>
         }
         @for (item of _bottomNavItems; track item.link) {
             <li class="nav-item mod-icon" [hidden]="!item.visible" [attr.data-nav-tour]="item.logo">
-                <a placement="right" tabindex="-1" [routerLink]="item.link" routerLinkActive="active" (click)="_isMobile && closeMobileMenu()">
-                    <div class="label">{{ item.tooltip }}</div>
+                <a [routerLink]="item.link" routerLinkActive="active" [attr.aria-label]="item.tooltip" (click)="_isMobile && closeMobileMenu()">
                     <img src="./assets/modules/{{ item.logo }}.svg" alt="" />
+                    <div class="label">{{ item.tooltip }}</div>
                 </a>
             </li>
         }

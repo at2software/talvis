@@ -5,6 +5,27 @@
 @let _selectionDuration = selectionDuration();
 <div class="row">
     <div class="col-md-3">
+        @if (canLogTime()) {
+            <form class="card mb-3" (ngSubmit)="onLogTime()">
+                <div class="card-header" i18n="@@i18n.foci.logTime">log time</div>
+                <div class="card-body vstack gap-2">
+                    <div class="input-group">
+                        <span class="input-group-text"><i i18n-ngbTooltip="@@i18n.common.date" ngbTooltip="date">event</i></span>
+                        <input type="date" class="form-control" name="logDate" [ngModel]="logDate()" (ngModelChange)="logDate.set($event)" required />
+                    </div>
+                    <div class="input-group">
+                        <span class="input-group-text"><i i18n-ngbTooltip="@@i18n.common.duration" ngbTooltip="duration">schedule</i></span>
+                        <input type="number" step="0.25" min="0" class="form-control text-end" name="logDuration" [ngModel]="logDuration()" (ngModelChange)="logDuration.set($event)" i18n-placeholder="@@i18n.foci.hoursPlaceholder" placeholder="hours" />
+                        <span class="input-group-text">h</span>
+                    </div>
+                    <input type="text" class="form-control" name="logComment" [ngModel]="logComment()" (ngModelChange)="logComment.set($event)" i18n-placeholder="@@i18n.foci.whatDidYouDo" placeholder="what did you work on?" />
+                    <button type="submit" class="btn btn-primary" [disabled]="!logDuration() || !logDate()">
+                        <i>add</i>
+                        <span i18n="@@i18n.foci.addTimeEntry">add time entry</span>
+                    </button>
+                </div>
+            </form>
+        }
         <div class="card mb-3">
             <div class="card-header" i18n="@@i18n.common.information">information</div>
             <ul class="list-group">
@@ -59,7 +80,11 @@
     <div class="col-md-9">
         @if (!_filteredFoci.length) {
             <div class="card">
-                <empty-state [card]="false" class="projects" title="no foci yet" i18n-title="@@i18n.invoices.noFociYet"></empty-state>
+                <empty-state [card]="false" class="calendar" title="no time entries yet" i18n-title="@@i18n.foci.noTimeEntriesYet">
+                    @if (!canLogTime()) {
+                        <p class="text-muted" i18n="@@i18n.foci.companyTimeHint">Only time booked directly on the customer appears here. Time booked on a project is listed in that project's time tracking tab.</p>
+                    }
+                </empty-state>
             </div>
         }
         @if (_filteredFoci.length) {
@@ -118,7 +143,7 @@
                         <td cdk-footer-cell *cdkFooterCellDef data-export-hidden></td>
                     </ng-container>
                     <ng-container cdkColumnDef="focus_item">
-                        <th cdk-header-cell *cdkHeaderCellDef data-export-hidden (click)="onSort('focus_item')">
+                        <th cdk-header-cell *cdkHeaderCellDef class="sortable" data-export-hidden (click)="onSort('focus_item')">
                             <i>filter_tilt_shift</i>
                         </th>
                         <td cdk-cell *cdkCellDef="let x" data-export-hidden>

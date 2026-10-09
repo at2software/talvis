@@ -21,9 +21,29 @@ import { Serializable } from '@models/_core/serializable';
 import type { NxAction } from '@models/_core/nx.actions';
 import type { INxContextMenu } from '@models/_core/nx.contextmenu.interface';
 import { Dictionary } from '@constants/constants';
-import { DashboardDto, TableRelationDto, TableSchemaDto, UserEnvironmentDto } from '@models/_core/api-response';
+import { DashboardDto, FlowTransitionDto, TableRelationDto, TableSchemaDto, UserEnvironmentDto } from '@models/_core/api-response';
 
 const DEV_ROLES: string[] | null = null; // e.g. ['user', 'invoicing']
+
+const DASHBOARD_COLUMNS = 4;
+const emptyDashboard = (): DashboardDto => ({ title: 'Dashboard', cols: Array.from({ length: DASHBOARD_COLUMNS }, () => []) });
+
+const parseDashboards = (raw: unknown): unknown => {
+    if (typeof raw !== 'string') return raw;
+    try {
+        return JSON.parse(raw);
+    } catch {
+        return null;
+    }
+};
+
+const sanitizeDashboards = (raw: unknown): DashboardDto[] => {
+    const parsed = parseDashboards(raw);
+    if (!Array.isArray(parsed)) return [emptyDashboard()];
+    return parsed
+        .filter((_): _ is DashboardDto => typeof _?.title === 'string' && Array.isArray(_.cols))
+        .map((_) => ({ ..._, cols: Array.from({ length: DASHBOARD_COLUMNS }, (__, i) => (Array.isArray(_.cols[i]) ? _.cols[i].filter((w) => typeof w?.widget === 'string') : [])) }));
+};
 
 interface NavigationItem {
     logo: string;
@@ -62,6 +82,7 @@ export class GlobalService extends TalvisHttpService<Serializable> {
     readonly loaded = signal(false);
     readonly authResolved = signal(false);
     readonly encryptionsValid = signal(false);
+    readonly isSeedAdmin = signal(false);
     readonly navigationItems = signal<NavigationItem[]>([]);
     readonly bottomNavigationItems = signal<NavigationItem[]>([]);
     readonly onActionsResolved = new Subject<{ object: INxContextMenu; action: NxAction }>();
@@ -131,6 +152,12 @@ export class GlobalService extends TalvisHttpService<Serializable> {
             },
         });
 
+    reloadTransitions = () =>
+        this.aget('flow/transitions', null, Object).subscribe({
+            next: (_: FlowTransitionDto[]) => (ProjectState.transitions = _),
+            error: () => (ProjectState.transitions = undefined),
+        });
+
     reloadInvoiceNumber = () => this.get('invoices/current_no_int').pipe(tap((_) => (this.settings['INVOICE_NO_CURRENT'] = '' + _)));
 
     setTokenInterceptor = (token: string) => {
@@ -169,12 +196,14 @@ export class GlobalService extends TalvisHttpService<Serializable> {
         this.tables = env.tables;
         this.relations = env.relations;
         this.accessors = env.accessors || {};
-        this.dashboards = env.dashboards;
+        this.dashboards = sanitizeDashboards(env.dashboards);
         this.#plugins = env.plugins;
         this.project_states = env.project_states.map((_) => ProjectState.fromJson(_));
+        this.reloadTransitions();
         this.lead_sources.set(env.lead_sources.map((_) => LeadSource.fromJson(_)));
         this.roles = env.roles || [];
         this.euCountries = env.eu_countries;
+        this.isSeedAdmin.set(!!env.is_seed_admin);
 
         this.me_id = env.settings.ME_ID as string;
 
@@ -276,7 +305,7 @@ export class GlobalService extends TalvisHttpService<Serializable> {
 
     currentRoot = () => this.selectedRootObject;
     currentProjectRoot = () => (this.selectedRootObject instanceof Project ? (this.selectedRootObject as Project) : null);
-    getAllowedSucceedingProjectStatesFor = (project: Project) => this.project_states.filter((_) => ProjectState.StateChangeWorkflow['' + project.state.id].contains('' + _.id));
+    getAllowedSucceedingProjectStatesFor = (project: Project) => this.project_states.filter((_) => ProjectState.allowedTargetIds(project.state.id, this.user).contains('' + _.id));
 
     #initializeNavigationItems() {
         const i18nDashboard = $localize`:@@i18n.common.dashboard:dashboard`;
@@ -287,6 +316,7 @@ export class GlobalService extends TalvisHttpService<Serializable> {
         const i18nProducts = $localize`:@@i18n.common.products:products`;
         const i18nTeam = $localize`:@@i18n.common.team:team`;
         const i18nCalendar = $localize`:@@i18n.common.calendar:calendar`;
+        const i18nApprovals = $localize`:@@i18n.flow.openApprovals:open approvals`;
         const i18nSettings = $localize`:@@i18n.common.settings:settings`;
 
         this.navigationItems.set([
@@ -298,6 +328,7 @@ export class GlobalService extends TalvisHttpService<Serializable> {
             { logo: 'product', tooltip: i18nProducts, link: '/products', visible: this.#hasRole('product_manager') },
             { logo: 'team', tooltip: i18nTeam, link: '/hr', visible: this.#hasAnyRole(['hr', 'project_manager']) },
             { logo: 'calendar', tooltip: i18nCalendar, link: '/calendar', visible: this.#hasRole('user') },
+            { logo: 'approval', tooltip: i18nApprovals, link: '/flow/approvals', visible: this.#hasRole('user') },
         ]);
 
         this.bottomNavigationItems.set([{ logo: 'settings', tooltip: i18nSettings, link: '/settings', visible: this.#hasRole('admin') }]);

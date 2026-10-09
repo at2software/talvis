@@ -5,7 +5,6 @@ namespace App\Services;
 use App\Enums\InvoiceItemType;
 use App\Enums\MilestoneState;
 use App\Models\Assignment;
-use App\Models\ProjectState;
 use Illuminate\Support\Facades\Auth;
 
 class TimetrackerDataService {
@@ -20,7 +19,7 @@ class TimetrackerDataService {
             ->get()
             ->filter(function ($_) {
                 $_->is_in_warranty = $_->isInWarranty();
-                return $_->state->progress < ProjectState::Finished || $_->is_in_warranty;
+                return $_->isTrackable();
             })
             ->map(function ($_) {
                 foreach (self::PROJECT_LOADERS as $key) {

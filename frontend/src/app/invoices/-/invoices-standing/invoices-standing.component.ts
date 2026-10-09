@@ -14,7 +14,7 @@ import { MoneyPipe } from '@pipes/money.pipe';
 import { SafePipe } from '@pipes/safe.pipe';
 import { EmptyStateComponent } from '@shards/empty-state/empty-state.component';
 import { EchartsComponent } from '@charts/echarts-wrapper/echarts-wrapper.component';
-import { ECHARTS_DEFAULT_TOOLTIP_OPTIONS, ECHARTS_DONUT_ITEM_STYLE } from '@charts/echarts-presets';
+import { ECHARTS_DEFAULT_TOOLTIP_OPTIONS, ECHARTS_DONUT_ITEM_STYLE, ECHARTS_DONUT_SERIES } from '@charts/echarts-presets';
 import { StackedTableDirective } from '@directives/stacked-table.directive';
 
 @Component({
@@ -61,7 +61,7 @@ export class InvoicesStandingComponent {
             tooltip: { trigger: 'item', ...ECHARTS_DEFAULT_TOOLTIP_OPTIONS, formatter: '{b}: {d}%' },
             series: [{
                 type: 'pie',
-                radius: ['50%', '72%'],
+                radius: ECHARTS_DONUT_SERIES.radius,
                 avoidLabelOverlap: false,
                 label: { show: false },
                 labelLine: { show: false },

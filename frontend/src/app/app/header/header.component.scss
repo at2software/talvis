@@ -1,5 +1,4 @@
 @use "var" as *;
-@use "colors";
 
 .ng-content {
     padding-left: $header-logo-size + $grid-width;
@@ -10,18 +9,11 @@
     cursor: default;
     position: fixed;
     z-index: 3;
-    padding: 0;
     top: 0;
-    left: $m-modules;
-    right: $m-activity;
-    height: $header-height - .5 * $grid-width;
-    background-color: colors.$bg-body;
-    transition: box-shadow 0.3s ease;
-    will-change: box-shadow;
-    
-    @media (max-width: 768px) {
-        left: 0;
-    }
+    left: var(--tv-modules-width);
+    right: var(--tv-activity-offset);
+    height: calc(var(--tv-header-height) - #{.5 * $grid-width});
+    background-color: var(--tv-surface-body);
 
     .slit {
         opacity: 0;
@@ -55,18 +47,17 @@
 
     ::ng-deep {
         .logo {
+            position: absolute;
+            top: $grid-width;
             width: $header-logo-size;
             height: $header-logo-size;
-            float: left;
             margin-left: -$header-logo-size - $grid-width;
-            top: $grid-width;
-            position: absolute;
             background-size: cover;
-            background-position: center center;
+            background-position: center;
             background-repeat: no-repeat;
             border: 1px black solid;
-            border-radius: 5px;
-            box-shadow: shadow();
+            border-radius: var(--bs-border-radius);
+            box-shadow: var(--tv-liquid-glass);
         }
 
         .h1,
@@ -101,6 +92,11 @@
                 &.active {
                     color: var(--color-primary-0);
                 }
+
+                &:focus:not(:focus-visible) {
+                    outline: none;
+                    box-shadow: none;
+                }
             }
 
             @media (max-width: 768px) {
@@ -112,54 +108,6 @@
                 .nav-link {
                     display: none !important;
                 }
-
-                &.mobile-dropdown {
-                    .mobile-nav-dropdown {
-                        display: block !important;
-                    }
-                    
-                    .dropdown-toggle {
-                        display: block !important;
-                        background-color: transparent;
-                        border: none;
-                        color: #cccccc;
-                        padding: 0.5rem 0;
-                        font-size: $nav-font-size * 0.8 !important;
-                        
-                        &:focus {
-                            box-shadow: none;
-                        }
-
-                        &::after {
-                            margin-left: 0.5rem;
-                        }
-                    }
-
-                    .dropdown-menu {
-                        .dropdown-item {
-                            color: #cccccc;
-                            font-size: $nav-font-size * 0.85 !important;
-                            padding: 0.5rem 1rem;
-                            
-                            &:hover,
-                            &:focus {
-                                background-color: rgba(var(--bs-primary-rgb), 0.2);
-                                color: #cccccc;
-                            }
-
-                            &.active {
-                                background-color: rgba(var(--bs-primary-rgb), 0.3);
-                                color: var(--color-primary-0);
-                            }
-                        }
-                    }
-                }
-            }
-
-            &.nav-right {
-                margin-top: -1rem;
-                left: auto;
-                right: 12rem;
             }
         }
     }
@@ -170,8 +118,12 @@
     white-space: nowrap;
 }
 
-::ng-deep {
-    body:not(.activity-hidden):not(.activity-collapsed) #activity-burger {
-        display: none;
+#activity-burger {
+    display: none;
+
+    @media (max-width: 768px) {
+        :host-context(body.activity-collapsed) & {
+            display: flex;
+        }
     }
 }

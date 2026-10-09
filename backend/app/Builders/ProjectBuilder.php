@@ -35,6 +35,9 @@ class ProjectBuilder extends BaseBuilder {
             ->whereHas('latestState', fn ($_) => $_->where('progress', ProjectState::Finished)->where('is_successful', true))
             ->whereRelation('states', 'project_project_state.created_at', '>=', now()->subMonths(Project::maxWarrantyMonths()));
     }
+    public function whereLinkedToChannel(string $type, string $channelId) {
+        return $this->whereHas('pluginLinks', fn ($_) => $_->where('type', $type)->where('url', 'like', "%/$channelId"));
+    }
     public function whereProgressIn(array $progress) {
         return $this->whereHas('latestState', fn ($q) => $q->whereIn('progress', $progress));
     }

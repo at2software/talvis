@@ -1,4 +1,4 @@
 <div class="form-check form-switch">
-    <input class="form-check-input" type="checkbox" role="switch" id="switch_{{ getPath() }}" (change)="onChange()" value="1" [(ngModel)]="default" />
+    <input class="form-check-input" type="checkbox" role="switch" id="switch_{{ getPath() }}" (change)="onChange()" value="1" [(ngModel)]="default" [disabled]="disabled()" />
     <label class="form-check-label" for="switch_{{ getPath() }}"><ng-content></ng-content></label>
 </div>
