@@ -12,9 +12,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class Approval extends BaseModel {
-    public const PENDING  = 'pending';
-    public const APPROVED = 'approved';
-    public const REJECTED = 'rejected';
+    public const PENDING           = 'pending';
+    public const APPROVED          = 'approved';
+    public const REJECTED          = 'rejected';
+    public const CHANGES_REQUESTED = 'changes_requested';
+    public const WITHDRAWN         = 'withdrawn';
 
     protected $table    = 'flow_approvals';
     protected $fillable = ['subject_type', 'subject_id', 'gate_key', 'requested_by_id', 'required_role', 'required_approvals', 'decision', 'decided_by_id', 'decided_at', 'reason', 'context', 'selected_option'];
@@ -61,6 +63,9 @@ class Approval extends BaseModel {
     }
     public function options(): array {
         return $this->context['options'] ?? [];
+    }
+    public function reviewRound(): ?int {
+        return $this->context['review_round'] ?? null;
     }
     public function getSubjectLabelAttribute(): string {
         $subject = $this->subject;

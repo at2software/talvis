@@ -22,6 +22,7 @@ import { IHasFoci } from '@models/focus/has-foci.interface';
 import { RouterModule } from '@angular/router';
 import { EmptyStateComponent } from '@shards/empty-state/empty-state.component';
 import { map, Observable } from 'rxjs';
+import { ValueUnitComponent } from '@shards/value-unit/value-unit.component';
 
 interface TLABEL {
     label: string;
@@ -76,7 +77,7 @@ const hydrate = (response: TData | undefined): TData | undefined => {
     selector: 'hr-workload',
     templateUrl: './hr-workload.component.html',
     styleUrls: ['./hr-workload.component.scss'],
-    imports: [NgTemplateOutlet, NgbTooltipModule, Nx, AvatarComponent, ProjectComponent, FormsModule, PermissionsDirective, RouterModule, EmptyStateComponent],
+    imports: [ValueUnitComponent, NgTemplateOutlet, NgbTooltipModule, Nx, AvatarComponent, ProjectComponent, FormsModule, PermissionsDirective, RouterModule, EmptyStateComponent],
 })
 export class HrWorkloadComponent {
     user = input.required<User>();

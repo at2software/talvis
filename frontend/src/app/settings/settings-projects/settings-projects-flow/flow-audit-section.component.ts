@@ -4,6 +4,7 @@ import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { SpinnerComponent } from '@shards/spinner/spinner.component';
 import { modelListResource, modelResource } from '@models/http/model-resource';
 import { FlowAdminService } from '@models/flow/flow-admin.service';
+import type { FlowAuditEntryDto } from '@models/_core/api-response';
 
 @Component({
     selector: 'flow-audit-section',
@@ -19,6 +20,7 @@ import { FlowAdminService } from '@models/flow/flow-admin.service';
                 <option value="" i18n="@@i18n.flow.allActors">users and machines</option>
                 <option value="user" i18n="@@i18n.flow.users">users</option>
                 <option value="machine" i18n="@@i18n.flow.machines">machines</option>
+                <option value="system" i18n="@@i18n.flow.system">system</option>
             </select>
             <select class="form-select form-select-sm w-auto" (change)="filter('action', $any($event.target).value)">
                 <option value="" i18n="@@i18n.flow.allActions">all actions</option>
@@ -51,7 +53,7 @@ import { FlowAdminService } from '@models/flow/flow-admin.service';
                                 <small class="text-muted">{{ entry.subject_type }} #{{ entry.subject_id }}</small>
                             </td>
                             <td class="text-nowrap">
-                                <i class="me-1 text-muted" [ngbTooltip]="entry.actor_type">{{ entry.actor_type === 'machine' ? 'smart_toy' : 'person' }}</i>
+                                <i class="me-1 text-muted" [ngbTooltip]="entry.actor_type">{{ actorIcon[entry.actor_type] }}</i>
                                 {{ entry.actor_name ?? '–' }}
                             </td>
                             <td>
@@ -86,6 +88,7 @@ import { FlowAdminService } from '@models/flow/flow-admin.service';
 export class FlowAuditSectionComponent {
     #service = inject(FlowAdminService);
 
+    readonly actorIcon: Record<FlowAuditEntryDto['actor_type'], string> = { user: 'person', machine: 'smart_toy', system: 'settings' };
     readonly filters = signal<Record<string, string>>({});
     readonly page = signal(1);
 

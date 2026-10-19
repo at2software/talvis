@@ -18,6 +18,7 @@ use App\Http\Middleware\PreventRequestsDuringMaintenance;
 use App\Http\Middleware\RedirectIfAuthenticated;
 use App\Http\Middleware\ReleaseSessionLock;
 use App\Http\Middleware\SecureApiResponses;
+use App\Http\Middleware\SelfMiddleware;
 use App\Http\Middleware\TrimStrings;
 use App\Http\Middleware\TrustProxies;
 use App\Http\Middleware\ValidateSignature;
@@ -97,6 +98,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'verified'               => EnsureEmailIsVerified::class,
             'role'                   => CompatibleRoleMiddleware::class,
             'owner'                  => OwnerMiddleware::class,
+            'self'                   => SelfMiddleware::class,
             'permission_invoiceItem' => HasPermissionsForInvoiceItemMiddleware::class,
             'hr_permission'          => HrMiddleware::class,
             'has_plugin'             => HasPluginMiddleware::class,

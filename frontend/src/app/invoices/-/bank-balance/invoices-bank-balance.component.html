@@ -4,7 +4,7 @@
 <toolbar>
     <button class="btn btn-primary" (click)="load()" [disabled]="_isLoading">
         @if (_isLoading) {
-            <span class="spinner-border spinner-border-sm me-1"></span> fetching…
+            <spinner [inline]="true" class="me-1"></spinner> fetching…
         } @else {
             <i>sync</i> fetch transactions
         }

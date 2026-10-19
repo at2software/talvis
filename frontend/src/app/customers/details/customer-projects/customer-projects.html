@@ -29,7 +29,9 @@
                 </div>
                 <ng-container *ngTemplateOutlet="projectList; context: { $implicit: _coParticipatedProjects, parentId: '', level: 0 }"></ng-container>
             </div>
-            } @if (_projects.length === 0 && _coParticipatedProjects.length === 0) {
+            } @if (_projects.length === 0 && _coParticipatedProjects.length === 0 && !loaded()) {
+            <spinner class="py-4"></spinner>
+            } @else if (_projects.length === 0 && _coParticipatedProjects.length === 0) {
             <div class="card">
                 <empty-state [card]="false" class="projects" title="no projects yet..." i18n-title="@@i18n.projects.noProjectsYet">
                     <button type="button" class="btn btn-plain text-primary" (click)="onAddProject()"><i>add</i><span i18n="@@i18n.common.project">project</span></button>

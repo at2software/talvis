@@ -2,7 +2,7 @@
     <div class="card-header gap-2">
         <n>monitor</n>
         <span class="flex-fill text-truncate" i18n="@@i18n.uptime.uptimeMonitoring">uptime monitoring</span>
-        <div class="chart-title">{{ value() ? value()! + '%' : (value() | loading) }}</div>
+        <div class="chart-title"><value-unit [value]="value() ? value()! + '%' : (value() | loading)" /></div>
     </div>
 
     @if (chartOptions()?.series) {
@@ -18,7 +18,11 @@
                 <span class="badge bg-{{ monitor.statusColor }}">{{ monitor.last_status }}</span>
             </li>
         }
-        @if (monitors().length === 0) {
+        @if (!loaded()) {
+            <li class="list-group-item">
+                <spinner [size]="24"></spinner>
+            </li>
+        } @else if (monitors().length === 0) {
             <li class="list-group-item text-center text-muted">
                 <span i18n="@@i18n.uptime.noMonitors">no uptime monitors configured</span>
             </li>

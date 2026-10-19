@@ -46,9 +46,9 @@ export class ProjectFlowComponent {
         for (const field of type?.input_schema.fields ?? []) {
             const raw = (this.values()[field.key] ?? '').trim();
             if (!raw) continue;
-            if (field.type === 'list') {
-                payload[field.key] = raw.split(/[\n,]/).map((_) => _.trim()).filter(Boolean);
-            } else if (field.type === 'object') {
+            if (field.type === 'list' && !field.fields) {
+                payload[field.key] = raw.split('\n').map((_) => _.trim()).filter(Boolean);
+            } else if (field.type === 'object' || field.type === 'list') {
                 try {
                     payload[field.key] = JSON.parse(raw);
                 } catch {
@@ -65,7 +65,8 @@ export class ProjectFlowComponent {
     readonly canSubmit = computed(() => {
         const type = this.selectedType();
         if (!type || this.saving() || this.invalidFields().length) return false;
-        return type.input_schema.fields.every((_) => !_.required || _.key in this.#converted().payload);
+        const payload = this.#converted().payload;
+        return type.input_schema.fields.every((_) => _.key in payload || (!_.required && (!_.required_without || _.required_without in payload)));
     });
 
     fieldLabel = (field: FlowJobFieldDto) => field.label ?? field.key;

@@ -12,7 +12,7 @@ class ConvertProspectRequest extends FormRequest {
         return [
             'company_id'   => 'nullable|integer|exists:companies,id,deleted_at,NULL',
             'create_new'   => 'required|boolean',
-            'company_name' => 'nullable|string',
+            'company_name' => 'required_if:create_new,true|nullable|string|max:255',
         ];
     }
 }

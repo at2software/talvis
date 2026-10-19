@@ -19,7 +19,7 @@
             <div class="card-body p-0" style="height: 320px">
                 @if (_isLoading) {
                     <div class="d-flex align-items-center justify-content-center h-100">
-                        <div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div>
+                        <spinner></spinner>
                     </div>
                 }
                 @if (!_isLoading) {
@@ -44,7 +44,7 @@
             </div>
             @if (_isLoading) {
                 <div class="d-flex align-items-center justify-content-center" style="height:120px">
-                    <div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div>
+                    <spinner></spinner>
                 </div>
             }
             @if (!_isLoading && !groupedEvents().length) {

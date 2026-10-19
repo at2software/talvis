@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, linkedSignal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, linkedSignal } from '@angular/core';
 import { modelResource } from '@models/http/model-resource';
 
 import { FormsModule } from '@angular/forms';
@@ -7,6 +7,7 @@ import { EmptyStateComponent } from '@shards/empty-state/empty-state.component';
 import { ParamService } from '@models/param/param.service';
 import { Param } from '@models/param/param.model';
 import { PaymentPlanStep, sortSteps } from './payment-plan-editor.component';
+import { SpinnerComponent } from '@shards/spinner/spinner.component';
 
 export interface PaymentPlanTier {
     label: string;
@@ -19,13 +20,14 @@ export interface PaymentPlanTier {
     selector: 'payment-plan-tiers-editor',
     templateUrl: './payment-plan-tiers-editor.component.html',
     styleUrls: ['./payment-plan-editor.component.scss'],
-    imports: [FormsModule, NgbTooltipModule, EmptyStateComponent],
+    imports: [FormsModule, NgbTooltipModule, EmptyStateComponent, SpinnerComponent],
     host: { style: 'display:contents' },
 })
 export class PaymentPlanTiersEditorComponent {
     #paramService = inject(ParamService);
 
     readonly #tiers = modelResource(() => this.#paramService.show('params/PROJECT_PAYMENT_PLAN_TIERS'));
+    loaded = computed(() => this.#tiers.hasValue() || this.#tiers.status() === 'error');
     tiers = linkedSignal<PaymentPlanTier[]>(() => {
         const tiers = this.#parseTiers(this.#tiers.hasValue() ? this.#tiers.value().value : undefined);
         for (const tier of tiers) tier.steps = sortSteps(tier.steps);

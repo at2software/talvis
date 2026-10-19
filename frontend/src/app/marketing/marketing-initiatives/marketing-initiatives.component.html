@@ -5,7 +5,7 @@
 <div class="row" col-slider>
     <!-- Left: Initiatives list -->
     <div class="col-12 col-md-3">
-        <div class="card sticky-top" data-tour="initiatives-list">
+        <div class="card sticky-side" data-tour="initiatives-list">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <div i18n="@@i18n.marketing.initiatives">initiatives</div>
                 <button data-tour="initiatives-add-btn" class="btn btn-plain text-primary m-0 p-0" (click)="showCreateModal.set(true)" tabindex="0" (keydown.enter)="showCreateModal.set(true)" i18n-title="@@i18n.marketing.create_initiative" title="create initiative">
@@ -30,6 +30,10 @@
                 <span class="badge cursor-pointer py-1 px-2" [class.bg-success]="statusFilter() === 'completed'" [class.bg-dark]="statusFilter() !== 'completed'" (click)="filterByStatus('completed')" tabindex="0" (keydown.enter)="filterByStatus('completed')" i18n-ngbTooltip="@@i18n.common.completed" ngbTooltip="completed">
                     <i style="font-size: 0.8rem; vertical-align: middle">check_circle</i>
                     <span class="ms-1 notranslate">{{ _stats.completed }}</span>
+                </span>
+                <span class="badge cursor-pointer py-1 px-2 ms-auto" [class.bg-primary]="onlySubscribed()" [class.bg-dark]="!onlySubscribed()" (click)="toggleSubscribed()" tabindex="0" (keydown.enter)="toggleSubscribed()" i18n-ngbTooltip="@@i18n.marketing.subscribedInitiatives" ngbTooltip="my subscribed initiatives">
+                    <i style="font-size: 0.8rem; vertical-align: middle">notifications_active</i>
+                    <span class="ms-1 notranslate">{{ _stats.subscribed }}</span>
                 </span>
             </div>
 

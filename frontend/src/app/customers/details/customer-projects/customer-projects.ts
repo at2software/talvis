@@ -20,12 +20,13 @@ import { HotkeyDirective } from '@directives/hotkey.directive';
 import { CdkDragDrop, CdkDropList, CdkDrag, CdkDragPreview } from '@angular/cdk/drag-drop';
 import { modelListResource } from '@models/http/model-resource';
 import { Dictionary } from '@constants/constants';
+import { SpinnerComponent } from '@shards/spinner/spinner.component';
 
 @Component({
     selector: 'customer-projects',
     templateUrl: './customer-projects.html',
     styleUrls: ['./customer-projects.scss'],
-    imports: [ToolbarComponent, ScrollbarComponent, ProjectStateFilterComponent, EmptyStateComponent, FormsModule, DatePipe, NgTemplateOutlet, Nx, AvatarComponent, ProjectComponent, NgbTooltipModule, MoneyShortPipe, PermissionsDirective, HotkeyDirective, CdkDropList, CdkDrag, CdkDragPreview],
+    imports: [ToolbarComponent, ScrollbarComponent, ProjectStateFilterComponent, EmptyStateComponent, FormsModule, DatePipe, NgTemplateOutlet, Nx, AvatarComponent, ProjectComponent, NgbTooltipModule, MoneyShortPipe, PermissionsDirective, HotkeyDirective, CdkDropList, CdkDrag, CdkDragPreview, SpinnerComponent],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CustomerProjects {
@@ -55,6 +56,7 @@ export class CustomerProjects {
 
     projects = computed(() => this.#buildProjectTree(this.#projects.value()));
     coParticipatedProjects = computed(() => this.#buildProjectTree(this.#coParticipated.value()));
+    loaded = computed(() => this.#projects.hasValue() && this.#coParticipated.hasValue());
     #allDropListIds = computed(() => this.#collectIds(this.projects()));
 
     reload = () => this.#reloadTick.update((_) => _ + 1);

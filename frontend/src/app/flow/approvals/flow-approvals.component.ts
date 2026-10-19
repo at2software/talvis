@@ -35,6 +35,12 @@ export class FlowApprovalsComponent {
         this.#service.approve(approval, result.text, this.selectedOptions()[approval.id]).subscribe(() => this.#approvals.reload());
     }
 
+    async requestChanges(approval: Approval) {
+        const result = await this.#input.open($localize`:@@i18n.flow.requestChangesReason:what has to change?`);
+        if (!result) return;
+        this.#service.requestChanges(approval, result.text).subscribe(() => this.#approvals.reload());
+    }
+
     async reject(approval: Approval) {
         const result = await this.#input.open($localize`:@@i18n.flow.rejectReason:why is this rejected?`);
         if (!result) return;

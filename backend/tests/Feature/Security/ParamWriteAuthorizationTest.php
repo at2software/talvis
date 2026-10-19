@@ -28,6 +28,15 @@ class ParamWriteAuthorizationTest extends TestCase {
         $this->assertFalse(Param::isWritableBy('INVOICE_NO_CURRENT', $this->userWithRoles('marketing')));
         $this->assertTrue(Param::isWritableBy('INVOICE_NO_CURRENT', $this->userWithRoles('admin')));
     }
+    public function test_user_params_of_another_user_are_forbidden(): void {
+        $this->actingAs($this->userWithRoles('hr', 'project_manager'));
+
+        $this->getJson('/api/users/2/params/WEBDAV_TOKEN')->assertForbidden();
+        $this->getJson('/api/users/2/params/WEBDAV_TOKEN/history')->assertForbidden();
+        $this->postJson('/api/users/2/params/WEBDAV_TOKEN', ['value' => 'x'])->assertForbidden();
+        $this->putJson('/api/users/2/params/WEBDAV_TOKEN', ['value' => 'x'])->assertForbidden();
+        $this->deleteJson('/api/users/2/params/WEBDAV_TOKEN')->assertForbidden();
+    }
     public function test_writing_a_param_of_an_unknown_model_type_is_not_found(): void {
         $this->actingAs($this->userWithRoles('admin'));
 

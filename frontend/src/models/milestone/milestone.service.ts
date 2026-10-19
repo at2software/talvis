@@ -17,7 +17,7 @@ export class MilestoneService extends TalvisHttpService<Milestone> {
     public apiPath = 'milestones';
     override readonly model = Milestone;
 
-    indexUserMilestones = (userId: string) => this.aget(`users/${userId}/milestones`, {}, MilestonesGroup);
+    indexUserMilestones = (userId: string, withEmptyProjects = false) => this.aget(`users/${userId}/milestones`, withEmptyProjects ? { with_empty_projects: 1 } : {}, MilestonesGroup);
     indexPmMilestones = (userId: string): Observable<PmMilestones> =>
         this.get<PmMilestones>(`users/${userId}/pm-milestones`).pipe(
             serialize('milestones', MilestonesGroup),

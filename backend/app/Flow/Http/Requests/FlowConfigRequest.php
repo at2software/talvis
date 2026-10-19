@@ -58,11 +58,12 @@ class FlowConfigRequest extends FormRequest {
                 'release_required_approvals' => [$required, 'integer', 'min:1', 'max:10'],
             ],
             'job-types' => [
-                'key'              => [$required, 'string', 'max:64', self::KEY, Rule::unique('flow_job_types')->ignore($id)],
-                'name'             => [$required, 'string', 'max:255'],
-                'description'      => ['nullable', 'string', 'max:5000'],
-                'input_schema'     => [$required, 'array'],
-                'release_gate_key' => ['nullable', 'string', 'max:64', self::KEY],
+                'key'                => [$required, 'string', 'max:64', self::KEY, Rule::unique('flow_job_types')->ignore($id)],
+                'name'               => [$required, 'string', 'max:255'],
+                'description'        => ['nullable', 'string', 'max:5000'],
+                'input_schema'       => [$required, 'array'],
+                'review_gate_keys'   => ['nullable', 'array', 'list', 'max:10'],
+                'review_gate_keys.*' => ['string', 'max:64', self::KEY, 'distinct'],
             ],
         };
     }

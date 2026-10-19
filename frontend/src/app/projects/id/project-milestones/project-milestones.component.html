@@ -6,6 +6,7 @@
                 <span class="visually-hidden" i18n="@@i18n.invoices.toggleDropdown">toggle dropdown</span>
             </button>
             <div class="dropdown-menu dropdown-menu-end" ngbDropdownMenu>
+                <button class="dropdown-item" (click)="onAddWholeProject()" ngbTooltip="One milestone for the whole project, with the remaining hours" i18n-ngbTooltip="@@i18n.projects.wholeProjectMilestone"><i class="me-2">select_all</i><span i18n="@@i18n.projects.wholeProject">whole project</span></button>
                 @if (project.invoice_items && project.invoice_items.length > 0) {
                     <button class="dropdown-item" (click)="onConvertInvoiceItems()" ngbTooltip="Track invoice items with milestones" i18n-ngbTooltip="@@i18n.projects.trackInvoiceItemsWithMilestones"><i class="me-2">auto_awesome</i>Track Invoice Items</button>
                 }

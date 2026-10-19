@@ -1,0 +1,14 @@
+<div class="modal d-block" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span class="modal-title">{{ title() }}</span>
+            </div>
+            <div class="modal-body">
+                <touchpoint-form [initialChannel]="channel()" [channelLocked]="channelLocked()" [withRetry]="withRetry()" (submitted)="onSubmitted($event)">
+                    <button type="button" class="btn" (click)="decline()" i18n="@@i18n.common.cancel">cancel</button>
+                </touchpoint-form>
+            </div>
+        </div>
+    </div>
+</div>

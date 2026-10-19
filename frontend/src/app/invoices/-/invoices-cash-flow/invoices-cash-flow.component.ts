@@ -31,6 +31,7 @@ export class InvoicesCashFlowComponent {
     data = model<TDay[]>([]);
     readonly keys = CASHFLOW_CHART_KEYS;
     observer = signal<Observable<Page<Expense>> | undefined>(undefined);
+    hasLoaded = signal(false);
 
     #invoiceService = inject(InvoiceService);
 
@@ -56,6 +57,7 @@ export class InvoicesCashFlowComponent {
             key.data.push({ id: +d.id, value: d.value });
         });
         this.data.set(_d);
+        this.hasLoaded.set(true);
     }
 
     valuesFor = (day: TDay, key: string) => day.values.find((_) => _.key === key);
@@ -66,6 +68,7 @@ export class InvoicesCashFlowComponent {
 
     onCsvUploaded = () => {
         this.data.set([]);
+        this.hasLoaded.set(false);
         this.observer.set(this.#invoiceService.showCashFlow());
     };
 }

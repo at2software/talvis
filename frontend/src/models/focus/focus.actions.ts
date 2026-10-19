@@ -24,17 +24,15 @@ export function getFocusActions(self: Focus): NxAction[] {
         { title: $localize`:@@i18n.foci.resetToOrga:reset to organisational`, action: () => self.update({ project_id: null }), roles: 'hr' },
         {
             title: $localize`:@@i18n.foci.enableInvoicing:enable invoicing`,
-            on: () => !self.invoice_item_id && self.is_unpaid,
+            on: () => self.canToggleInvoicing() && self.is_unpaid,
             action: () => self.update({ is_unpaid: false }),
             group: true,
-            roles: 'project_manager|financial',
         },
         {
             title: $localize`:@@i18n.foci.disableInvoicing:disable invoicing`,
-            on: () => !self.invoice_item_id && !self.is_unpaid,
+            on: () => self.canToggleInvoicing() && !self.is_unpaid,
             action: () => self.update({ is_unpaid: true }),
             group: true,
-            roles: 'project_manager|financial',
         },
         {
             title: $localize`:@@i18n.common.selectAll:select all...`,

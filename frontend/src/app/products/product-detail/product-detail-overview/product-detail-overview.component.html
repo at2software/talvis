@@ -125,7 +125,7 @@
             <div class="card sticky-side">
                 <div class="card-header capitalize-first d-flex justify-content-between align-items-center">
                     <span i18n="@@i18n.common.customers">customers</span>
-                    <div class="chart-title" [ngbTooltip]="_totalCustomers + ' customers total'">{{ _totalRevenue ? (_totalRevenue | mshort) : (_totalRevenue | loading) }}</div>
+                    <div class="chart-title" [ngbTooltip]="_totalCustomers + ' customers total'"><value-unit [value]="_totalRevenue ? (_totalRevenue | mshort) : (_totalRevenue | loading)" /></div>
                 </div>
                 <ul class="list-group">
                     @for (c of _customers; track c.id) {

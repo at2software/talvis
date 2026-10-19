@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal, WritableSignal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, inject, input, signal, untracked, WritableSignal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterModule } from '@angular/router';
 import { Nx } from '@app/nx/nx.directive';
@@ -28,7 +28,17 @@ export class TabTasksPluginTasksComponent extends TabTasksBaseComponent {
     factory = inject(PluginInstanceFactory);
     input = inject(InputModalService);
 
+    readonly active = input(false);
+
+    constructor() {
+        super();
+        effect(() => {
+            if (this.ready() && this.active()) untracked(() => this.reload());
+        });
+    }
+
     override reload() {
+        if (!this.active()) return;
         const raw = this.factory.getPluginInstances().filter((_) => 'ITaskPluginProperty' in _ && _.isRootInstance()) as TTask[];
         const entries: TInstanceEntry[] = raw.map((instance, i) => ({ instance, tasks: signal<Task[]>([]), key: instance.id != null ? instance.id.toString() : instance.getName() ?? i.toString() }));
         this.instances.set(entries);

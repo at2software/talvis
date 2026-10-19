@@ -8,7 +8,6 @@ import { PermissionsDirective } from '@directives/permissions.directive';
 @Component({
     selector: 'hr-nav',
     templateUrl: './hr-nav.component.html',
-    styleUrls: ['./hr-nav.component.scss'],
     imports: [HeaderComponent, HeaderLinkItemComponent, RouterModule, PermissionsDirective],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })

@@ -14,6 +14,8 @@ class GateRequestRequest extends FormRequest {
             'options'        => 'nullable|array|list|max:10',
             'options.*'      => 'string|max:255|distinct',
             'recommendation' => 'nullable|string|max:2000',
+            'source'         => 'nullable|in:agent,rule_check',
+            'diff_url'       => 'nullable|url:http,https|max:2048',
         ];
     }
 }

@@ -20,7 +20,9 @@
     </div>
 }
 
-@if (_users.length === 0) {
+@if (!loaded()) {
+    <spinner class="py-4"></spinner>
+} @else if (_users.length === 0) {
     <empty-state [card]="false" class="hr" i18n-title="@@i18n.hr.no_focus_accuracy_data" title="no focus data yet">
         <p class="text-muted small" i18n="@@i18n.hr.focus_accuracy_data_note">Data will appear once time tracking entries are recorded.</p>
     </empty-state>

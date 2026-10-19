@@ -57,7 +57,9 @@
                     <span class="material-icons" style="font-size: 18px; vertical-align: middle">add</span>
                 </button>
             </div>
-            @if (filteredMetrics().length === 0 && !typeFilter()) {
+            @if (!metricsLoaded()) {
+                <spinner class="py-4"></spinner>
+            } @else if (filteredMetrics().length === 0 && !typeFilter()) {
                 <empty-state [card]="false" class="marketing" i18n-title="@@i18n.marketing.no_metrics_created" title="no metrics created yet"></empty-state>
             }
             @if (filteredMetrics().length === 0 && typeFilter()) {

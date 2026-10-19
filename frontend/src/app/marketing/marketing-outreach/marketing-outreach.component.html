@@ -1,0 +1,148 @@
+@let _queue = queue();
+@let _current = current();
+@let _prospect = prospect();
+@let _stats = stats();
+@let _channel = channel();
+@let _ui = ui();
+
+<toolbar>
+    <div class="btn-group btn-group-sm" role="group">
+        @for (_ of channels; track _.key) {
+            <button type="button" class="btn btn-outline-primary hstack gap-1" [class.active]="_channel === _.key" (click)="setChannel(_.key)">
+                <i>{{ _.icon }}</i><span>{{ _.label }}</span>
+            </button>
+        }
+    </div>
+    <div ngbDropdown placement="bottom-end">
+        <button class="btn btn-sm btn-plain text-primary dropdown-toggle-simple hstack gap-1" ngbDropdownToggle i18n-ngbTooltip="@@i18n.marketing.move_overdue" ngbTooltip="move overdue activities">
+            <i>event_repeat</i>
+        </button>
+        <div ngbDropdownMenu>
+            @for (_ of rescheduleTargets; track _.label) {
+                <button ngbDropdownItem (click)="rescheduleOverdue(_.date())">{{ _.label }}</button>
+            }
+        </div>
+    </div>
+</toolbar>
+
+<div class="row">
+    <div class="col-12 col-md-3">
+        <div class="card mb-3 sticky-side">
+            <div class="card-header hstack gap-2">
+                <span class="flex-fill" i18n="@@i18n.marketing.outreach_due">due</span>
+                <span class="badge bg-dark rounded-pill">{{ _queue.length }}</span>
+            </div>
+            @if (isLoading()) {
+                <div class="card-body text-center"><spinner></spinner></div>
+            } @else if (_queue.length) {
+                <ul class="list-group list-group-flush">
+                    @for (activity of _queue; track activity.id) {
+                        <li class="list-group-item hstack gap-2 cursor-pointer" [class.active]="activity === _current" [nx]="activity" tabindex="0" (click)="select(activity)" (keyup.enter)="select(activity)">
+                            <avatar [object]="activity.marketing_prospect!" size="sm"></avatar>
+                            <div class="flex-fill text-truncate">
+                                <div class="text-truncate">{{ activity.marketing_prospect?.name() }}</div>
+                                <small class="text-muted text-truncate d-block">{{ activity.marketing_prospect?.company() }}</small>
+                            </div>
+                            @if (activity.bumps > 0) {
+                                <span class="badge text-bg-dark" i18n-ngbTooltip="@@i18n.marketing.bumps_tooltip" ngbTooltip="call attempts">×{{ activity.bumps }}</span>
+                            }
+                            <small class="text-nowrap" [class.text-danger]="isOverdue(activity)" [class.text-muted]="!isOverdue(activity)">{{ activity.scheduled_at | date: 'shortDate' }}</small>
+                        </li>
+                    }
+                </ul>
+            } @else {
+                <empty-state [card]="false" class="marketing" i18n-title="@@i18n.marketing.nothing_due" title="nothing due"></empty-state>
+            }
+        </div>
+    </div>
+
+    <div class="col-12 col-md-9">
+        @if (_stats) {
+            <div class="row g-3 mb-3">
+                <stat-card class="col-6 col-lg-4 col-xxl-2" icon="phone_forwarded" color="cyan" [value]="_stats.dials" [hint]="thisWeek" i18n-label="@@i18n.marketing.kpi_dials" label="dials"></stat-card>
+                <stat-card class="col-6 col-lg-4 col-xxl-2" icon="call" color="blue" [value]="_stats.connects" [hint]="thisWeek" i18n-label="@@i18n.marketing.kpi_connects" label="reached"></stat-card>
+                <stat-card class="col-6 col-lg-4 col-xxl-2" icon="percent" color="purple" [value]="(_stats.connect_rate | number: '1.0-1') ?? 0" unit="%" [progress]="_stats.connect_rate / 100" [hint]="bestHourHint()" i18n-label="@@i18n.marketing.kpi_connect_rate" label="connect rate"></stat-card>
+                <stat-card class="col-6 col-lg-4 col-xxl-2" icon="event_available" color="success" [value]="_stats.meetings" [hint]="thisWeek" i18n-label="@@i18n.marketing.kpi_meetings" label="meetings"></stat-card>
+                <stat-card class="col-6 col-lg-4 col-xxl-2" icon="send" color="yellow" [value]="_stats.emails_sent" [hint]="bouncedHint()" i18n-label="@@i18n.marketing.kpi_emails_sent" label="emails sent"></stat-card>
+                <stat-card class="col-6 col-lg-4 col-xxl-2" icon="reply" color="orange" [value]="_stats.emails_replied" [progress]="replyRate()" [hint]="thisWeek" i18n-label="@@i18n.marketing.kpi_replies" label="replies"></stat-card>
+            </div>
+        }
+
+        @if (_current && _prospect) {
+            @let _website = _prospect.websiteUrl();
+            <div class="row">
+                <div class="col-12 col-lg-8">
+                    <div class="card mb-3">
+                        <div class="card-header hstack gap-2">
+                            <avatar [object]="_prospect"></avatar>
+                            <div class="flex-fill text-truncate">
+                                <div class="fw-bold text-truncate">{{ _prospect.name() }}</div>
+                                <small class="text-muted">{{ _prospect.company() }} · {{ _prospect.marketing_initiative?.name }}</small>
+                            </div>
+                            @if (_website) {
+                                <a class="text-primary" [href]="_website" target="_blank" rel="noopener" i18n-ngbTooltip="@@i18n.marketing.open_website" ngbTooltip="open website"><i>language</i></a>
+                            }
+                            <a class="text-primary" [href]="_prospect.companySearchUrl()" target="_blank" rel="noopener" i18n-ngbTooltip="@@i18n.marketing.search_company" ngbTooltip="search company"><i>travel_explore</i></a>
+                            <a class="text-primary" [routerLink]="['/marketing/prospects', _prospect.id]" i18n-ngbTooltip="@@i18n.common.view" ngbTooltip="view"><i>open_in_new</i></a>
+                        </div>
+                        <div class="card-body">
+                            <div class="hstack gap-3 flex-wrap mb-3">
+                                @for (value of contactValues(); track value) {
+                                    <a class="text-primary hstack gap-1 fs-5 text-truncate" [href]="contactHref(value)" [attr.target]="_channel === 'linkedin' ? '_blank' : null" rel="noopener"><i>{{ _ui.icon }}</i><span class="text-truncate">{{ value }}</span></a>
+                                } @empty {
+                                    <span class="text-warning hstack gap-1"><i>block</i><span>{{ _ui.missing }}</span></span>
+                                }
+                                @if (_channel === 'linkedin') {
+                                    <a class="text-primary hstack gap-1" [href]="linkedInSearchUrl(_prospect)" target="_blank" rel="noopener"><i>person_search</i><span i18n="@@i18n.marketing.search_on_linkedin">search on LinkedIn</span></a>
+                                }
+                            </div>
+                            <div class="input-group input-group-sm mb-3">
+                                <input [type]="_channel === 'call' ? 'tel' : _channel === 'email' ? 'email' : 'url'" class="form-control" [ngModel]="newContactValue()" (ngModelChange)="newContactValue.set($event)" (keyup.enter)="addContactValue()" [placeholder]="_ui.placeholder" />
+                                <button type="button" class="btn btn-outline-primary" [disabled]="!newContactValue().trim() || addingContactValue()" (click)="addContactValue()"><i>add</i></button>
+                            </div>
+                            <div class="fw-medium mb-1">{{ _current.getName() }}</div>
+                            @if (script()) {
+                                <p class="small mb-0" style="white-space: pre-wrap">{{ script() }}</p>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="card mb-3">
+                        <div class="card-header" i18n="@@i18n.marketing.wrap_up">wrap-up</div>
+                        <div class="card-body">
+                            <touchpoint-form [initialChannel]="_channel" [channelLocked]="true" [busy]="saving()" (submitted)="save($event)">
+                                <button type="button" class="btn btn-plain text-primary hstack gap-1" (click)="skip()"><i>skip_next</i><span i18n="@@i18n.marketing.skip">skip</span></button>
+                            </touchpoint-form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 col-lg-4">
+                    <div class="card mb-3">
+                        <div class="card-header" i18n="@@i18n.common.notes">notes</div>
+                        <rte [object]="_prospect" [compact]="true" key="notes"></rte>
+                    </div>
+                    <div class="card mb-3">
+                        <div class="card-header" i18n="@@i18n.marketing.contact_history">contact history</div>
+                        <ul class="list-group list-group-flush">
+                            @for (_ of history(); track _.id) {
+                                <li class="list-group-item">
+                                    <div class="hstack gap-2">
+                                        <i [class]="resultOf(_)?.color">{{ resultOf(_)?.icon }}</i>
+                                        <span class="flex-fill">{{ _.getName() }}</span>
+                                        <small class="text-muted text-nowrap">{{ _.occurred_at | date: 'short' }}</small>
+                                    </div>
+                                    @if (_.notes) {
+                                        <small class="text-muted d-block" style="white-space: pre-wrap">{{ _.notes }}</small>
+                                    }
+                                </li>
+                            } @empty {
+                                <li class="list-group-item text-muted small" i18n="@@i18n.marketing.no_contact_yet">no contact logged yet</li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>

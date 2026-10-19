@@ -14,13 +14,13 @@
     }
     <button class="btn btn-sm btn-plain text-primary" [disabled]="rendering()" (click)="renderRealPdf()">
         @if (rendering()) {
-            <span class="spinner-border spinner-border-sm"></span>
+            <spinner [inline]="true"></spinner>
         }
         <span i18n="@@i18n.settings.pdf.renderPdf">render real PDF</span>
     </button>
     <button class="btn btn-sm btn-primary" [disabled]="saving() || !dirty()" (click)="save()">
         @if (saving()) {
-            <span class="spinner-border spinner-border-sm"></span>
+            <spinner [inline]="true"></spinner>
         }
         <span i18n="@@i18n.common.save">save</span>
     </button>
@@ -28,7 +28,7 @@
 
 @if (loading()) {
     <div class="pdf-editor d-flex align-items-center justify-content-center">
-        <span class="spinner-border"></span>
+        <spinner></spinner>
     </div>
 } @else {
     <div class="pdf-editor d-flex">

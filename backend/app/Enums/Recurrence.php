@@ -2,6 +2,7 @@
 
 namespace App\Enums;
 
+use Carbon\CarbonInterface;
 use Illuminate\Support\Carbon;
 
 enum Recurrence: int {
@@ -15,6 +16,20 @@ enum Recurrence: int {
     case EverySixMonths   = 8;
     case Yearly           = 3;
 
+    public static function add(self $interval, CarbonInterface $date): CarbonInterface {
+        $date = $date->copy();
+        return match ($interval) {
+            self::None             => $date,
+            self::Daily            => $date->addDay(),
+            self::Weekly           => $date->addWeek(),
+            self::EveryTwoWeeks    => $date->addWeeks(2),
+            self::Monthly          => $date->addMonths(1),
+            self::EveryTwoMonths   => $date->addMonths(2),
+            self::EveryThreeMonths => $date->addMonths(3),
+            self::EverySixMonths   => $date->addMonths(6),
+            self::Yearly           => $date->addYear(),
+        };
+    }
     public static function sub(self $interval, ?Carbon $date = null): Carbon {
         $date ??= now();
         return match ($interval) {

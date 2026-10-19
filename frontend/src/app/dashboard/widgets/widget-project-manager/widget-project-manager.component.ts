@@ -6,13 +6,14 @@ import { PermissionsDirective } from '@directives/permissions.directive';
 import { WidgetService } from '@models/widget.service';
 import { forkJoin } from 'rxjs';
 import { ParamChartSeriesDto } from '@models/_core/api-response';
+import { ValueUnitComponent } from '@shards/value-unit/value-unit.component';
 
 @Component({
     changeDetection: ChangeDetectionStrategy.OnPush,
     selector: 'widget-project-manager',
     templateUrl: './widget-project-manager.component.html',
     styleUrls: ['./../base.widget.component.scss'],
-    imports: [...WIDGET_SHARED, PermissionsDirective],
+    imports: [ValueUnitComponent, ...WIDGET_SHARED, PermissionsDirective],
 })
 export class WidgetProjectManagerComponent extends BaseWidgetComponent {
     #widgetService = inject(WidgetService);

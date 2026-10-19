@@ -38,7 +38,7 @@ $lane-height: 24px;
 
 .day-of-week-header {
     display: grid;
-    grid-template-columns: repeat(7, 1fr);
+    grid-template-columns: repeat(var(--days, 7), 1fr);
     padding-left: calc(#{$meta-width} + 6px);
 
     .day-of-week-label {
@@ -84,7 +84,7 @@ $lane-height: 24px;
     position: absolute;
     inset: 0;
     display: grid;
-    grid-template-columns: repeat(7, 1fr);
+    grid-template-columns: repeat(var(--days, 7), 1fr);
     grid-template-rows: 1fr;
 }
 
@@ -116,17 +116,20 @@ $lane-height: 24px;
     cursor: default;
 }
 
-.capacity-fill {
+.load-bar {
     position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: color-mix(in srgb, var(--bs-primary) 5%, transparent);
-    pointer-events: none;
+    top: 9px;
+    left: 6px;
+    width: 45%;
+    height: 5px;
+    z-index: 2;
+    border-radius: var(--bs-border-radius);
+    background: color-mix(in srgb, var(--bs-body-color) 12%, transparent);
+    overflow: hidden;
+}
 
-    &.overflow {
-        background: color-mix(in srgb, var(--bs-danger) 10%, transparent);
-    }
+.load-bar-fill {
+    height: 100%;
 }
 
 .day-percent {
@@ -259,4 +262,10 @@ $lane-height: 24px;
     min-width: 220px;
     max-width: 300px;
     font-size: 13px;
+}
+
+.calendar-bar {
+    background: color-mix(in srgb, currentColor 12%, var(--bs-body-bg));
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, currentColor 35%, transparent);
+    cursor: default;
 }

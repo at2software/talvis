@@ -16,10 +16,12 @@ class Job extends BaseModel {
     public const CLAIMED       = 'claimed';
     public const RUNNING       = 'running';
     public const AWAITING_GATE = 'awaiting_gate';
+    public const IN_REVIEW     = 'in_review';
     public const COMPLETED     = 'completed';
     public const FAILED        = 'failed';
     public const REJECTED      = 'rejected';
-    public const STATES        = [self::OPEN, self::CLAIMED, self::RUNNING, self::AWAITING_GATE, self::COMPLETED, self::FAILED, self::REJECTED];
+    public const STATES        = [self::OPEN, self::CLAIMED, self::RUNNING, self::AWAITING_GATE, self::IN_REVIEW, self::COMPLETED, self::FAILED, self::REJECTED];
+    public const HELD_BY_CLAIM = [self::CLAIMED, self::RUNNING];
 
     protected $table    = 'flow_jobs';
     protected $fillable = ['project_id', 'type', 'state', 'input', 'output', 'claimed_by', 'claimed_at', 'metrics', 'knowledge', 'created_by_id'];

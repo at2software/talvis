@@ -4,7 +4,7 @@
         <span class="flex-fill text-truncate" i18n="@@i18n.project.leadSuccess">lead success</span>
         <span class="badge bg-lighter ms-2 py-1 px-1" ngbTooltip="lead success rate of the last 12 months" i18n-ngbTooltip="@@i18n.project.leadSuccess12m">12m</span>
         @if (value()) {
-            <div class="chart-title" roles="invoicing">{{ (value() ?? 0) | mshort }}</div>
+            <div class="chart-title" roles="invoicing"><value-unit [value]="(value() ?? 0) | mshort" /></div>
         }
     </div>
 

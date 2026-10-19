@@ -1,0 +1,96 @@
+# Local development stack: API, Reverb websockets, MariaDB and Mailpit. The checkout is
+# bind-mounted, so code changes apply without a rebuild. See "Docker" in README.md.
+name: talvis
+
+x-php: &php
+  build: docker/php
+  image: talvis-php:8.4
+  volumes:
+    - .:/app
+    - vendor:/app/vendor
+  # Real environment variables take precedence over .env, so the same .env works for a
+  # native setup (127.0.0.1) and for this stack (service names).
+  environment: &php-env
+    DB_HOST: db
+    DB_PORT: 3306
+    DB_DATABASE: talvis
+    DB_USERNAME: talvis
+    DB_PASSWORD: changeme
+    MAIL_MAILER: smtp
+    MAIL_HOST: mailpit
+    MAIL_PORT: 1025
+    PUSHER_HOST: reverb
+    PUSHER_PORT: 6001
+    PUSHER_SCHEME: http
+  restart: unless-stopped
+
+services:
+  app:
+    <<: *php
+    # Several workers so the frontend's parallel requests do not queue up; Laravel only
+    # honors PHP_CLI_SERVER_WORKERS together with --no-reload.
+    command: php artisan serve --host=0.0.0.0 --port=8000 --no-reload
+    environment:
+      <<: *php-env
+      TALVIS_SETUP: 1
+      PHP_CLI_SERVER_WORKERS: 4
+    ports:
+      - "127.0.0.1:${APP_FORWARD_PORT:-8000}:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "php", "-r", "exit(@file_get_contents('http://127.0.0.1:8000/up') === false ? 1 : 0);"]
+      # The first start runs composer install and all migrations before the server is up.
+      start_period: 10m
+      start_interval: 5s
+      interval: 30s
+
+  reverb:
+    <<: *php
+    # Same host and port as deploy/nexus-reverb.service; config/reverb.php defaults to 8080.
+    command: php artisan reverb:start --host=0.0.0.0 --port=6001
+    ports:
+      - "127.0.0.1:${REVERB_FORWARD_PORT:-6001}:6001"
+    depends_on:
+      app:
+        condition: service_healthy
+
+  # Opt-in with --profile scheduler. With a production dump loaded, its jobs act on real
+  # systems: Microsoft 365 mirror, webhook deliveries, bank balance fetch.
+  scheduler:
+    <<: *php
+    command: php artisan schedule:work
+    profiles: [scheduler]
+    depends_on:
+      app:
+        condition: service_healthy
+
+  db:
+    image: mariadb:11.8
+    command: --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    environment:
+      MARIADB_ROOT_PASSWORD: root
+      MARIADB_DATABASE: talvis
+      MARIADB_USER: talvis
+      MARIADB_PASSWORD: changeme
+    ports:
+      - "127.0.0.1:${DB_FORWARD_PORT:-3306}:3306"
+    volumes:
+      - db:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      start_period: 1m
+      start_interval: 2s
+      interval: 30s
+    restart: unless-stopped
+
+  mailpit:
+    image: axllent/mailpit
+    ports:
+      - "127.0.0.1:${MAILPIT_FORWARD_PORT:-8025}:8025"
+    restart: unless-stopped
+
+volumes:
+  db:
+  vendor:

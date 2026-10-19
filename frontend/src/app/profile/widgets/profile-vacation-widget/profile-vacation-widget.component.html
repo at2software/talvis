@@ -2,7 +2,7 @@
     <div class="card-header">
         <span class="flex-fill" i18n="@@i18n.common.vacation">vacation</span>
         <ng-container>&nbsp;</ng-container>
-        <div class="chart-title">{{ totalVacationDays() | loading: 3 : 'd' }}</div>
+        <div class="chart-title"><value-unit [value]="totalVacationDays() | loading: 3 : 'd'" /></div>
     </div>
     <img src="assets/images/hero-vacation.jpg" class="card-img-top card-img-21-9 chart" alt="" />
     <div class="card-body">

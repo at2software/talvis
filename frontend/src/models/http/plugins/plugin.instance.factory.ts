@@ -9,6 +9,7 @@ import { HttpClient } from '@angular/common/http';
 import { MantisPlugin } from './plugin.mantis';
 import { SlackPlugin } from './plugin.slack';
 import { LocalAIPlugin } from './plugin.localai';
+import { CalendarPlugin } from './plugin.calendar';
 import { JiraPlugin } from './plugin.jira';
 import { GitHubPlugin } from './plugin.github';
 import { PluginLink } from '@models/plugin-link/plugin-link.model';
@@ -30,6 +31,7 @@ Promise.all([
 export interface TPluginAllocations {
     type: Type<PluginInstance>;
     sub?: () => Type<PluginInstance> | null;
+    personal?: boolean;
 }
 
 const PLUGIN_TYPES: Dictionary<TPluginAllocations> = {
@@ -40,6 +42,7 @@ const PLUGIN_TYPES: Dictionary<TPluginAllocations> = {
     github: { type: GitHubPlugin, sub: () => GitHubSubPlugin },
     slack: { type: SlackPlugin },
     local_ai: { type: LocalAIPlugin },
+    calendar: { type: CalendarPlugin, personal: true },
 };
 
 @Service()
@@ -97,6 +100,7 @@ export class PluginInstanceFactory {
 
     getPluginEncryptionsOfType = (type: string): Encryption[] => nx().global.encryptions.filter((_) => _.key === type);
     getPluginEncryptions = (): Encryption[] => nx().global.encryptions.filter((_) => _.key in PLUGIN_TYPES);
+    getLinkablePluginEncryptions = (): Encryption[] => this.getPluginEncryptions().filter((_) => !PLUGIN_TYPES[_.key].personal);
     getPluginInstances = (): PluginInstance[] => {
         const instances = nx().global.encryptions
             .filter((_) => _.key in PLUGIN_TYPES)

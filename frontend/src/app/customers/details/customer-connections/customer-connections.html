@@ -1,4 +1,5 @@
 @let _connections = connections();
+@let _connectionsLoaded = connectionsLoaded();
 @let _selectedCompany = selectedCompany();
 @let _myCompany = myCompany();
 <scrollbar>
@@ -33,13 +34,17 @@
                         <div class="text-truncate">{{con.otherCompany(_myCompany)?.getName()}}</div>
                     </li>
                     } @empty {
+                    @if (_connectionsLoaded) {
                     <li class="list-group-item small text-muted" i18n="@@i18n.customers.noConnectionsYet">no connections yet</li>
+                    }
                     }
                 </ul>
             </div>
         </div>
         <div class="col-md-9">
-            @if (!_connections.length) {
+            @if (!_connectionsLoaded) {
+            <spinner class="py-4"></spinner>
+            } @else if (!_connections.length) {
             <empty-state [card]="true" class="chart" i18n-title="@@i18n.customers.noConnectionsYet" title="no connections yet">
                 <p class="text-muted small" i18n="@@i18n.customers.connectionsEmptyBody">Link partner companies such as agencies, suppliers or subcontractors with the + in the connections card to see who works with whom.</p>
             </empty-state>

@@ -241,6 +241,11 @@ body > :is(.dropdown, .dropup) {
     max-width: fit-content;
 }
 
+.tooltip-pre-line .tooltip-inner {
+    white-space: pre-line;
+    text-align: left;
+}
+
 .progress {
     box-shadow: var(--tv-liquid-glass), var.shadow-down(2px, 4px);
 }

@@ -66,7 +66,7 @@ export class ProjectDebriefingComponent {
         (projectId) => this.#service.indexProjectDebriefs(projectId),
     );
     readonly debriefs = linkedSignal(this.#debriefs.value);
-    readonly loading = computed(() => this.#categories.isLoading() || this.#debriefs.isLoading());
+    readonly loading = computed(() => this.#categories.isLoading() || this.#debriefs.isLoading() || this.#debriefs.status() === 'idle');
 
     get localAiPlugin(): LocalAIPlugin | null {
         const encs = this.#pluginFactory.getPluginEncryptionsOfType('local_ai');

@@ -25,7 +25,7 @@ class InvoiceController extends Controller {
             $query = $query->where('paid_at', null);
         }
         if (@$r->input('onlyPaid') == 'true') {
-            $query = $query->where('paid_at', 'is not', null);
+            $query = $query->whereNotNull('paid_at');
         }
         // $query->whereNull('cancellation_invoice_id');
         $query->with('cancelledBy', 'cancelles');

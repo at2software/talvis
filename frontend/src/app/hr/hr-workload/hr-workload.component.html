@@ -18,7 +18,7 @@
                 {{ _title ? _title : _user.getName() }}
             </div>
             @if (_user.active_employment) {
-                <div class="chart-title">{{ _user.active_employment.hpw }} h</div>
+                <div class="chart-title"><value-unit [value]="_user.active_employment.hpw" unit="h" /></div>
             }
         </div>
         @if (_isError) {

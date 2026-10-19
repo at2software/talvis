@@ -1,0 +1,17 @@
+<div class="card h-100">
+    <div class="card-body hstack gap-3 align-items-stretch">
+        <div class="flex-fill vstack min-w-0">
+            <div class="stat-value" [class.is-zero]="isZero()"><value-unit [value]="value()" [unit]="unit()" /></div>
+            <div class="stat-labels mt-auto">
+                <div class="small text-truncate">{{ label() }}</div>
+                @if (hint()) {
+                    <div class="small text-muted text-truncate">{{ hint() }}</div>
+                }
+            </div>
+        </div>
+        <div class="stat-icon align-self-start text-{{ color() }}"><i>{{ icon() }}</i></div>
+    </div>
+    @if (progress() !== undefined) {
+        <progress-bar [progress]="progress()!" [style]="color()"></progress-bar>
+    }
+</div>

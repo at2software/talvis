@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Http\Controllers\PluginMattermostController;
 use App\Models\MarketingProspect;
 use App\Models\User;
 use App\Observers\MarketingProspectObserver;
@@ -27,6 +28,7 @@ use Illuminate\Support\Str;
 class AppServiceProvider extends ServiceProvider {
     public function register(): void {
         $this->app->singleton(LiveSyncBroadcaster::class);
+        $this->app->bind(PluginMattermostController::class, fn () => PluginMattermostController::createInstance());
     }
     public function boot(): void {
         MarketingProspect::observe(MarketingProspectObserver::class);

@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject, linkedSignal, signal } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
-import { map } from 'rxjs';
+import { firstValueFrom, map } from 'rxjs';
 import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
@@ -21,6 +21,10 @@ import { SpinnerComponent } from '@shards/spinner/spinner.component';
 import { GlobalService } from '@models/global.service';
 import { Dictionary } from '@constants/constants';
 import { StackedTableDirective } from '@directives/stacked-table.directive';
+import { MarketingTouchpoint } from '@models/marketing/marketing-touchpoint.model';
+import { CompanyContact } from '@models/company/company-contact.model';
+import { Toast } from '@shards/toast/toast';
+import { TouchpointModalComponent } from '../../shared/touchpoint-modal/touchpoint-modal.component';
 
 @Component({
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -36,6 +40,7 @@ export class MarketingProspectDetailComponent {
 
     #prospectId = toSignal(this.#route.params.pipe(map(params => params['id'] as string | undefined)));
     #prospectRes = modelResource(this.#prospectId, id => this.#marketingService.showProspect(id));
+    #duplicatesRes = modelResource(this.#prospectId, id => this.#marketingService.showProspectDuplicates(id));
 
     prospect        = linkedSignal(() => this.#prospectRes.value());
     isLoading       = this.#prospectRes.isLoading;
@@ -45,6 +50,10 @@ export class MarketingProspectDetailComponent {
 
     pendingActivities   = computed(() => this.activities().filter(a => a.status === 'pending'));
     completedActivities = computed(() => this.activities().filter(a => ['completed', 'skipped'].includes(a.status)));
+    touchpoints = computed(() => this.prospect()?.touchpoints ?? []);
+    duplicateProspects = computed(() => this.#duplicatesRes.value()?.prospects ?? []);
+    duplicateContacts = computed(() => this.#duplicatesRes.value()?.company_contacts ?? []);
+    hasDuplicates = computed(() => this.duplicateProspects().length + this.duplicateContacts().length > 0);
 
     constructor() {
         this.#globalService.onActionsResolved.pipe(takeUntilDestroyed()).subscribe(({ object }) => {
@@ -72,7 +81,7 @@ export class MarketingProspectDetailComponent {
             case 'EMAIL': {
                 const email = this.#getEmail();
                 if (!email) return;
-                const body = personalized(this.#getEmailBody(activity), this.#getPersonalizations());
+                const body = personalized(this.#getEmailBody(activity), this.prospect()!.personalizations());
                 window.location.href = `mailto:${email}?subject=${encodeURIComponent(activity.marketing_activity?.name || '')}&body=${encodeURIComponent(body)}`;
                 break;
             }
@@ -88,22 +97,62 @@ export class MarketingProspectDetailComponent {
                 window.location.href = `tel:${this.#getPhone()!.replace(/[\s-]/g, '')}`;
                 break;
         }
+        this.logTouchpoint(activity);
+    }
+
+    logTouchpoint(activity?: MarketingProspectActivity) {
+        const prospect = this.prospect();
+        if (!prospect) return;
+        const channel = MarketingTouchpoint.channelOf(activity?.marketing_activity?.quick_action);
+        this.#modal.open(TouchpointModalComponent, {
+            title: activity?.getName() ?? $localize`:@@i18n.marketing.log_contact:log contact`,
+            channel,
+            channelLocked: !!channel,
+            withRetry: !!activity,
+        }).then((payload) => {
+            if (!payload) return;
+            this.#marketingService.storeProspectTouchpoint(prospect.id, { ...payload, marketing_prospect_activity_id: activity?.id ?? null }).subscribe({
+                next: () => this.#prospectRes.reload(),
+                error: () => Toast.error($localize`:@@i18n.marketing.touchpoint_save_failed:saving the contact failed – please try again`),
+            });
+        });
+    }
+
+    matchedBy = (model: MarketingProspect | CompanyContact): string => ((model.var['matched_by'] ?? []) as string[]).join(', ');
+    isSameInitiative = (other: MarketingProspect) => other.marketing_initiative_id == this.prospect()?.marketing_initiative_id;
+
+    async mergeDuplicate(other: MarketingProspect) {
+        const prospect = this.prospect();
+        if (!prospect) return;
+        try {
+            await prospect.modalConfirm(
+                $localize`:@@i18n.marketing.merge_prospect:merge prospect`,
+                $localize`:@@i18n.marketing.merge_prospect_confirm:Merge ${other.name()}:name: into this prospect? Contact data, notes and contact history are taken over, the duplicate is deleted.`,
+            );
+        } catch {
+            return;
+        }
+        const merged = await firstValueFrom(this.#marketingService.mergeProspect(prospect.id, other.id));
+        this.prospect.set(merged);
+        this.#duplicatesRes.reload();
+        this.#prospectRes.reload();
+    }
+
+    linkDuplicateContact(contact: CompanyContact) {
+        const prospect = this.prospect();
+        if (!prospect) return;
+        this.#marketingService.updateProspect(prospect.id, { company_contact_id: contact.id }).subscribe((updated: MarketingProspect) => {
+            this.prospect.set(updated);
+            this.#duplicatesRes.reload();
+        });
     }
 
     getQuickActionIcon(qa: string): string {
         return ({ EMAIL: 'email', LINKEDIN: 'open_in_new', LINKEDIN_SEARCH: 'search', CALL: 'phone' } as Dictionary<string>)[qa] || '';
     }
 
-    getLocalizedDescription(activity: MarketingProspectActivity): string {
-        const desc = activity.marketing_activity?.description;
-        if (!desc) return '';
-        if (typeof desc === 'string') return desc;
-        const lang = this.prospect()?.getLang() || 'de';
-        const formality = this.prospect()?.getFormality() || 'formal';
-        return desc.find((v) => v.language === lang && v.formality === formality)?.text
-            ?? desc.find((v) => v.language === lang)?.text
-            ?? desc[0]?.text ?? '';
-    }
+    getLocalizedDescription = (activity: MarketingProspectActivity): string =>
+        activity.localizedDescription(this.prospect()?.getLang() || 'de', this.prospect()?.getFormality() || 'formal');
 
     convertProspect() {
         if (!this.prospect()) return;
@@ -136,9 +185,9 @@ export class MarketingProspectDetailComponent {
             .subscribe((updated: MarketingProspect) => this.prospect.set(updated));
     }
 
-    #getEmail   = () => this.prospect()?.card()?.get('EMAIL')?.first()?.vals?.[0] || this.prospect()?.company_contact?.card()?.get('EMAIL')?.first()?.vals?.[0] || this.prospect()?.company_contact?.contact?.card()?.get('EMAIL')?.first()?.vals?.[0] || this.prospect()?.email || null;
-    #getLinkedIn = () => this.prospect()?.card()?.get('URL')?.first()?.vals?.[0] || this.prospect()?.company_contact?.card()?.get('URL')?.first()?.vals?.[0] || this.prospect()?.company_contact?.contact?.card()?.get('URL')?.first()?.vals?.[0] || this.prospect()?.linkedin_url || null;
-    #getPhone   = () => this.prospect()?.card()?.get('TEL')?.first()?.vals?.[0] || this.prospect()?.company_contact?.card()?.get('TEL')?.first()?.vals?.[0] || this.prospect()?.company_contact?.contact?.card()?.get('TEL')?.first()?.vals?.[0] || this.prospect()?.phone || null;
+    #getEmail = () => this.prospect()?.emailAddress() ?? null;
+    #getLinkedIn = () => this.prospect()?.linkedInUrl() ?? null;
+    #getPhone = () => this.prospect()?.phoneNumber() ?? null;
 
     #getEmailBody(activity: MarketingProspectActivity): string {
         const targetId = String(activity.marketing_initiative_activity_id || activity.marketing_activity?.id || '');
@@ -150,46 +199,5 @@ export class MarketingProspectDetailComponent {
         return this.getLocalizedDescription(
             matched instanceof MarketingProspectActivity ? matched : (matched ? MarketingProspectActivity.fromJson(matched) : activity)
         );
-    }
-
-    #getPersonalizations(): Dictionary<string> {
-        const prospect = this.prospect();
-        const contact = prospect?.company_contact?.contact;
-        const cc = prospect?.company_contact;
-
-        const firstName  = prospect?.firstName()  || cc?.firstName()  || contact?.firstName()  || '';
-        const familyName = prospect?.familyName() || cc?.familyName() || contact?.familyName() || '';
-        const fullName   = prospect?.fullName()   || cc?.fullName()   || contact?.fullName()   || prospect?.getName() || '';
-        const salutation = this.#buildSalutation(firstName, familyName, fullName,
-            prospect?.salutation() || cc?.salutation() || contact?.salutation() || '',
-            prospect?.gender || cc?.gender || contact?.gender || '');
-        const company = prospect?.company() || prospect?.companyModel?.company_name || cc?.company?.getName() || '';
-        const email   = this.#getEmail() || '';
-        const phone   = this.#getPhone() || '';
-
-        return { salutation, firstName, familyName, fullName, name: fullName, company, companyName: company, email, phone,
-                 first_name: firstName, family_name: familyName, full_name: fullName };
-    }
-
-    #buildSalutation(firstName: string, familyName: string, fullName: string, rawSalutation: string, gender: string): string {
-        const lang     = this.prospect()?.getLang()      || 'de';
-        const formality = this.prospect()?.getFormality() || 'formal';
-
-        if (formality === 'informal') {
-            const prefix = lang === 'de' ? 'Hallo' : 'Hello';
-            const name = firstName || fullName || familyName;
-            return name ? `${prefix} ${name},` : `${prefix},`;
-        }
-        if (lang === 'de') {
-            if (familyName) return gender === 'F' ? `Sehr geehrte Frau ${familyName},` : `Sehr geehrter Herr ${familyName},`;
-            if (fullName) return `Sehr geehrte/r ${fullName},`;
-            if (rawSalutation) return `${rawSalutation},`;
-            return 'Sehr geehrte Damen und Herren,';
-        }
-        const honorific = gender === 'F' ? 'Ms.' : 'Mr.';
-        if (familyName) return `Dear ${honorific} ${familyName},`;
-        if (fullName) return `Dear ${fullName},`;
-        if (rawSalutation) return `Dear ${rawSalutation.replace(/,$/, '')},`;
-        return 'Dear Sir or Madam,';
     }
 }

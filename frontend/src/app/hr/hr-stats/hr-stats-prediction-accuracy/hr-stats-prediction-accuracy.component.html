@@ -20,7 +20,9 @@
     </div>
 }
 
-@if (_users.length === 0) {
+@if (!loaded()) {
+    <spinner class="py-4"></spinner>
+} @else if (_users.length === 0) {
     <empty-state [card]="false" class="hr" i18n-title="@@i18n.hr.no_prediction_data" title="no prediction data yet">
         <p class="text-muted small" i18n="@@i18n.hr.prediction_data_note">Data will appear once projects with time predictions are completed.</p>
     </empty-state>

@@ -98,6 +98,7 @@ trait CustomModelTrait {
         'MarketingPerformanceMetric'  => ['create' => ['marketing'], 'read' => ['marketing'], 'update' => ['marketing'], 'delete' => ['marketing']],
         'MarketingProspect'           => ['create' => ['marketing'], 'read' => ['marketing'], 'update' => ['marketing'], 'delete' => ['marketing']],
         'MarketingProspectActivity'   => ['create' => ['marketing'], 'read' => ['marketing'], 'update' => ['marketing'], 'delete' => ['marketing']],
+        'MarketingTouchpoint'         => ['create' => ['marketing'], 'read' => ['marketing'], 'update' => ['marketing'], 'delete' => ['marketing']],
         'MarketingWorkflow'           => ['create' => ['marketing'], 'read' => ['marketing'], 'update' => ['marketing'], 'delete' => ['marketing']],
 
         // === HR ===

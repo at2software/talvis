@@ -1,0 +1,41 @@
+@let _day = day();
+@let _planned = planned();
+
+<div class="card card-chart mb-3">
+    <div class="card-header hstack gap-2">
+        <n>project</n>
+        <span class="flex-fill" i18n="@@i18n.widget-planned-today">planned for today</span>
+        @if (_day && !_day.is_break) {
+            <span class="text-muted small text-nowrap">{{ plannedHours() | number: '1.0-1' }} / {{ _day.available_hours | number: '1.0-1' }}h</span>
+        }
+    </div>
+
+    <widget-options [options]="getOptions()" (updated)="_onUpdate($event)" (deleted)="onDelete($event)"></widget-options>
+
+    @if (!loaded()) {
+        <spinner class="py-3" [size]="24"></spinner>
+    } @else if (_day?.is_break) {
+        <div class="card-body py-1 text-muted">
+            @if (_day?.break_name) {
+                {{ _day?.break_name }}
+            } @else {
+                <span i18n="@@i18n.widget-planned-today.dayOff">day off</span>
+            }
+        </div>
+    } @else if (_planned.length) {
+        <ul class="list-group">
+            @for (p of _planned; track p.milestone.id) {
+                <li class="list-group-item hstack gap-2 cursor-pointer" [nx]="p.milestone" tabindex="0" (click)="onEdit(p.milestone)" (keydown.enter)="onEdit(p.milestone)">
+                    <avatar [object]="p.milestone.project"></avatar>
+                    <div class="flex-fill text-truncate">
+                        <div class="text-truncate">{{ p.milestone.name }}</div>
+                        <small class="text-muted text-truncate d-block">{{ p.milestone.project?.name }}</small>
+                    </div>
+                    <span class="text-muted text-nowrap">{{ p.hours | number: '1.0-1' }}h</span>
+                </li>
+            }
+        </ul>
+    } @else {
+        <div class="card-body py-1 text-muted" i18n="@@i18n.widget-planned-today.empty">nothing planned for today</div>
+    }
+</div>

@@ -9,6 +9,7 @@ import { EChartsSimpleOptions, ECHARTS_DONUT_ITEM_STYLE, ECHARTS_DONUT_SERIES, E
 import { EmptyStateComponent } from '@shards/empty-state/empty-state.component';
 import type { EChartsOption, SeriesOption } from 'echarts';
 import { ChartAxisTooltipParamDto } from '@models/_core/api-response';
+import { SpinnerComponent } from '@shards/spinner/spinner.component';
 
 interface PredictionAccuracyData {
     id: number;
@@ -33,7 +34,7 @@ interface PredictionAccuracyData {
 
 @Component({
     selector: 'hr-stats-prediction-accuracy',
-    imports: [NgxEchartsModule, EmptyStateComponent],
+    imports: [NgxEchartsModule, EmptyStateComponent, SpinnerComponent],
     templateUrl: './hr-stats-prediction-accuracy.component.html',
     styleUrl: './hr-stats-prediction-accuracy.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -43,6 +44,7 @@ export class HrStatsPredictionAccuracyComponent {
     #global = inject(GlobalService);
 
     readonly #predictionAccuracy = modelListResource<PredictionAccuracyData>(() => this.#statsService.showPredictionAccuracy());
+    readonly loaded = this.#predictionAccuracy.hasValue;
     readonly users = computed(() =>
         [...this.#predictionAccuracy.value()].sort((a, b) => this.#global.team.findIndex((t) => t.id === a.id.toString()) - this.#global.team.findIndex((t) => t.id === b.id.toString())),
     );

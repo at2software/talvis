@@ -78,6 +78,42 @@
                 </div>
             }
 
+            @if (hasDuplicates()) {
+                <div class="card mb-3">
+                    <div class="card-header hstack gap-2">
+                        <i class="text-warning">content_copy</i>
+                        <span class="flex-fill" i18n="@@i18n.marketing.possible_duplicates">possible duplicates</span>
+                    </div>
+                    <ul class="list-group list-group-flush">
+                        @for (other of duplicateProspects(); track other.id) {
+                            <li class="list-group-item hstack gap-2" [nx]="other">
+                                <div class="flex-fill text-truncate">
+                                    <div class="text-truncate">{{ other.name() }}</div>
+                                    <small class="text-muted">{{ other.marketing_initiative?.name }} · {{ matchedBy(other) }}</small>
+                                </div>
+                                @if (isSameInitiative(other)) {
+                                    <i class="text-primary cursor-pointer" tabindex="0" (click)="mergeDuplicate(other)" (keyup.enter)="mergeDuplicate(other)" i18n-ngbTooltip="@@i18n.marketing.merge_into_this" ngbTooltip="merge into this prospect">merge</i>
+                                } @else {
+                                    <small class="text-muted" i18n="@@i18n.marketing.other_initiative">other initiative</small>
+                                }
+                            </li>
+                        }
+                        @for (contact of duplicateContacts(); track contact.id) {
+                            <li class="list-group-item hstack gap-2" [nx]="contact">
+                                <i class="text-success">person</i>
+                                <div class="flex-fill text-truncate">
+                                    <div class="text-truncate">{{ contact.getName() }}</div>
+                                    <small class="text-muted">{{ contact.company.getName() }} · {{ matchedBy(contact) }}</small>
+                                </div>
+                                @if (!_prospect!.company_contact_id) {
+                                    <i class="text-primary cursor-pointer" tabindex="0" (click)="linkDuplicateContact(contact)" (keyup.enter)="linkDuplicateContact(contact)" i18n-ngbTooltip="@@i18n.marketing.linkToContact" ngbTooltip="link to contact">link</i>
+                                }
+                            </li>
+                        }
+                    </ul>
+                </div>
+            }
+
             <!-- Pending Activities -->
             @if (_prospect && _pendingActivities.length > 0) {
                 <div class="card mb-3">
@@ -229,6 +265,34 @@
             <div class="card mb-3">
                 <div class="card-header" i18n="@@i18n.common.notes">notes</div>
                 <rte [object]="_prospect!" [compact]="true" key="notes"></rte>
+            </div>
+        }
+
+        @if (_prospect) {
+            <div class="card mb-3">
+                <div class="card-header hstack gap-2">
+                    <span class="flex-fill" i18n="@@i18n.marketing.contact_history">contact history</span>
+                    <i class="text-primary cursor-pointer" tabindex="0" (click)="logTouchpoint()" (keyup.enter)="logTouchpoint()" i18n-ngbTooltip="@@i18n.marketing.log_contact" ngbTooltip="log contact">add</i>
+                </div>
+                <ul class="list-group list-group-flush">
+                    @for (_ of touchpoints(); track _.id) {
+                        <li class="list-group-item">
+                            <div class="hstack gap-2">
+                                <i [class]="_.resultOption()?.color">{{ _.channelOption()?.icon }}</i>
+                                <span class="flex-fill">{{ _.getName() }}</span>
+                                @if (_.user) {
+                                    <small class="text-muted">{{ _.user.getName() }}</small>
+                                }
+                                <small class="text-muted text-nowrap">{{ _.occurred_at | date: 'short' }}</small>
+                            </div>
+                            @if (_.notes) {
+                                <small class="text-muted d-block" style="white-space: pre-wrap">{{ _.notes }}</small>
+                            }
+                        </li>
+                    } @empty {
+                        <li class="list-group-item text-muted small" i18n="@@i18n.marketing.no_contact_yet">no contact logged yet</li>
+                    }
+                </ul>
             </div>
         }
 

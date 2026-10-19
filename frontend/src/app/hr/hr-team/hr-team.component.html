@@ -27,9 +27,11 @@
                         </button>
                     </div>
                 </li>
-                @for (x of _team; track x.id) {
-                    <list-group-item-contact class="cursor-pointer" [class.d-none]="enabledOnly() && x.is_retired" [contact]="x" [active]="x.id === _id" [routerLink]="currentRouteFor(x)" [nx]="x" [tables]="_team" [primary]="false"> </list-group-item-contact>
-                }
+                <div class="list-group list-group-flush overflow-x-hidden">
+                    @for (x of _team; track x.id) {
+                        <list-group-item-contact class="cursor-pointer" [class.d-none]="enabledOnly() && x.is_retired" [contact]="x" [active]="x.id === _id" [routerLink]="currentRouteFor(x)" [nx]="x" [tables]="_team" [primary]="false"> </list-group-item-contact>
+                    }
+                </div>
             </div>
         </div>
         <div class="col-md-9">

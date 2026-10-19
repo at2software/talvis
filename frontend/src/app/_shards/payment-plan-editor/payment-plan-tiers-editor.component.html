@@ -1,5 +1,7 @@
 @let _tiers = tiers();
-@if (_tiers.length === 0) {
+@if (!loaded()) {
+    <spinner class="py-4"></spinner>
+} @else if (_tiers.length === 0) {
     <empty-state [card]="false" class="settings" i18n-title="@@i18n.payment.noTiersDefined" title="no payment plan tiers defined yet"></empty-state>
 }
 

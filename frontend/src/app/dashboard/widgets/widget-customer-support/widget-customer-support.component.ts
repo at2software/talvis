@@ -6,6 +6,7 @@ import { ShortPipe } from '@pipes/short.pipe';
 import { PermissionsDirective } from '@directives/permissions.directive';
 import { WidgetService } from '@models/widget.service';
 import { ParamChartSeriesDto } from '@models/_core/api-response';
+import { ValueUnitComponent } from '@shards/value-unit/value-unit.component';
 
 
 @Component({
@@ -13,7 +14,7 @@ import { ParamChartSeriesDto } from '@models/_core/api-response';
     selector: 'widget-customer-support',
     templateUrl: './widget-customer-support.component.html',
     styleUrls: ['./../base.widget.component.scss'],
-    imports: [...WIDGET_SHARED, ShortPipe, PermissionsDirective],
+    imports: [ValueUnitComponent, ...WIDGET_SHARED, ShortPipe, PermissionsDirective],
 })
 export class WidgetCustomerSupportComponent extends BaseWidgetComponent {
     #widgetService = inject(WidgetService);

@@ -21,7 +21,7 @@ resources/aqua_migration
 .vscode
 .env
 /grc-*
-/nexus-up.settings.bat
+/talvis-up.settings.bat
 /nexus.sql
 public/qr.png
 storage/app/marketing-assets/
@@ -31,7 +31,7 @@ storage/app/foci_invoice_item_ids.sql
 tmpclaude-*-cwd
 .claude/commands/
 .claude/settings.local.json
-nexus-sync-office.bat
+talvis-sync-office.bat
 storage/app/api-benchmark-report.json
 storage/app/ml/
 docs

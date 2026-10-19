@@ -2,7 +2,7 @@
     <div class="card-header hstack gap-2">
         <i>payments</i>
         <span i18n="@@i18n.common.cashFlow" class="flex-fill text-truncate">cash flow</span>
-        <div class="chart-title">{{ (value() ?? 0) | mshort }}</div>
+        <div class="chart-title"><value-unit [value]="(value() ?? 0) | mshort" /></div>
     </div>
     <div class="chart-body mb-3">
         <div echarts [options]="chartOptions()" [initOpts]="{ height: 100 }" (chartInit)="onChartInit($event)" style="height: 100px"></div>

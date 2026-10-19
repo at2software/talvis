@@ -13,11 +13,12 @@ import { AvatarComponent } from '@shards/avatar/avatar.component';
 import { Nx } from '@app/nx/nx.directive';
 import { FormsModule } from '@angular/forms';
 import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
+import { ValueUnitComponent } from '@shards/value-unit/value-unit.component';
 
 @Component({
     selector: 'app-product-group-overview',
     templateUrl: './product-group-overview.component.html',
-    imports: [AutosaveDirective, FormsModule, ColorPickerDirective, RteComponent, AvatarComponent, Nx, AvatarComponent, NgbTooltipModule, MoneyShortPipe, LoadingPipe],
+    imports: [ValueUnitComponent, AutosaveDirective, FormsModule, ColorPickerDirective, RteComponent, AvatarComponent, Nx, AvatarComponent, NgbTooltipModule, MoneyShortPipe, LoadingPipe],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProductGroupOverviewComponent {

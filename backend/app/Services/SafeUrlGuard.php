@@ -3,8 +3,41 @@
 namespace App\Services;
 
 use App\Exceptions\SsrfException;
+use GuzzleHttp\Psr7\Uri;
+use GuzzleHttp\Psr7\UriResolver;
+use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Http\Client\Response;
+use Illuminate\Support\Facades\Http;
 
 class SafeUrlGuard {
+    private const CREDENTIAL_HEADERS = ['authorization', 'cookie', 'proxy-authorization'];
+
+    /**
+     * @param array<string, string> $headers
+     * @param array<string, mixed> $body Guzzle body option, e.g. ['json' => …] or ['query' => …]
+     */
+    public function send(string $method, #[\SensitiveParameter] string $url, #[\SensitiveParameter] array $headers = [], int $timeout = 5, #[\SensitiveParameter] array $body = [], int $hopsLeft = 3): Response {
+        $response = Http::withHeaders($headers)
+            ->timeout($timeout)
+            ->connectTimeout(2)
+            ->withOptions(['allow_redirects' => false, 'curl' => $this->pinnedCurlOptions($url)])
+            ->send($method, $url, $body);
+
+        if (! $response->redirect() || $hopsLeft <= 0) {
+            return $response;
+        }
+        $location = $response->header('Location') ?: throw new ConnectionException('Redirect without Location header');
+        $target   = UriResolver::resolve(new Uri($url), new Uri($location));
+        $origin   = new Uri($url);
+        if ($origin->getScheme() === 'https' && $target->getScheme() !== 'https') {
+            throw new ConnectionException('Refusing redirect from https to '.$target->getScheme());
+        }
+        if (Uri::composeComponents($origin->getScheme(), $origin->getAuthority(), '', '', '') !== Uri::composeComponents($target->getScheme(), $target->getAuthority(), '', '', '')) {
+            $headers = array_filter($headers, fn (string $name) => ! in_array(strtolower($name), self::CREDENTIAL_HEADERS, true), ARRAY_FILTER_USE_KEY);
+        }
+        return $this->send($method, (string)$target, $headers, $timeout, $body, $hopsLeft - 1);
+    }
+
     /** @return list<string> */
     public function validate(string $url): array {
         $parsed = parse_url($url);

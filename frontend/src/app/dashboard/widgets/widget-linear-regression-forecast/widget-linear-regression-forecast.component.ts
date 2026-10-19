@@ -9,6 +9,7 @@ import { WIDGET_SHARED } from '../widgets.shared';
 import type { EChartsOption } from 'echarts';
 import type { EChartsType, TopLevelFormatterParams } from 'echarts/types/dist/shared';
 import { LinearRegressionDataDto } from '@models/_core/api-response';
+import { ValueUnitComponent } from '@shards/value-unit/value-unit.component';
 
 @Component({
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -16,7 +17,7 @@ import { LinearRegressionDataDto } from '@models/_core/api-response';
     templateUrl: './widget-linear-regression-forecast.component.html',
     styleUrls: ['./../base.widget.component.scss'],
     providers: [MoneyShortPipe],
-    imports: [...WIDGET_SHARED],
+    imports: [ValueUnitComponent, ...WIDGET_SHARED],
 })
 export class WidgetLinearRegressionForecastComponent extends BaseWidgetComponent {
     #stats = inject(StatsService);

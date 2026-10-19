@@ -2,6 +2,7 @@
 
 namespace App\Flow\Http\Controllers;
 
+use App\Flow\JobStateMachine;
 use App\Flow\Models\JobType;
 use App\Flow\Models\Phase;
 use App\Flow\Models\RiskClass;
@@ -13,6 +14,7 @@ class FlowConfigController extends Controller {
             'phases'       => Phase::with('gates')->orderBy('sort')->get(),
             'risk_classes' => RiskClass::orderBy('level')->get(),
             'job_types'    => JobType::orderBy('key')->get(),
+            'job_states'   => JobStateMachine::TRANSITIONS,
         ];
     }
     public function jobTypes() {

@@ -94,7 +94,7 @@
                         <div class="card-header">
                             <span i18n="@@i18n.common.revenue">revenue</span>
                             <span class="badge bg-lighter ms-2 py-1 px-1" ngbTooltip="accumulated revenue of the last 12 months" i18n="@@i18n.common.12m" i18n-ngbTooltip="@@i18n.invoice.revenue12m">12m</span>
-                            <div class="chart-title ms-auto">{{ (revenueChart.value() || 0) | money }}</div>
+                            <div class="chart-title ms-auto"><value-unit [value]="(revenueChart.value() || 0) | money" /></div>
                         </div>
                         <echarts-range-card #revenueChart keyPath="{{ _company.getParamPath('INVOICE_REVENUE_12M,INVOICE_DEG_12M') }}" [color]="['white', 'primary']"></echarts-range-card>
                     </div>
@@ -156,7 +156,9 @@
                 </div>
             </div>
             <div>
-                @if (_projects.length === 0) {
+                @if (_projects.length === 0 && !projectsLoaded()) {
+                    <spinner class="py-4"></spinner>
+                } @else if (_projects.length === 0) {
                     <empty-state class="projects" title="no projects yet..." i18n-title="@@i18n.projects.noProjectsYet"></empty-state>
                 }
                 <ng-container *ngTemplateOutlet="projectList; context: { $implicit: _projects }"></ng-container>

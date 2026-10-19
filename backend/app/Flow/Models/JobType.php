@@ -8,8 +8,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class JobType extends BaseModel {
     protected $table    = 'flow_job_types';
-    protected $fillable = ['key', 'name', 'description', 'input_schema', 'release_gate_key'];
-    protected $casts    = ['input_schema' => 'array'];
+    protected $fillable = ['key', 'name', 'description', 'input_schema', 'review_gate_keys'];
+    protected $casts    = ['input_schema' => 'array', 'review_gate_keys' => 'array'];
     protected $appends  = [];
 
     protected static function booted() {

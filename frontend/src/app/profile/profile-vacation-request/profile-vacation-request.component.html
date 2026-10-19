@@ -25,7 +25,9 @@
     <div class="col-12 col-md-6">
         @if (!_currentGrant) {
             <div class="card">
-                @if (_grants.length) {
+                @if (!grantsLoaded()) {
+                    <spinner class="py-4"></spinner>
+                } @else if (_grants.length) {
                     <empty-state [card]="false" title="Please select a leave allowance pool on the left" class="calendar" i18n-title="@@i18n.profile.infoSelectLeaveAllowance"></empty-state>
                 } @else {
                     <empty-state [card]="false" title="No active leave allowance — yours has expired or has not been granted yet. Please contact HR." class="shrug" i18n-title="@@i18n.profile.noActiveLeaveAllowance"></empty-state>
@@ -53,7 +55,7 @@
                 <div class="card-header">
                     <div i18n="@@i18n.common.newTimeOffRequest">new time off request</div>
                     <div class="flex-fill"></div>
-                    <div class="chart-title">-{{ totalDeduction() }} h</div>
+                    <div class="chart-title"><value-unit [value]="'-' + totalDeduction()" unit="h" /></div>
                 </div>
                 <div class="card-body">
                     <ul class="list-group">
@@ -127,7 +129,7 @@
                 <div class="card-header hstack gap-2">
                     <div i18n="@@i18n.common.timeOffHistory">time off history</div>
                     <div class="flex-fill"></div>
-                    <div class="chart-title">{{ _currentGrant.remainingHours() | number: '1.1-1' }} h</div>
+                    <div class="chart-title"><value-unit [value]="_currentGrant.remainingHours() | number: '1.1-1'" unit="h" /></div>
                 </div>
                 @if (_currentGrant.vacations.length > 0) {
                     <ul class="list-group">

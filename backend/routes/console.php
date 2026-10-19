@@ -28,6 +28,7 @@ Schedule::command('cron:m365-mirror')->everyThirtyMinutes()->withoutOverlapping(
 Schedule::command('assignments:reset-finished-projects')->daily();
 Schedule::command('assignments:compute-timebased-averages')->daily();
 Schedule::command('timetracker:reset-idle')->everyMinute();
+Schedule::command('flow:release-stale-claims')->hourly()->withoutOverlapping();
 Schedule::command('git:detect-frameworks')->daily();
 Schedule::command('git:detect-frameworks', ['--fresh'])->weekly();
 Schedule::command('git:fetch-latest-framework-versions')->daily();

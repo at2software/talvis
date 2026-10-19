@@ -2,8 +2,13 @@
 
 namespace Tests\Feature\Flow;
 
+use App\Flow\ApprovalService;
+use App\Flow\MachineAbility;
+use App\Flow\Models\Approval;
 use App\Flow\Models\Gate;
+use App\Flow\Models\Job;
 use App\Flow\Models\JobType;
+use App\Flow\Models\Machine;
 use App\Flow\Models\Phase;
 use App\Flow\Models\RiskClass;
 use App\Flow\Models\Transition;
@@ -44,12 +49,48 @@ class FlowAt2SeederTest extends TestCase {
         $this->assertSame(['architecture', 'ui'], Phase::where('key', 'discovery')->sole()->gates->pluck('key')->all());
         $this->assertSame(['risk_level_gte' => 2], Phase::where('key', 'mvp')->sole()->gates->firstWhere('key', 'security')->condition);
         $this->assertNull(Phase::where('key', 'care')->sole()->gates->firstWhere('key', 'release')->required_approvals);
-        $this->assertSame('release', JobType::byKey('care_fix')->release_gate_key);
+        $this->assertSame(['architecture', 'security', 'release'], Phase::where('key', 'care')->sole()->gates->pluck('key')->all());
+        $this->assertSame(['release'], JobType::byKey('care_fix')->review_gate_keys);
         $this->assertSame(
-            ['issue', 'repo', 'base_ref', 'harness_customer_path', 'harness_internal_path', 'escalation_rules'],
+            ['issue', 'repo', 'base_ref', 'repos', 'harness_customer_path', 'harness_internal_path', 'escalation_rules'],
             array_column(JobType::byKey('care_fix')->input_schema['fields'], 'key')
         );
         $this->assertTrue(Role::where('name', 'dev')->exists() && Role::where('name', 'design')->exists());
+    }
+    public function test_care_fix_jobs_can_ask_for_architecture_and_security_in_care_and_take_several_repos(): void {
+        Bus::fake();
+        $this->seed(FlowAt2Seeder::class);
+        $project = Project::factory()->create(['flow_risk_class_id' => RiskClass::where('key', 'high')->value('id')]);
+        $project->states()->attach(Phase::where('key', 'care')->sole()->project_state_id);
+        $pm      = User::factory()->create();
+        $pm->assignRole('project_manager');
+        $store = fn (array $input) => $this->actingAs($pm)->postJson("/api/flow/projects/{$project->id}/jobs", ['type' => 'care_fix', 'input' => ['issue' => 'https://git.example.com/acme/shop/-/issues/7', ...$input]]);
+
+        $store([])->assertJsonValidationErrors(['input.repo', 'input.base_ref']);
+        $store(['repo' => 'https://git.example.com/acme/shop.git', 'base_ref' => 'master'])->assertCreated();
+        $store(['escalation_rules' => ['Never touch billing, ask first']])->assertJsonValidationErrors('input.repo');
+        $id = $store(['repos' => [['url' => 'https://git.example.com/acme/shop.git', 'base_ref' => 'master', 'role' => 'backend'], ['url' => 'https://git.example.com/acme/ui.git', 'base_ref' => 'main']]])
+            ->assertCreated()
+            ->json('id');
+
+        $token = Machine::firstOrCreate(['name' => 'orchestrator'])->createToken('orchestrator', MachineAbility::ALL)->plainTextToken;
+        $this->app['auth']->forgetGuards();
+        $this->withHeaders(['Authorization' => 'Bearer '.$token])->postJson("/api/flow/jobs/{$id}/claim")->assertOk();
+        foreach (['architecture', 'security'] as $gateKey) {
+            $this->withHeaders(['Authorization' => 'Bearer '.$token])->postJson("/api/flow/jobs/{$id}/gate-request", ['gate_key' => $gateKey])->assertOk();
+            $approval = Approval::where('subject_type', Job::class)->where('subject_id', $id)->pending()->sole();
+            for ($i = 0; $i < $approval->required_approvals; $i++) {
+                $dev = User::factory()->create();
+                $dev->assignRole('dev');
+                app(ApprovalService::class)->approve($approval, $dev);
+            }
+            $this->assertSame(Job::RUNNING, Job::find($id)->state);
+        }
+        $this->withHeaders(['Authorization' => 'Bearer '.$token])->postJson("/api/flow/jobs/{$id}/result", [])
+            ->assertOk()
+            ->assertJsonPath('job.state', Job::IN_REVIEW)
+            ->assertJsonPath('review_approvals.0.gate_key', 'release')
+            ->assertJsonPath('review_approvals.0.required_approvals', 2);
     }
     public function test_discovery_cannot_be_left_without_architecture_and_ui_approval(): void {
         Bus::fake();

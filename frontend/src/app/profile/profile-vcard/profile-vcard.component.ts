@@ -15,6 +15,7 @@ import { Toast } from '@shards/toast/toast';
 @Component({
     selector: 'profile-vcard',
     templateUrl: './profile-vcard.component.html',
+    styleUrls: ['./profile-vcard.component.scss'],
     imports: [ScrollbarComponent, VcardComponent, NgbTooltipModule, InputSwitchGroupComponent],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })

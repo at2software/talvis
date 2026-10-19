@@ -19,6 +19,7 @@ export const MARKETING_ROUTES: Routes = [
                     },
                 ],
             },
+            { path: 'outreach', loadComponent: () => import('./marketing-outreach/marketing-outreach.component').then((m) => m.MarketingOutreachComponent) },
             { path: 'metrics', loadComponent: () => import('./marketing-metrics/marketing-metrics.component').then((m) => m.MarketingMetricsComponent) },
             {
                 path: 'prospects',

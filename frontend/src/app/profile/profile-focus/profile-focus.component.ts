@@ -9,11 +9,12 @@ import { AvatarComponent } from '@shards/avatar/avatar.component';
 import { EmptyStateComponent } from '@shards/empty-state/empty-state.component';
 import { GlobalService } from '@models/global.service';
 import { UserService } from '@models/user/user.service';
+import { SpinnerComponent } from '@shards/spinner/spinner.component';
 
 @Component({
     selector: 'profile-focus',
     templateUrl: './profile-focus.component.html',
-    imports: [ScrollbarComponent, WidgetMyWorkingTimeComponent, NgbProgressbarModule, AvatarComponent, DecimalPipe, HrFocusTableComponent, EmptyStateComponent],
+    imports: [ScrollbarComponent, WidgetMyWorkingTimeComponent, NgbProgressbarModule, AvatarComponent, DecimalPipe, HrFocusTableComponent, EmptyStateComponent, SpinnerComponent],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProfileFocusComponent {
@@ -28,5 +29,6 @@ export class ProfileFocusComponent {
         foci.forEach((_) => _.fixParent());
         return foci.sort((a, b) => b.duration - a.duration);
     });
+    readonly focusLoaded = this.#foci30d.hasValue;
     readonly maxFocusSum = computed(() => this.focusSum().first()?.duration ?? 0);
 }

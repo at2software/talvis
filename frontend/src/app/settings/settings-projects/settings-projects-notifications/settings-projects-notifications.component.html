@@ -33,7 +33,9 @@
                     <button type="button" class="btn-close btn-close-white ms-1" aria-label="remove" (click)="removeThreshold(threshold)" style="font-size: 0.6em"></button>
                 </span>
             }
-            @if (!thresholds().length) {
+            @if (thresholdsLoading()) {
+                <spinner [size]="20" [inline]="true"></spinner>
+            } @else if (!thresholds().length) {
                 <span class="text-muted small fst-italic" i18n="@@i18n.settings.noThresholds">no thresholds configured</span>
             }
         </div>

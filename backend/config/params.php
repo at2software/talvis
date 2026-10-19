@@ -112,6 +112,7 @@ return [
     'ME_VAT_ID'                               => ['type' => StringParam::class, 'history' => false],
     'ME_VATID'                                => ['type' => StringParam::class, 'history' => false],
     'ONBOARDING_HIDDEN'                       => ['type' => FloatParam::class, 'history' => false],
+    'PLANNER_CALENDARS'                       => ['type' => TextParam::class, 'history' => false],
     'PROJECT_PAYMENT_PLAN'                    => ['type' => TextParam::class, 'history' => false],
     'PROJECT_PAYMENT_PLAN_TIERS'              => ['type' => TextParam::class, 'history' => false],
     'PROJECT_PREFIX'                          => ['type' => TextParam::class, 'history' => false],

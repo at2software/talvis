@@ -80,16 +80,15 @@ class BaseBuilder extends Builder {
         })->toArray());
     }
     public function whereRequest() {
-        $allowedFilters = $this->getModel()->allowedFilters ?? [];
+        $filters = array_intersect_key(request()->all(), array_flip($this->getModel()->allowedFilters ?? []));
 
-        if (! count($allowedFilters)) {
+        if (! count($filters)) {
             return $this;
         }
 
-        $tableName   = $this->getModel()->getTable();
-        $columnTypes = $this->cachedColumnTypes($tableName);
-        foreach (request()->all() as $colName => $value) {
-            if (! in_array($colName, $allowedFilters, true) || ! array_key_exists($colName, $columnTypes)) {
+        $columnTypes = $this->cachedColumnTypes($this->getModel()->getTable());
+        foreach ($filters as $colName => $value) {
+            if (! array_key_exists($colName, $columnTypes)) {
                 continue;
             }
             $type = $columnTypes[$colName];
@@ -186,13 +185,14 @@ class BaseBuilder extends Builder {
         $wGroup     = $g->wrap($groupByColumn);
         $wPolyId    = $g->wrap($polyColumn.'_id');
         $wPolyType  = $g->wrap($polyColumn.'_type');
-        return $this->whereRaw("{$wOrder} IN (
-                SELECT MAX({$wOrder})
+        return $this->where("{$table}.{$polyColumn}_type", $polyClass)->whereRaw("NOT EXISTS (
+                SELECT 1
                 FROM {$wTable} AS {$wSub}
-                WHERE {$wSub}.{$wPolyType} = ?
+                WHERE {$wSub}.{$wPolyType} = {$wTable}.{$wPolyType}
                 AND {$wSub}.{$wPolyId} = {$wTable}.{$wPolyId}
-                GROUP BY {$wSub}.{$wGroup}
-            )", [$polyClass]);
+                AND {$wSub}.{$wGroup} = {$wTable}.{$wGroup}
+                AND {$wSub}.{$wOrder} > {$wTable}.{$wOrder}
+            )");
     }
 
     /**
@@ -282,11 +282,8 @@ class BaseBuilder extends Builder {
 
     private function cachedColumnTypes(string $tableName): array {
         if (! isset(static::$columnTypeCache[$tableName])) {
-            $schema                              = $this->getModel()->getConnection()->getSchemaBuilder();
-            $columns                             = $schema->getColumnListing($tableName);
-            static::$columnTypeCache[$tableName] = collect($columns)
-                ->mapWithKeys(fn ($col) => [$col => $schema->getColumnType($tableName, $col)])
-                ->all();
+            $columns                             = $this->getModel()->getConnection()->getSchemaBuilder()->getColumns($tableName);
+            static::$columnTypeCache[$tableName] = array_column($columns, 'type_name', 'name');
         }
         return static::$columnTypeCache[$tableName];
     }

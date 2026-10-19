@@ -11,6 +11,8 @@ import type { CompanyContact } from '../company/company-contact.model';
 import type { UserEmployment } from '../user/user-employment.model';
 import type { ProjectState } from '../project/project-state.model';
 import type { LeadSource } from '../project/lead-source.model';
+import type { MarketingProspect } from '../marketing/marketing-prospect.model';
+import type { TouchpointChannel, TouchpointOutcome, TouchpointResult } from '../marketing/marketing-touchpoint.model';
 import type { Expense } from '../expense/expense.model';
 import type { INxContextMenu } from '@models/_core/nx.contextmenu.interface';
 
@@ -424,6 +426,36 @@ export interface RemarketingDto {
     suggested?: Company[];
 }
 
+export interface ProspectDuplicatesDto {
+    prospects: MarketingProspect[];
+    company_contacts: CompanyContact[];
+}
+
+export interface TouchpointPayloadDto extends Dictionary {
+    channel: TouchpointChannel;
+    result: TouchpointResult;
+    outcome: TouchpointOutcome | null;
+    notes: string | null;
+    retry_at: string | null;
+}
+
+export interface TouchpointKpisDto {
+    dials: number;
+    connects: number;
+    connect_rate: number;
+    emails_sent: number;
+    emails_replied: number;
+    emails_bounced: number;
+    linkedin: number;
+    meetings: number;
+}
+
+export interface TouchpointStatsDto {
+    total: TouchpointKpisDto;
+    by_user: (TouchpointKpisDto & { user_id: number | null })[];
+    by_hour: { weekday: number; hour: number; dials: number; connects: number }[];
+}
+
 export interface ProspectActivityCountDto {
     count: number;
 }
@@ -649,6 +681,19 @@ export interface DailyWorkloadElementDto {
     workload_percent?: number;
 }
 
+export interface CalendarEventDto {
+    key: string;
+    source: string;
+    title: string;
+    all_day: boolean;
+    start: string;
+    end: string;
+}
+
+export interface ExternalCalendarDto {
+    events: CalendarEventDto[];
+}
+
 export interface DailyWorkloadDto {
     date: string;
     day_of_week: number;
@@ -660,6 +705,7 @@ export interface DailyWorkloadDto {
     is_break: boolean;
     break_type?: string;
     break_name?: string;
+    meeting_hours: number;
     elements: DailyWorkloadElementDto[];
     distinct_project_count: number;
 }
@@ -671,6 +717,7 @@ export interface WorkloadDataDto {
     hpw: number;
     hpw_array: number[];
     daily_workload: DailyWorkloadDto[];
+    events: CalendarEventDto[];
     unconfigured_milestones: Milestone[];
 }
 
@@ -681,17 +728,22 @@ export interface FlowTransitionDto {
     required_role: string | null;
 }
 
+export type FlowApprovalDecision = 'pending' | 'approved' | 'rejected' | 'changes_requested' | 'withdrawn';
+
 export interface FlowApprovalContextDto {
     options?: string[];
     recommendation?: string;
     requested_by_machine?: string;
     job_id?: number;
+    source?: 'agent' | 'rule_check';
+    diff_url?: string;
+    review_round?: number;
 }
 
 export interface FlowApprovalVoteDto {
     id: number;
     user_id: number;
-    decision: 'approved' | 'rejected';
+    decision: 'approved' | 'rejected' | 'changes_requested';
     reason: string | null;
     selected_option: string | null;
     created_at: string;
@@ -784,7 +836,7 @@ export interface FlowAuditEntryDto {
     id: number;
     created_at: string;
     action: string;
-    actor_type: 'user' | 'machine';
+    actor_type: 'user' | 'machine' | 'system';
     actor_id: number | null;
     actor_name: string | null;
     subject_type: string;
@@ -806,6 +858,8 @@ export interface FlowJobFieldDto {
     label?: string;
     description?: string;
     required?: boolean;
+    required_without?: string;
+    fields?: FlowJobFieldDto[];
 }
 
 export interface FlowJobTypeDto {
@@ -814,13 +868,13 @@ export interface FlowJobTypeDto {
     name: string;
     description: string | null;
     input_schema: { fields: FlowJobFieldDto[] };
-    release_gate_key: string | null;
+    review_gate_keys: string[] | null;
 }
 
 export interface FlowJobApprovalDto {
     id: number;
     gate_key: string | null;
-    decision: 'pending' | 'approved' | 'rejected';
+    decision: FlowApprovalDecision;
     selected_option: string | null;
     reason: string | null;
     decided_at: string | null;
@@ -828,7 +882,7 @@ export interface FlowJobApprovalDto {
 
 export interface FlowJobEventDto {
     action: string;
-    actor_type: 'user' | 'machine';
+    actor_type: 'user' | 'machine' | 'system';
     created_at: string;
 }
 

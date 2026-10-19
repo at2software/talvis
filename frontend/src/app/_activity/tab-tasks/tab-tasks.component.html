@@ -14,7 +14,7 @@
                 @if (_user.hasRole('project_manager')) {
                     <tab-tasks-missing-git></tab-tasks-missing-git>
                 }
-                <tab-tasks-plugin-tasks></tab-tasks-plugin-tasks>
+                <tab-tasks-plugin-tasks [active]="opened()"></tab-tasks-plugin-tasks>
                 @if (_user.hasRole('marketing')) {
                     <tab-tasks-marketing-activities></tab-tasks-marketing-activities>
                 }

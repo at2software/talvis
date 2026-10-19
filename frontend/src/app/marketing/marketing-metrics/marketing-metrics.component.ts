@@ -13,6 +13,7 @@ import { GuidedTourComponent } from '@shards/guided-tour/guided-tour.component';
 import { ColorPickerDirective } from 'ngx-color-picker';
 import { StackedTableDirective } from '@directives/stacked-table.directive';
 import { ConfirmationService } from '@app/_modals/modal-confirm/confirmation.service';
+import { SpinnerComponent } from '@shards/spinner/spinner.component';
 
 const ActivityStatsColors = MarketingActivity.STATS_COLORS;
 
@@ -21,7 +22,7 @@ const ActivityStatsColors = MarketingActivity.STATS_COLORS;
     selector: 'marketing-metrics',
     templateUrl: './marketing-metrics.component.html',
     styleUrls: ['./marketing-metrics.component.scss'],
-    imports: [StackedTableDirective, FormsModule, Nx, NgbTooltipModule, NgbDropdownModule, EmptyStateComponent, GuidedTourComponent, ColorPickerDirective],
+    imports: [StackedTableDirective, FormsModule, Nx, NgbTooltipModule, NgbDropdownModule, EmptyStateComponent, GuidedTourComponent, ColorPickerDirective, SpinnerComponent],
 })
 export class MarketingMetricsComponent {
     #marketingService = inject(MarketingService);
@@ -30,6 +31,7 @@ export class MarketingMetricsComponent {
 
     #loaded = modelListResource(() => this.#marketingService.indexMetrics());
     metrics = linkedSignal(() => this.#loaded.value());
+    metricsLoaded = this.#loaded.hasValue;
     selectedMetric: MarketingPerformanceMetric | null = null;
 
     readonly STATS_COLORS = ActivityStatsColors;

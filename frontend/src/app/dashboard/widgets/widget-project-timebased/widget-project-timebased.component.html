@@ -3,7 +3,7 @@
     <div class="card-header gap-2">
         <i>schedule</i>
         <span class="flex-fill text-truncate" i18n="@@i18n.common.timeBased">time based</span>
-        <div class="chart-title" roles="invoicing">{{ value() ? (value()! | short) : (value() | loading) }}h</div>
+        <div class="chart-title" roles="invoicing"><value-unit [value]="value() ? (value()! | short) : (value() | loading)" unit="h" /></div>
     </div>
 
     <echarts-range-card type="rangeArea" [chartData]="chartData()" [suffix]="' ' + global.currencySymbol()" color="cyan" roles="invoicing"></echarts-range-card>

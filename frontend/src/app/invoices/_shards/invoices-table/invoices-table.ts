@@ -31,6 +31,7 @@ export class InvoicesTable {
     #global = inject(GlobalService);
 
     _invoices = signal<Invoice[]>([]);
+    hasLoaded = signal(false);
     selection = signal<Invoice[]>([]);
     selectionNet = signal<number>(0);
     selectionGross = signal<number>(0);
@@ -48,7 +49,9 @@ export class InvoicesTable {
 
     constructor() {
         effect(() => {
-            this._invoices.set(this.observer() ? [] : this.invoices());
+            const observer = this.observer();
+            this._invoices.set(observer ? [] : this.invoices());
+            this.hasLoaded.set(!observer);
         });
 
         this.#global
@@ -63,6 +66,7 @@ export class InvoicesTable {
 
     onResult(data: Invoice[]) {
         this._invoices.update((inv) => [...inv, ...data]);
+        this.hasLoaded.set(true);
     }
 
     onActionsResolved = () => this._invoices.update((inv) => [...inv]);

@@ -6,7 +6,9 @@
     <div class="col-12 col-md-3">
         <div class="card">
             <div class="card-header" i18n="@@i18n.common.sentinels">sentinels</div>
-            @if (_sentinels.length === 0) {
+            @if (!sentinelsLoaded()) {
+                <spinner class="py-4"></spinner>
+            } @else if (_sentinels.length === 0) {
                 <empty-state [card]="false" class="sentinels" i18n-title="@@i18n.profile.noSentinels" title="no sentinels yet">
                     <p class="text-muted small" i18n="@@i18n.profile.noSentinelsBody">Sentinels are automated workflows that react to events in the system — like a project state change or a new invoice. Define triggers, conditions, and actions to automate repetitive tasks.</p>
                 </empty-state>

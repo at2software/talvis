@@ -13,8 +13,8 @@ use Illuminate\Validation\Rule;
 
 class TaskController extends Controller {
     public function store(Request $request) {
-        $new = new Task($request->user()->toPoly());
-        $new->applyAndSave($request, ['project_id', 'assignment_id', 'task_id', 'milestone_id']);
+        $new = new Task([...$request->user()->toPoly(), 'description' => '']);
+        $new->applyAndSave($request, ['project_id', 'assignment_id', 'task_id', 'milestone_id', 'parent_type', 'parent_id']);
         return $new;
     }
     public function storeForProject(Request $request, Project $_) {
@@ -41,6 +41,9 @@ class TaskController extends Controller {
     }
     public function index(Request $request) {
         return $request->user()?->unfinishedTasks()->with('parent', 'assignee.assignee', 'coAssignees.assignee')->get() ?? [];
+    }
+    public function indexInbox(Request $request) {
+        return Task::attachLinks($request->user()->tasks()->whereState(TaskState::Open)->whereNull('assignment_id')->oldest()->get());
     }
     public function show(Task $task) {
         return $task->load('parent', 'assignee.assignee', 'coAssignees.assignee');

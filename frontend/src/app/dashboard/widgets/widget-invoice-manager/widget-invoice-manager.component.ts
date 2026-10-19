@@ -11,6 +11,7 @@ import { forkJoin } from 'rxjs';
 import { REFLECTION } from '@constants/constants';
 import { Router } from '@angular/router';
 import { ParamChartSeriesDto } from '@models/_core/api-response';
+import { ValueUnitComponent } from '@shards/value-unit/value-unit.component';
 
 type TInvoiceItem = Project | Company;
 interface TGroupedItem {
@@ -23,7 +24,7 @@ interface TGroupedItem {
     selector: 'widget-invoice-manager',
     templateUrl: './widget-invoice-manager.component.html',
     styleUrls: ['./widget-invoice-manager.component.scss', './../base.widget.component.scss'],
-    imports: [NgbTooltipModule, NgbDropdownModule, ...WIDGET_SHARED, PermissionsDirective],
+    imports: [ValueUnitComponent, NgbTooltipModule, NgbDropdownModule, ...WIDGET_SHARED, PermissionsDirective],
 })
 export class WidgetInvoiceManagerComponent extends BaseWidgetComponent {
     #widgetService = inject(WidgetService);

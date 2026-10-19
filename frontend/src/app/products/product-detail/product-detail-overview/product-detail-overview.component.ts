@@ -17,11 +17,12 @@ import { FormsModule } from '@angular/forms';
 import { NgbDropdownModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { CompactItemDirective } from '@shards/ul-compact/CompactItemDirective';
 import { UlCompactComponent } from '@shards/ul-compact/ul-compact.component';
+import { ValueUnitComponent } from '@shards/value-unit/value-unit.component';
 
 @Component({
     selector: 'app-product-detail-overview',
     templateUrl: './product-detail-overview.component.html',
-    imports: [AutosaveDirective, FormsModule, RteComponent, Nx, AvatarComponent, NgbDropdownModule, NgbTooltipModule, MoneyShortPipe, LoadingPipe, MoneyPipe, UlCompactComponent, CompactItemDirective],
+    imports: [ValueUnitComponent, AutosaveDirective, FormsModule, RteComponent, Nx, AvatarComponent, NgbDropdownModule, NgbTooltipModule, MoneyShortPipe, LoadingPipe, MoneyPipe, UlCompactComponent, CompactItemDirective],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProductDetailOverviewComponent {

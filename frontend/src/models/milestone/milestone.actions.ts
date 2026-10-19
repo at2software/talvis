@@ -36,6 +36,12 @@ export function getMilestoneActions(self: Milestone): NxAction[] {
             children: () => self.getAssignmentActions(),
         },
         {
+            title: $localize`:@@i18n.milestone.sendToBacklog:send to backlog`,
+            group: false,
+            on: () => !!self.started_at || !!self.due_at,
+            action: () => self.update({ started_at: null, due_at: null }, true),
+        },
+        {
             title: $localize`:@@i18n.milestone.setDuration:set duration`,
             group: false,
             on: () => !self.invoice_items || self.invoice_items.length === 0,

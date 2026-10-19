@@ -6,6 +6,7 @@ import { ITaskPlugin } from '@models/task/task.plugin.interface';
 import { Task } from '@models/task/task.model';
 import { Project } from '@models/project/project.model';
 import { ProjectPluginLinkResolution, ProjectService } from '@models/project/project.service';
+import { TaskService } from '@models/task/task.service';
 
 export interface ExtIssueProjectMatch {
     project: Project;
@@ -41,11 +42,10 @@ export class ExtIssueBacklogService {
     #factory = inject(PluginInstanceFactory);
     #projectService = inject(ProjectService);
 
-    /** @param excludeKeys `pluginLinkId:issueId` pairs already converted into a Milestone. */
-    loadAssignedIssues(excludeKeys: Set<string>): Observable<ExtIssueBacklogItem[]> {
+    loadAssignedIssues(): Observable<ExtIssueBacklogItem[]> {
         const roots = this.#factory
             .getPluginInstances()
-            .filter((inst): inst is PluginInstance & ITaskPlugin => !!inst && 'ITaskPluginProperty' in inst && inst.isRootInstance())
+            .filter((inst): inst is PluginInstance & ITaskPlugin => !!inst && !(inst instanceof TaskService) && 'ITaskPluginProperty' in inst && inst.isRootInstance())
             .filter((inst) => inst.state !== 'no token' && inst.state !== 'connection fail');
 
         if (!roots.length) return of([]);
@@ -63,9 +63,9 @@ export class ExtIssueBacklogService {
         return forkJoin(perRootTasks).pipe(
             map((lists) => lists.flat()),
             switchMap((tasks) => {
-                const pending = of(this.#toItems(tasks, [], excludeKeys, true));
+                const pending = of(this.#toItems(tasks, [], true));
                 const urls = Array.from(new Set(tasks.map((t) => t.project_url).filter((u): u is string => !!u)));
-                const resolved = this.#projectService.resolveProjectsByPluginLinkUrls(urls).pipe(map((matches) => this.#toItems(tasks, matches, excludeKeys, false)));
+                const resolved = this.#projectService.resolveProjectsByPluginLinkUrls(urls).pipe(map((matches) => this.#toItems(tasks, matches, false)));
                 return concat(pending, resolved);
             }),
         );
@@ -78,7 +78,7 @@ export class ExtIssueBacklogService {
             .filter((task) => !myId || String(task.user_id) === String(myId));
     }
 
-    #toItems(tasks: Task[], matches: ProjectPluginLinkResolution[], excludeKeys: Set<string>, resolving: boolean): ExtIssueBacklogItem[] {
+    #toItems(tasks: Task[], matches: ProjectPluginLinkResolution[], resolving: boolean): ExtIssueBacklogItem[] {
         return tasks
             .map((task): ExtIssueBacklogItem => {
                 const resolved = matches.filter((m) => m.url === task.project_url).map((m): ExtIssueProjectMatch => ({ project: m.project, pluginLinkId: m.pluginLinkId }));
@@ -94,7 +94,6 @@ export class ExtIssueBacklogService {
                     trackerProjectName: first?.project.name ?? task.project_name ?? task.project_url ?? '',
                     resolving,
                 };
-            })
-            .filter((item) => !excludeKeys.has(item.id));
+            });
     }
 }

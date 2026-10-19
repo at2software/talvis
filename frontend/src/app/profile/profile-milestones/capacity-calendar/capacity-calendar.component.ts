@@ -1,23 +1,32 @@
-import { ChangeDetectionStrategy, Component, ElementRef, computed, inject, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, computed, inject, input, output, signal } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { NgbPopover, NgbPopoverModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { CdkDropList, CdkDragDrop } from '@angular/cdk/drag-drop';
-import { dayjs } from '@constants/date/dates';
+import { dayjs, Dayjs } from '@constants/date/dates';
 import { Color } from '@constants/Color';
 import { AvatarComponent } from '@shards/avatar/avatar.component';
 import { Milestone } from '@models/milestone/milestone.model';
 import { MilestoneState } from '@models/milestone/milestone-state.enum';
-import { DailyWorkloadDto, DailyWorkloadElementDto, WorkloadDataDto } from '@models/_core/api-response';
+import { CalendarEventDto, DailyWorkloadDto, DailyWorkloadElementDto, WorkloadDataDto } from '@models/_core/api-response';
 import { Nx } from '@app/nx/nx.directive';
 
-export interface MilestoneBar {
-    milestone: Milestone;
-    startCol: number; // 0..6 - first day column the bar occupies in this week
-    span: number; // number of day columns the bar covers within this week
+export type PlannerEvent = CalendarEventDto & { color: string };
+
+interface BarSegment {
+    startCol: number; // first visible day column the bar occupies in this week
+    span: number; // number of visible day columns the bar covers within this week
     lane: number; // vertical stacking lane to avoid overlap
-    color: string;
     continuesLeft: boolean; // bar started in an earlier week
     continuesRight: boolean; // bar ends in a later week
+}
+
+export interface MilestoneBar extends BarSegment {
+    milestone: Milestone;
+    color: string;
+}
+
+export interface EventBar extends BarSegment {
+    event: PlannerEvent;
 }
 
 export interface WeekRow {
@@ -25,6 +34,7 @@ export interface WeekRow {
     monthLabel?: string;
     days: (DailyWorkloadDto | null)[];
     bars: MilestoneBar[];
+    eventBars: EventBar[];
     laneCount: number;
     distinctProjectCount: number;
 }
@@ -54,8 +64,6 @@ interface DragState {
     startRowIndex: number;
 }
 
-const OVERFLOW_CAP_PERCENT = 150;
-
 @Component({
     changeDetection: ChangeDetectionStrategy.OnPush,
     selector: 'capacity-calendar',
@@ -66,19 +74,28 @@ const OVERFLOW_CAP_PERCENT = 150;
 export class CapacityCalendarComponent {
     #elementRef = inject(ElementRef<HTMLElement>);
 
+    constructor() {
+        inject(DestroyRef).onDestroy(() => this.#listenToDocument(false));
+    }
+
     workloadData = input.required<WorkloadDataDto>();
     milestones = input<Milestone[]>([]);
+    events = input<PlannerEvent[]>([]);
+    showWeekend = input(false);
 
     itemDropped = output<CapacityCalendarDrop>();
     editMilestone = output<Milestone>();
     milestoneRescheduled = output<MilestoneReschedule>();
+    milestoneUnscheduled = output<Milestone>();
+    draggingChange = output<boolean>();
     addMilestoneForDay = output<string>();
 
-    readonly dayLabels = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
+    readonly columns = computed(() => (this.showWeekend() ? 7 : 5));
+    readonly dayLabels = computed(() => ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'].slice(0, this.columns()));
 
     #drag = signal<DragState | null>(null);
 
-    readonly weeks = computed<WeekRow[]>(() => this.#buildWeeks(this.workloadData(), this.milestones(), this.#drag()));
+    readonly weeks = computed<WeekRow[]>(() => this.#buildWeeks(this.workloadData(), this.milestones(), this.events(), this.#drag(), this.columns()));
 
     readonly overdueMilestones = computed<Milestone[]>(() => {
         const startDate = dayjs(this.workloadData().start_date);
@@ -91,20 +108,17 @@ export class CapacityCalendarComponent {
         this.itemDropped.emit({ date: day.date, item: event.item.data });
     }
 
-    fillHeight = (day: DailyWorkloadDto): string => {
-        if (day.available_hours <= 0) return '0%';
-        const ratio = Math.min(day.total_hours / day.available_hours, OVERFLOW_CAP_PERCENT / 100);
-        return `${ratio * 100}%`;
-    };
-
-    isOverflowing = (day: DailyWorkloadDto): boolean => day.total_percent > 100;
+    loadWidth = (day: DailyWorkloadDto): string => `${Math.min(day.total_percent, 100)}%`;
+    loadClass = (day: DailyWorkloadDto): string => (day.total_percent >= 100 ? 'bg-danger' : day.total_percent >= 75 ? 'bg-warning' : 'bg-success');
+    loadTooltip = (day: DailyWorkloadDto): string => `${day.total_hours.toFixed(1)} / ${day.available_hours}h · ${Math.round(day.total_percent)}%`;
 
     isToday = (day: DailyWorkloadDto | null): boolean => day?.date === dayjs().format('YYYY-MM-DD');
     dayNumber = (day: DailyWorkloadDto): number => dayjs(day.date).date();
+    eventTooltip = (event: PlannerEvent): string => (event.all_day ? event.title : `${dayjs(event.start).format('HH:mm')}–${dayjs(event.end).format('HH:mm')} ${event.title}`);
     fragmentationDots = (day: DailyWorkloadDto): number[] => Array.from({ length: Math.min(day.distinct_project_count, 5) });
 
-    barLeft = (bar: MilestoneBar): string => `${(bar.startCol / 7) * 100}%`;
-    barWidth = (bar: MilestoneBar): string => `${(bar.span / 7) * 100}%`;
+    barLeft = (bar: BarSegment): string => `${(bar.startCol / this.columns()) * 100}%`;
+    barWidth = (bar: BarSegment): string => `${(bar.span / this.columns()) * 100}%`;
 
     isMilestoneDone = (milestone: Milestone): boolean => milestone.state === MilestoneState.DONE;
     isMilestoneOverdue = (milestone: Milestone): boolean => !this.isMilestoneDone(milestone) && !!milestone.due_at && dayjs().isAfter(milestone.due_at, 'day');
@@ -150,7 +164,7 @@ export class CapacityCalendarComponent {
         event.stopPropagation();
         const weekRow = (event.target as HTMLElement).closest('.week-row') as HTMLElement | null;
         const weekBody = (event.target as HTMLElement).closest('.week-body') as HTMLElement | null;
-        const colWidth = weekBody ? weekBody.clientWidth / 7 : 1;
+        const colWidth = weekBody ? weekBody.clientWidth / this.columns() : 1;
         const rowEls = (this.#elementRef.nativeElement as HTMLElement).querySelectorAll('.week-row');
         const rowTops = Array.from(rowEls).map((el) => (el as HTMLElement).getBoundingClientRect().top);
         const startRowIndex = weekRow ? rowTops.findIndex((top) => Math.abs(top - weekRow.getBoundingClientRect().top) < 1) : -1;
@@ -161,22 +175,24 @@ export class CapacityCalendarComponent {
             mode,
             dayDelta: 0,
             weekDelta: 0,
-            originStart: dayjs(bar.milestone.started_at),
-            originDue: dayjs(bar.milestone.due_at),
+            originStart: bar.milestone.plannedRange()!.start,
+            originDue: bar.milestone.plannedRange()!.due,
             pointerStartX: event.clientX,
             colWidth,
             rowTops,
             startRowIndex,
         });
+        this.#listenToDocument(true);
+        this.draggingChange.emit(true);
     }
 
-    onPointerMove(event: PointerEvent): void {
+    onPointerMove = (event: PointerEvent): void => {
         const drag = this.#drag();
-        if (!drag) return;
+        if (!drag || !this.#elementRef.nativeElement.contains(document.elementFromPoint(event.clientX, event.clientY))) return;
         const dayDelta = Math.round((event.clientX - drag.pointerStartX) / drag.colWidth);
         const weekDelta = drag.mode === 'move' && drag.startRowIndex !== -1 ? this.#rowIndexAt(drag.rowTops, event.clientY) - drag.startRowIndex : 0;
         if (dayDelta !== drag.dayDelta || weekDelta !== drag.weekDelta) this.#drag.set({ ...drag, dayDelta, weekDelta });
-    }
+    };
 
     #rowIndexAt(rowTops: number[], clientY: number): number {
         let index = 0;
@@ -186,38 +202,61 @@ export class CapacityCalendarComponent {
         return index;
     }
 
-    onPointerUp(): void {
+    onPointerUp = (event: PointerEvent): void => {
+        this.#listenToDocument(false);
         const drag = this.#drag();
         this.#drag.set(null);
-        const totalDelta = drag ? drag.dayDelta + drag.weekDelta * 7 : 0;
-        if (!drag || totalDelta === 0) return;
-
-        const milestone = drag.milestone;
-
-        let start = drag.originStart;
-        let due = drag.originDue;
-        if (drag.mode === 'move') {
-            start = start.add(totalDelta, 'day');
-            due = due.add(totalDelta, 'day');
-        } else if (drag.mode === 'resize-start') {
-            start = start.add(totalDelta, 'day');
-            if (start.isAfter(due)) start = due;
-        } else {
-            due = due.add(totalDelta, 'day');
-            if (due.isBefore(start)) due = start;
+        if (!drag) return;
+        this.draggingChange.emit(false);
+        if (document.elementFromPoint(event.clientX, event.clientY)?.closest('[data-unschedule-target]')) {
+            this.#suppressClick = true;
+            this.milestoneUnscheduled.emit(drag.milestone);
+            return;
         }
+        if (drag.dayDelta === 0 && drag.weekDelta === 0) return;
 
+        const { start, due } = this.#applyDrag(drag.originStart, drag.originDue, drag);
         this.#suppressClick = true;
-        this.milestoneRescheduled.emit({ milestone, started_at: start.format('YYYY-MM-DD'), due_at: due.format('YYYY-MM-DD') });
+        this.milestoneRescheduled.emit({ milestone: drag.milestone, started_at: start.format('YYYY-MM-DD'), due_at: due.format('YYYY-MM-DD') });
+    };
+
+    #listenToDocument(listen: boolean): void {
+        const events = [['pointermove', this.onPointerMove], ['pointerup', this.onPointerUp], ['pointercancel', this.onPointerUp]] as const;
+        for (const [type, handler] of events) {
+            if (listen) document.addEventListener(type, handler);
+            else document.removeEventListener(type, handler);
+        }
     }
 
-    #buildWeeks(data: WorkloadDataDto, milestones: Milestone[], drag: DragState | null): WeekRow[] {
+    #applyDrag(start: Dayjs, due: Dayjs, drag: DragState): { start: Dayjs; due: Dayjs } {
+        const shift = (date: Dayjs) => this.#shiftColumns(date.add(drag.weekDelta, 'week'), drag.dayDelta);
+        if (drag.mode === 'move') return { start: shift(start), due: shift(due) };
+        if (drag.mode === 'resize-start') {
+            const shifted = shift(start);
+            return { start: shifted.isAfter(due) ? due : shifted, due };
+        }
+        const shifted = shift(due);
+        return { start, due: shifted.isBefore(start) ? start : shifted };
+    }
+
+    #shiftColumns(date: Dayjs, columns: number): Dayjs {
+        if (this.showWeekend()) return date.add(columns, 'day');
+        let cursor = date;
+        for (let remaining = Math.abs(columns); remaining > 0; ) {
+            cursor = cursor.add(Math.sign(columns), 'day');
+            if (cursor.isoWeekday() <= 5) remaining--;
+        }
+        return cursor;
+    }
+
+    #buildWeeks(data: WorkloadDataDto, milestones: Milestone[], events: PlannerEvent[], drag: DragState | null, columns: number): WeekRow[] {
         const workloadMap = new Map<string, DailyWorkloadDto>();
         data.daily_workload.forEach((day) => workloadMap.set(day.date, day));
 
         const startDate = dayjs(data.start_date);
         const endDate = dayjs(data.end_date);
-        const dated = milestones.filter((m) => m.started_at && m.due_at).map((m) => this.#withDragApplied(m, drag));
+        const dated = milestones.filter((m) => m.plannedRange()).map((m) => this.#withDragApplied(m, drag));
+        const datedEvents = events.map((event) => ({ event, ...this.#eventDays(event) }));
 
         const weeks: WeekRow[] = [];
         let currentWeekStart = startDate.startOf('isoWeek');
@@ -225,13 +264,13 @@ export class CapacityCalendarComponent {
 
         while (currentWeekStart.isSameOrBefore(endDate)) {
             const weekStart = currentWeekStart;
-            const weekEnd = weekStart.add(6, 'days');
+            const weekEnd = weekStart.add(columns - 1, 'days');
             const weekDays: (DailyWorkloadDto | null)[] = [];
             const weekNumber = weekStart.isoWeek();
             const weekProjectIds = new Set<string>();
             let monthLabel: string | undefined;
 
-            for (let i = 0; i < 7; i++) {
+            for (let i = 0; i < columns; i++) {
                 const day = weekStart.add(i, 'days');
                 const dayStr = day.format('YYYY-MM-DD');
                 const dayData = day.isBefore(startDate) || day.isAfter(endDate) ? null : (workloadMap.get(dayStr) ?? null);
@@ -247,52 +286,46 @@ export class CapacityCalendarComponent {
                 }
             }
 
-            const bars = this.#barsForWeek(dated, weekStart, weekEnd);
-            const laneCount = bars.reduce((max, b) => Math.max(max, b.lane + 1), 0);
-            weeks.push({ weekNumber, monthLabel, days: weekDays, bars, laneCount, distinctProjectCount: weekProjectIds.size });
+            const laneEnds: number[] = [];
+            const eventBars = this.#assignLanes(this.#segmentsForWeek(datedEvents, weekStart, weekEnd), laneEnds);
+            const bars = this.#assignLanes(this.#segmentsForWeek(dated, weekStart, weekEnd), laneEnds).map((bar) => ({ ...bar, color: this.#colorFor(bar.milestone) }));
+            weeks.push({ weekNumber, monthLabel, days: weekDays, bars, eventBars, laneCount: laneEnds.length, distinctProjectCount: weekProjectIds.size });
             currentWeekStart = weekStart.add(1, 'week');
         }
 
         return weeks;
     }
 
-    #withDragApplied(milestone: Milestone, drag: DragState | null): { milestone: Milestone; start: ReturnType<typeof dayjs>; due: ReturnType<typeof dayjs> } {
-        let start = dayjs(milestone.started_at);
-        let due = dayjs(milestone.due_at);
-        const totalDelta = drag && drag.milestone.id === milestone.id ? drag.dayDelta + drag.weekDelta * 7 : 0;
-        if (totalDelta !== 0 && drag) {
-            if (drag.mode === 'move') {
-                start = start.add(totalDelta, 'day');
-                due = due.add(totalDelta, 'day');
-            } else if (drag.mode === 'resize-start') {
-                start = start.add(totalDelta, 'day');
-                if (start.isAfter(due)) start = due;
-            } else {
-                due = due.add(totalDelta, 'day');
-                if (due.isBefore(start)) due = start;
-            }
-        }
-        return { milestone, start, due };
+    #withDragApplied(milestone: Milestone, drag: DragState | null): { milestone: Milestone; start: Dayjs; due: Dayjs } {
+        const { start, due } = milestone.plannedRange()!;
+        if (!drag || drag.milestone.id !== milestone.id) return { milestone, start, due };
+        return { milestone, ...this.#applyDrag(start, due, drag) };
     }
 
-    #barsForWeek(dated: { milestone: Milestone; start: ReturnType<typeof dayjs>; due: ReturnType<typeof dayjs> }[], weekStart: ReturnType<typeof dayjs>, weekEnd: ReturnType<typeof dayjs>): MilestoneBar[] {
-        const segments = dated
-            .filter(({ start, due }) => !due.isBefore(weekStart) && !start.isAfter(weekEnd))
-            .map(({ milestone, start, due }) => {
-                const segStart = start.isBefore(weekStart) ? weekStart : start;
-                const segEnd = due.isAfter(weekEnd) ? weekEnd : due;
+    #eventDays(event: PlannerEvent): { start: Dayjs; due: Dayjs } {
+        const start = dayjs(event.start).startOf('day');
+        const due = event.all_day ? dayjs(event.end).subtract(1, 'day') : dayjs(event.end).subtract(1, 'second').startOf('day');
+        return { start, due: due.isBefore(start) ? start : due };
+    }
+
+    #segmentsForWeek<T extends { start: Dayjs; due: Dayjs }>(items: T[], weekStart: Dayjs, weekEnd: Dayjs): (T & Omit<BarSegment, 'lane'>)[] {
+        return items
+            .filter(({ start, due }) => !due.isBefore(weekStart, 'day') && !start.isAfter(weekEnd, 'day'))
+            .map((item) => {
+                const segStart = item.start.isBefore(weekStart) ? weekStart : item.start;
+                const segEnd = item.due.isAfter(weekEnd) ? weekEnd : item.due;
                 return {
-                    milestone,
+                    ...item,
                     startCol: segStart.diff(weekStart, 'day'),
                     span: Math.max(1, segEnd.diff(segStart, 'day') + 1),
-                    color: this.#colorFor(milestone),
-                    continuesLeft: start.isBefore(weekStart),
-                    continuesRight: due.isAfter(weekEnd),
+                    continuesLeft: item.start.isBefore(weekStart, 'day'),
+                    continuesRight: item.due.isAfter(weekEnd, 'day'),
                 };
             })
             .sort((a, b) => a.startCol - b.startCol || b.span - a.span);
+    }
 
-        const laneEnds: number[] = [];
+    #assignLanes<T extends { startCol: number; span: number }>(segments: T[], laneEnds: number[]): (T & { lane: number })[] {
         return segments.map((seg) => {
             let lane = laneEnds.findIndex((end) => end < seg.startCol);
             if (lane === -1) {

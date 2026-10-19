@@ -11,6 +11,7 @@ import type { EChartsOption } from 'echarts';
 import type { TopLevelFormatterParams } from 'echarts/types/dist/shared';
 
 import { RevenueCurrentYearDto } from '@models/_core/api-response';
+import { ValueUnitComponent } from '@shards/value-unit/value-unit.component';
 
 @Component({
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -18,7 +19,7 @@ import { RevenueCurrentYearDto } from '@models/_core/api-response';
     templateUrl: './widget-revenue-current-year.component.html',
     styleUrls: ['./../base.widget.component.scss'],
     providers: [MoneyShortPipe],
-    imports: [...WIDGET_SHARED],
+    imports: [ValueUnitComponent, ...WIDGET_SHARED],
 })
 export class WidgetRevenueCurrentYearComponent extends BaseWidgetComponent {
     #stats = inject(StatsService);

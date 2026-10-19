@@ -19,6 +19,7 @@ import type { EChartsOption } from 'echarts';
 import { Dictionary } from '@constants/constants';
 import { ChartAxisTooltipParamDto } from '@models/_core/api-response';
 import { ProductGroup } from '@models/product/product-group.model';
+import { SpinnerComponent } from '@shards/spinner/spinner.component';
 
 echarts.use([TitleComponent, TooltipComponent, LegendComponent, GridComponent, BarChart, CanvasRenderer]);
 
@@ -57,7 +58,7 @@ const CHART_BASE: EChartsOption = {
     selector: 'product-statistics',
     templateUrl: './product-statistics.component.html',
     styleUrls: ['./product-statistics.component.scss'],
-    imports: [DecimalPipe, FormsModule, NgbTooltipModule, NgbDropdownModule, NgxDaterangepickerMd, NgxEchartsDirective, Nx, ToolbarComponent, MoneyPipe],
+    imports: [DecimalPipe, FormsModule, NgbTooltipModule, NgbDropdownModule, NgxDaterangepickerMd, NgxEchartsDirective, Nx, ToolbarComponent, MoneyPipe, SpinnerComponent],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProductStatisticsComponent {
@@ -90,6 +91,7 @@ export class ProductStatisticsComponent {
         (filters) => this.#productService.showStatistics(filters),
     );
     readonly statistics = this.#statistics.value;
+    readonly statsLoading = computed(() => this.#statistics.isLoading() || (!this.#rootGroups.hasValue() && this.#rootGroups.status() !== 'error'));
 
     readonly ranges = {
         'This year': [dayjs().startOf('year'), dayjs().endOf('year')],

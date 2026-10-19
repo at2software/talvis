@@ -33,7 +33,10 @@ final class CalendarEvent {
             return null;
         }
         $event = $calendar instanceof VCalendar ? $calendar->VEVENT : null;
-        if (! $event instanceof VEvent || ! isset($event->DTSTART)) {
+        return $event instanceof VEvent ? self::fromVEvent($objectId, $event, $updatedAt) : null;
+    }
+    public static function fromVEvent(string $objectId, VEvent $event, ?DateTimeInterface $updatedAt = null): ?self {
+        if (! isset($event->DTSTART)) {
             return null;
         }
 
@@ -58,6 +61,18 @@ final class CalendarEvent {
             location: trim((string)$event->LOCATION) ?: null,
         );
     }
+
+    /** @return list<self> */
+    public static function occurrences(VCalendar $calendar, DateTimeInterface $from, DateTimeInterface $until): array {
+        $occurrences = [];
+        foreach ($calendar->expand($from, $until, new DateTimeZone(config('app.timezone')))->select('VEVENT') as $index => $event) {
+            if ($occurrence = self::fromVEvent($index.'_'.$event->UID, $event)) {
+                $occurrences[] = $occurrence;
+            }
+        }
+        return $occurrences;
+    }
+
     private static function isDateOnly(string $value): bool {
         return (bool)preg_match('/^\d{8}$/', $value);
     }

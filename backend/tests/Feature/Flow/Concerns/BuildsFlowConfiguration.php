@@ -27,7 +27,7 @@ trait BuildsFlowConfiguration {
         JobType::create([
             'key'              => 'fix',
             'name'             => 'Fix',
-            'release_gate_key' => 'release',
+            'review_gate_keys' => ['architecture', 'security'],
             'input_schema'     => ['fields' => [
                 ['key' => 'issue', 'type' => 'url', 'required' => true],
                 ['key' => 'notes', 'type' => 'text'],

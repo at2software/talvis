@@ -16,6 +16,7 @@ export class SpinnerComponent {
     centered = input<boolean>(true);
     visible = model<boolean>(true);
     inline = input<boolean>(false);
+    logo = input<boolean>(false);
 
     show() {
         this.visible.set(true);

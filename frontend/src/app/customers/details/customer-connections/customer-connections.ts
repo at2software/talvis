@@ -14,12 +14,13 @@ import { SearchInputComponent } from '@shards/search-input/search-input.componen
 import { Nx } from '@app/nx/nx.directive';
 import { AvatarComponent } from '@shards/avatar/avatar.component';
 import { modelListResource } from '@models/http/model-resource';
+import { SpinnerComponent } from '@shards/spinner/spinner.component';
 
 @Component({
     selector: 'customer-connections',
     templateUrl: './customer-connections.html',
     styleUrls: ['./customer-connections.scss'],
-    imports: [ScrollbarComponent, NgbPopoverModule, NgbTooltipModule, SearchInputComponent, Nx, AvatarComponent, NetworkChart, EmptyStateComponent],
+    imports: [ScrollbarComponent, NgbPopoverModule, NgbTooltipModule, SearchInputComponent, Nx, AvatarComponent, NetworkChart, EmptyStateComponent, SpinnerComponent],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CustomerConnections {
@@ -45,6 +46,7 @@ export class CustomerConnections {
             return rows;
         },
     });
+    connectionsLoaded = this.#connections.hasValue;
 
     reload = () => this.#connections.reload();
 

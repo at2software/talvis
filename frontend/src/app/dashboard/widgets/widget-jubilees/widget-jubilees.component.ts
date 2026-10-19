@@ -6,13 +6,14 @@ import { environment } from '@environments/environment';
 import { WIDGET_SHARED } from '../widgets.shared';
 import { DatePipe } from '@angular/common';
 import { JubileeEntryDto } from '@models/_core/api-response';
+import { SpinnerComponent } from '@shards/spinner/spinner.component';
 
 @Component({
     changeDetection: ChangeDetectionStrategy.OnPush,
     selector: 'widget-jubilees.component',
     templateUrl: './widget-jubilees.component.html',
     styleUrls: ['./widget-jubilees.component.scss', './../base.widget.component.scss'],
-    imports: [...WIDGET_SHARED, DatePipe],
+    imports: [...WIDGET_SHARED, DatePipe, SpinnerComponent],
 })
 export class WidgetJubileesComponent extends BaseWidgetComponent {
     #widgetService = inject(WidgetService);
@@ -26,6 +27,8 @@ export class WidgetJubileesComponent extends BaseWidgetComponent {
             .map((d) => ({ ...d, next: dayjs(d.next) }))
             .sort((a, b) => a.next.valueOf() - b.next.valueOf()),
     );
+
+    readonly loaded = computed(() => this.#jubilees.hasValue() || this.#jubilees.status() === 'error');
 
     isToday = (_: JubileeEntryDto) => dayjs().isSame(_.next, 'day');
 }

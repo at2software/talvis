@@ -5,11 +5,8 @@ namespace App\Http\Controllers;
 use App\Http\Requests\Cors\CurlIdRequest;
 use App\Http\Requests\Cors\CurlRequest;
 use App\Services\SafeUrlGuard;
-use GuzzleHttp\Psr7\Uri;
-use GuzzleHttp\Psr7\UriResolver;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 
 class CorsController extends Controller {
@@ -24,9 +21,7 @@ class CorsController extends Controller {
     public function curl(CurlRequest $request) {
         return $this->send($request, $request->validated('url'));
     }
-    private function send(CurlRequest $request, string $url, int $hopsLeft = 3): JsonResponse {
-        $pinned = $this->guard->pinnedCurlOptions($url);
-
+    private function send(CurlRequest $request, string $url): JsonResponse {
         $method  = Str::upper($request->validated('method'));
         $headers = $this->parseHeaders($request->validated('headers') ?? []);
         $timeout = $request->validated('timeout') ?? 5;
@@ -40,22 +35,9 @@ class CorsController extends Controller {
         }
 
         try {
-            $response = Http::withHeaders($headers)
-                ->timeout($timeout)
-                ->connectTimeout(2)
-                ->withOptions(['allow_redirects' => false, 'curl' => $pinned])
-                ->send($method, $url, $body);
+            $response = $this->guard->send($method, $url, $headers, $timeout, $body);
         } catch (ConnectionException $e) {
             return response()->json(['error' => $e->getMessage()], 502);
-        }
-
-        if ($response->redirect() && $hopsLeft > 0) {
-            $location = $response->header('Location');
-            if (! $location) {
-                return response()->json(['error' => 'Redirect without Location header'], 502);
-            }
-
-            return $this->send($request, (string)UriResolver::resolve(new Uri($url), new Uri($location)), $hopsLeft - 1);
         }
 
         $decoded = json_decode($response->body());

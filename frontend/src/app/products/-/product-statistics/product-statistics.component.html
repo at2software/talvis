@@ -6,6 +6,7 @@
 @let _chartOption = chartOption();
 @let _selectedGroupsText = selectedGroupsText();
 @let _hasChartData = hasChartData();
+@let _statsLoading = statsLoading();
 
 <toolbar>
     <div class="hstack gap-3">
@@ -59,6 +60,8 @@
                             </li>
                         }
                     </ul>
+                } @else if (_statsLoading) {
+                    <spinner class="py-3"></spinner>
                 } @else {
                     <div class="card-body">
                         <p class="text-muted text-center" i18n="@@i18n.products.noSalesData">no sales data available</p>
@@ -78,6 +81,8 @@
                             </li>
                         }
                     </ul>
+                } @else if (_statsLoading) {
+                    <spinner class="py-3"></spinner>
                 } @else {
                     <div class="card-body">
                         <p class="text-muted text-center" i18n="@@i18n.products.noSpeedData">no speed data available</p>
@@ -97,6 +102,8 @@
                             </li>
                         }
                     </ul>
+                } @else if (_statsLoading) {
+                    <spinner class="py-3"></spinner>
                 } @else {
                     <div class="card-body">
                         <p class="text-muted text-center" i18n="@@i18n.products.noRepurchaseData">no repurchase data available</p>
@@ -112,6 +119,8 @@
             <div class="card-body">
                 @if (_statistics?.timeline && _hasChartData) {
                     <div echarts [options]="_chartOption" class="chart-container" style="height: 400px"></div>
+                } @else if (_statsLoading) {
+                    <spinner class="py-4"></spinner>
                 } @else {
                     <p class="text-muted text-center" i18n="@@i18n.products.noTimelineData">no timeline data available</p>
                 }

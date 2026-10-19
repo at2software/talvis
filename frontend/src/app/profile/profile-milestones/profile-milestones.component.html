@@ -2,13 +2,7 @@
 @let _error = error();
 @let _workloadData = workloadData();
 
-<toolbar>
-    <div class="btn-group">
-        <button type="button" class="btn btn-plain text-primary" (click)="onRangeShift(-1)"><i>chevron_left</i></button>
-        <button type="button" class="btn btn-plain text-primary" (click)="onRangeToday()" i18n="@@i18n.common.today">today</button>
-        <button type="button" class="btn btn-plain text-primary" (click)="onRangeShift(1)"><i>chevron_right</i></button>
-    </div>
-</toolbar>
+<toolbar></toolbar>
 
 @if (_loading) {
     <div class="d-flex align-items-center justify-content-center py-5">
@@ -29,20 +23,64 @@
                 [projectGroups]="projectGroups()"
                 [externalIssues]="externalIssues()"
                 [externalIssuesLoading]="externalIssuesLoading()"
+                [inbox]="inbox()"
+                [unscheduleTarget]="draggingMilestone()"
                 (addMilestone)="onAddMilestone($event)"
+                (capture)="onCapture($event)"
+                (processInbox)="onProcessInbox()"
             ></planner-backlog>
         </div>
         <div class="col-12 col-md-9">
             <div class="card">
+                <div class="card-header hstack gap-2">
+                    <span class="flex-fill">{{ rangeStart().format('MMM YYYY') }} – {{ rangeEnd().format('MMM YYYY') }}</span>
+                    <div class="d-flex" ngbDropdown placement="bottom-end" [autoClose]="'outside'">
+                        <i class="text-primary pointer dropdown-toggle-simple" role="button" tabindex="0" ngbDropdownToggle ngbTooltip="calendars" i18n-ngbTooltip="@@i18n.planner.calendars">calendar_month</i>
+                        <div ngbDropdownMenu class="p-2">
+                            @for (calendar of calendars(); track calendar.source) {
+                                <div class="hstack gap-2 py-1">
+                                    <input type="checkbox" class="form-check-input mt-0" [id]="'calendar-' + calendar.source" [checked]="calendar.visible" (change)="updateCalendar(calendar.source, { visible: !calendar.visible })" />
+                                    <label class="flex-fill text-nowrap" [for]="'calendar-' + calendar.source" [style.color]="calendar.color">{{ calendar.label }}</label>
+                                    @if (calendar.personal) {
+                                        <i class="pointer" role="button" tabindex="0" [class.text-primary]="calendar.busy" [class.text-muted]="!calendar.busy" (click)="updateCalendar(calendar.source, { busy: !calendar.busy })" (keydown.enter)="updateCalendar(calendar.source, { busy: !calendar.busy })" ngbTooltip="appointments count as busy time" i18n-ngbTooltip="@@i18n.planner.countsAsBusy">event_busy</i>
+                                    }
+                                    @if (calendar.error) {
+                                        <i class="text-danger" [ngbTooltip]="calendar.error">error</i>
+                                    }
+                                    <input #picker type="color" class="calendar-swatch" [value]="calendar.color" (change)="updateCalendar(calendar.source, { color: picker.value })" />
+                                </div>
+                            }
+                            <div class="dropdown-divider"></div>
+                            <button type="button" class="btn btn-plain text-primary btn-sm px-0" (click)="addCalendar()"><i>add</i> <span i18n="@@i18n.planner.addCalendar">calendar</span></button>
+                        </div>
+                    </div>
+                    <i class="text-primary pointer" role="button" tabindex="0" (click)="toggleView()" (keydown.enter)="toggleView()" [ngbTooltip]="view() === 'calendar' ? timelineLabel : calendarLabel">{{ view() === 'calendar' ? 'view_timeline' : 'calendar_view_month' }}</i>
+                    @if (view() === 'calendar') {
+                        <i class="pointer" role="button" tabindex="0" [class.text-primary]="showWeekend()" [class.text-muted]="!showWeekend()" (click)="toggleWeekend()" (keydown.enter)="toggleWeekend()" ngbTooltip="show weekend" i18n-ngbTooltip="@@i18n.planner.showWeekend">weekend</i>
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-plain text-primary" (click)="onRangeShift(-1)"><i>chevron_left</i></button>
+                            <button type="button" class="btn btn-plain text-primary" (click)="onRangeToday()" i18n="@@i18n.common.today">today</button>
+                            <button type="button" class="btn btn-plain text-primary" (click)="onRangeShift(1)"><i>chevron_right</i></button>
+                        </div>
+                    }
+                </div>
                 <div class="card-body">
+                    @if (view() === 'gantt') {
+                        <custom-gantt [rows]="ganttRows()" [viewMode]="'Week'" [workloadUser]="global.user" (addMilestone)="onAddMilestone($event)"></custom-gantt>
+                    } @else {
                     <capacity-calendar
+                        [showWeekend]="showWeekend()"
+                        [events]="plannerEvents()"
                         [workloadData]="_workloadData"
                         [milestones]="scheduledMilestones()"
                         (itemDropped)="onCalendarDrop($event)"
                         (editMilestone)="onEditMilestone($event)"
                         (milestoneRescheduled)="onMilestoneRescheduled($event)"
+                        (milestoneUnscheduled)="onMilestoneUnscheduled($event)"
+                        (draggingChange)="draggingMilestone.set($event)"
                         (addMilestoneForDay)="onAddMilestoneForDay($event)"
                     ></capacity-calendar>
+                    }
                 </div>
             </div>
         </div>

@@ -75,7 +75,7 @@
                     <div class="col-12 col-md-6 col-xl-4">
                         <div class="card ratio ratio-21x9 bg-gradient">
                             <div class="text-end p-2">
-                                <div class="fs-1 lh-1 text-header mb-0">{{ _invoice.net | mshort }}</div>
+                                <div class="fs-1 lh-1 text-header mb-0"><value-unit [value]="_invoice.net | mshort" /></div>
                                 <div class="mb-2"><span i18n="@@i18n.common.gross">gross</span>: {{ _invoice.gross | money }}</div>
                                 <div>
                                     <n class="ms-2 btn btn-blank text-primary px-2 py-1" ngbTooltip="open invoice" role="button" (click)="openFile(_invoice)">invoice</n>

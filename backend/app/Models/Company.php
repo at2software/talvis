@@ -302,6 +302,48 @@ class Company extends BaseModel {
     public function comments() {
         return $this->hasManyMorph(Comment::class, 'parent');
     }
+    public function marketingTouchpoints() {
+        return $this->hasMany(MarketingTouchpoint::class);
+    }
+
+    private const LAST_CONTACT_COLUMNS = ['last_touchpoint_at', 'last_focus_at', 'last_project_focus_at', 'last_invoice_at_contact', 'last_project_at', 'last_comment_at', 'last_contact_comment_at', 'last_project_comment_at'];
+
+    public function scopeWithLastContact($query) {
+        $projects     = fn ($q) => $q->select('id')->from('projects')->whereColumn('projects.company_id', 'companies.id');
+        $userComments = fn (string $parentType) => DB::table('comments')->selectRaw('MAX(created_at)')->where('parent_type', $parentType)->whereNotNull('user_id');
+
+        return $query->addSelect([
+            'last_touchpoint_at'      => DB::table('marketing_touchpoints')->selectRaw('MAX(occurred_at)')->whereColumn('company_id', 'companies.id'),
+            'last_focus_at'           => DB::table('foci')->selectRaw('MAX(started_at)')->where('parent_type', self::class)->whereColumn('parent_id', 'companies.id'),
+            'last_project_focus_at'   => DB::table('foci')->selectRaw('MAX(started_at)')->where('parent_type', Project::class)->whereIn('parent_id', $projects),
+            'last_invoice_at_contact' => DB::table('invoices')->selectRaw('MAX(created_at)')->whereColumn('company_id', 'companies.id'),
+            'last_project_at'         => DB::table('projects')->selectRaw('MAX(created_at)')->whereColumn('company_id', 'companies.id'),
+            'last_comment_at'         => $userComments(self::class)->whereColumn('parent_id', 'companies.id'),
+            'last_contact_comment_at' => $userComments(CompanyContact::class)->whereIn('parent_id', fn ($q) => $q->select('id')->from('company_contacts')->whereColumn('company_contacts.company_id', 'companies.id')),
+            'last_project_comment_at' => $userComments(Project::class)->whereIn('parent_id', $projects),
+        ]);
+    }
+    public function lastContactedAt(): ?Carbon {
+        return collect(self::LAST_CONTACT_COLUMNS)
+            ->map(fn ($column) => $this->getAttribute($column))
+            ->filter()
+            ->map(fn ($at) => Carbon::parse($at))
+            ->max();
+    }
+    public function resolveLastContact(): static {
+        $this->setAttribute('last_contacted_at', $this->lastContactedAt());
+        return $this->makeHidden(self::LAST_CONTACT_COLUMNS);
+    }
+    public function logTouchpoint(User $user, array $data): MarketingTouchpoint {
+        return $this->marketingTouchpoints()->create([
+            'user_id'     => $user->id,
+            'channel'     => $data['channel'],
+            'result'      => $data['result'],
+            'outcome'     => $data['outcome'] ?? null,
+            'notes'       => $data['notes'] ?? null,
+            'occurred_at' => now(),
+        ]);
+    }
     public function companyContacts() {
         return $this->hasMany(CompanyContact::class);
     }

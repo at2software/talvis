@@ -3,7 +3,7 @@
         <n>invoice</n>
         <span class="flex-fill text-truncate" i18n="@@i18n.invoice.prepared">prepared</span>
         @if (value()) {
-            <div class="chart-title">{{ (value() ?? 0) | mshort }}</div>
+            <div class="chart-title"><value-unit [value]="(value() ?? 0) | mshort" /></div>
         }
     </div>
 

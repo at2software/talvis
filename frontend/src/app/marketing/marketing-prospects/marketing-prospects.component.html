@@ -9,6 +9,18 @@
 @let _totalOverdueCount = totalOverdueCount();
 
 <toolbar>
+    @if (_totalOverdueCount > 0) {
+        <div ngbDropdown placement="bottom-end">
+            <button class="btn btn-sm btn-plain text-primary dropdown-toggle-simple hstack gap-1" ngbDropdownToggle i18n-ngbTooltip="@@i18n.marketing.move_overdue" ngbTooltip="move overdue activities">
+                <i>event_repeat</i>
+            </button>
+            <div ngbDropdownMenu>
+                @for (_ of rescheduleTargets; track _.label) {
+                    <button ngbDropdownItem (click)="rescheduleOverdue(_.date())">{{ _.label }}</button>
+                }
+            </div>
+        </div>
+    }
     <div ngbDropdown placement="bottom-end">
         <button class="btn btn-sm btn-plain dropdown-toggle-simple d-flex align-items-center gap-2 px-2 py-1" ngbDropdownToggle>
             @if (!_userFilter) {
@@ -37,7 +49,7 @@
 
 <div class="row" col-slider>
     <div class="col-12 col-md-3">
-        <div class="card mb-3">
+        <div class="card mb-3 sticky-side">
             <div class="card-header hstack gap-2">
                 <div ngbDropdown class="flex-fill" placement="bottom-start">
                     <button class="btn btn-plain btn-sm dropdown-toggle-simple hstack gap-2 p-0 w-100 text-start" ngbDropdownToggle>

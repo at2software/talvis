@@ -10,13 +10,14 @@ import { DecimalPipe } from '@angular/common';
 import type { EChartsOption } from 'echarts';
 import type { EChartsType, TopLevelFormatterParams } from 'echarts/types/dist/shared';
 import { WorkingTimeDto } from '@models/_core/api-response';
+import { ValueUnitComponent } from '@shards/value-unit/value-unit.component';
 
 @Component({
     changeDetection: ChangeDetectionStrategy.OnPush,
     selector: 'widget-my-working-time',
     templateUrl: './widget-my-working-time.component.html',
     styleUrls: ['./../base.widget.component.scss'],
-    imports: [...WIDGET_SHARED, DecimalPipe],
+    imports: [ValueUnitComponent, ...WIDGET_SHARED, DecimalPipe],
 })
 export class WidgetMyWorkingTimeComponent extends BaseWidgetComponent {
     #stats = inject(StatsService);

@@ -12,11 +12,12 @@ import { ModalBaseService } from '@app/_modals/modal-base-service';
 import { Nx } from '@app/nx/nx.directive';
 import { AvatarComponent } from '@app/_shards/avatar/avatar.component';
 import { CustomerAddToInitiativeModalComponent } from './customer-add-to-initiative-modal/customer-add-to-initiative-modal.component';
+import { SpinnerComponent } from '@shards/spinner/spinner.component';
 
 @Component({
     selector: 'customer-initiatives',
     templateUrl: './customer-initiatives.component.html',
-    imports: [RouterModule, NgbTooltipModule, DatePipe, Nx, AvatarComponent, AvatarComponent],
+    imports: [RouterModule, NgbTooltipModule, DatePipe, Nx, AvatarComponent, AvatarComponent, SpinnerComponent],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CustomerInitiativesComponent {
@@ -30,6 +31,7 @@ export class CustomerInitiativesComponent {
         () => this.company()?.id || undefined,
         (companyId) => this.#marketingService.indexProspects({ company_id: companyId }),
     );
+    activityRowsLoaded = this.#prospects.hasValue;
     activityRows = linkedSignal<MarketingProspectActivity[]>(() => {
         const rows: MarketingProspectActivity[] = [];
         for (const prospect of this.#prospects.value()) {

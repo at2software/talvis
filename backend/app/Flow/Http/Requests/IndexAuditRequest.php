@@ -13,7 +13,7 @@ class IndexAuditRequest extends FormRequest {
             'subject'    => 'nullable|string|max:64|alpha',
             'subject_id' => 'nullable|integer|min:1',
             'action'     => 'nullable|string|max:64|regex:/^[a-z_.-]+$/',
-            'actor_type' => 'nullable|in:user,machine',
+            'actor_type' => 'nullable|in:user,machine,system',
             'page'       => 'nullable|integer|min:1',
         ];
     }

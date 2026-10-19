@@ -5,11 +5,12 @@ import { GlobalService } from '@models/global.service';
 import { modelListResource } from '@models/http/model-resource';
 import { VacationService } from '@models/vacation/vacation.service';
 import { LoadingPipe } from '@pipes/loading.pipe';
+import { ValueUnitComponent } from '@shards/value-unit/value-unit.component';
 
 @Component({
     selector: 'profile-vacation-widget',
     templateUrl: './profile-vacation-widget.component.html',
-    imports: [LoadingPipe, DecimalPipe],
+    imports: [ValueUnitComponent, LoadingPipe, DecimalPipe],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProfileVacationWidgetComponent {

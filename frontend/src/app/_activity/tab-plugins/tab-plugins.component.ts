@@ -30,7 +30,7 @@ export class TabPluginsComponent {
     readonly project = signal<Project | undefined>(undefined);
     readonly user = computed(() => this.#global.user);
     readonly encryptionsValid = computed(() => this.#global.encryptionsValid());
-    readonly pluginEncryptions = computed(() => this.#factory.getPluginEncryptions());
+    readonly pluginEncryptions = computed(() => this.#factory.getLinkablePluginEncryptions());
 
     readonly #connectBump = signal(0);
     readonly #subscribedInstances = new Set<PluginInstance>();

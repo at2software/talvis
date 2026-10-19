@@ -64,6 +64,11 @@ export class Focus extends Serializable implements IHasMarker, IHasExtIssue {
     momentStarted = computed((): Dayjs => { this.snapshot(); return dayjs(this.started_at); });
     momentEnded = computed((): Dayjs => { this.snapshot(); return dayjs(this.ended_at); });
 
+    canToggleInvoicing = (): boolean => {
+        const me = nx().global.user;
+        return !this.invoice_item_id && (String(this.user_id) === String(me?.id) || !!me?.hasRole('project_manager') || !!me?.hasRole('financial'));
+    };
+
     setParent = (_: Serializable): void => {
         if (_ instanceof Company) { this.update({ parent_id: _.id, parent_type: 'App\\Models\\Company' }).subscribe(); return; }
         if (_ instanceof Project) { this.update({ parent_id: _.id, parent_type: 'App\\Models\\Project' }).subscribe(); return; }

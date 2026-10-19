@@ -4,6 +4,7 @@ import { InputSettingsGroupComponent } from '@shards/input-group/input-settings-
 import { TalvisHttp } from '@models/http/http.talvis';
 import { ParamValueDto } from '@models/_core/api-response';
 import { modelResource } from '@models/http/model-resource';
+import { SpinnerComponent } from '@shards/spinner/spinner.component';
 
 const parseThresholds = (param?: ParamValueDto): number[] => {
     try {
@@ -16,7 +17,7 @@ const parseThresholds = (param?: ParamValueDto): number[] => {
 @Component({
     selector: 'settings-projects-notifications',
     templateUrl: './settings-projects-notifications.component.html',
-    imports: [InputSettingsGroupComponent, FormsModule],
+    imports: [InputSettingsGroupComponent, FormsModule, SpinnerComponent],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SettingsProjectsNotificationsComponent {
@@ -26,6 +27,7 @@ export class SettingsProjectsNotificationsComponent {
     #http = inject(TalvisHttp);
 
     readonly #param = modelResource(() => this.#http.get<ParamValueDto | undefined>('params/PROJECT_WORK_THRESHOLDS'));
+    readonly thresholdsLoading = this.#param.isLoading;
     readonly thresholds = linkedSignal(() => parseThresholds(this.#param.value()));
 
     addThreshold() {

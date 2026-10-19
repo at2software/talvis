@@ -9,6 +9,7 @@ import { EChartsSimpleOptions, ECHARTS_DONUT_ITEM_STYLE, ECHARTS_DONUT_SERIES, E
 import { EmptyStateComponent } from '@shards/empty-state/empty-state.component';
 import type { EChartsOption } from 'echarts';
 import { ChartAxisTooltipParamDto } from '@models/_core/api-response';
+import { SpinnerComponent } from '@shards/spinner/spinner.component';
 
 interface FocusAccuracyData {
     id: number;
@@ -26,7 +27,7 @@ interface FocusAccuracyData {
 
 @Component({
     selector: 'hr-stats-invoice-focus',
-    imports: [NgxEchartsModule, EmptyStateComponent],
+    imports: [NgxEchartsModule, EmptyStateComponent, SpinnerComponent],
     templateUrl: './hr-stats-invoice-focus.component.html',
     styleUrl: './hr-stats-invoice-focus.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -36,6 +37,7 @@ export class HrStatsInvoiceFocusComponent {
     #global = inject(GlobalService);
 
     readonly #focusAccuracy = modelListResource<FocusAccuracyData>(() => this.#statsService.showFocusAccuracy());
+    readonly loaded = this.#focusAccuracy.hasValue;
     readonly users = computed(() =>
         [...this.#focusAccuracy.value()].sort((a, b) => this.#global.team.findIndex((t) => t.id === a.id.toString()) - this.#global.team.findIndex((t) => t.id === b.id.toString())),
     );

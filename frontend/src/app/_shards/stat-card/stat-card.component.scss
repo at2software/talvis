@@ -1,0 +1,36 @@
+:host {
+    display: block;
+}
+
+.stat-value {
+    font-family: 'BrunoAce', sans-serif;
+    font-size: 2.25rem;
+    line-height: 1;
+
+    &.is-zero {
+        color: #666;
+    }
+}
+
+.stat-labels {
+    padding-top: 0.75rem;
+    line-height: 1.2;
+}
+
+.stat-icon {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    flex-shrink: 0;
+
+    &::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: var(--bs-border-radius);
+        background-color: currentColor;
+        opacity: 0.15;
+    }
+}

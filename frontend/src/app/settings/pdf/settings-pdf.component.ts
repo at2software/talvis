@@ -7,6 +7,7 @@ import { ToolbarComponent } from '@app/app/toolbar/toolbar.component';
 import { CodeEditorComponent } from '@app/_shards/code-editor/code-editor.component';
 import { PdfLogo, PdfTemplateService } from '@models/pdf-template.service';
 import { Toast } from '@shards/toast/toast';
+import { SpinnerComponent } from '@shards/spinner/spinner.component';
 
 const A4_WIDTH_PX = (210 * 96) / 25.4;
 
@@ -107,7 +108,7 @@ type StyleProp = 'fontSize' | 'color' | 'fontWeight' | 'fontStyle' | 'textAlign'
     selector: 'app-settings-pdf',
     templateUrl: './settings-pdf.component.html',
     styleUrl: './settings-pdf.component.scss',
-    imports: [FormsModule, NgTemplateOutlet, ToolbarComponent, CodeEditorComponent],
+    imports: [FormsModule, NgTemplateOutlet, ToolbarComponent, CodeEditorComponent, SpinnerComponent],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SettingsPdfComponent {

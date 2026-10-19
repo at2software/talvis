@@ -1,6 +1,6 @@
 <div class="card-header gap-2">
     <span class="flex-fill text-truncate" i18n="@@i18n.common.info">info</span>
-    <div class="chart-title">{{ company()?.net | mshort }}</div>
+    <div class="chart-title"><value-unit [value]="company()?.net | mshort" /></div>
 </div>
 <ul class="list-group">
     <li class="list-group-item">

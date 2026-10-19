@@ -4,7 +4,7 @@
         <n>invoice</n>
         <span class="flex-fill text-truncate" i18n="@@i18n.invoice.revenueCurrentYear">revenue current year</span>
         @if (_data) {
-            <div class="chart-title">{{ _data.revenue | mshort }}</div>
+            <div class="chart-title"><value-unit [value]="_data.revenue | mshort" /></div>
         }
     </div>
 

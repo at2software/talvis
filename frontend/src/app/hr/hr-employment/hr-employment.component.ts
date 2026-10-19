@@ -24,6 +24,7 @@ import { EmptyStateComponent } from '@shards/empty-state/empty-state.component';
 import { UlCompactComponent } from '@shards/ul-compact/ul-compact.component';
 import { Serializable } from '@models/_core/serializable';
 import { TbeRowDto } from '@models/_core/api-response';
+import { SpinnerComponent } from '@shards/spinner/spinner.component';
 
 interface TBlocks {
     paid: [number, string][];
@@ -75,7 +76,7 @@ function buildTBlocks(rows: TbeRowDto[]): { months: TBlocks[]; min: number; max:
     selector: 'hr-employment',
     templateUrl: './hr-employment.component.html',
     styleUrls: ['./hr-employment.component.scss'],
-    imports: [SmartLinkDirective, AvatarComponent, DatePipe, DecimalPipe, FormsModule, NgbDatepickerModule, NgbTooltipModule, UlCompactComponent, ToolbarComponent, Nx, AvatarComponent, HotkeyDirective, EmptyStateComponent],
+    imports: [SmartLinkDirective, AvatarComponent, DatePipe, DecimalPipe, FormsModule, NgbDatepickerModule, NgbTooltipModule, UlCompactComponent, ToolbarComponent, Nx, AvatarComponent, HotkeyDirective, EmptyStateComponent, SpinnerComponent],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HrEmploymentComponent {
@@ -92,6 +93,7 @@ export class HrEmploymentComponent {
         () => this.#parent.userId(),
         (userId) => this.#userService.showTimeBasedEmploymentInfo(userId).pipe(map((_) => ({ ..._, employments: _.employments.map((e) => UserEmployment.fromJson(e)) }))),
     );
+    readonly loaded = computed(() => this.#info.hasValue() || this.#info.status() === 'error');
     readonly projects = computed(() => this.#info.value()?.tbe_projects?.map((_) => REFLECTION<TbeProjectRow>(_)) ?? []);
     readonly employments = computed(() => this.#info.value()?.employments ?? []);
     readonly roles = computed(() => this.#info.value()?.roles.map((_) => _.name) ?? []);

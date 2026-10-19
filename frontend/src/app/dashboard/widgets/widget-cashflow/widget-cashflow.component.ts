@@ -13,13 +13,14 @@ import { OptionType } from '../widget-options/widget-options.component';
 import { MoneyPipe } from '@pipes/money.pipe';
 import { WIDGET_SHARED } from '../widgets.shared';
 import { ParamService } from '@models/param/param.service';
+import { ValueUnitComponent } from '@shards/value-unit/value-unit.component';
 
 @Component({
     changeDetection: ChangeDetectionStrategy.OnPush,
     selector: 'widget-cashflow',
     templateUrl: './widget-cashflow.component.html',
     styleUrls: ['./../base.widget.component.scss'],
-    imports: [...WIDGET_SHARED],
+    imports: [ValueUnitComponent, ...WIDGET_SHARED],
 })
 export class WidgetCashflowComponent extends BaseWidgetComponent {
     #mshort = new MoneyPipe();

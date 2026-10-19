@@ -14,10 +14,10 @@
 <div class="card mb-3">
     <div class="card-header" i18n="@@i18n.common.analysis">analysis</div>
     <ul class="list-group">
-        <li class="list-group-item hstack gap-2" roles="project_manager">
+        <li class="list-group-item hstack gap-2">
             <div class="flex-fill" i18n="@@i18n.common.name">name</div>
             <div class="text-truncate">{{ _project.name }}</div>
-            <i class="text-primary cursor-pointer" (click)="renameProject()" (keyup.enter)="renameProject()" tabindex="0" ngbTooltip="rename" i18n-ngbTooltip="@@i18n.common.rename">edit</i>
+            <i class="text-primary cursor-pointer" roles="project_manager" (click)="renameProject()" (keyup.enter)="renameProject()" tabindex="0" ngbTooltip="rename" i18n-ngbTooltip="@@i18n.common.rename">edit</i>
         </li>
         @if (!_project.is_internal && global.user?.hasRole('invoicing')) {
             <li class="list-group-item hstack gap-2">

@@ -2,7 +2,7 @@
 
 @if (loading()) {
     <div class="route-loading" role="status" aria-live="polite">
-        <spinner [size]="64" />
+        <spinner [size]="64" [logo]="true" />
         <span class="visually-hidden" i18n="@@i18n.common.loading">loading</span>
     </div>
 }

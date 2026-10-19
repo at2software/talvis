@@ -46,6 +46,17 @@ export class ModalEditInvoiceItemComponent extends ModalBaseComponent<{ item: In
 
     onTitleEditorCreated(quill: Quill) {
         this.#titleEditor = quill;
+        quill.root.addEventListener('paste', event => this.#pastePlainText(quill, event), true);
+    }
+
+    #pastePlainText(quill: Quill, event: ClipboardEvent) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+        const text = event.clipboardData?.getData('text/plain') ?? '';
+        const range = quill.getSelection(true);
+        quill.deleteText(range.index, range.length, 'user');
+        quill.insertText(range.index, text, 'user');
+        quill.setSelection(range.index + text.length, 0, 'silent');
     }
 
     init(item: InvoiceItem, companyRef: Company, okButtonText: string = 'Add', _header?: string, okNextButtonText?: string) {

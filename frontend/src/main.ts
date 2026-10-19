@@ -15,6 +15,7 @@ import { provideEchartsCore } from 'ngx-echarts';
 import localeDe from '@angular/common/locales/de';
 import './app/custom-interfaces';
 import '@app/_modals/modal-registrations';
+import { ModalHotkeyService } from '@app/_modals/modal-hotkey.service';
 import { MODEL_REGISTRY } from '@constants/model/model-registry';
 import { MODEL_REGISTRY_TOKEN } from '@constants/model/model-registry.token';
 
@@ -51,7 +52,7 @@ AuthenticationService.loadSysInfo().then(async (sysinfo) => {
                         if (isChunkError(error)) handleChunkError(error);
                     }),
                 ),
-                provideAppInitializer(() => { inject(RouteChangeListenerService); }),
+                provideAppInitializer(() => { inject(RouteChangeListenerService); inject(ModalHotkeyService); }),
                 ...keycloakProviders,
             ],
         };

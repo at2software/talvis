@@ -27,7 +27,11 @@ class AuditEntry extends BaseModel {
             'subject_id'   => $subject->getKey(),
             'action'       => $action,
             'actor_id'     => $actor?->getAuthIdentifier(),
-            'actor_type'   => $actor === null || $actor instanceof User ? 'user' : 'machine',
+            'actor_type'   => match (true) {
+                $actor === null         => 'system',
+                $actor instanceof User  => 'user',
+                default                 => 'machine',
+            },
             'payload'      => $payload ?: null,
         ]);
     }

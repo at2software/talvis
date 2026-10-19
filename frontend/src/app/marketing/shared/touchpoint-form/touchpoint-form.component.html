@@ -1,0 +1,50 @@
+@let _channel = channel();
+@let _result = result();
+@let _outcome = outcome();
+
+@if (!channelLocked()) {
+    <div class="btn-group btn-group-sm mb-3" role="group">
+        @for (_ of channels; track _.key) {
+            <button type="button" class="btn btn-outline-primary hstack gap-1" [class.active]="_channel === _.key" (click)="channel.set(_.key)">
+                <i>{{ _.icon }}</i><span>{{ _.label }}</span>
+            </button>
+        }
+    </div>
+}
+
+<div class="form-label" i18n="@@i18n.marketing.touchpoint_result">result</div>
+<div class="btn-group btn-group-sm flex-wrap mb-3" role="group">
+    @for (_ of results(); track _.key) {
+        <button type="button" class="btn btn-outline-primary hstack gap-1" [class.active]="_result === _.key" (click)="result.set(_.key)">
+            <i [class]="_result === _.key ? '' : _.color">{{ _.icon }}</i><span>{{ _.label }}</span>
+        </button>
+    }
+</div>
+
+@if (showOutcome()) {
+    <div class="form-label" i18n="@@i18n.marketing.touchpoint_outcome">outcome</div>
+    <div class="btn-group btn-group-sm flex-wrap mb-3" role="group">
+        @for (_ of outcomes; track _.key) {
+            <button type="button" class="btn btn-outline-primary hstack gap-1" [class.active]="_outcome === _.key" (click)="outcome.set(_outcome === _.key ? undefined : _.key)">
+                <i [class]="_outcome === _.key ? '' : _.color">{{ _.icon }}</i><span>{{ _.label }}</span>
+            </button>
+        }
+    </div>
+}
+
+@if (showRetry()) {
+    <div class="mb-3">
+        <label class="form-label" for="touchpointRetryAt" i18n="@@i18n.marketing.touchpoint_retry_at">try again on</label>
+        <input id="touchpointRetryAt" type="date" class="form-control form-control-sm" [ngModel]="retryAt()" (ngModelChange)="retryAt.set($event)" />
+    </div>
+}
+
+<textarea class="form-control mb-3" rows="3" [ngModel]="notes()" (ngModelChange)="notes.set($event)" placeholder="notes" i18n-placeholder="@@i18n.common.notes" (keydown.control.enter)="submit()"></textarea>
+
+<div class="hstack">
+    <ng-content></ng-content>
+    <button type="button" class="btn btn-primary ms-auto hstack gap-1" [disabled]="!canSubmit()" (click)="submit()">
+        <i>check</i>
+        <span i18n="@@i18n.marketing.touchpoint_save">save</span>
+    </button>
+</div>

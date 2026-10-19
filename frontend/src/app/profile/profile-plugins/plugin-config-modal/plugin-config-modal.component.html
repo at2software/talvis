@@ -206,6 +206,36 @@
         </div>
     }
 
+    @if (plugin.type === 'calendar') {
+        <div class="row">
+            <div class="col-12 col-md-4">
+                <div class="form-floating mb-3">
+                    <input type="text" class="form-control" id="name" placeholder="Private" [(ngModel)]="plugin.value.name" />
+                    <label for="name" i18n="@@i18n.common.name">name</label>
+                </div>
+            </div>
+            <div class="col-12 col-md-8">
+                <div class="form-floating mb-3">
+                    <input type="url" class="form-control" id="url" placeholder="https://…/calendar.ics" [(ngModel)]="plugin.value.url" />
+                    <label for="url" i18n="@@i18n.common.url">URL</label>
+                </div>
+            </div>
+            <div class="col-12 col-md-6">
+                <div class="form-floating mb-3">
+                    <input type="text" class="form-control" id="login" autocomplete="off" [(ngModel)]="plugin.value.login" />
+                    <label for="login" i18n="@@i18n.profile.calendarLogin">login (optional)</label>
+                </div>
+            </div>
+            <div class="col-12 col-md-6">
+                <div class="form-floating mb-3">
+                    <input type="password" class="form-control" id="password" autocomplete="new-password" [(ngModel)]="plugin.value.password" />
+                    <label for="password" i18n="@@i18n.profile.calendarPassword">password (optional)</label>
+                </div>
+            </div>
+            <div class="col-12 small text-muted" i18n="@@i18n.profile.calendarHint">ICS subscription URL or a WebDAV/CalDAV calendar export URL (https required with login). Prefer a revocable read-only app password or a secret calendar URL over your account password. TALVIS loads the calendar on demand and stores neither the content nor the decrypted credentials.</div>
+        </div>
+    }
+
     <!-- LocalAI Proxy -->
     @if (plugin.type === 'local_ai') {
         <div class="row">

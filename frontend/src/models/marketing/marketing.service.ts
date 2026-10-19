@@ -10,8 +10,10 @@ import { MarketingPerformanceMetric } from './marketing-performance-metrics.mode
 import { MarketingInitiative } from './marketing-initiative.model';
 import { MarketingProspect } from './marketing-prospect.model';
 import { MarketingProspectActivity } from './marketing-prospect-activity.model';
+import { MarketingTouchpoint, TouchpointChannel } from './marketing-touchpoint.model';
+import { CompanyContact } from '@models/company/company-contact.model';
 import { map, Observable, Subject } from 'rxjs';
-import { InitiativeStatsDto, MarketingDashboardStatsDto, ProspectActivityCountDto, ProspectStatsDto, RemarketingDto, SankeyDataDto } from '@models/_core/api-response';
+import { InitiativeStatsDto, MarketingDashboardStatsDto, ProspectActivityCountDto, ProspectDuplicatesDto, ProspectStatsDto, RemarketingDto, SankeyDataDto, TouchpointStatsDto } from '@models/_core/api-response';
 
 @Service()
 export class MarketingService extends TalvisHttpService<MarketingInitiative> {
@@ -20,6 +22,7 @@ export class MarketingService extends TalvisHttpService<MarketingInitiative> {
 
     readonly initiativeActivitySaved$ = new Subject<string>(); // emits initiative ID
     readonly workflowActivitySaved$ = new Subject<string>(); // emits workflow ID
+    readonly initiativeSubscriptionChanged$ = new Subject<void>();
 
     getFunnel = (filters: Dictionary = {}) => this.get<SankeyDataDto>(`marketing/funnel`, filters);
     getRemarketing = (): Observable<RemarketingDto> =>
@@ -60,14 +63,27 @@ export class MarketingService extends TalvisHttpService<MarketingInitiative> {
     showProspectStats = (params?: Dictionary) => this.get<ProspectStatsDto>('marketing/prospects/stats', params);
     linkToCompany = (prospectId: string, companyId: string) => this.post(`marketing/prospects/${prospectId}/link-to-company`, { company_id: companyId }, MarketingProspect);
     convertProspect = (prospectId: string, data: Dictionary) => this.post(`marketing/prospects/${prospectId}/convert`, data, Object);
+    showProspectDuplicates = (prospectId: string): Observable<ProspectDuplicatesDto> =>
+        this.get<Dictionary>(`marketing/prospects/${prospectId}/duplicates`).pipe(
+            map((response) => ({
+                prospects: ((response['prospects'] ?? []) as Dictionary[]).map((_) => MarketingProspect.fromJson({ ..._, var: { matched_by: _['matched_by'] } })),
+                company_contacts: ((response['company_contacts'] ?? []) as Dictionary[]).map((_) => CompanyContact.fromJson({ ..._, var: { matched_by: _['matched_by'] } })),
+            })),
+        );
+    mergeProspect = (targetId: string, sourceId: string) => this.post(`marketing/prospects/${targetId}/merge`, { source_id: sourceId }, MarketingProspect);
+    rescheduleOverdueActivities = (data: Dictionary) => this.post<{ moved: number }>('marketing/prospects/activities/reschedule-overdue', data);
+
+    indexOutreachQueue = (channel: TouchpointChannel) => this.aget('marketing/touchpoints/queue', { channel }, MarketingProspectActivity);
+    showTouchpointStats = (params?: Dictionary) => this.get<TouchpointStatsDto>('marketing/touchpoints/stats', params);
+    indexProspectTouchpoints = (prospectId: string) => this.aget(`marketing/prospects/${prospectId}/touchpoints`, {}, MarketingTouchpoint);
+    storeProspectTouchpoint = (prospectId: string, data: Dictionary) => this.post(`marketing/prospects/${prospectId}/touchpoints`, data, MarketingTouchpoint);
+    storeCompanyTouchpoint = (companyId: string, data: Dictionary) => this.post(`marketing/remarketing/${companyId}/touchpoints`, data, MarketingTouchpoint);
 
     indexWorkflows = (params?: Dictionary) => this.aget('marketing/workflows', params, MarketingWorkflow);
     showWorkflow = (id: string) => this.get(`marketing/workflows/${id}`, {}, MarketingWorkflow);
     storeWorkflow = (data: Dictionary) => this.post('marketing/workflows', data, MarketingWorkflow);
     updateWorkflow = (id: string, data: Dictionary) => this.put(`marketing/workflows/${id}`, data, MarketingWorkflow);
     destroyWorkflow = (id: string) => this.delete(`marketing/workflows/${id}`, {}, Object);
-    duplicateWorkflow = (id: string, data?: Dictionary) => this.post<MarketingWorkflow>(`marketing/workflows/${id}/duplicate`, data);
-    updateWorkflowStatus = (id: string, isActive: boolean) => this.put<MarketingWorkflow>(`marketing/workflows/${id}/status`, { is_active: isActive });
     indexInitiativeWorkflows = (initiativeId: string) => this.aget(`marketing/initiatives/${initiativeId}/workflows`, {}, MarketingWorkflow);
     attachWorkflowToInitiative = (initiativeId: string, data: Dictionary) => this.post(`marketing/initiatives/${initiativeId}/workflows`, data, MarketingWorkflow);
     detachWorkflowFromInitiative = (initiativeId: string, workflowId: string) => this.delete(`marketing/initiatives/${initiativeId}/workflows/${workflowId}`, {}, Object);

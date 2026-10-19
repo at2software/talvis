@@ -12,6 +12,8 @@ import { GlobalService } from '@models/global.service';
 import { VacationGrant } from '@models/vacation/vacation-grant.model';
 import { Vacation } from '@models/vacation/vacation.model';
 import { VacationService } from '@models/vacation/vacation.service';
+import { ValueUnitComponent } from '@shards/value-unit/value-unit.component';
+import { SpinnerComponent } from '@shards/spinner/spinner.component';
 
 type TimePeriod = NonNullable<DaterangepickerDirective['value']>;
 
@@ -32,7 +34,7 @@ const STR_PARTIAL_VACATION = 'Partieller Urlaub';
     selector: 'profile-vacation-request',
     templateUrl: './profile-vacation-request.component.html',
     styleUrls: ['./profile-vacation-request.component.scss'],
-    imports: [DatePipe, DecimalPipe, EmptyStateComponent, Nx, FormsModule, NgbTooltipModule, NgxDaterangepickerMd, AffixInputDirective],
+    imports: [ValueUnitComponent, DatePipe, DecimalPipe, EmptyStateComponent, Nx, FormsModule, NgbTooltipModule, NgxDaterangepickerMd, AffixInputDirective, SpinnerComponent],
 })
 export class ProfileVacationRequestComponent {
     global = inject(GlobalService);
@@ -49,6 +51,7 @@ export class ProfileVacationRequestComponent {
         grants.forEach((grant) => (grant.var.total = grant.remainingHours()));
         return grants;
     });
+    readonly grantsLoaded = this.#grants.hasValue;
     readonly openRequests = this.#requests.value;
     readonly holidays = this.#holidays.value;
 

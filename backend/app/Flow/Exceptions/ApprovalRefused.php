@@ -25,6 +25,9 @@ class ApprovalRefused extends RuntimeException {
     public static function alreadyVoted(): self {
         return new self('You have already decided on this approval; a second approval must come from someone else.', 409);
     }
+    public static function changesNotApplicable(): self {
+        return new self('Changes can only be requested on approvals of a job.', 422);
+    }
     public static function unknownOption(): self {
         return new self('The selected option is not one of the offered options.', 422);
     }

@@ -7,13 +7,14 @@ import { GlobalService } from '@models/global.service';
 import { WIDGET_SHARED } from '../widgets.shared';
 import { PermissionsDirective } from '@directives/permissions.directive';
 import { ParamChartSeriesDto } from '@models/_core/api-response';
+import { ValueUnitComponent } from '@shards/value-unit/value-unit.component';
 
 @Component({
     changeDetection: ChangeDetectionStrategy.OnPush,
     selector: 'widget-unpaid-invoices',
     templateUrl: './widget-unpaid-invoices.component.html',
     styleUrls: ['./../base.widget.component.scss'],
-    imports: [...WIDGET_SHARED, PermissionsDirective],
+    imports: [ValueUnitComponent, ...WIDGET_SHARED, PermissionsDirective],
 })
 export class WidgetUnpaidInvoicesComponent extends BaseWidgetComponent {
     global = inject(GlobalService);

@@ -6,13 +6,14 @@ import { ShortPipe } from '@pipes/short.pipe';
 import { PermissionsDirective } from '@directives/permissions.directive';
 import { WidgetService } from '@models/widget.service';
 import { ParamChartSeriesDto } from '@models/_core/api-response';
+import { ValueUnitComponent } from '@shards/value-unit/value-unit.component';
 
 @Component({
     changeDetection: ChangeDetectionStrategy.OnPush,
     selector: 'widget-project-timebased',
     templateUrl: './widget-project-timebased.component.html',
     styleUrls: ['./../base.widget.component.scss'],
-    imports: [...WIDGET_SHARED, ShortPipe, PermissionsDirective],
+    imports: [ValueUnitComponent, ...WIDGET_SHARED, ShortPipe, PermissionsDirective],
 })
 export class WidgetProjectTimebasedComponent extends BaseWidgetComponent {
     #widgetService = inject(WidgetService);

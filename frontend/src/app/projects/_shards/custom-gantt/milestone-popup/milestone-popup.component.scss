@@ -1,5 +1,6 @@
 .form-control,
-.form-control-sm {
+.form-control-sm,
+.form-select {
     font-size: 0.875rem;
 }
 
@@ -10,21 +11,5 @@
         &.active {
             border-color: transparent;
         }
-    }
-}
-
-.dropdown-toggle {
-    text-align: left;
-
-    &::after {
-        margin-left: auto;
-    }
-}
-
-.dropdown-item {
-    font-size: 0.875rem;
-
-    &.active {
-        background-color: var(--bs-primary);
     }
 }

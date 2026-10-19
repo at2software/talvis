@@ -7,10 +7,16 @@
     $luminance: 0;
     @each $channel, $weight in ('red': 0.2126, 'green': 0.7152, 'blue': 0.0722) {
         $value: math.div(color.channel($background, $channel, $space: rgb), 255);
-        $linear: if($value <= 0.04045, math.div($value, 12.92), math.pow(math.div($value + 0.055, 1.055), 2.4));
+        $linear: math.pow(math.div($value + 0.055, 1.055), 2.4);
+        @if $value <= 0.04045 {
+            $linear: math.div($value, 12.92);
+        }
         $luminance: $luminance + $weight * $linear;
     }
-    @return if($luminance > 0.179, black, white);
+    @if $luminance > 0.179 {
+        @return black;
+    }
+    @return white;
 }
 
 $bg-darker : #050909;  // deepest surface, near-black green-gray

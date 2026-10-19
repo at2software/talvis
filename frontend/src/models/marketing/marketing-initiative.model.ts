@@ -6,13 +6,20 @@ import { MarketingWorkflow } from './marketing-workflow.model';
 import { MarketingInitiativeActivity } from './marketing-initiative-activity.model';
 import { User } from '@models/user/user.model';
 import { Model } from '@constants/model/type-discriminators';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, Observable, tap } from 'rxjs';
+import { nx, TBroadcast } from '@models/_core/nx-bridge';
+import { MODAL } from '@models/_core/modal-registry';
+import { ModalInputResult } from '@models/_core/modal-results';
+import type { Dictionary } from '@constants/constants';
 
 @Model('MarketingInitiative')
 export class MarketingInitiative extends Serializable {
     static API_PATH = (): string => 'marketing/initiatives';
     static DB_TABLE_NAME = (): string => 'marketing_initiatives';
-    
+
+    override update(changes?: Dictionary, silent = false): Observable<this> {
+        return super.update(changes, silent).pipe(tap(() => nx().broadcast({ type: TBroadcast.Update, data: this })));
+    }
 
     name!: string;
     description?: string;
@@ -38,6 +45,17 @@ export class MarketingInitiative extends Serializable {
                 title: $localize`:@@i18n.common.open:open`,
                 doubleClick: true,
                 action: () => this.navigateTo(`/marketing/initiatives`),
+            },
+            {
+                title: $localize`:@@i18n.common.rename:rename`,
+                roles: 'marketing',
+                action: (success) => {
+                    nx().openModal<ModalInputResult>(MODAL.input, { title: $localize`:@@i18n.common.rename:rename`, initialValue: this.name })
+                        .then((result) => {
+                            const name = result?.text?.trim();
+                            if (name && name !== this.name) this.update({ name }).subscribe(() => success?.(undefined));
+                        });
+                },
             },
             {
                 title: 'Change state to...',

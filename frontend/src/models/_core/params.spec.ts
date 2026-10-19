@@ -59,4 +59,23 @@ describe('model params', () => {
             { method: 'delete', url: 'notes/7/params/COLOR', body: undefined },
         ]);
     });
+
+    it('remembers a written value so later reads see it without a reload', () => {
+        const model = note({ id: '7', params: { COLOR: 'red', SIZE: 'l' } });
+
+        Params.write(model, 'COLOR', { value: 'blue' }).subscribe();
+
+        expect(Params.read(model, 'COLOR')).toBe('blue');
+        expect(Params.read(model, 'SIZE')).toBe('l');
+    });
+
+    it('forgets a param that was nulled or removed', () => {
+        const model = note({ id: '7', params: { COLOR: 'red', SIZE: 'l' } });
+
+        Params.write(model, 'COLOR', { value: null }).subscribe();
+        Params.remove(model, 'SIZE').subscribe();
+
+        expect(Params.read(model, 'COLOR', 'none')).toBe('none');
+        expect(Params.read(model, 'SIZE', 'none')).toBe('none');
+    });
 });

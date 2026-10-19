@@ -122,7 +122,9 @@
                 }
             </div>
             <div class="card-body p-0">
-                @if (supportItems().length === 0) {
+                @if (!supportItemsLoaded()) {
+                    <spinner class="py-3"></spinner>
+                } @else if (supportItems().length === 0) {
                     <div class="px-3 py-2 small text-muted" i18n="@@i18n.projects.noOpenSupportItems">no open support items</div>
                 } @else {
                     <table stackedTable cdk-table [dataSource]="supportItems()" class="table mb-0">

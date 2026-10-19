@@ -12,7 +12,9 @@
 @let _projects = projects();
 
 @if (_user) {
-    @if (!_employments.length) {
+    @if (!loaded()) {
+        <spinner class="py-4"></spinner>
+    } @else if (!_employments.length) {
         <div class="card mb-3">
             <empty-state [card]="false" class="hr" i18n-title="@@i18n.hr.theUserHasNoEmployment" title="no employment record yet">
                 <p class="text-muted small" i18n="@@i18n.hr.noEmploymentBody">Click "new employment" to set up this user's working hours and start date.</p>

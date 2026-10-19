@@ -101,6 +101,7 @@ export class ProjectSupportComponent {
         this.#invoiceItemService.getInvoiceItems(this.parent(), { append: 'my_prediction', with: 'predictions' }).pipe(map((items: InvoiceItem[]) => items.filter(ProjectSupportComponent.isPendingSupportItem))),
     );
     readonly supportItems = linkedSignal(this.#supportItems.value);
+    readonly supportItemsLoaded = this.#supportItems.hasValue;
 
     constructor() {
         effect(() => {

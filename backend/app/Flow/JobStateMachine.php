@@ -6,15 +6,17 @@ use App\Flow\Exceptions\JobTransitionRefused;
 use App\Flow\Models\AuditEntry;
 use App\Flow\Models\Job;
 use App\Flow\Models\Machine;
+use Carbon\CarbonInterface;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Support\Facades\DB;
 
 class JobStateMachine {
     public const TRANSITIONS = [
         Job::OPEN          => [Job::CLAIMED, Job::REJECTED],
-        Job::CLAIMED       => [Job::RUNNING, Job::AWAITING_GATE, Job::COMPLETED, Job::FAILED],
-        Job::RUNNING       => [Job::AWAITING_GATE, Job::COMPLETED, Job::FAILED],
+        Job::CLAIMED       => [Job::RUNNING, Job::AWAITING_GATE, Job::IN_REVIEW, Job::FAILED, Job::OPEN],
+        Job::RUNNING       => [Job::AWAITING_GATE, Job::IN_REVIEW, Job::FAILED, Job::OPEN],
         Job::AWAITING_GATE => [Job::RUNNING, Job::REJECTED, Job::FAILED],
+        Job::IN_REVIEW     => [Job::COMPLETED, Job::REJECTED, Job::RUNNING, Job::FAILED],
         Job::COMPLETED     => [],
         Job::FAILED        => [],
         Job::REJECTED      => [],
@@ -53,6 +55,15 @@ class JobStateMachine {
             $job->update([...$changes, 'state' => $to]);
             AuditEntry::record($job, "job.{$to}", $actor, ['from' => $from, 'to' => $to, ...$payload]);
             return $job;
+        });
+    }
+    public function releaseStaleClaim(Job $job, CarbonInterface $idleSince): ?Job {
+        return DB::transaction(function () use ($job, $idleSince) {
+            $job = Job::whereKey($job->id)->lockForUpdate()->first();
+            if (! $job || ! in_array($job->state, Job::HELD_BY_CLAIM, true) || $job->updated_at->gt($idleSince)) {
+                return null;
+            }
+            return $this->transition($job, Job::OPEN, null, ['claimed_by' => null, 'claimed_at' => null], ['reason' => 'claim_ttl', 'claimed_by' => $job->claimed_by]);
         });
     }
 }

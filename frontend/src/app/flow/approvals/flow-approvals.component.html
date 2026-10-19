@@ -20,6 +20,17 @@
                                     @if (_.gate_key) {
                                         <span class="badge bg-dark me-2">{{ _.gate_key }}</span>
                                     }
+                                    @switch (_.source()) {
+                                        @case ('agent') {
+                                            <span class="badge bg-info text-dark me-2" i18n="@@i18n.flow.sourceAgent">agent</span>
+                                        }
+                                        @case ('rule_check') {
+                                            <span class="badge bg-info text-dark me-2" i18n="@@i18n.flow.sourceRuleCheck">rule check</span>
+                                        }
+                                        @case ('review') {
+                                            <span class="badge bg-info text-dark me-2" i18n="@@i18n.flow.sourceReview">review</span>
+                                        }
+                                    }
                                     @if (_.subject_link) {
                                         <a class="text-primary" [routerLink]="_.subject_link">{{ _.subject_label }}</a>
                                     } @else {
@@ -34,6 +45,9 @@
                                         · {{ _.context.requested_by_machine }}
                                     }
                                     · {{ _.created_at | date: 'short' }}
+                                    @if (_.context?.diff_url; as diff) {
+                                        · <a class="text-primary" [href]="diff" target="_blank" rel="noopener" i18n="@@i18n.flow.diff">diff</a>
+                                    }
                                 </small>
                                 @if (_.context?.recommendation) {
                                     <div class="mt-2">
@@ -49,6 +63,9 @@
                                 }
                             </div>
                             <i class="text-primary pointer" tabindex="0" i18n-ngbTooltip="@@i18n.common.approve" ngbTooltip="approve" (click)="approve(_)" (keyup.enter)="approve(_)">check</i>
+                            @if (_.allowsChangeRequest()) {
+                                <i class="text-primary pointer" tabindex="0" i18n-ngbTooltip="@@i18n.flow.requestChanges" ngbTooltip="request changes" (click)="requestChanges(_)" (keyup.enter)="requestChanges(_)">edit_note</i>
+                            }
                             <i class="text-danger pointer" tabindex="0" i18n-ngbTooltip="@@i18n.common.reject" ngbTooltip="reject" (click)="reject(_)" (keyup.enter)="reject(_)">close</i>
                         </div>
                     </li>

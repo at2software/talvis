@@ -8,7 +8,6 @@ use App\Events\ProjectStateTransitioning;
 use App\Exceptions\ProjectStateTransitionRejected;
 use App\Jobs\ChatAddUsersJob;
 use App\Jobs\ChatGetOrCreateChannelJob;
-use App\Jobs\ChatRemoveUsersJob;
 use App\Jobs\ChatSendMessageJob;
 use App\Models\Comment;
 use App\Models\Project;
@@ -80,7 +79,6 @@ class HandleProjectStateTransitionAction {
             if (! config('app.debug')) {
                 $props = ChatProps::sender($name, $icon);
                 ChatSendMessageJob::dispatch('', $props, $project, imagePath: 'images/projekt_abgeschlossen.png');
-                ChatRemoveUsersJob::dispatch($project, $project->assigned_users->pluck('id')->toArray());
                 ChatSendMessageJob::dispatch($stateChangeMessage, $props, channelEnvKey: 'TOWN_SQUARE');
             }
         }

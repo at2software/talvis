@@ -14,12 +14,13 @@ import { SaldoChartComponent } from '@shards/saldo-chart/saldo-chart.component';
 import { EmptyStateComponent } from '@shards/empty-state/empty-state.component';
 import { SpinnerComponent } from "@shards/spinner/spinner.component";
 import { StackedTableDirective } from '@directives/stacked-table.directive';
+import { ValueUnitComponent } from '@shards/value-unit/value-unit.component';
 
 @Component({
     changeDetection: ChangeDetectionStrategy.OnPush,
     selector: 'hr-vacation',
     templateUrl: './hr-vacation.component.html',
-    imports: [StackedTableDirective, DecimalPipe, DatePipe, Nx, NgbDropdownModule, NgbTooltipModule, SaldoChartComponent, EmptyStateComponent, SpinnerComponent],
+    imports: [ValueUnitComponent, StackedTableDirective, DecimalPipe, DatePipe, Nx, NgbDropdownModule, NgbTooltipModule, SaldoChartComponent, EmptyStateComponent, SpinnerComponent],
 })
 export class HrVacationComponent {
     user = input.required<User>();

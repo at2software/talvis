@@ -12,7 +12,7 @@
             <li class="list-group-item mx-0 p-0">
                 <div class="day-wrapper" [class.weekend]="x.weekend" [class.workday]="!x.weekend" [class.vacation]="x.vacation?.isVacation()" [class.sick]="x.vacation?.isSick()">
                     @for (f of x.foci; track f.id) {
-                        <div class="bar" [class.bar-unpaid]="f.isUnpaid()" [style.left]="f.pStart()" [style.right]="f.pEnd()" [style.backgroundColor]="f.color()" [ngbTooltip]="f.getParentName()" [nx]="f" (actionsResolved)="reorderDays()" [tables]="x.foci"></div>
+                        <div class="bar nx-no-trigger" [class.bar-unpaid]="f.isUnpaid()" [style.left]="f.pStart()" [style.right]="f.pEnd()" [style.backgroundColor]="f.color()" [ngbTooltip]="f.getParentName()" [nx]="f" (actionsResolved)="reorderDays()" [tables]="x.foci"></div>
                     }
 
                     <small class="date small text-muted p-1"

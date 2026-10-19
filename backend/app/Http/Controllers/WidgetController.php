@@ -259,8 +259,8 @@ class WidgetController extends Controller {
         $upcomingDateJubilees  = $now->copy()->addDays(180);
 
         foreach (User::where('vcard', 'like', '%BDAY%')->whereHas('activeEmployments')->get() as $_) {
-            $bday           = Carbon::parse($_->vcard->getFirstValue('BDAY'))->startOfDay();
-            $nextOccurrence = $this->getNextOccurence($bday, $now);
+            $bday           = $this->parseBirthday($_->vcard->getFirstValue('BDAY'));
+            $nextOccurrence = $bday ? $this->getNextOccurence($bday, $now) : null;
             if (! $nextOccurrence || $nextOccurrence > $upcomingDateBirthdays) {
                 continue;
             }
@@ -273,10 +273,10 @@ class WidgetController extends Controller {
             ];
         }
 
-        $companyContacts = CompanyContact::whereNot('is_retired')->whereHas('contact', fn ($q) => $q->where('vcard', 'like', '%BDAY%'))->with('contact', 'company')->get();
+        $companyContacts = CompanyContact::whereNot('is_retired')->whereHas('company')->whereHas('contact', fn ($q) => $q->where('vcard', 'like', '%BDAY%'))->with('contact', 'company')->get();
         foreach ($companyContacts->unique('contact_id') as $_) {
-            $bday           = Carbon::parse($_->contact->vcard->getFirstValue('BDAY'))->startOfDay();
-            $nextOccurrence = $this->getNextOccurence($bday, $now);
+            $bday           = $this->parseBirthday($_->contact->vcard->getFirstValue('BDAY'));
+            $nextOccurrence = $bday ? $this->getNextOccurence($bday, $now) : null;
             if (! $nextOccurrence || $nextOccurrence > $upcomingDateBirthdays) {
                 continue;
             }
@@ -336,6 +336,12 @@ class WidgetController extends Controller {
             ];
         }
         return $collection;
+    }
+    private function parseBirthday(?string $value): ?Carbon {
+        if (! $value) {
+            return null;
+        }
+        return rescue(fn () => Carbon::parse($value)->startOfDay(), null, false);
     }
     private function getNextOccurence($carbonDate, $now) {
         $next = Carbon::create($now->year, $carbonDate->month, $carbonDate->day);

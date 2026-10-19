@@ -2,7 +2,7 @@ import { Dictionary } from '@constants/constants';
 import { ChangeDetectionStrategy, Component, effect, inject, input, output, signal, computed } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { ReactiveFormsModule, FormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { NgbDropdownModule, NgbProgressbarModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { DaterangepickerDirective, NgxDaterangepickerMd } from 'ngx-daterangepicker-material';
 import { Milestone } from '@models/milestone/milestone.model';
 import { Project } from '@models/project/project.model';
@@ -12,7 +12,6 @@ import { MilestoneState, MILESTONE_STATES } from '@models/milestone/milestone-st
 import { ProjectService } from '@models/project/project.service';
 import { Toast } from '@shards/toast/toast';
 import { dayjs, Dayjs } from '@constants/date/dates';
-import { AffixInputDirective } from '@directives/affix-input.directive';
 import { InputModalService } from '@app/_modals/modal-input/modal-input.service';
 import { Nx } from '@app/nx/nx.directive';
 import { TaskService } from '@models/task/task.service';
@@ -26,7 +25,7 @@ type DateRanges = DaterangepickerDirective['ranges'];
     selector: 'milestone-popup',
     templateUrl: './milestone-popup.component.html',
     styleUrls: ['./milestone-popup.component.scss'],
-    imports: [DecimalPipe, ReactiveFormsModule, FormsModule, NgbDropdownModule, NgbProgressbarModule, NgxDaterangepickerMd, NgbTooltipModule, AffixInputDirective, Nx],
+    imports: [DecimalPipe, ReactiveFormsModule, FormsModule, NgxDaterangepickerMd, NgbTooltipModule, Nx],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MilestonePopupComponent {
@@ -41,7 +40,7 @@ export class MilestonePopupComponent {
     deleted = output<Milestone>();
 
     milestoneStates = MILESTONE_STATES;
-    MilestoneState = MilestoneState;
+    readonly states = [MilestoneState.TODO, MilestoneState.IN_PROGRESS, MilestoneState.DONE];
 
     projectUsers = signal<User[]>([]);
     dateRangeModel = signal<TimePeriod | null>(null);
@@ -56,6 +55,12 @@ export class MilestonePopupComponent {
     });
 
     readonly selectedProject = computed<Project | undefined>(() => this.selectableProjects().find((p) => String(p.id) === this.selectedProjectId()));
+
+    readonly assigneeOptions = computed<User[]>(() => {
+        const users = this.projectUsers();
+        const current = this.trackedMilestone()?.user;
+        return current && !users.some((u) => u.id === current.id) ? [...users, current] : users;
+    });
 
     readonly dateRanges: DateRanges = {
         Today: [dayjs(), dayjs()],
@@ -152,10 +157,6 @@ export class MilestonePopupComponent {
     };
 
     selectState = (state: MilestoneState) => this.milestoneForm.patchValue({ state });
-
-    selectUser = (user: User | null) => this.milestoneForm.patchValue({ user_id: user?.id ?? null });
-
-    selectProject = (project: Project) => this.selectedProjectId.set(String(project.id));
 
     onSave() {
         if (!this.milestoneForm.valid) return;

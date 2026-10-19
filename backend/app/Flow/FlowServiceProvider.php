@@ -5,13 +5,16 @@ namespace App\Flow;
 use App\Events\ProjectStateTransitioned;
 use App\Events\ProjectStateTransitioning;
 use App\Flow\Console\IssueMachineToken;
+use App\Flow\Console\ReleaseStaleClaims;
 use App\Flow\Console\RevokeMachineToken;
 use App\Flow\Events\ApprovalDecided;
+use App\Flow\Events\ApprovalRequested;
 use App\Flow\Http\Middleware\EnsureMachineToken;
 use App\Flow\Http\Middleware\RequireMachineAbility;
+use App\Flow\Listeners\AdvanceJobAfterDecision;
 use App\Flow\Listeners\EnforcePhaseGates;
+use App\Flow\Listeners\NotifyChatOfApprovalRequest;
 use App\Flow\Listeners\RecordProjectStateTransition;
-use App\Flow\Listeners\ResumeJobAfterGate;
 use App\Flow\Models\RiskClass;
 use App\Models\Project;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -25,7 +28,8 @@ class FlowServiceProvider extends ServiceProvider {
     public function boot(): void {
         Event::listen(ProjectStateTransitioned::class, RecordProjectStateTransition::class);
         Event::listen(ProjectStateTransitioning::class, EnforcePhaseGates::class);
-        Event::listen(ApprovalDecided::class, ResumeJobAfterGate::class);
+        Event::listen(ApprovalDecided::class, AdvanceJobAfterDecision::class);
+        Event::listen(ApprovalRequested::class, NotifyChatOfApprovalRequest::class);
         Project::resolveRelationUsing('flowRiskClass', fn (Project $project) => $project->belongsTo(RiskClass::class, 'flow_risk_class_id'));
 
         Route::aliasMiddleware('flow.ability', RequireMachineAbility::class);
@@ -33,7 +37,7 @@ class FlowServiceProvider extends ServiceProvider {
         RateLimiter::for('flow-machine', fn (Request $request) => Limit::perMinute(config('flow.machine_rate_limit'))->by('flow-machine:'.$request->user()?->getAuthIdentifier()));
 
         if ($this->app->runningInConsole()) {
-            $this->commands([IssueMachineToken::class, RevokeMachineToken::class]);
+            $this->commands([IssueMachineToken::class, RevokeMachineToken::class, ReleaseStaleClaims::class]);
         }
     }
 }

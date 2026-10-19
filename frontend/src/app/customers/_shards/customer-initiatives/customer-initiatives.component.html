@@ -7,7 +7,9 @@
             </button>
         </div>
     </div>
-    @if (activityRows().length === 0) {
+    @if (!activityRowsLoaded()) {
+        <spinner class="py-3" [size]="24"></spinner>
+    } @else if (activityRows().length === 0) {
         <div class="card-body text-muted small text-center py-3" i18n="@@i18n.marketing.noInitiativesForCompany">no open initiative activities</div>
     }
     @if (activityRows().length > 0) {

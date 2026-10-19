@@ -8,10 +8,11 @@ use App\Models\Param;
 
 class MarketingRemarketingService {
     public static function getRemarketingData(): array {
-        $total = Param::get('INVOICE_REVENUE_12M')->value;
+        $total    = Param::get('INVOICE_REVENUE_12M')->value;
+        $observed = self::observed();
         return [
-            'due'      => self::getRemarketingDue(),
-            'observed' => Company::whereNot('remarketing_interval', Recurrence::None)->get()
+            'due'      => self::due($observed),
+            'observed' => $observed
                 ->map(function ($_) {
                     $_->revenue_12 = $_->param('INVOICE_REVENUE_12M')->value;
                     return $_;
@@ -22,57 +23,33 @@ class MarketingRemarketingService {
                 ->where('remarketing_interval', Recurrence::None)
                 ->whereHas('latestRevenue12Param', fn ($_) => $_->where('value', '>', 0.05 * $total))
                 ->with('latestRevenue12Param')
+                ->withLastContact()
                 ->get()
                 ->map(function ($_) {
                     $_->setAttribute('revenue_12', $_->latestRevenue12Param?->value);
-                    return $_;
+                    return $_->resolveLastContact();
                 })
                 ->sortByDesc('revenue_12')
                 ->values(),
         ];
     }
     public static function getRemarketingDue() {
-        $now = now();
+        return self::due(self::observed());
+    }
+    private static function due($observed) {
+        return $observed
+            ->filter(fn ($_) => $_->remarketing_due_at->isPast())
+            ->sortBy('remarketing_due_at')
+            ->values();
+    }
+    private static function observed() {
         return Company::whereNot('remarketing_interval', Recurrence::None)
-            ->where(function ($query) use ($now) {
-                $query->where(function ($q) use ($now) {
-                    $q->where('remarketing_interval', Recurrence::Daily)
-                        ->whereRaw('updated_at < ?', [$now->copy()->subDay()]);
-                })
-                    ->orWhere(function ($q) use ($now) {
-                        $q->where('remarketing_interval', Recurrence::Weekly)
-                            ->whereRaw('updated_at < ?', [$now->copy()->subWeek()]);
-                    })
-                    ->orWhere(function ($q) use ($now) {
-                        $q->where('remarketing_interval', Recurrence::EveryTwoWeeks)
-                            ->whereRaw('updated_at < ?', [$now->copy()->subWeeks(2)]);
-                    })
-                    ->orWhere(function ($q) use ($now) {
-                        $q->where('remarketing_interval', Recurrence::Monthly)
-                            ->whereRaw('updated_at < ?', [$now->copy()->subMonths(1)]);
-                    })
-                    ->orWhere(function ($q) use ($now) {
-                        $q->where('remarketing_interval', Recurrence::EveryTwoMonths)
-                            ->whereRaw('updated_at < ?', [$now->copy()->subMonths(2)]);
-                    })
-                    ->orWhere(function ($q) use ($now) {
-                        $q->where('remarketing_interval', Recurrence::EveryThreeMonths)
-                            ->whereRaw('updated_at < ?', [$now->copy()->subMonths(3)]);
-                    })
-                    ->orWhere(function ($q) use ($now) {
-                        $q->where('remarketing_interval', Recurrence::EverySixMonths)
-                            ->whereRaw('updated_at < ?', [$now->copy()->subMonths(6)]);
-                    })
-                    ->orWhere(function ($q) use ($now) {
-                        $q->where('remarketing_interval', Recurrence::Yearly)
-                            ->whereRaw('updated_at < ?', [$now->copy()->subYear()]);
-                    });
-            })
+            ->withLastContact()
             ->get()
             ->map(function ($_) {
-                $_->setAttribute('remarketing_due_at', Recurrence::sub($_->remarketing_interval));
+                $_->resolveLastContact();
+                $_->setAttribute('remarketing_due_at', Recurrence::add($_->remarketing_interval, $_->last_contacted_at ?? $_->created_at));
                 return $_;
-            })
-            ->values();
+            });
     }
 }

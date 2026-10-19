@@ -38,13 +38,15 @@ import { CompactItemDirective } from '@shards/ul-compact/CompactItemDirective';
 import { UlCompactComponent } from '@shards/ul-compact/ul-compact.component';
 import { KnownseqCallerCardsComponent } from './knownseq-caller-cards.component';
 import { modelListResource } from '@models/http/model-resource';
+import { ValueUnitComponent } from '@shards/value-unit/value-unit.component';
+import { SpinnerComponent } from '@shards/spinner/spinner.component';
 
 @Component({
     changeDetection: ChangeDetectionStrategy.OnPush,
     selector: 'customers-known-sequitur',
     templateUrl: './customers-known-sequitur.component.html',
     styleUrls: ['./customers-known-sequitur.component.scss'],
-    imports: [ToolbarComponent, ListGroupItemContactComponent, Nx, AvatarComponent, ProjectComponent, NgbPopoverModule, NgbDropdownModule, SearchInputComponent, NgTemplateOutlet, EchartsRangeCardComponent, VcardComponent, CustomerQuickstatsComponent, EmptyStateComponent, UlCompactComponent, CompactItemDirective, FormsModule, HotkeyDirective, MoneyPipe, MediaPreviewComponent, AvatarComponent, RteComponent, SafePipe, KnownseqCallerCardsComponent],
+    imports: [ValueUnitComponent, ToolbarComponent, ListGroupItemContactComponent, Nx, AvatarComponent, ProjectComponent, NgbPopoverModule, NgbDropdownModule, SearchInputComponent, NgTemplateOutlet, EchartsRangeCardComponent, VcardComponent, CustomerQuickstatsComponent, EmptyStateComponent, UlCompactComponent, CompactItemDirective, FormsModule, HotkeyDirective, MoneyPipe, MediaPreviewComponent, AvatarComponent, RteComponent, SafePipe, KnownseqCallerCardsComponent, SpinnerComponent],
 })
 export class CustomersKnownSequiturComponent {
     company = input.required<Company>();
@@ -70,6 +72,7 @@ export class CustomersKnownSequiturComponent {
         (companyId) => this.#companyService.showConnections(companyId),
     );
     projects = linkedSignal(() => this.#projects.value());
+    projectsLoaded = this.#projects.hasValue;
     connections = linkedSignal<Connection[], Connection[]>({
         source: this.#connections.value,
         computation: (rows) => {

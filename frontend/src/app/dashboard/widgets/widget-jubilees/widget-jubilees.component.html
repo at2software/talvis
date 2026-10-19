@@ -27,6 +27,8 @@
                 </li>
             }
         </ul>
+    } @else if (!loaded()) {
+        <spinner class="py-3" [size]="24"></spinner>
     } @else {
         <div class="card-body py-1 text-muted" i18n="@@i18n.common.noUpcomingBirthdaysOrJubilees">no upcoming birthdays or jubilees</div>
     }

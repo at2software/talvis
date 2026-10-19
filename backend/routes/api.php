@@ -17,6 +17,7 @@ use App\Http\Controllers\DeletionLogController;
 use App\Http\Controllers\EncryptionController;
 use App\Http\Controllers\ExpenseCategoryController;
 use App\Http\Controllers\ExpenseController;
+use App\Http\Controllers\ExternalCalendarController;
 use App\Http\Controllers\FileController;
 use App\Http\Controllers\FocusController;
 use App\Http\Controllers\GitlabAuditController;
@@ -31,6 +32,7 @@ use App\Http\Controllers\MarketingController;
 use App\Http\Controllers\MarketingInitiativeController;
 use App\Http\Controllers\MarketingMetricController;
 use App\Http\Controllers\MarketingProspectController;
+use App\Http\Controllers\MarketingTouchpointController;
 use App\Http\Controllers\MarketingWorkflowController;
 use App\Http\Controllers\Microsoft365AccountController;
 use App\Http\Controllers\MilestoneController;
@@ -264,6 +266,7 @@ Route::middleware('auth', 'release.session', 'cache.headers:no_cache;must_revali
         Route::get('funnel', [MarketingController::class, 'getFunnelChart']);
         Route::get('remarketing', [MarketingController::class, 'getRemarketing']);
         Route::get('remarketing/due', [MarketingController::class, 'getRemarketingDue']);
+        Route::post('remarketing/{company}/touchpoints', [MarketingTouchpointController::class, 'storeCompanyTouchpoint']);
         Route::get('dashboard', [MarketingController::class, 'getDashboardStats']);
 
         Route::prefix('initiatives')->controller(MarketingInitiativeController::class)->group(function () {
@@ -325,8 +328,14 @@ Route::middleware('auth', 'release.session', 'cache.headers:no_cache;must_revali
             });
         });
 
+        Route::prefix('touchpoints')->controller(MarketingTouchpointController::class)->group(function () {
+            Route::get('queue', 'indexQueue');
+            Route::get('stats', 'showStats');
+        });
+
         Route::prefix('prospects')->controller(MarketingProspectController::class)->group(function () {
             Route::get('', 'indexProspects');
+            Route::post('activities/reschedule-overdue', 'rescheduleOverdueActivities');
             Route::post('', 'storeProspect');
             Route::get('stats', 'showProspectStats');
             Route::get('by-phone', 'showProspectByPhone');
@@ -342,6 +351,10 @@ Route::middleware('auth', 'release.session', 'cache.headers:no_cache;must_revali
                 Route::post('convert', 'convertProspect');
                 Route::post('postpone-activities', 'postponeProspectActivities');
                 Route::put('activities/{activityId}/status', 'updateProspectActivityStatus');
+                Route::get('duplicates', 'showProspectDuplicates');
+                Route::post('merge', 'mergeProspect');
+                Route::get('touchpoints', [MarketingTouchpointController::class, 'indexProspectTouchpoints']);
+                Route::post('touchpoints', [MarketingTouchpointController::class, 'storeProspectTouchpoint']);
             });
         });
 
@@ -608,6 +621,7 @@ Route::middleware('auth', 'release.session', 'cache.headers:no_cache;must_revali
             Route::get('vacation_absences', [VacationController::class, 'indexAbsences']);
             Route::get('show-foci-30d', [UserController::class, 'showFoci30D']);
             Route::get('daily-workload', [UserController::class, 'indexDailyWorkload']);
+            Route::get('calendar-events', [UserController::class, 'indexCalendarEvents']);
 
             Route::middleware('role:hr')->get('time-based-employment', [UserController::class, 'showTimeBasedEmploymentInfo']);
             Route::middleware('role:hr')->post('time-based-employment', [UserController::class, 'createTbe']);
@@ -618,7 +632,7 @@ Route::middleware('auth', 'release.session', 'cache.headers:no_cache;must_revali
             });
             Route::post('reset-password', [UserController::class, 'resetPassword'])->middleware('role:admin');
         })->whereNumber('_');
-        ParamController::getRoute(User::class);
+        Route::middleware('self')->group(fn () => ParamController::getRoute(User::class));
     });
 
     Route::prefix('vacations')->controller(VacationController::class)->group(function () {
@@ -660,6 +674,7 @@ Route::middleware('auth', 'release.session', 'cache.headers:no_cache;must_revali
     Route::resource('calendar_entries', CalendarController::class)->only(['index', 'store', 'update', 'destroy']);
     Route::get('calendar-feed', [CalendarFeedController::class, 'showUrl']);
     Route::post('calendar-feed', [CalendarFeedController::class, 'rotate']);
+    Route::post('calendars/occurrences', [ExternalCalendarController::class, 'occurrences'])->middleware('throttle:60,1');
     Route::resource('assignments', AssignmentController::class)->only(['update'])->middleware('owner:assigned_user_id,hr|project_manager');
     Route::resource('assignments', AssignmentController::class)->only(['destroy'])->middleware('owner:assigned_user_id,project_manager');
 
@@ -674,30 +689,30 @@ Route::middleware('auth', 'release.session', 'cache.headers:no_cache;must_revali
     Route::resource('company_contacts', CompanyContactController::class)->only(['store', 'update'])->middleware('role:project_manager|marketing');
     Route::resource('company_contacts', CompanyContactController::class)->only(['destroy'])->middleware('role:admin');
 
-    Route::resource('contacts', ContactController::class)->only(['store', 'update'])->middleware('role:project_manager|marketing');
-    Route::resource('contacts', ContactController::class)->only(['destroy'])->middleware('role:admin');
+    Route::resource('contacts', ContactController::class)->only(['update'])->middleware('role:project_manager|marketing');
 
     Route::resource('encryptions', EncryptionController::class)->only(['update', 'destroy'])->middleware('owner:user_id');
 
     Route::resource('expenses', ExpenseController::class)->only(['index', 'show', 'store', 'update', 'destroy'])->middleware('role:financial');
     Route::resource('expense-categories', ExpenseCategoryController::class)->only(['index', 'show', 'store', 'update', 'destroy'])->middleware('role:financial');
 
-    Route::resource('files', FileController::class)->only(['show', 'store', 'update']);
+    Route::resource('files', FileController::class)->only(['show']);
     Route::resource('files', FileController::class)->only(['destroy'])->middleware('role:admin');
 
     Route::resource('foci', FocusController::class)->only(['store', 'update'])->middleware('owner:user_id,hr|project_manager|financial');
     Route::resource('foci', FocusController::class)->only(['destroy'])->middleware('role:admin');
 
-    Route::resource('invoices', InvoiceController::class)->only(['index', 'show', 'store', 'update', 'destroy'])->middleware('role:invoicing');
+    Route::resource('invoices', InvoiceController::class)->only(['index', 'show', 'update'])->middleware('role:invoicing');
 
     Route::resource('invoice_items', InvoiceItemController::class)->only(['show'])->whereNumber('invoice_item')->middleware('role:invoicing|project_manager');
     Route::resource('invoice_items', InvoiceItemController::class)->only(['update'])->whereNumber('invoice_item')->middleware('permission_invoiceItem');
     Route::resource('invoice_items', InvoiceItemController::class)->only(['store', 'destroy'])->whereNumber('invoice_item')->middleware(['role:invoicing|project_manager', 'permission_invoiceItem']);
 
-    Route::resource('lead_sources', LeadSourceController::class);
+    Route::resource('lead_sources', LeadSourceController::class)->only(['index', 'show']);
+    Route::resource('lead_sources', LeadSourceController::class)->only(['store', 'destroy'])->middleware('role:project_manager|marketing');
     Route::resource('project_states', ProjectStateController::class)->only(['index']);
     Route::resource('project_states', ProjectStateController::class)->only(['update'])->middleware('role:admin');
-    Route::resource('milestones', MilestoneController::class)->only(['index', 'show', 'store', 'update', 'destroy']);
+    Route::resource('milestones', MilestoneController::class)->only(['index', 'show', 'update', 'destroy']);
     Route::resource('plugin_links', PluginLinkController::class)->only(['store', 'update', 'destroy']);
 
     Route::resource('products', ProductController::class)->only(['index', 'show']);
@@ -707,11 +722,12 @@ Route::middleware('auth', 'release.session', 'cache.headers:no_cache;must_revali
     Route::resource('product_groups', ProductGroupController::class)->only(['store', 'update', 'destroy'])->whereNumber('product_group')->middleware('role:product_manager');
 
     Route::resource('projects', ProjectController::class)->only(['index', 'show']);
-    Route::resource('projects', ProjectController::class)->only(['store', 'update'])->middleware('role:project_manager');
+    Route::resource('projects', ProjectController::class)->only(['update'])->middleware('role:project_manager');
     Route::resource('projects', ProjectController::class)->only(['destroy'])->middleware('role:admin');
 
     Route::resource('sentinels', SentinelController::class)->only(['index', 'show', 'store', 'update', 'destroy'])->whereNumber('sentinel')->middleware('role:admin');
-    Route::resource('tasks', TaskController::class);
+    Route::get('tasks/inbox', [TaskController::class, 'indexInbox']);
+    Route::resource('tasks', TaskController::class)->only(['index', 'show', 'store', 'update', 'destroy']);
     Route::post('tasks/{task}/co-assignees', [TaskController::class, 'addCoAssignee']);
     Route::delete('tasks/{task}/co-assignees/{assignment}', [TaskController::class, 'removeCoAssignee']);
     Route::resource('users', UserController::class)->only(['show'])->middleware('owner:id,project_manager|hr');
@@ -726,7 +742,7 @@ Route::middleware('auth', 'release.session', 'cache.headers:no_cache;must_revali
     Route::post('vaults/tan', [VaultController::class, 'submitTan'])->middleware('role:admin');
     Route::get('vaults/bank-lookup', [VaultController::class, 'bankLookup'])->middleware('role:admin');
     Route::get('vaults/m365/teams-app-package', [PluginM365Controller::class, 'downloadTeamsAppPackage'])->middleware('role:admin');
-    Route::resource('vaults', VaultController::class)->middleware('role:admin');
+    Route::resource('vaults', VaultController::class)->only(['index', 'show', 'store'])->middleware('role:admin');
     Route::prefix('webhook-endpoints')->middleware('role:admin')->controller(WebhookEndpointController::class)->group(function () {
         Route::get('', 'index');
         Route::post('', 'store');

@@ -2,10 +2,27 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <span class="modal-title" i18n="@@i18n.common.addMilestone">add milestone</span>
+                @if (inboxStep(); as step) {
+                    <span class="modal-title"><span i18n="@@i18n.planner.processInbox">process inbox</span> {{ step.index }} / {{ step.total }}</span>
+                } @else {
+                    <span class="modal-title" i18n="@@i18n.common.addMilestone">add milestone</span>
+                }
                 <button type="button" class="btn-close" (click)="decline()" tabindex="0" (keydown.enter)="decline()" aria-label="Close"></button>
             </div>
             <div class="modal-body">
+                @if (inboxStep(); as step) {
+                    @if (step.linked || step.description || step.link) {
+                        <div class="hstack gap-2 align-items-start mb-3">
+                            @if (step.linked) {
+                                <avatar [object]="step.linked"></avatar>
+                            }
+                            <div class="flex-fill text-muted small text-break" style="white-space: pre-wrap">{{ step.description }}</div>
+                            @if (step.link) {
+                                <a [href]="step.link" target="_blank" rel="noopener noreferrer"><i class="text-primary">launch</i></a>
+                            }
+                        </div>
+                    }
+                }
                 <div class="input-group mb-3 d-flex">
                     <span class="input-group-text" i18n="@@i18n.common.project">project</span>
                     <select class="form-select" [ngModel]="projectId()" (ngModelChange)="projectId.set($event)">
@@ -13,6 +30,7 @@
                             <option [value]="project.id">{{ project.name }}</option>
                         }
                     </select>
+                    <button type="button" class="btn btn-plain text-primary" (click)="fillWholeProject()" [disabled]="!selectedProject()" title="whole project: name and remaining hours of the project" i18n-title="@@i18n.planner.wholeProject"><i>select_all</i></button>
                 </div>
                 <div class="input-group mb-3 d-flex">
                     <span class="input-group-text" i18n="@@i18n.common.name">name</span>
@@ -32,7 +50,13 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn" (click)="decline()" i18n="@@i18n.common.cancel">cancel</button>
+                @if (inboxStep()) {
+                    <button type="button" class="btn text-danger me-auto" (click)="discard()" i18n="@@i18n.planner.discard">discard</button>
+                    <button type="button" class="btn" (click)="decline()" i18n="@@i18n.planner.stop">stop</button>
+                    <button type="button" class="btn" (click)="skip()" i18n="@@i18n.planner.skip">skip</button>
+                } @else {
+                    <button type="button" class="btn" (click)="decline()" i18n="@@i18n.common.cancel">cancel</button>
+                }
                 <button type="button" class="btn btn-primary" (click)="accept()" [disabled]="!canSubmit()" hotkey="CTRL+ENTER" i18n="@@i18n.common.ok">ok</button>
             </div>
         </div>

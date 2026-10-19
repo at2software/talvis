@@ -4,7 +4,7 @@
         <n>hr</n>
         <span class="flex-fill text-truncate" i18n="@@i18n.widget-my-working-time">my working time</span>
         @if (_chartOptions) {
-            <div class="chart-title" [class.text-danger]="average() < averageSoll() * 0.9" [ngbTooltip]="'average working hours per week (required: ' + averageSoll() + ' h)'">{{ average() | number: '1.1-1' }}<span class="text-lowercase text-muted fs-6">h</span></div>
+            <div class="chart-title" [class.text-danger]="average() < averageSoll() * 0.9" [ngbTooltip]="'average working hours per week (required: ' + averageSoll() + ' h)'"><value-unit [value]="average() | number: '1.1-1'" unit="h" /></div>
         }
     </div>
 

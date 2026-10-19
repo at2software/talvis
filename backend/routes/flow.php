@@ -6,6 +6,7 @@ use App\Flow\Http\Controllers\FlowAdminController;
 use App\Flow\Http\Controllers\FlowConfigController;
 use App\Flow\Http\Controllers\JobController;
 use App\Flow\Http\Controllers\MachineController;
+use App\Flow\Http\Controllers\MattermostActionController;
 use App\Flow\Http\Controllers\ProjectFlowController;
 use App\Flow\Http\Controllers\TransitionController;
 use App\Flow\Http\Requests\FlowConfigRequest;
@@ -25,6 +26,7 @@ Route::prefix('flow')->middleware('auth', 'release.session', 'cache.headers:no_c
         Route::get('', 'index');
         Route::post('{approval}/approve', 'approve')->whereNumber('approval');
         Route::post('{approval}/reject', 'reject')->whereNumber('approval');
+        Route::post('{approval}/request-changes', 'requestChanges')->whereNumber('approval');
     });
 
     Route::middleware('role:admin')->group(function () {
@@ -67,4 +69,9 @@ Route::prefix('flow')->middleware('flow.machine', 'cache.headers:no_cache;must_r
             });
         });
     });
+});
+
+Route::prefix('flow/chat/mattermost')->middleware('throttle:60,1')->controller(MattermostActionController::class)->group(function () {
+    Route::post('actions', 'action');
+    Route::post('dialog', 'dialog');
 });

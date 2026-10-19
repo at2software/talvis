@@ -19,6 +19,8 @@
                     </li>
                 }
             </ul>
+        } @else if (!loaded()) {
+            <spinner class="py-4"></spinner>
         } @else {
             <empty-state></empty-state>
         }

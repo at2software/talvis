@@ -3,7 +3,7 @@
     <div class="card-header gap-2">
         <n>project</n>
         <span class="flex-fill text-truncate" i18n="@@i18n.common.projects">projects</span>
-        <div class="chart-title" roles="invoicing">{{ value() ? (value()! | mshort) : (value() | loading) }}</div>
+        <div class="chart-title" roles="invoicing"><value-unit [value]="value() ? (value()! | mshort) : (value() | loading)" /></div>
     </div>
 
     @if (hasInvoicesModule()) {

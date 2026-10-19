@@ -47,6 +47,7 @@ address, so an exposed HTTP server never lends its own token to anonymous caller
 | Tool | REST call | Ability |
 |---|---|---|
 | `flow_list_open_jobs` | `GET /flow/jobs?state=open` | `flow:jobs:read` |
+| `flow_list_my_jobs` | `GET /flow/jobs?state=…` (claimed/running default to the calling machine) | `flow:jobs:read` |
 | `flow_claim_job` | `POST /flow/jobs/{id}/claim` | `flow:jobs:write` |
 | `flow_request_gate` | `POST /flow/jobs/{id}/gate-request` | `flow:jobs:write` |
 | `flow_get_gate_decision` | `GET /flow/jobs/{id}/gates` | `flow:gates:read` |
@@ -107,8 +108,9 @@ claude mcp add --transport http talvis-flow http://127.0.0.1:3333/mcp --header "
 ## Smoke test
 
 Runs the job lifecycle once through the MCP server (stdio) against a running TALVIS instance:
-two jobs are created with a user token, one goes claim → gate request → human approval → result,
-the other claim → fail; transitions, project phase and both resources are read.
+two jobs are created with a user token, one goes claim → gate request → human approval → result
+(`in_review`) → human requests changes → result again (next review round), the other
+claim → fail; transitions, project phase and both resources are read.
 
 Prerequisites on the TALVIS side: migrations, `FlowAt2Seeder` (or an equivalent configuration),
 a project in a phase that has the gate `SMOKE_GATE_KEY`, a machine token with all three abilities,

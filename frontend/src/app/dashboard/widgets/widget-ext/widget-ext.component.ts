@@ -11,13 +11,14 @@ import { WIDGET_SHARED } from '../widgets.shared';
 import { EChartsSimpleOptions } from '@charts/echarts-presets';
 import type { EChartsOption } from 'echarts';
 import type { EChartsType } from 'echarts/types/dist/shared';
+import { ValueUnitComponent } from '@shards/value-unit/value-unit.component';
 
 @Component({
     changeDetection: ChangeDetectionStrategy.OnPush,
     selector: 'widget-ext',
     templateUrl: './widget-ext.component.html',
     styleUrls: ['./../base.widget.component.scss'],
-    imports: [...WIDGET_SHARED],
+    imports: [ValueUnitComponent, ...WIDGET_SHARED],
 })
 export class WidgetExtComponent extends BaseWidgetComponent {
     #echartsInstance: EChartsType | undefined;

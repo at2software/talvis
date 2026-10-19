@@ -12,6 +12,7 @@ import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { EmptyStateComponent } from '@shards/empty-state/empty-state.component';
 import { GuidedTourComponent } from '@shards/guided-tour/guided-tour.component';
 import { ConfirmationService } from '@app/_modals/modal-confirm/confirmation.service';
+import { SpinnerComponent } from '@shards/spinner/spinner.component';
 
 const ActivityStatsColors = MarketingActivity.STATS_COLORS;
 
@@ -20,7 +21,7 @@ const ActivityStatsColors = MarketingActivity.STATS_COLORS;
     selector: 'marketing-workflows',
     templateUrl: './marketing-workflows.component.html',
     styleUrl: './marketing-workflows.component.scss',
-    imports: [FormsModule, Nx, RouterModule, NgbTooltipModule, EmptyStateComponent, GuidedTourComponent],
+    imports: [FormsModule, Nx, RouterModule, NgbTooltipModule, EmptyStateComponent, GuidedTourComponent, SpinnerComponent],
 })
 export class MarketingWorkflowsComponent {
     #marketingService = inject(MarketingService);
@@ -33,6 +34,7 @@ export class MarketingWorkflowsComponent {
 
     #loaded = modelListResource(() => this.#marketingService.indexWorkflows());
     workflows = linkedSignal(() => this.#loaded.value());
+    workflowsLoaded = this.#loaded.hasValue;
     currentWorkflowId: string | null = null;
 
     showCreateModal = signal(false);

@@ -2,7 +2,7 @@
     <div class="card-header gap-2">
         <n>invoice</n>
         <div class="me-auto flex-fill text-truncate" i18n="@@i18n.widget-linear-regression-forecast">linear regression forecast</div>
-        <div class="chart-title">{{ data()?.current?.forecast | mshort }}</div>
+        <div class="chart-title"><value-unit [value]="data()?.current?.forecast | mshort" /></div>
     </div>
 
     <widget-options [options]="getOptions()" (updated)="_onUpdate($event)" (deleted)="onDelete($event)"></widget-options>

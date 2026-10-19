@@ -25,6 +25,7 @@ import { ECHARTS_DONUT_ITEM_STYLE, ECHARTS_DONUT_SERIES } from '@charts/echarts-
 import { GlobalService } from '@models/global.service';
 import { NgbDropdownModule, NgbModal, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { StackedTableDirective } from '@directives/stacked-table.directive';
+import { SpinnerComponent } from '@shards/spinner/spinner.component';
 
 interface TBankTx extends INxContextMenu {
     date: string;
@@ -67,7 +68,7 @@ function longestCommonSubstring(strings: string[]): string {
     templateUrl: './invoices-bank-balance.component.html',
     styleUrl: './invoices-bank-balance.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [StackedTableDirective, FormsModule, Nx, NComponent, ToolbarComponent, AutosaveDirective, NgxEchartsDirective, NgbTooltipModule, NgbDropdownModule],
+    imports: [StackedTableDirective, FormsModule, Nx, NComponent, ToolbarComponent, AutosaveDirective, NgxEchartsDirective, NgbTooltipModule, NgbDropdownModule, SpinnerComponent],
 })
 export class InvoicesBankBalanceComponent {
     #expenseService = inject(ExpenseService);

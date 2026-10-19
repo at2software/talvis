@@ -6,6 +6,7 @@ use App\Actions\User\CalculateDailyWorkload;
 use App\Enums\CommentType;
 use App\Enums\InvoiceItemType;
 use App\Enums\InvoiceVatHandling;
+use App\Enums\MilestoneState;
 use App\Helpers\ModelRelationship;
 use App\Http\Requests\User\CreateTbeRequest;
 use App\Http\Requests\User\StoreEmploymentRequest;
@@ -21,12 +22,15 @@ use App\Models\UserEmployment;
 use App\Models\UserPaidTime;
 use App\Models\Vault;
 use App\Services\DatabaseSchemaService;
+use App\Services\PersonalCalendar;
 use App\Services\User\UserProjectLoadService;
 use App\Services\UserTimelineService;
+use App\Support\Calendar\CalendarOccurrence;
 use App\Traits\HasParams;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
@@ -101,7 +105,7 @@ class UserController extends Controller {
         if ($pm) {
             $milestonesGrouped = Milestone::whereHas('project', fn ($query) => $query->where('project_manager_id', $_->id)->whereRunning());
         } else {
-            $milestonesGrouped = $_->milestones()->whereHas('project', fn ($q) => $q->whereRunning());
+            $milestonesGrouped = $_->milestones()->where(fn ($q) => $q->whereHas('project', fn ($p) => $p->whereRunning())->orWhereNot('state', MilestoneState::DONE));
         }
 
         $milestonesGrouped = $milestonesGrouped
@@ -137,7 +141,7 @@ class UserController extends Controller {
             ->with('assignee.assignee')
             ->get()
             ->groupBy('parent_id');
-        return $milestonesGrouped->map(function ($milestones, $projectId) use ($projectTasksGrouped, $milestoneTasksGrouped) {
+        $groups = $milestonesGrouped->map(function ($milestones, $projectId) use ($projectTasksGrouped, $milestoneTasksGrouped) {
             $project = $milestones->first()->project;
             $project->makeHidden(['params']);
             $projectTasks = $projectTasksGrouped->get($projectId, collect());
@@ -151,6 +155,23 @@ class UserController extends Controller {
                 'milestones'    => $milestones->values(),
             ];
         })->values();
+
+        if (! $pm && $request->boolean('with_empty_projects')) {
+            $groups = $groups->concat($this->emptyMilestoneGroups($_, $milestonesGrouped->keys()));
+        }
+        return $groups;
+    }
+    private function emptyMilestoneGroups(User $user, Collection $skipProjectIds): Collection {
+        return Project::whereRunning()
+            ->whereNotIn('projects.id', $skipProjectIds)
+            ->where(fn ($q) => $q->where('project_manager_id', $user->id)->orWhereIn('projects.id', $user->projects()->select('projects.id')))
+            ->with(['assignees.assignee', 'company', 'hoursInvestedSum'])
+            ->get()
+            ->map(fn (Project $project) => [
+                'project'       => $project->append('hours_invested')->makeHidden(['params']),
+                'project_tasks' => collect(),
+                'milestones'    => collect(),
+            ]);
     }
     public function update(Request $request, User $user) {
         $isOwnProfile = $request->user()->id === $user->id;
@@ -375,6 +396,15 @@ class UserController extends Controller {
         $endDate = $request->has('end')
             ? Carbon::parse($request->get('end'))->endOfDay()
             : now()->addMonths(3)->endOfDay();
-        return app(CalculateDailyWorkload::class)->execute($_, $startDate, $endDate);
+        return app(CalculateDailyWorkload::class)->execute($_, $startDate, $endDate, $request->boolean('with_events'), $request->user()->is($_), $request->boolean('with_calendar', true));
+    }
+    public function indexCalendarEvents(Request $request, User $_, PersonalCalendar $calendar) {
+        $request->validate([
+            'start' => 'required|date',
+            'end'   => 'required|date|after_or_equal:start',
+        ]);
+        $occurrences = $calendar->occurrences($_, Carbon::parse($request->get('start'))->startOfDay(), Carbon::parse($request->get('end'))->addDay()->startOfDay(), true);
+        $visible     = array_filter($occurrences, fn (CalendarOccurrence $occurrence) => $request->user()->is($_) || ! $occurrence->private);
+        return array_values(array_map(fn (CalendarOccurrence $occurrence) => $occurrence->toArray(), $visible));
     }
 }

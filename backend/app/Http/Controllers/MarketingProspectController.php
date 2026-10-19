@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\TouchpointChannel;
 use App\Http\Controllers\Traits\MarketingControllerHelpers;
 use App\Http\Requests\Marketing\ConvertProspectRequest;
 use App\Http\Requests\Marketing\ProspectRequest;
@@ -9,9 +10,11 @@ use App\Http\Requests\Marketing\StoreProspectFromAddonRequest;
 use App\Http\Requests\PhoneLookupRequest;
 use App\Models\MarketingProspect;
 use App\Models\MarketingProspectActivity;
+use App\Models\Vcard;
 use App\Services\MarketingDashboardService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class MarketingProspectController extends Controller {
     use MarketingControllerHelpers;
@@ -30,7 +33,31 @@ class MarketingProspectController extends Controller {
             'activities' => fn ($q) => $q->orderBy('scheduled_at'),
             'companyContact.contact',
             'companyContact.company',
+            'touchpoints' => fn ($q) => $q->with('user')->latest('occurred_at'),
         ]);
+    }
+    public function showProspectDuplicates(MarketingProspect $marketingProspect) {
+        return $marketingProspect->findDuplicates();
+    }
+    public function mergeProspect(Request $request, MarketingProspect $marketingProspect) {
+        $validated = $request->validate(['source_id' => 'required|integer|exists:marketing_prospects,id']);
+
+        return $marketingProspect->mergeFrom(MarketingProspect::findOrFail($validated['source_id']));
+    }
+    public function rescheduleOverdueActivities(Request $request) {
+        $validated = $request->validate([
+            'date'                    => 'required|date|after_or_equal:today',
+            'user_id'                 => 'nullable|integer',
+            'marketing_initiative_id' => 'nullable|integer',
+            'channel'                 => ['nullable', Rule::enum(TouchpointChannel::class)],
+        ]);
+
+        return ['moved' => MarketingProspectActivity::rescheduleOverdue(
+            now()->parse($validated['date'])->startOfDay(),
+            $request->has('user_id') ? ($validated['user_id'] ?? null) : $request->user()->id,
+            $validated['marketing_initiative_id'] ?? null,
+            TouchpointChannel::tryFrom($validated['channel'] ?? ''),
+        )];
     }
     public function showProspectByPhone(PhoneLookupRequest $request): JsonResponse {
         $prospect = MarketingProspect::searchByPhone($request->validated('phone_number'));
@@ -50,6 +77,11 @@ class MarketingProspectController extends Controller {
 
         if (! isset($validated['user_id'])) {
             $validated['user_id'] = $request->user()->id;
+        }
+
+        $existing = MarketingProspect::findByIdentity(new Vcard($validated['vcard'] ?? ''), $validated['marketing_initiative_id'])->first();
+        if ($existing) {
+            return response()->json(['error' => 'Prospect already exists', 'prospect' => $existing], 409);
         }
 
         $prospect = MarketingProspect::create($validated);
@@ -110,7 +142,8 @@ class MarketingProspectController extends Controller {
         if (isset($result['error'])) {
             $statusCode = match (true) {
                 str_contains($result['error'], 'already converted') => 400,
-                str_contains($result['error'], 'no vcard data')     => 422,
+                str_contains($result['error'], 'no vcard data'),
+                str_contains($result['error'], 'no company')        => 422,
                 default                                             => 500,
             };
 

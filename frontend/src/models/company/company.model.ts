@@ -86,6 +86,7 @@ export class Company extends VcardClass implements HasInvoiceItems, IHasFiles, I
     earliest_invoice?: { created_at: string };
     remarketing_interval?: number;
     remarketing_due_at?: string;
+    last_contacted_at?: string | null;
     desicion_duration?: number;
     billing_considerations?: BillingConsiderationDto[];
     quote_acceptance_rate?: number | null;
@@ -105,7 +106,7 @@ export class Company extends VcardClass implements HasInvoiceItems, IHasFiles, I
     hasTimeBudget!: () => boolean;
     frontendUrl = (): string => `/customers/${this.id}`;
     companyId = (): string => this.id;
-    lastUpdateDuration = () => dayjs().diff(dayjs(this.updated_at), 'days');
+    lastContactDuration = () => dayjs().diff(dayjs(this.last_contacted_at ?? this.created_at), 'days');
     isVatExcempt = computed(() => (this.snapshot().vat_id?.length ?? 0) > 0);
     vatRate = computed(() => this.isVatExcempt() || !this.isEuropeanCountry() ? 0 : nx().global.user!.getFloatParam('VAT_RATE', 19)!);
     remarketingOption = computed((): RecurrenceOption => recurrenceOf(this.snapshotAsThis().remarketing_interval));
@@ -123,7 +124,7 @@ export class Company extends VcardClass implements HasInvoiceItems, IHasFiles, I
     averagePaymentDelay = computed((): number => this.snapshot().avg_payment_delay_days ?? 0);
     remarketingProgress = computed(() => {
         const days = this.remarketingDays();
-        return days === 0 ? 0 : this.lastUpdateDuration() / days;
+        return days === 0 ? 0 : this.lastContactDuration() / days;
     });
 
     revenue12m = computed((): number => { this.snapshot(); return +(this.getParam('INVOICE_REVENUE_12M') ?? 0) });

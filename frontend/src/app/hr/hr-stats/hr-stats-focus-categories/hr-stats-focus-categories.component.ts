@@ -10,6 +10,7 @@ import { EmptyStateComponent } from '@shards/empty-state/empty-state.component';
 import { Dictionary } from '@constants/constants';
 import type { EChartsOption, SeriesOption } from 'echarts';
 import { ChartAxisTooltipParamDto } from '@models/_core/api-response';
+import { SpinnerComponent } from '@shards/spinner/spinner.component';
 
 interface FocusCategoryData {
     id: number;
@@ -26,7 +27,7 @@ interface FocusCategoryData {
 
 @Component({
     selector: 'hr-stats-focus-categories',
-    imports: [NgxEchartsModule, EmptyStateComponent],
+    imports: [NgxEchartsModule, EmptyStateComponent, SpinnerComponent],
     templateUrl: './hr-stats-focus-categories.component.html',
     styleUrl: './hr-stats-focus-categories.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -36,6 +37,7 @@ export class HrStatsFocusCategoriesComponent {
     #global = inject(GlobalService);
 
     readonly #focusCategories = modelListResource<FocusCategoryData>(() => this.#statsService.showFocusCategories());
+    readonly loaded = this.#focusCategories.hasValue;
     readonly users = computed(() =>
         [...this.#focusCategories.value()].sort((a, b) => this.#global.team.findIndex((t) => t.id === a.id.toString()) - this.#global.team.findIndex((t) => t.id === b.id.toString())),
     );

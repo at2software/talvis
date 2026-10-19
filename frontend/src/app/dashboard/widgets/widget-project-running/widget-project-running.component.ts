@@ -5,13 +5,14 @@ import { WIDGET_SHARED } from '../widgets.shared';
 import { PermissionsDirective } from '@directives/permissions.directive';
 import { WidgetService } from '@models/widget.service';
 import { ParamChartSeriesDto } from '@models/_core/api-response';
+import { ValueUnitComponent } from '@shards/value-unit/value-unit.component';
 
 @Component({
     changeDetection: ChangeDetectionStrategy.OnPush,
     selector: 'widget-project-running',
     templateUrl: './widget-project-running.component.html',
     styleUrls: ['./../base.widget.component.scss'],
-    imports: [...WIDGET_SHARED, PermissionsDirective],
+    imports: [ValueUnitComponent, ...WIDGET_SHARED, PermissionsDirective],
 })
 export class WidgetProjectRunningComponent extends BaseWidgetComponent {
     #widgetService = inject(WidgetService);

@@ -1,5 +1,5 @@
 ﻿import { ActivityTabComponent } from '@activity/activity-tab.component';
-import { ChangeDetectionStrategy, Component, inject, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, inject, signal, untracked, viewChild } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
 import { ScrollbarComponent } from '@app/app/scrollbar/scrollbar.component';
@@ -23,6 +23,14 @@ export class TabTasksComponent {
     readonly #global = inject(GlobalService);
     readonly #counts = new Map<string, number>();
     readonly user = toSignal(this.#global.init.pipe(map(() => this.#global.user)));
+    readonly opened = signal(false);
+
+    constructor() {
+        effect(() => {
+            const tab = this.tabComponent();
+            untracked(() => (tab.onFocus = () => this.opened.set(true)));
+        });
+    }
 
     onCount(key: string, n: number) {
         this.#counts.set(key, n);

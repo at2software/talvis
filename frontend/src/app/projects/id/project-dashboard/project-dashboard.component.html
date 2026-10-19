@@ -98,7 +98,7 @@
                         <i class="text-primary">add</i>
                     </button>
                     <div ngbDropdownMenu style="text-transform: none">
-                        @for (p of factory.getPluginEncryptions(); track $index) {
+                        @for (p of factory.getLinkablePluginEncryptions(); track $index) {
                         @let _inst = factory.instanceFor(p);
                         <button class="dropdown-item pointer hstack gap-2 text-nowrap px-2"
                             (click)="onNewPluginLink(_inst!)" tabindex="0"

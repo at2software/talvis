@@ -123,6 +123,23 @@ export class ProjectMilestonesComponent {
             });
     };
 
+    onAddWholeProject = () => {
+        this.#projectService
+            .createMilestone(this.project.id, {
+                name: this.project.name,
+                workload_hours: this.project.wholeProjectHours(),
+                ...this.#nextMilestoneSlot(),
+            })
+            .pipe(takeUntilDestroyed(this.#destroyRef))
+            .subscribe({
+                next: () => {
+                    Toast.success($localize`:@@i18n.milestone.created:milestone created`);
+                    this.loadMilestones();
+                },
+                error: () => Toast.error($localize`:@@i18n.milestone.createError:failed to create milestone`),
+            });
+    };
+
     #nextMilestoneSlot() {
         const lastDue = (this.project.milestones ?? []).map((m) => m.due_at).filter((d): d is string => !!d).sort().at(-1);
         const today = dayjs().startOf('day');

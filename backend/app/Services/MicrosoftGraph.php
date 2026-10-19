@@ -163,6 +163,27 @@ class MicrosoftGraph {
             ? $this->request()->post($path.'setUserPreferredPresence', ['availability' => $availability, 'activity' => $availability === 'Offline' ? 'OffWork' : $availability])->throw()
             : $this->request()->post($path.'clearUserPreferredPresence')->throw();
     }
+
+    /** @return list<array<string, mixed>> */
+    public function calendarView(string $mailbox, \DateTimeInterface $from, \DateTimeInterface $until): array {
+        $request = $this->request()->withHeaders(['Prefer' => 'outlook.timezone="'.self::TIME_ZONE.'"']);
+        $events  = [];
+        $url     = 'users/'.rawurlencode($mailbox).'/calendar/calendarView';
+        $query   = [
+            'startDateTime' => $from->format(DATE_ATOM),
+            'endDateTime'   => $until->format(DATE_ATOM),
+            '$select'       => 'id,subject,start,end,isAllDay,isCancelled,showAs',
+            '$top'          => 200,
+        ];
+        while ($url) {
+            $page   = $request->get($url, $query)->throw();
+            $events = [...$events, ...$page->json('value', [])];
+            $url    = $page->json('@odata.nextLink');
+            $query  = [];
+        }
+        return $events;
+    }
+
     public function scheduleAutomaticReplies(string $mailbox, \DateTimeInterface $from, \DateTimeInterface $until, string $message): void {
         $range = self::allDayRange($from, $until);
         $this->request()->patch('users/'.rawurlencode($mailbox).'/mailboxSettings', [

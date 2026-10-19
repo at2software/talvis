@@ -2,7 +2,7 @@
     <div class="card-header gap-2">
         <n>invoice</n>
         <span class="flex-fill text-truncate" i18n="@@i18n.widget-invoice-manager">invoice manager</span>
-        <div class="chart-title" roles="invoicing" i18n-ngbTooltip="@@i18n.widget.invoiceManager.headline" ngbTooltip="currently invoiceable in total: uninvoiced hours on time-based projects, unbilled customer support and prepared invoice items">{{ value() ? (value()! | mshort) : (value() | loading) }}</div>
+        <div class="chart-title" roles="invoicing" i18n-ngbTooltip="@@i18n.widget.invoiceManager.headline" ngbTooltip="currently invoiceable in total: uninvoiced hours on time-based projects, unbilled customer support and prepared invoice items"><value-unit [value]="value() ? (value()! | mshort) : (value() | loading)" /></div>
     </div>
 
     @if (hasInvoicesModule()) {

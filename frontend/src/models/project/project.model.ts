@@ -120,6 +120,7 @@ export class Project extends Serializable implements HasInvoiceItems, IHasFiles,
     readonly getExtState             = computed((): string => { this.snapshot(); return this.state?.name || ''; });
     readonly remainingAllocatedTime  = computed(() => { this.snapshot(); return this.assignees.reduce((a, b) => a + parseFloat('' + b.hours_planned), 0); });
     readonly remainingTimeBudget     = computed(() => { this.snapshot(); return (this.work_estimated ?? 0) - this.hours_invested; });
+    readonly wholeProjectHours       = computed((): number | undefined => { this.snapshot(); const remaining = this.remainingTimeBudget(); return (this.work_estimated ?? 0) > 0 && remaining > 0 ? Math.round(remaining * 10) / 10 : undefined; });
     readonly timePercentage          = computed(() => { this.snapshot(); return this.hours_invested / (this.work_estimated ?? 1); });
     readonly worksharesTotal         = computed(() => { this.snapshot(); return ((this.var.workshares as { val?: number }[]) ?? []).reduce((a: number, b) => a + (b.val ?? 0), 0); });
     readonly assignedUsers           = computed((): Assignee[] => { this.snapshot(); return this.assignees.filter((_) => _.assignee instanceof User); });

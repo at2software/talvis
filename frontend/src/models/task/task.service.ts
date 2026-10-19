@@ -14,7 +14,7 @@ import { environment } from '@environments/environment';
 
 @Service()
 export class TaskService extends PluginInstance implements ITaskPlugin {
-    ITaskPluginProperty!: boolean;
+    ITaskPluginProperty: boolean = true;
     tasks: Task[] = [];
     needsHttpInterceptor: boolean = false;
     _http = inject(HttpClient);
@@ -37,6 +37,8 @@ export class TaskService extends PluginInstance implements ITaskPlugin {
     canCreateTasks = (): boolean => true;
     myUser = () => nx().global.user;
     indexTasks = (): Observable<Task[]> => this.aget('tasks', {}, this.#toTask);
+    indexInbox = (): Observable<Task[]> => this.aget('tasks/inbox', {}, this.#toTask);
+    capture = (name: string): Observable<Task> => this.post('tasks', { name }, this.#toTask);
     getUsers = () => nx().global.team;
     getUserFor = (userId: string) => this.getUsers().find((_) => _.id === userId);
     getLabels = () => [];

@@ -1,3 +1,6 @@
+@let _milestone = trackedMilestone();
+@let _percent = dailyWorkloadPercent();
+
 <div class="modal d-block" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -6,123 +9,73 @@
                 <button type="button" class="btn-close" (click)="onCancel()" aria-label="Close"></button>
             </div>
             <form [formGroup]="milestoneForm" (ngSubmit)="onSave()">
-                <div class="modal-body">
-                    <!-- Title -->
-                    <div class="row mb-3 align-items-center">
-                        <div class="col-12 col-md-6 col-xl-3 text-truncate" i18n="@@i18n.common.title">title</div>
-                        <div class="col">
-                            <input type="text" class="form-control form-control-sm" formControlName="name" [class.is-invalid]="milestoneForm.get('name')?.invalid && milestoneForm.get('name')?.touched" />
-                            @if (milestoneForm.get('name')?.invalid && milestoneForm.get('name')?.touched) {
-                                <div class="invalid-feedback">
-                                    <span i18n="@@i18n.milestone.titleRequired">title is required</span>
-                                </div>
-                            }
-                        </div>
+                <div class="modal-body vstack gap-3">
+                    <div class="input-group">
+                        <span class="input-group-text" i18n="@@i18n.common.title">title</span>
+                        <input type="text" class="form-control" formControlName="name" ngbAutofocus [class.is-invalid]="milestoneForm.get('name')?.invalid && milestoneForm.get('name')?.touched" />
                     </div>
-                    <!-- Duration with Date Range Picker + Workload -->
-                    <div class="row mb-3 align-items-center">
-                        <div class="col-12 col-md-6 col-xl-3 text-truncate" i18n="@@i18n.common.duration">duration</div>
-                        <div class="col d-flex gap-2 align-items-center">
-                            <input type="text" style="width: 160px" class="form-control form-control-sm" ngxDaterangepickerMd [(ngModel)]="dateRangeModel" [ngModelOptions]="{ standalone: true }" [ranges]="dateRanges" [showCustomRangeLabel]="true" [alwaysShowCalendars]="true" (datesUpdated)="onDateRangeChange($event)" [locale]="{ applyLabel: 'Apply', format: 'DD.MM.YYYY' }" readonly />
-                            <input type="number" style="width: 80px" class="form-control form-control-sm text-end" formControlName="workload_hours" suffix="h" min="0" step="0.5" placeholder="e.g. 8" i18n-placeholder="@@i18n.projects.eg81640" />
-                            @if (dailyWorkloadPercent() !== null) {
-                                <span class="badge text-bg-secondary" i18n-ngbTooltip="@@i18n.common.workloadHoursHint" ngbTooltip="Estimated share of the assignee's daily workload, based on duration and estimated hours">{{ dailyWorkloadPercent() }}%</span>
-                            }
+
+                    <div class="row g-2">
+                        <div class="col-12 col-sm-7">
+                            <div class="input-group">
+                                <span class="input-group-text" i18n="@@i18n.common.duration">duration</span>
+                                <input type="text" class="form-control" ngxDaterangepickerMd [(ngModel)]="dateRangeModel" [ngModelOptions]="{ standalone: true }" [ranges]="dateRanges" [showCustomRangeLabel]="true" [alwaysShowCalendars]="true" (datesUpdated)="onDateRangeChange($event)" [locale]="{ applyLabel: 'Apply', format: 'DD.MM.YYYY' }" readonly />
+                            </div>
                         </div>
-                    </div>
-                    <!-- Project -->
-                    <div class="row mb-3 align-items-center">
-                        <div class="col-12 col-md-6 col-xl-3 text-truncate" i18n="@@i18n.common.project">project</div>
-                        <div class="col">
-                            <div class="dropdown" style="width: 160px" ngbDropdown>
-                                <button type="button" class="btn btn-outline-primary btn-sm dropdown-toggle w-100 d-flex align-items-center justify-content-between" ngbDropdownToggle [disabled]="selectableProjects().length <= 1">
-                                    <span class="text-truncate">{{ selectedProject()?.name }}</span>
-                                </button>
-                                <div class="dropdown-menu w-100" ngbDropdownMenu>
-                                    @for (proj of selectableProjects(); track proj.id) {
-                                        <button type="button" class="dropdown-item" [class.active]="selectedProject()?.id === proj.id" (click)="selectProject(proj)">
-                                            {{ proj.name }}
-                                        </button>
-                                    }
-                                </div>
+                        <div class="col-12 col-sm-5">
+                            <div class="input-group">
+                                <input type="number" class="form-control text-end" formControlName="workload_hours" min="0" step="0.5" placeholder="8" />
+                                <span class="input-group-text">h</span>
+                                @if (_percent !== null) {
+                                    <span class="input-group-text text-muted" i18n-ngbTooltip="@@i18n.common.workloadHoursHint" ngbTooltip="Estimated share of the assignee's daily workload, based on duration and estimated hours">{{ _percent }}%</span>
+                                }
                             </div>
                         </div>
                     </div>
-                    <!-- Progress -->
+
+                    <div class="input-group">
+                        <span class="input-group-text" i18n="@@i18n.common.project">project</span>
+                        <select class="form-select" [disabled]="selectableProjects().length <= 1" [ngModel]="selectedProjectId()" (ngModelChange)="selectedProjectId.set($event)" [ngModelOptions]="{ standalone: true }">
+                            @for (project of selectableProjects(); track project.id) {
+                                <option [value]="'' + project.id">{{ project.name }}</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="input-group">
+                        <span class="input-group-text" i18n="@@i18n.common.assignee">assignee</span>
+                        <select class="form-select" formControlName="user_id">
+                            <option [ngValue]="null" i18n="@@i18n.common.unassigned">unassigned</option>
+                            @for (user of assigneeOptions(); track user.id) {
+                                <option [ngValue]="user.id">{{ user.getName() }}</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="btn-group w-100" role="group">
+                        @for (state of states; track state) {
+                            <button type="button" class="btn btn-sm btn-outline-primary" [class.active]="milestoneForm.get('state')?.value === state" (click)="selectState(state)">{{ milestoneStates[state].name }}</button>
+                        }
+                    </div>
+
                     @if (hasInvoiceItems()) {
-                        <div class="row mb-3 align-items-center">
-                            <div class="col-12 col-md-6 col-xl-3 text-truncate" i18n="@@i18n.milestone.progress">progress</div>
-                            <div class="col text-white">
-                                {{ (milestoneForm.get('progress')?.value || 0) * 100 | number: '1.0-0' }}%
-                                <span class="text-muted"> ({{ totalInvoiceItemDuration() }}h total) </span>
-                            </div>
+                        <div class="small text-muted">
+                            <span i18n="@@i18n.milestone.progress">progress</span>
+                            {{ (milestoneForm.get('progress')?.value || 0) * 100 | number: '1.0-0' }}% ({{ totalInvoiceItemDuration() }}h total)
                         </div>
                     }
-                    <!-- State -->
-                    <div class="row mb-3 align-items-center">
-                        <div class="col-12 col-md-6 col-xl-3 text-truncate" i18n="@@i18n.common.state">state</div>
-                        <div class="col">
-                            <div class="btn-group d-flex" role="group">
-                                <button type="button" class="btn btn-sm" [class.btn-secondary]="milestoneForm.get('state')?.value === MilestoneState.TODO" [class.btn-outline-primary]="milestoneForm.get('state')?.value !== MilestoneState.TODO" (click)="selectState(MilestoneState.TODO)">
-                                    {{ milestoneStates[MilestoneState.TODO].name }}
-                                </button>
-                                <button type="button" class="btn btn-sm" [class.btn-info]="milestoneForm.get('state')?.value === MilestoneState.IN_PROGRESS" [class.btn-outline-primary]="milestoneForm.get('state')?.value !== MilestoneState.IN_PROGRESS" (click)="selectState(MilestoneState.IN_PROGRESS)">
-                                    {{ milestoneStates[MilestoneState.IN_PROGRESS].name }}
-                                </button>
-                                <button type="button" class="btn btn-sm" [class.btn-success]="milestoneForm.get('state')?.value === MilestoneState.DONE" [class.btn-outline-primary]="milestoneForm.get('state')?.value !== MilestoneState.DONE" (click)="selectState(MilestoneState.DONE)">
-                                    {{ milestoneStates[MilestoneState.DONE].name }}
-                                </button>
-                            </div>
+
+                    <textarea class="form-control" formControlName="comments" rows="2" placeholder="Add a comment..." i18n-placeholder="@@i18n.projects.addAComment"></textarea>
+
+                    <div>
+                        <div class="hstack gap-2 mb-1">
+                            <span class="flex-fill text-muted small" i18n="@@i18n.common.tasks">tasks</span>
+                            <i class="text-primary pointer" role="button" tabindex="0" (click)="onAddTask()" (keydown.enter)="onAddTask()">add</i>
                         </div>
-                    </div>
-                    <!-- Assignee -->
-                    <div class="row mb-3 align-items-center">
-                        <div class="col-12 col-md-6 col-xl-3 text-truncate" i18n="@@i18n.common.assignee">assignee</div>
-                        <div class="col">
-                            <div class="dropdown" ngbDropdown>
-                                <button type="button" class="btn btn-outline-primary btn-sm dropdown-toggle w-100 d-flex align-items-center justify-content-between" ngbDropdownToggle>
-                                    <span class="d-flex align-items-center">
-                                        <i class="me-2">person</i>
-                                        {{ getSelectedUser()?.getName() || 'Unassigned' }}
-                                    </span>
-                                </button>
-                                <div class="dropdown-menu w-100" ngbDropdownMenu>
-                                    <button type="button" class="dropdown-item" [class.active]="!milestoneForm.get('user_id')?.value" (click)="selectUser(null)">
-                                        <i class="me-2">person_off</i>
-                                        <span i18n="@@i18n.common.unassigned">unassigned</span>
-                                    </button>
-                                    @if (projectUsers().length > 0) {
-                                        <div class="dropdown-divider"></div>
-                                    }
-                                    @for (user of projectUsers(); track user.id) {
-                                        <button type="button" class="dropdown-item" [class.active]="milestoneForm.get('user_id')?.value === user.id" (click)="selectUser(user)">
-                                            <i class="me-2">person</i>
-                                            {{ user.getName() }}
-                                        </button>
-                                    }
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- Comment -->
-                    <div class="row mb-3 align-items-start">
-                        <div class="col-12 col-md-6 col-xl-3 text-truncate" i18n="@@i18n.common.comment">comment</div>
-                        <div class="col">
-                            <textarea class="form-control form-control-sm" formControlName="comments" rows="2" placeholder="Add a comment..." i18n-placeholder="@@i18n.projects.addAComment"></textarea>
-                        </div>
-                    </div>
-                    <!-- Tasks -->
-                    <div class="mb-3">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <div class="flex-fill text-truncate" i18n="@@i18n.common.tasks">tasks</div>
-                            <button type="button" class="btn btn-sm btn-plain text-primary" (click)="onAddTask()">
-                                <i>add</i>
-                            </button>
-                        </div>
-                        @if (trackedMilestone().tasks.length) {
-                            <ul class="list-group mb-0">
-                                @for (task of trackedMilestone().tasks; track task.id) {
-                                    <li class="list-group-item d-flex align-items-center gap-2" [nx]="task" [tables]="trackedMilestone().tasks">
+                        @if (_milestone.tasks.length) {
+                            <ul class="list-group">
+                                @for (task of _milestone.tasks; track task.id) {
+                                    <li class="list-group-item hstack gap-2" [nx]="task" [tables]="_milestone.tasks">
                                         <i class="text-muted small">task</i>
                                         <span class="flex-fill text-truncate small">{{ task.name }}</span>
                                     </li>
@@ -134,21 +87,11 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <div class="d-flex justify-content-between w-100">
-                        <button type="button" class="btn btn-plain text-danger btn-sm" (click)="onDeleteMilestone()">
-                            <i class="me-1">delete</i>
-                            <span i18n="@@i18n.common.delete">delete</span>
-                        </button>
-                        <div class="d-flex gap-2">
-                            <button type="button" class="btn btn-sm" (click)="onCancel()">
-                                <span i18n="@@i18n.common.cancel">cancel</span>
-                            </button>
-                            <button type="submit" class="btn btn-primary btn-sm" [disabled]="milestoneForm.invalid">
-                                <i class="me-1">save</i>
-                                <span i18n="@@i18n.common.save">save</span>
-                            </button>
-                        </div>
-                    </div>
+                    <button type="button" class="btn btn-plain text-danger me-auto px-0" (click)="onDeleteMilestone()">
+                        <i class="me-1">delete</i><span i18n="@@i18n.common.delete">delete</span>
+                    </button>
+                    <button type="button" class="btn" (click)="onCancel()" i18n="@@i18n.common.cancel">cancel</button>
+                    <button type="submit" class="btn btn-primary" [disabled]="milestoneForm.invalid" i18n="@@i18n.common.save">save</button>
                 </div>
             </form>
         </div>

@@ -9,10 +9,12 @@ use App\Flow\MachineAbility;
 use App\Flow\Models\Approval;
 use App\Flow\Models\AuditEntry;
 use App\Flow\Models\Machine;
+use App\Jobs\ChatSendMessageJob;
 use App\Models\Project;
 use App\Models\User;
 use App\Models\Vacation;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Mail;
 use ReflectionMethod;
 use Tests\TestCase;
@@ -26,6 +28,7 @@ class ApprovalTest extends TestCase {
         parent::setUp();
         $this->approvals = app(ApprovalService::class);
         Mail::fake();
+        Bus::fake([ChatSendMessageJob::class]);
     }
     private function userWithRole(string ...$roles): User {
         $user = User::factory()->create();
@@ -96,6 +99,19 @@ class ApprovalTest extends TestCase {
         $this->assertSame(Approval::REJECTED, $approval->fresh()->decision);
 
         $this->assertSame(409, $this->refusal(fn () => $this->approvals->approve($approval, $this->userWithRole('project_manager')))->render()->getStatusCode());
+    }
+    public function test_changes_can_only_be_requested_on_job_approvals(): void {
+        $approval = $this->approvals->request(Project::factory()->create(), 'project_manager', null, 1, 'architecture');
+
+        $this->assertSame(422, $this->refusal(fn () => $this->approvals->requestChanges($approval, $this->userWithRole('project_manager'), 'Rework'))->render()->getStatusCode());
+        $this->assertTrue($approval->fresh()->isPending());
+    }
+    public function test_only_gate_approvals_of_projects_and_jobs_are_announced_in_chat(): void {
+        $project = Project::factory()->create();
+        $this->approvals->request($project, 'project_manager', $this->userWithRole('project_manager'), 1, 'architecture');
+        $this->approvals->request($project, 'project_manager', null);
+
+        $this->assertCount(1, Bus::dispatched(ChatSendMessageJob::class)->filter(fn (ChatSendMessageJob $job) => (fn () => $this->project)->call($job)));
     }
     public function test_selected_option_must_be_one_of_the_offered_options(): void {
         $approval = $this->approvals->request(Project::factory()->create(), 'project_manager', null, 1, 'architecture', ['options' => ['monolith', 'services']]);

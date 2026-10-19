@@ -1,5 +1,6 @@
 @let _suggested = suggested();
 @let _observed = observed();
+@let _loaded = loaded();
 <div class="card mb-3">
     <div class="card-header hstack gap-2">
         <span class="flex-fill" i18n="@@i18n.marketing.suggested_for_remarketing">suggested for remarketing</span>
@@ -9,7 +10,9 @@
         @for (item of _suggested; track item.id) {
             <ng-container *ngTemplateOutlet="row; context: { $implicit: item }"></ng-container>
         }
-        @if (!_suggested.length) {
+        @if (!_loaded) {
+            <li class="list-group-item"><spinner class="py-3" [size]="24"></spinner></li>
+        } @else if (!_suggested.length) {
             <li class="list-group-item text-muted small text-center py-3" i18n="@@i18n.marketing.no_suggestions">no suggestions available</li>
         }
     </ul>
@@ -24,7 +27,9 @@
         @for (item of _observed; track item.id) {
             <ng-container *ngTemplateOutlet="row; context: { $implicit: item }"></ng-container>
         }
-        @if (!_observed.length) {
+        @if (!_loaded) {
+            <li class="list-group-item"><spinner class="py-3" [size]="24"></spinner></li>
+        } @else if (!_observed.length) {
             <li class="list-group-item text-muted small text-center py-3" i18n="@@i18n.marketing.no_remarketing_intervals">no remarketing intervals configured</li>
         }
     </ul>
@@ -37,7 +42,8 @@
             <avatar [object]="item"></avatar>
             <div class="flex-fill text-truncate fw-medium">{{ item.name }}</div>
             <small class="text-muted text-nowrap remarketing-revenue" ngbTooltip="revenue last 12 months" i18n-ngbTooltip="@@i18n.marketing.revenue_last_12_months">{{ item.revenue_12 | money }}</small>
-            <small class="text-muted text-nowrap remarketing-date text-end" ngbTooltip="last contact" i18n-ngbTooltip="@@i18n.marketing.last_contact">{{ item.updated_at | date }}</small>
+            <small class="text-muted text-nowrap remarketing-date text-end" ngbTooltip="last contact" i18n-ngbTooltip="@@i18n.marketing.last_contact">{{ item.last_contacted_at ? (item.last_contacted_at | date) : '—' }}</small>
+            <i class="text-primary cursor-pointer" tabindex="0" (click)="logContact(item)" (keyup.enter)="logContact(item)" i18n-ngbTooltip="@@i18n.marketing.log_contact" ngbTooltip="log contact">add_ic_call</i>
             <div class="d-flex align-items-center gap-1">
                 <select class="form-select form-select-sm remarketing-select" [autosave]="item" [(ngModel)]="item.remarketing_interval">
                     @for (_ of recurrences; track _.value) {

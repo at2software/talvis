@@ -4,6 +4,9 @@ namespace App\Models;
 
 use App\Traits\VcardGenderTrait;
 use App\Traits\VcardTrait;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Http\Request;
@@ -51,6 +54,31 @@ class MarketingProspect extends BaseModel {
     }
     public function companyContact(): BelongsTo {
         return $this->belongsTo(CompanyContact::class);
+    }
+    public function touchpoints(): HasMany {
+        return $this->hasMany(MarketingTouchpoint::class);
+    }
+    public function logTouchpoint(User $user, array $data, ?MarketingProspectActivity $activity = null): MarketingTouchpoint {
+        return DB::transaction(function () use ($user, $data, $activity) {
+            $touchpoint = $this->touchpoints()->create([
+                'user_id'                        => $user->id,
+                'marketing_prospect_activity_id' => $activity?->id,
+                'company_id'                     => $this->companyContact?->company_id ?? $this->company_id,
+                'channel'                        => $data['channel'],
+                'result'                         => $data['result'],
+                'outcome'                        => $data['outcome'] ?? null,
+                'notes'                          => $data['notes'] ?? null,
+                'occurred_at'                    => now(),
+            ]);
+
+            $activity?->applyTouchpoint($touchpoint, isset($data['retry_at']) ? Carbon::parse($data['retry_at']) : null);
+
+            $status = $touchpoint->outcome?->prospectStatus();
+            if ($status && $this->refresh()->status !== 'converted') {
+                $this->update(['status' => $status]);
+            }
+            return $touchpoint;
+        });
     }
     public function activities(): HasMany {
         return $this->hasMany(MarketingProspectActivity::class, 'marketing_prospect_id');
@@ -334,18 +362,128 @@ class MarketingProspect extends BaseModel {
         }
         return $pattern;
     }
-    public static function createFromAddon(array $validated, $user): mixed {
-        $vcard       = new Vcard($validated['vcard']);
-        $linkedinUrl = $vcard->getFirstValue('URL');
-
-        if ($linkedinUrl) {
-            $existing = static::where('marketing_initiative_id', $validated['marketing_initiative_id'])
-                ->get()
-                ->first(fn ($p) => $p->linkedin_url === $linkedinUrl);
-
-            if ($existing) {
-                return ['error' => 'Prospect already exists', 'prospect' => $existing];
+    public static function identityKeys(Vcard $vcard): array {
+        $keys = [];
+        foreach ($vcard->getAttr('EMAIL') as $values) {
+            $email = strtolower(trim($values[0] ?? ''));
+            if (str_contains($email, '@')) {
+                $keys[] = "email:$email";
             }
+        }
+        foreach ($vcard->getAttr('URL') as $values) {
+            if (preg_match('#linkedin\.com/in/([^/?\s]+)#i', $values[0] ?? '', $matches)) {
+                $keys[] = 'linkedin:'.strtolower(rawurldecode($matches[1]));
+            }
+        }
+        foreach ($vcard->getAttr('TEL') as $values) {
+            if ($national = static::nationalPhoneDigits($values[0] ?? '')) {
+                $keys[] = "phone:$national";
+            }
+        }
+        return array_values(array_unique($keys));
+    }
+    private static function nationalPhoneDigits(string $phone): ?string {
+        $phone  = trim(str_replace('(0)', '', $phone));
+        $digits = preg_replace('/\D/', '', $phone);
+        if (str_starts_with($phone, '+') || str_starts_with($digits, '00')) {
+            $digits = preg_replace('/^(00)?49/', '', $digits);
+        }
+        $digits = ltrim($digits, '0');
+        return strlen($digits) >= 6 ? $digits : null;
+    }
+    private static function matchedBy(array $keys, Vcard $vcard): array {
+        return array_values(array_unique(array_map(
+            fn ($_) => explode(':', $_, 2)[0],
+            array_intersect($keys, static::identityKeys($vcard))
+        )));
+    }
+    private static function whereVcardMatches(Builder $query, array $keys): Builder {
+        return $query->where(function ($q) use ($keys) {
+            foreach ($keys as $key) {
+                [$type, $value] = explode(':', $key, 2);
+                match ($type) {
+                    'email'    => $q->orWhere('vcard', 'like', "%{$value}%"),
+                    'linkedin' => $q->orWhere('vcard', 'like', "%/in/{$value}%"),
+                    'phone'    => $q->orWhere('vcard', 'REGEXP', static::buildPhoneRegex($value)),
+                };
+            }
+        });
+    }
+    public static function findByIdentity(Vcard $vcard, ?int $initiativeId = null, ?int $exceptId = null): Collection {
+        $keys = static::identityKeys($vcard);
+        if (! $keys) {
+            return new Collection;
+        }
+        return static::whereVcardMatches(static::query(), $keys)
+            ->when($initiativeId, fn ($q) => $q->where('marketing_initiative_id', $initiativeId))
+            ->when($exceptId, fn ($q) => $q->whereKeyNot($exceptId))
+            ->get()
+            ->filter(fn ($_) => static::matchedBy($keys, $_->vcard))
+            ->values();
+    }
+    public function findDuplicates(): array {
+        $keys = static::identityKeys($this->vcard);
+        if (! $keys) {
+            return ['prospects' => [], 'company_contacts' => []];
+        }
+        $withMatch = fn ($vcardOf) => fn ($model) => $model->setAttribute('matched_by', static::matchedBy($keys, $vcardOf($model)));
+
+        return [
+            'prospects' => static::findByIdentity($this->vcard, null, $this->id)
+                ->load(['marketingInitiative:id,name', 'user'])
+                ->map($withMatch(fn ($_) => $_->vcard))
+                ->values(),
+            'company_contacts' => static::whereVcardMatches(CompanyContact::query(), $keys)
+                ->when($this->company_contact_id, fn ($q) => $q->whereKeyNot($this->company_contact_id))
+                ->with(['contact', 'company'])
+                ->get()
+                ->map($withMatch(fn ($_) => $_->vcard))
+                ->filter(fn ($_) => $_->matched_by)
+                ->values(),
+        ];
+    }
+    public function mergeFrom(self $other): static {
+        abort_if($other->is($this), 422, 'Cannot merge a prospect into itself');
+        abort_if($other->marketing_initiative_id !== $this->marketing_initiative_id, 422, 'Only prospects of the same initiative can be merged');
+
+        return DB::transaction(function () use ($other) {
+            $vcard   = $this->vcard;
+            $ownKeys = static::identityKeys($vcard);
+            foreach ($other->vcard->getRows() as $row) {
+                $name   = $row->getName();
+                $values = $row->getValues();
+                if (trim(implode('', $values)) === '') {
+                    continue;
+                }
+                if (in_array($name, ['EMAIL', 'TEL', 'URL'])) {
+                    $rowKeys = static::identityKeys((new Vcard)->addRow($row));
+                    if ($rowKeys ? ! array_intersect($rowKeys, $ownKeys) : ! in_array($values, $vcard->getAttr($name))) {
+                        $vcard->addRow($row);
+                    }
+                } elseif (in_array($name, ['ORG', 'TITLE', 'ROLE', 'ADR']) && trim(implode('', $vcard->getFirstAttr($name) ?? [])) === '') {
+                    $vcard->remove($name)->addRow($row);
+                }
+            }
+
+            $this->vcard = $vcard;
+            $this->fill([
+                'notes'              => implode('', array_filter([$this->notes, $other->notes])) ?: null,
+                'company_id'         => $this->company_id ?? $other->company_id,
+                'company_contact_id' => $this->company_contact_id ?? $other->company_contact_id,
+                'status'             => $other->status === 'converted' ? 'converted' : $this->status,
+            ])->save();
+
+            $other->touchpoints()->update(['marketing_prospect_id' => $this->id, 'marketing_prospect_activity_id' => null]);
+            $other->delete();
+
+            return $this->fresh(['marketingInitiative', 'leadSource', 'user', 'activities.marketingInitiativeActivity', 'companyContact.contact', 'companyContact.company']);
+        });
+    }
+    public static function createFromAddon(array $validated, $user): mixed {
+        $vcard    = new Vcard($validated['vcard']);
+        $existing = static::findByIdentity($vcard, $validated['marketing_initiative_id'])->first();
+        if ($existing) {
+            return ['error' => 'Prospect already exists', 'prospect' => $existing];
         }
 
         if (! $vcard->getFirstValue('FN')) {
@@ -414,6 +552,11 @@ class MarketingProspect extends BaseModel {
             return ['error' => 'Prospect has no vcard data - cannot convert'];
         }
 
+        $targetCompanyId = $createNew ? null : ($companyId ?: $this->company_id);
+        if (! $createNew && ! $targetCompanyId) {
+            return ['error' => 'Prospect has no company - select or create one'];
+        }
+
         if (! $nAttr && $fn) {
             $nameParts  = explode(' ', $fn);
             $familyName = array_pop($nameParts);
@@ -421,7 +564,7 @@ class MarketingProspect extends BaseModel {
             $nAttr      = [$familyName, $givenName, '', '', ''];
         }
 
-        return DB::transaction(function () use ($prospectVcardString, $fn, $nAttr, $createNew, $companyName, $companyId) {
+        return DB::transaction(function () use ($prospectVcardString, $fn, $nAttr, $createNew, $companyName, $targetCompanyId) {
             $contactVcard = new Vcard($prospectVcardString);
             $contactVcard->remove(['ORG', 'TITLE', 'ADR', 'TEL', 'EMAIL']);
             if ($fn) {
@@ -436,15 +579,11 @@ class MarketingProspect extends BaseModel {
             $companyContactVcard = new Vcard($prospectVcardString);
             $companyContactVcard->remove(['ORG', 'FN', 'N']);
 
-            $targetCompanyId = null;
-            if ($createNew && ! empty($companyName)) {
+            if ($createNew) {
                 $companyVcard = new Vcard;
                 $companyVcard->setProperty('FN', $companyName);
                 $companyVcard->setProperty('ORG', $companyName);
-                $company         = Company::create(['vcard' => $companyVcard->toVCardString(), 'flags' => 0]);
-                $targetCompanyId = $company->id;
-            } elseif (! empty($companyId)) {
-                $targetCompanyId = $companyId;
+                $targetCompanyId = Company::create(['vcard' => $companyVcard->toVCardString(), 'flags' => 0])->id;
             }
 
             $companyContact = CompanyContact::create([
@@ -457,6 +596,7 @@ class MarketingProspect extends BaseModel {
             $this->update([
                 'company_contact_id' => $companyContact->id,
                 'company_id'         => null,
+                'status'             => 'converted',
             ]);
 
             return ['prospect' => $this->load(['companyContact.contact', 'companyContact.company'])];

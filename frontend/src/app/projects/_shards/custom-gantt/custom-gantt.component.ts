@@ -16,6 +16,7 @@ import { Toast } from '@shards/toast/toast';
 import { environment } from '@environments/environment';
 import { Color } from '@constants/Color';
 import { storageGet, storageSet } from '@constants/storage';
+import { dayjs } from '@constants/date/dates';
 import { ToolbarComponent } from '@app/app/toolbar/toolbar.component';
 
 export type GanttRow =
@@ -204,7 +205,7 @@ export class CustomGanttComponent implements AfterViewInit {
         const end = new Date(this.#timelineEnd);
         end.setMonth(end.getMonth() + 1);
 
-        this.#userService.showDailyWorkload(user, start.toISOString().split('T')[0], end.toISOString().split('T')[0]).subscribe((data) => {
+        this.#userService.showDailyWorkload(user, dayjs(start).format('YYYY-MM-DD'), dayjs(end).format('YYYY-MM-DD')).subscribe((data) => {
             const workloadData = data as { daily_workload?: DailyWorkload[] };
             this.#workloadMap.clear();
             workloadData.daily_workload?.forEach((day) => this.#workloadMap.set(day.date, day));
@@ -222,7 +223,7 @@ export class CustomGanttComponent implements AfterViewInit {
     #getWorkloadForUnit(unit: TimelineUnit): number {
         switch (this.viewMode()) {
             case 'Day': {
-                const workload = this.#workloadMap.get(unit.date.toISOString().split('T')[0]);
+                const workload = this.#workloadMap.get(dayjs(unit.date).format('YYYY-MM-DD'));
                 return workload?.is_break ? -1 : (workload?.total_percent ?? 0);
             }
             case 'Week':
@@ -250,7 +251,7 @@ export class CustomGanttComponent implements AfterViewInit {
         for (let i = 0; i < days; i++) {
             const date = new Date(startDate);
             date.setDate(date.getDate() + i);
-            const workload = this.#workloadMap.get(date.toISOString().split('T')[0]);
+            const workload = this.#workloadMap.get(dayjs(date).format('YYYY-MM-DD'));
             if (workload && !workload.is_break) {
                 totalPercent += workload.total_percent;
                 validDays++;
@@ -829,7 +830,7 @@ export class CustomGanttComponent implements AfterViewInit {
         if (this.#resizingMilestone && this.#resizeStartDate && this.#resizeEndDate) {
             const deltaUnits = Math.round((event.clientX - this.#dragStartX) / this.UNIT_WIDTH());
             if (this.#resizingSide === 'right') {
-                this.#resizingMilestone.due_at = this.#applyDeltaToDate(this.#resizeEndDate, deltaUnits).toISOString().split('T')[0];
+                this.#resizingMilestone.due_at = dayjs(this.#applyDeltaToDate(this.#resizeEndDate, deltaUnits)).format('YYYY-MM-DD');
             }
             this.#updateMilestonePosition(this.#resizingMilestone);
             return;
@@ -843,12 +844,12 @@ export class CustomGanttComponent implements AfterViewInit {
                 const milestone = this.#renderedMilestones.find((rm) => rm.milestone.id === milestoneId)?.milestone;
                 if (!milestone) return;
                 const newStart = this.#applyDeltaToDate(originalDates.start, deltaUnits);
-                milestone.started_at = newStart.toISOString().split('T')[0];
+                milestone.started_at = dayjs(newStart).format('YYYY-MM-DD');
                 if (originalDates.end) {
-                    const duration = Math.floor((originalDates.end.getTime() - originalDates.start.getTime()) / (1000 * 60 * 60 * 24));
+                    const duration = dayjs(originalDates.end).diff(originalDates.start, 'day');
                     const newEnd = new Date(newStart);
                     newEnd.setDate(newEnd.getDate() + duration);
-                    milestone.due_at = newEnd.toISOString().split('T')[0];
+                    milestone.due_at = dayjs(newEnd).format('YYYY-MM-DD');
                 }
                 updatedMilestones.push(milestone);
             });
@@ -881,7 +882,7 @@ export class CustomGanttComponent implements AfterViewInit {
         }
 
         if (this.#resizingMilestone) {
-            this.#resizingMilestone.update({ started_at: this.#resizingMilestone.started_at, due_at: this.#resizingMilestone.due_at }, true).subscribe({
+            this.#resizingMilestone.update({ due_at: this.#resizingMilestone.due_at }, true).subscribe({
                 next: () => Toast.success($localize`:@@i18n.milestone.updated:Milestone updated successfully`),
                 error: () => Toast.error($localize`:@@i18n.milestone.updateError:Failed to update milestone`),
             });
@@ -954,12 +955,12 @@ export class CustomGanttComponent implements AfterViewInit {
                     const toEndDate = new Date(to.due_at);
                     const fromStartDate = new Date(from.started_at);
                     if (fromStartDate < toEndDate) {
-                        from.started_at = toEndDate.toISOString().split('T')[0];
+                        from.started_at = dayjs(toEndDate).format('YYYY-MM-DD');
                         if (from.due_at) {
-                            const duration = Math.floor((new Date(from.due_at).getTime() - fromStartDate.getTime()) / (1000 * 60 * 60 * 24));
+                            const duration = dayjs(from.due_at).diff(fromStartDate, 'day');
                             const newEnd = new Date(toEndDate);
                             newEnd.setDate(newEnd.getDate() + duration);
-                            from.due_at = newEnd.toISOString().split('T')[0];
+                            from.due_at = dayjs(newEnd).format('YYYY-MM-DD');
                         }
                         this.#updateMilestonePosition(from);
                         from.update({ started_at: from.started_at, due_at: from.due_at }, true).subscribe({

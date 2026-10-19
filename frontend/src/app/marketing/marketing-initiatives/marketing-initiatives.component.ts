@@ -9,6 +9,10 @@ import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { EmptyStateComponent } from '@shards/empty-state/empty-state.component';
 import { GuidedTourComponent } from '@shards/guided-tour/guided-tour.component';
 import { SpinnerComponent } from '@shards/spinner/spinner.component';
+import { NxStatic, TBroadcast } from '@app/nx/nx.static';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { GlobalService } from '@models/global.service';
+import { filter } from 'rxjs';
 
 @Component({
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -21,6 +25,7 @@ export class MarketingInitiativesComponent {
     #marketingService = inject(MarketingService);
     #router = inject(Router);
     #route = inject(ActivatedRoute);
+    #global = inject(GlobalService);
 
     #initiatives = modelResource(() => this.#marketingService.indexInitiatives());
     isLoading = this.#initiatives.isLoading;
@@ -31,6 +36,7 @@ export class MarketingInitiativesComponent {
     showRootOnly = signal(true);
     searchTerm = signal('');
     statusFilter = signal('active');
+    onlySubscribed = signal(false);
 
     newInitiative: Partial<MarketingInitiative> = {
         name: '',
@@ -41,10 +47,12 @@ export class MarketingInitiativesComponent {
     initiatives = computed(() => {
         const term = this.searchTerm().toLowerCase();
         const status = this.statusFilter();
+        const onlySubscribed = this.onlySubscribed();
         return this.allInitiatives()
             .filter((i) => !term || i.name?.toLowerCase().includes(term) || i.description?.toLowerCase().includes(term))
             .filter((i) => !status || i.status === status)
             .filter((i) => !this.showRootOnly() || !i.parent_id)
+            .filter((i) => !onlySubscribed || this.#isSubscribed(i))
             .sort((a, b) => (b.prospects_count || 0) - (a.prospects_count || 0));
     });
 
@@ -55,10 +63,20 @@ export class MarketingInitiativesComponent {
             active: all.filter((i) => i.status === 'active').length,
             paused: all.filter((i) => i.status === 'paused').length,
             completed: all.filter((i) => i.status === 'completed').length,
+            subscribed: all.filter((i) => this.#isSubscribed(i)).length,
         };
     });
 
     constructor() {
+        NxStatic.broadcast$
+            .pipe(
+                takeUntilDestroyed(),
+                filter((e) => e.type === TBroadcast.Update && e.data instanceof MarketingInitiative),
+            )
+            .subscribe(() => this.allInitiatives.update((all) => [...all]));
+
+        this.#marketingService.initiativeSubscriptionChanged$.pipe(takeUntilDestroyed()).subscribe(() => this.#initiatives.reload());
+
         effect(() => {
             const first = this.initiatives()[0];
             if (!first) return;
@@ -77,6 +95,8 @@ export class MarketingInitiativesComponent {
     }
 
     filterByStatus = (status: string) => this.statusFilter.set(status);
+    toggleSubscribed = () => this.onlySubscribed.update((v) => !v);
+    #isSubscribed = (initiative: MarketingInitiative) => initiative.users?.some((u) => u.id === this.#global.user?.id) ?? false;
 
     resetCreateForm() {
         this.newInitiative = { name: '', description: '', status: 'active' };

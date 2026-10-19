@@ -3,8 +3,10 @@ import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { map } from 'rxjs';
+import { filter, map } from 'rxjs';
 import { MarketingService } from '@models/marketing/marketing.service';
+import { MarketingInitiative } from '@models/marketing/marketing-initiative.model';
+import { NxStatic, TBroadcast } from '@app/nx/nx.static';
 import { MarketingPerformanceMetric } from '@models/marketing/marketing-performance-metrics.model';
 import { MarketingWorkflow } from '@models/marketing/marketing-workflow.model';
 import { MarketingActivity } from '@models/marketing/marketing-activity.model';
@@ -76,6 +78,18 @@ export class MarketingInitiativeDetailComponent {
             .pipe(takeUntilDestroyed())
             .subscribe((initiativeId) => {
                 if (String(this.#initiativeId()) === initiativeId) this.loadInitiative();
+            });
+
+        NxStatic.broadcast$
+            .pipe(
+                takeUntilDestroyed(),
+                filter((e) => e.type === TBroadcast.Update && e.data instanceof MarketingInitiative),
+            )
+            .subscribe(({ data }) => {
+                const current = this.initiative();
+                if (!current || current === data || String(current.id) !== String(data.id)) return;
+                const { name, description, status, start_date, end_date } = data as MarketingInitiative;
+                this.initiative.set(Object.assign(Object.create(Object.getPrototypeOf(current)), current, { name, description, status, start_date, end_date }));
             });
 
         effect(() => {
@@ -194,6 +208,7 @@ export class MarketingInitiativeDetailComponent {
             if (this.initiative()) {
                 this.loadInitiative();
             }
+            this.#marketingService.initiativeSubscriptionChanged$.next();
         });
     }
 
@@ -206,6 +221,7 @@ export class MarketingInitiativeDetailComponent {
             if (this.initiative()) {
                 this.loadInitiative();
             }
+            this.#marketingService.initiativeSubscriptionChanged$.next();
         });
     }
 

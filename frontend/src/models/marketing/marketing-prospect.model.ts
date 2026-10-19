@@ -7,11 +7,14 @@ import { CompanyContact } from '@models/company/company-contact.model';
 import { User } from '@models/user/user.model';
 import { LeadSource } from '@models/project/lead-source.model';
 import { MarketingProspectActivity } from './marketing-prospect-activity.model';
+import { MarketingTouchpoint } from './marketing-touchpoint.model';
 import { MarketingInitiative } from './marketing-initiative.model';
 import { IHasMarker, Marker } from '@enums/marker';
 import { Model } from '@constants/model/type-discriminators';
 import { computed } from '@angular/core';
-import { tap } from 'rxjs';
+import { Observable, tap } from 'rxjs';
+import { VcardRow } from '@models/vcard/vcard-row';
+import { personalized } from '@constants/personalized';
 import { MarketingProspectActions } from './marketing-prospect.actions';
 import { Dictionary } from '@constants/constants';
 import { nx } from '@models/_core/nx-bridge';
@@ -20,6 +23,8 @@ import { nx } from '@models/_core/nx-bridge';
 export class MarketingProspect extends VcardClass implements IHasMarker {
     static API_PATH = (): string => 'marketing/prospects';
     static DB_TABLE_NAME = (): string => 'marketing_prospects';
+
+    static readonly FREEMAIL_DOMAINS = ['gmail.com', 'googlemail.com', 'gmx.de', 'gmx.net', 'web.de', 't-online.de', 'outlook.com', 'hotmail.com', 'yahoo.com', 'yahoo.de', 'icloud.com', 'aol.com', 'freenet.de', 'posteo.de', 'mail.de'];
 
     static readonly STATUS_ICONS: Dictionary<string> = {
         new: 'add_circle',
@@ -51,6 +56,7 @@ export class MarketingProspect extends VcardClass implements IHasMarker {
     override frontendUrl = (): string | undefined => (nx().global.user?.hasRole('marketing') ? `/marketing/prospects/${this.id}` : undefined);
 
     protected override buildActions(): NxAction[] { return MarketingProspectActions(this) }
+    override readonly getName = computed((): string => { this.snapshot(); return this.company_contact?.getName() || this.card()?.name || this.email || ''; });
 
     email!: string;
     user_id!: number;
@@ -58,6 +64,7 @@ export class MarketingProspect extends VcardClass implements IHasMarker {
     position?: string;
     phone?: string;
     notes?: string;
+    marketing_initiative_id?: string;
     company_id?: string;
     company_contact_id?: string;
     companyModel?: { company_name?: string; [key: string]: unknown };
@@ -88,14 +95,80 @@ export class MarketingProspect extends VcardClass implements IHasMarker {
     @Type(()=>LeadSource) lead_source?: LeadSource;
     @Type(()=>MarketingInitiative) marketing_initiative?: MarketingInitiative;
     @Type(()=>MarketingProspectActivity) activities?: MarketingProspectActivity[];
+    @Type(()=>MarketingTouchpoint) touchpoints?: MarketingTouchpoint[];
 
     mark = (state: string) =>
         this.httpService.put(`marketing/prospects/${this.id}`, { status: state })
             .pipe(tap((response) => this.status = ((response as { status?: string }).status ?? state) as typeof this.status));
 
-    name = computed(() => { this.snapshot(); return this.company_contact?.getName() || this.getName() || this.email; });
+    name = computed(() => this.getName());
 
     getPersonal = (): VcardClass | undefined => this.company_contact?.contact ?? this;
+
+    #cards = (): VcardClass[] => ([this, this.company_contact, this.company_contact?.contact] as (VcardClass | undefined)[]).filter((_): _ is VcardClass => !!_);
+    contactValues = (key: 'EMAIL' | 'TEL' | 'URL'): string[] =>
+        [...new Set(this.#cards().flatMap((_) => _.card()?.get(key) ?? []).map((_) => _.vals[0]?.trim()).filter((_): _ is string => !!_))];
+    emailAddress = (): string | null => this.contactValues('EMAIL')[0] ?? (this.email || null);
+    phoneNumber = (): string | null => this.contactValues('TEL')[0] ?? (this.phone || null);
+    websiteUrl = (): string | null => {
+        const cards = [...this.#cards(), this.company_contact?.company].filter((_): _ is VcardClass => !!_);
+        const url = cards.flatMap((_) => _.card()?.get('URL') ?? []).map((_) => _.vals[0]?.trim()).find((_) => !!_ && !_.includes('linkedin.com'));
+        const domain = this.emailAddress()?.split('@')[1]?.toLowerCase();
+        const site = url ?? (domain && !MarketingProspect.FREEMAIL_DOMAINS.includes(domain) ? domain : null);
+        return site ? (/^https?:\/\//i.test(site) ? site : `https://${site}`) : null;
+    };
+    companySearchUrl = (): string => `https://www.google.com/search?q=${encodeURIComponent(`${this.company() || this.name()} Telefon`)}`;
+    addContactValue = (key: 'TEL' | 'EMAIL' | 'URL', value: string): Observable<VcardClass> => {
+        const target: VcardClass = this.company_contact ?? this;
+        const card = target.card() ?? new Vcard('BEGIN:VCARD\nVERSION:3.0\nEND:VCARD');
+        card.rows = card.rows.filter((_) => _.key !== key || !!_.vals.join('').trim());
+        const row = VcardRow.fromString(`${key}${key === 'URL' ? '' : ';TYPE=work'}:${value.trim()}`)!;
+        const end = card.rows.findIndex((_) => _.key === 'END');
+        card.rows.splice(end === -1 ? card.rows.length : end, 0, row);
+        target.card.set(card);
+        return target.saveCard();
+    };
+    personalizations = (): Dictionary<string> => {
+        const cc = this.company_contact;
+        const contact = cc?.contact;
+        const firstName = this.firstName() || cc?.firstName() || contact?.firstName() || '';
+        const familyName = this.familyName() || cc?.familyName() || contact?.familyName() || '';
+        const fullName = this.fullName() || cc?.fullName() || contact?.fullName() || this.getName() || '';
+        const salutation = this.#salutation(firstName, familyName, fullName,
+            this.salutation() || cc?.salutation() || contact?.salutation() || '',
+            this.gender || cc?.gender || contact?.gender || '');
+        const company = this.company() || this.companyModel?.company_name || cc?.company?.getName() || '';
+        const email = this.emailAddress() || '';
+        const phone = this.phoneNumber() || '';
+
+        return { salutation, firstName, familyName, fullName, name: fullName, company, companyName: company, email, phone,
+                 first_name: firstName, family_name: familyName, full_name: fullName };
+    };
+    personalizedText = (activity: MarketingProspectActivity): string =>
+        personalized(activity.localizedDescription(this.getLang() || 'de', this.getFormality() || 'formal'), this.personalizations());
+
+    #salutation(firstName: string, familyName: string, fullName: string, rawSalutation: string, gender: string): string {
+        const lang = this.getLang() || 'de';
+        const formality = this.getFormality() || 'formal';
+
+        if (formality === 'informal') {
+            const prefix = lang === 'de' ? 'Hallo' : 'Hello';
+            const name = firstName || fullName || familyName;
+            return name ? `${prefix} ${name},` : `${prefix},`;
+        }
+        if (lang === 'de') {
+            if (familyName) return gender === 'F' ? `Sehr geehrte Frau ${familyName},` : `Sehr geehrter Herr ${familyName},`;
+            if (fullName) return `Sehr geehrte/r ${fullName},`;
+            if (rawSalutation) return `${rawSalutation},`;
+            return 'Sehr geehrte Damen und Herren,';
+        }
+        const honorific = gender === 'F' ? 'Ms.' : 'Mr.';
+        if (familyName) return `Dear ${honorific} ${familyName},`;
+        if (fullName) return `Dear ${fullName},`;
+        if (rawSalutation) return `Dear ${rawSalutation.replace(/,$/, '')},`;
+        return 'Dear Sir or Madam,';
+    }
+    linkedInUrl = (): string | null => this.contactValues('URL').find((_) => _.includes('linkedin.com')) ?? this.contactValues('URL')[0] ?? (this.linkedin_url || null);
 
     override afterDeserialize(json: Dictionary, seen?: WeakSet<Serializable>): void {
         this.#ensureVcardNameFields();

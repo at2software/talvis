@@ -131,7 +131,11 @@ class VacationController extends Controller {
             $vacation->approved_at    = now();
             $vacation->save();
         });
-        Mail::to($vacation->user->email)->send(new VacationMail($vacation, $vacation->state, @$data->reason, request()->user()));
+        try {
+            Mail::to($vacation->user->email)->send(new VacationMail($vacation, $vacation->state, @$data->reason, request()->user()));
+        } catch (\Throwable $e) {
+            report($e);
+        }
         return $vacation;
     }
     public function acknowledge(Vacation $_) {

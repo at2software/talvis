@@ -5,7 +5,7 @@
         <span class="flex-fill text-truncate" i18n="@@i18n.invoice.unpaid">unpaid</span>
         <span class="badge badge-dark" i18n="@@i18n.common.gross">gross</span>
         @if (value()) {
-            <div class="chart-title text-nowrap">{{ (value() ?? 0) | mshort }}</div>
+            <div class="chart-title text-nowrap"><value-unit [value]="(value() ?? 0) | mshort" /></div>
         }
     </div>
 

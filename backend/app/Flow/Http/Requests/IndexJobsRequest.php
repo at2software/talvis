@@ -12,9 +12,10 @@ class IndexJobsRequest extends FormRequest {
     }
     public function rules(): array {
         return [
-            'state' => ['nullable', Rule::in(Job::STATES)],
-            'type'  => 'nullable|string|max:255',
-            'limit' => 'nullable|integer|min:1|max:100',
+            'state'      => ['nullable', Rule::in(Job::STATES)],
+            'type'       => 'nullable|string|max:255',
+            'claimed_by' => 'nullable|string|max:255',
+            'limit'      => 'nullable|integer|min:1|max:100',
         ];
     }
 }

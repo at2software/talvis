@@ -8,11 +8,12 @@ import { SentinelService } from '@models/sentinel/sentinel.service';
 import { Nx } from '@app/nx/nx.directive';
 import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { EmptyStateComponent } from '@shards/empty-state/empty-state.component';
+import { SpinnerComponent } from '@shards/spinner/spinner.component';
 
 @Component({
     selector: 'profile-sentinels',
     templateUrl: './profile-sentinels.component.html',
-    imports: [ToolbarComponent, Nx, RouterModule, NgbTooltipModule, EmptyStateComponent],
+    imports: [ToolbarComponent, Nx, RouterModule, NgbTooltipModule, EmptyStateComponent, SpinnerComponent],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProfileSentinelsComponent {
@@ -21,6 +22,7 @@ export class ProfileSentinelsComponent {
 
     readonly #sentinels = modelListResource(() => this.#sentinelService.index());
     readonly sentinels = this.#sentinels.value;
+    readonly sentinelsLoaded = this.#sentinels.hasValue;
 
     #reload = () => this.#sentinels.reload();
 

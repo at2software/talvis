@@ -78,7 +78,7 @@
         }
     </div>
     <div class="col-md-9">
-        @if (!_filteredFoci.length) {
+        @if (fociLoaded() && !_filteredFoci.length) {
             <div class="card">
                 <empty-state [card]="false" class="calendar" title="no time entries yet" i18n-title="@@i18n.foci.noTimeEntriesYet">
                     @if (!canLogTime()) {

@@ -23,6 +23,9 @@ class ApprovalController extends Controller {
     public function reject(RejectRequest $request, Approval $approval, ApprovalService $approvals) {
         return $this->present($approvals->reject($approval, $request->user(), $request->validated('reason')));
     }
+    public function requestChanges(RejectRequest $request, Approval $approval, ApprovalService $approvals) {
+        return $this->present($approvals->requestChanges($approval, $request->user(), $request->validated('reason')));
+    }
     private function present(Approval $approval): Approval {
         return $approval->load('subject', 'requestedBy', 'votes.user')->append(['subject_label', 'subject_link']);
     }

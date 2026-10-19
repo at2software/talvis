@@ -25,6 +25,7 @@ export abstract class TimetrackingComponent {
 
     observer!: Observable<Page<Focus>>;
     filteredFoci = signal<Focus[]>([]);
+    fociLoaded = signal(false);
     users: User[] = [];
     filteredUsers = signal<User[]>([]);
     selection = signal<Focus[]>([]);
@@ -88,6 +89,7 @@ export abstract class TimetrackingComponent {
     reload = () => {
         this.parent.object().foci = [];
         this.filteredFoci.set([]);
+        this.fociLoaded.set(false);
         this.observer = this.onReload();
     };
     userForFocus = (x: Focus) => this.#global.userFor(x.user_id);
@@ -137,6 +139,7 @@ export abstract class TimetrackingComponent {
             }
         });
 
+        this.fociLoaded.set(true);
         this.applyUserFilters();
     };
 

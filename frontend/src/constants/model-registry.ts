@@ -44,6 +44,7 @@ import { MarketingPerformanceMetric } from '@models/marketing/marketing-performa
 import { MarketingProspect } from '@models/marketing/marketing-prospect.model';
 import { MarketingProspectActivity } from '@models/marketing/marketing-prospect-activity.model';
 import { MarketingProspectStats } from '@models/marketing/marketing-prospect-stats.model';
+import { MarketingTouchpoint } from '@models/marketing/marketing-touchpoint.model';
 import { MarketingWorkflow } from '@models/marketing/marketing-workflow.model';
 import { Milestone } from '@models/milestone/milestone.model';
 import { MilestoneData } from '@models/milestone/milestone-group.model';
@@ -105,6 +106,7 @@ export const MODEL_REGISTRY: Record<string, any> = {
     'MarketingProspect': MarketingProspect,
     'MarketingProspectActivity': MarketingProspectActivity,
     'MarketingProspectStats': MarketingProspectStats,
+    'MarketingTouchpoint': MarketingTouchpoint,
     'MarketingWorkflow': MarketingWorkflow,
     'Milestone': Milestone,
     'MilestoneData': MilestoneData,

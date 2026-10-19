@@ -5,19 +5,24 @@ import { InvoiceItem } from '../invoice/invoice-item.model';
 import { MilestoneState, getMilestoneStateInfo } from './milestone-state.enum';
 import { User } from '../user/user.model';
 import { Task } from '../task/task.model';
-import { nx } from '@models/_core/nx-bridge';
+import { nx, TBroadcast } from '@models/_core/nx-bridge';
 import { Project } from '../project/project.model';
 import { dayjs, Dayjs } from '@constants/date/dates';
 import { Type } from '@models/_core/hydrate';
 import { Model } from '@constants/model/type-discriminators';
 import { computed } from '@angular/core';
 import { IHasExtIssue, effectiveExtIssueOf } from '../ext-issue/ext-issue.interface';
+import type { Dictionary } from '@constants/constants';
+import { Observable, tap } from 'rxjs';
 
 @Model('Milestone')
 export class Milestone extends Serializable implements IHasExtIssue {
     static API_PATH = (): string => 'milestones';
 
     protected override buildActions(): NxAction[] { return getMilestoneActions(this) }
+    override update(changes?: Dictionary, silent = false): Observable<this> {
+        return super.update(changes, silent).pipe(tap(() => nx().broadcast({ type: TBroadcast.Update, data: this })));
+    }
 
     due_at: string | null = null;
     started_at: string | null = null;
@@ -83,6 +88,11 @@ export class Milestone extends Serializable implements IHasExtIssue {
     isCurrentUserAssigned = (): boolean => this.user_id === nx().global.user?.id;
     time_started = (): Dayjs => dayjs(this.started_at);
     time_due = (): Dayjs => dayjs(this.due_at);
+    plannedRange = (): { start: Dayjs; due: Dayjs } | null => {
+        if (!this.due_at) return null;
+        const due = dayjs(this.due_at).startOf('day');
+        return { start: this.started_at ? dayjs(this.started_at).startOf('day') : due.subtract(this.duration ?? 1, 'day'), due };
+    };
 
     startDate = computed(() => { const s = this.snapshot().started_at; return s ? new Date(s) : null; });
     endDate = computed((): Date | null => {

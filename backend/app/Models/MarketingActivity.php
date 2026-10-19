@@ -39,12 +39,6 @@ class MarketingActivity extends BaseModel {
             ->withPivot(['target_value'])
             ->withTimestamps();
     }
-    public function marketingProspectActivities(): HasMany {
-        return $this->hasMany(MarketingProspectActivity::class, 'marketing_activity_id');
-    }
-    public function completedActivities(): HasMany {
-        return $this->marketingProspectActivities()->where('status', 'completed');
-    }
     public function parentActivity(): BelongsTo {
         return $this->belongsTo(MarketingActivity::class, 'parent_activity_id');
     }
@@ -54,50 +48,7 @@ class MarketingActivity extends BaseModel {
     public function scopeRequired($query) {
         return $query->where('is_required', true);
     }
-    public function scopeByType($query, string $type) {
-        return $query->where('activity_type', $type);
-    }
     public function scopeForDay($query, int $day) {
         return $query->where('day_offset', $day);
-    }
-    public function getActivityTypeLabel(): string {
-        return match ($this->activity_type) {
-            'like_post'          => 'Like Post',
-            'send_message'       => 'Send Message',
-            'connection_request' => 'Connection Request',
-            'call'               => 'Phone Call',
-            'email'              => 'Send Email',
-            'follow'             => 'Follow Profile',
-            'view_profile'       => 'View Profile',
-            'comment_post'       => 'Comment on Post',
-            'share_post'         => 'Share Post',
-            'custom'             => 'Custom Activity',
-            default              => ucfirst(str_replace('_', ' ', $this->activity_type))
-        };
-    }
-    public function getCompletionRate(): float {
-        $total = $this->marketingProspectActivities()->count();
-
-        if ($total === 0) {
-            return 0;
-        }
-
-        $completed = $this->completedActivities()->count();
-        return ($completed / $total) * 100;
-    }
-    public function tracksMetric(): bool {
-        return ! is_null($this->marketing_performance_metric_id);
-    }
-    public function getTotalPerformanceValue() {
-        if (! $this->tracksMetric()) {
-            return 0;
-        }
-        return $this->completedActivities()->sum('performance_value');
-    }
-    public function isOverdue(): bool {
-        return $this->marketingProspectActivities()
-            ->where('status', 'pending')
-            ->where('scheduled_at', '<', now())
-            ->exists();
     }
 }

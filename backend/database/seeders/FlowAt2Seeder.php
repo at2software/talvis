@@ -41,6 +41,7 @@ class FlowAt2Seeder extends Seeder {
         ['phase' => 'discovery', 'key' => 'ui', 'name' => 'UI', 'required_role' => 'design', 'required_approvals' => 1, 'condition' => ['always' => true], 'sort' => 20],
         ['phase' => 'mvp', 'key' => 'security', 'name' => 'Sicherheit', 'required_role' => 'dev', 'required_approvals' => 2, 'condition' => ['risk_level_gte' => 2], 'sort' => 10],
         ['phase' => 'mvp', 'key' => 'release', 'name' => 'Release', 'required_role' => 'dev', 'required_approvals' => null, 'condition' => ['always' => true], 'sort' => 20],
+        ['phase' => 'care', 'key' => 'architecture', 'name' => 'Architektur', 'required_role' => 'dev', 'required_approvals' => 1, 'condition' => ['always' => true], 'sort' => 5],
         ['phase' => 'care', 'key' => 'security', 'name' => 'Sicherheit', 'required_role' => 'dev', 'required_approvals' => 2, 'condition' => ['risk_level_gte' => 2], 'sort' => 10],
         ['phase' => 'care', 'key' => 'release', 'name' => 'Release', 'required_role' => 'dev', 'required_approvals' => null, 'condition' => ['always' => true], 'sort' => 20],
     ];
@@ -61,11 +62,16 @@ class FlowAt2Seeder extends Seeder {
         'key'              => 'care_fix',
         'name'             => 'Care-Fix',
         'description'      => 'Behebt ein gemeldetes Problem in einem Projekt in der Care-Phase: Branch ab base_ref, Fix plus Test, Merge Request. Ergebnis braucht die Release-Freigabe der Care-Phase.',
-        'release_gate_key' => 'release',
+        'review_gate_keys' => ['release'],
         'input_schema'     => ['fields' => [
             ['key' => 'issue', 'type' => 'url', 'required' => true, 'label' => 'Issue', 'description' => 'Link auf das Issue, das behoben werden soll.'],
-            ['key' => 'repo', 'type' => 'url', 'required' => true, 'label' => 'Repository', 'description' => 'Clone-URL des Repositories.'],
-            ['key' => 'base_ref', 'type' => 'string', 'required' => true, 'label' => 'Basis', 'description' => 'Branch, Tag oder Commit, von dem aus gearbeitet wird (z. B. master).'],
+            ['key' => 'repo', 'type' => 'url', 'required_without' => 'repos', 'label' => 'Repository', 'description' => 'Clone-URL des Repositories. Pflicht, solange „Repositories“ leer ist.'],
+            ['key' => 'base_ref', 'type' => 'string', 'required_without' => 'repos', 'label' => 'Basis', 'description' => 'Branch, Tag oder Commit, von dem aus gearbeitet wird (z. B. master). Pflicht, solange „Repositories“ leer ist.'],
+            ['key' => 'repos', 'type' => 'list', 'label' => 'Repositories', 'description' => 'Mehrere Repositories als JSON-Liste, z. B. [{"url": "https://…", "base_ref": "master", "role": "backend"}].', 'fields' => [
+                ['key' => 'url', 'type' => 'url', 'required' => true],
+                ['key' => 'base_ref', 'type' => 'string', 'required' => true],
+                ['key' => 'role', 'type' => 'string'],
+            ]],
             ['key' => 'harness_customer_path', 'type' => 'string', 'label' => 'Kunden-Harness', 'description' => 'Pfad zur kundenspezifischen Agenten-Anweisung im Repository.'],
             ['key' => 'harness_internal_path', 'type' => 'string', 'label' => 'Internes Harness', 'description' => 'Pfad zur internen at²-Agenten-Anweisung.'],
             ['key' => 'escalation_rules', 'type' => 'list', 'label' => 'Eskalationsregeln', 'description' => 'Eine Regel pro Zeile; wann der Agent statt zu handeln eine Gate-Anfrage stellt.'],

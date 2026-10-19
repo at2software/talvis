@@ -3,19 +3,26 @@
 namespace App\Actions\User;
 
 use App\Models\User;
+use App\Services\PersonalCalendar;
+use App\Support\Calendar\CalendarOccurrence;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 
 class CalculateDailyWorkload {
-    public function execute(User $user, Carbon $startDate, Carbon $endDate): array {
+    public function __construct(private PersonalCalendar $calendar) {}
+
+    public function execute(User $user, Carbon $startDate, Carbon $endDate, bool $withTeamCalendar = false, bool $withPrivateEvents = false, bool $withCalendar = true): array {
         $hpwArray    = $user->getHpwArray();
         $breakDays   = $user->getBreakDays($startDate, $endDate);
         $assignments = $user->getWeeklyAssignments();
         $milestones  = $user->milestonesInRange($startDate, $endDate);
 
+        $occurrences = $withCalendar ? $this->calendar->occurrences($user, $startDate->copy()->startOfDay(), $endDate->copy()->addDay()->startOfDay(), $withTeamCalendar) : [];
+        $eventsByDay = CalendarOccurrence::groupByDay($occurrences);
+
         $dailyWorkload = [];
         foreach (CarbonPeriod::create($startDate, $endDate) as $date) {
-            $dailyWorkload[] = $this->calculateDayWorkload($user, $date, $hpwArray, $breakDays, $assignments, $milestones);
+            $dailyWorkload[] = $this->calculateDayWorkload($user, $date, $hpwArray, $breakDays, $assignments, $milestones, $eventsByDay[$date->format('Y-m-d')] ?? []);
         }
 
         return [
@@ -25,6 +32,7 @@ class CalculateDailyWorkload {
             'hpw'                     => $user->getHpw(),
             'hpw_array'               => $hpwArray,
             'daily_workload'          => $dailyWorkload,
+            'events'                  => array_values(array_map(fn (CalendarOccurrence $occurrence) => $occurrence->toArray(), array_filter($occurrences, fn (CalendarOccurrence $occurrence) => $withPrivateEvents || ! $occurrence->private))),
             'unconfigured_milestones' => $user->getUnconfiguredMilestones(),
         ];
     }
@@ -34,7 +42,8 @@ class CalculateDailyWorkload {
         array $hpwArray,
         array $breakDays,
         array $assignments,
-        $milestones
+        $milestones,
+        array $events,
     ): array {
         $dayOfWeek      = $date->dayOfWeekIso - 1;
         $availableHours = $hpwArray[$dayOfWeek] ?? 0;
@@ -53,11 +62,13 @@ class CalculateDailyWorkload {
                 'is_break'               => true,
                 'break_type'             => $breakDays[$dateStr]['type'] ?? 'weekend',
                 'break_name'             => $breakDays[$dateStr]['name'] ?? null,
+                'meeting_hours'          => 0,
                 'elements'               => [],
                 'distinct_project_count' => 0,
             ];
         }
 
+        $meetingHours       = CalendarOccurrence::busyHoursOn($events, $dateStr);
         $workingDaysPerWeek = count(array_filter($hpwArray, fn ($hours) => $hours > 0));
         $elements           = [];
         $assignmentHours    = 0;
@@ -105,7 +116,7 @@ class CalculateDailyWorkload {
             ];
         }
 
-        $totalHours       = $assignmentHours + $milestoneHours;
+        $totalHours       = $assignmentHours + $milestoneHours + $meetingHours;
         $totalPercent     = $availableHours > 0 ? ($totalHours / $availableHours) * 100 : 0;
         $distinctProjects = collect($elements)->pluck('project_id')->filter()->unique()->count();
         return [
@@ -117,6 +128,7 @@ class CalculateDailyWorkload {
             'milestone_hours'        => round($milestoneHours, 2),
             'total_hours'            => round($totalHours, 2),
             'is_break'               => false,
+            'meeting_hours'          => round($meetingHours, 2),
             'elements'               => $elements,
             'distinct_project_count' => $distinctProjects,
         ];

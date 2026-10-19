@@ -113,7 +113,8 @@
                             @if (tan.text) { <div class="text-muted small">{{ tan.text }}</div> }
                             @if (tan.medium) { <div class="text-muted small"><ng-container i18n="@@i18n.settings.device">Device</ng-container>: {{ tan.medium }}</div> }
                         </div>
-                        <div class="spinner-border text-primary" role="status">
+                        <div role="status">
+                            <spinner></spinner>
                             <span class="visually-hidden" i18n="@@i18n.common.waiting">Waiting…</span>
                         </div>
                         <div class="text-muted small" i18n="@@i18n.settings.checkingEvery3s">Checking automatically every 3 seconds…</div>

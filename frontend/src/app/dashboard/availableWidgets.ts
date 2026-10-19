@@ -25,6 +25,7 @@ import { WidgetUptimeMonitorsComponent } from './widgets/widget-uptime-monitors/
 import { WidgetProjectAnalysisComponent } from './widgets/widget-project-analysis/widget-project-analysis.component';
 import { WidgetCustomerChurnComponent } from './widgets/widget-customer-churn/widget-customer-churn.component';
 import { WidgetOverrunRiskComponent } from './widgets/widget-overrun-risk/widget-overrun-risk.component';
+import { WidgetPlannedTodayComponent } from './widgets/widget-planned-today/widget-planned-today.component';
 
 export interface TWidget {
     widget: Type<unknown>;
@@ -47,6 +48,7 @@ const ALL_WIDGETS: Dictionary<TWidget> = {
     'widget-customer-support'          : { widget: WidgetCustomerSupportComponent, i18n: $localize`:@@i18n.common.customerSupport:customer support`, on: () => hasRole('project_manager') },
     'widget-hr-team'                   : { widget: WidgetHrTeamComponent, i18n: $localize`:@@i18n.widget-hr-team:team status` },
     'widget-my-working-time'           : { widget: WidgetMyWorkingTimeComponent, i18n: $localize`:@@i18n.widget-my-working-time:my working time` },
+    'widget-planned-today'             : { widget: WidgetPlannedTodayComponent, i18n: $localize`:@@i18n.widget-planned-today:planned for today` },
     'widget-missing-project-manager'   : { widget: WidgetMissingProjectManagerComponent, i18n: $localize`:@@i18n.project.missingProjectManager:missing project manager`, on: () => hasRole('project_manager') },
     'widget-project-acquisitions'      : { widget: WidgetProjectAcquisitionsComponent, i18n: $localize`:@@i18n.common.acquisitions:acquisitions`, on: () => hasRole('project_manager') },
     'widget-project-manager'           : { widget: WidgetProjectManagerComponent, i18n: $localize`:@@i18n.common.projectManager:project manager`, on: () => hasRole('project_manager') },

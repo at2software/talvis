@@ -12,6 +12,7 @@ import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { LiquidityEventDto } from '@models/_core/api-response';
 import { modelResource } from '@models/http/model-resource';
 import { StackedTableDirective } from '@directives/stacked-table.directive';
+import { SpinnerComponent } from '@shards/spinner/spinner.component';
 
 interface DayGroup {
     date: string;
@@ -36,7 +37,7 @@ const TYPE_CONFIG: Dictionary<{ label: string; badge: string }> = {
     templateUrl: './financial-liquidity.component.html',
     styleUrls: ['./financial-liquidity.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
-    imports: [StackedTableDirective, NgxEchartsDirective, MoneyPipe, DatePipe, NgClass, NgbTooltipModule],
+    imports: [StackedTableDirective, NgxEchartsDirective, MoneyPipe, DatePipe, NgClass, NgbTooltipModule, SpinnerComponent],
 })
 export class FinancialLiquidityComponent {
     readonly #invoiceService = inject(InvoiceService);

@@ -35,7 +35,7 @@
                 }
             </div>
             <div class="chart-title" [class.text-muted]="grant.remainingHours() === 0"
-                [class.text-danger]="grant.remainingHours() < 0">{{ grant.remainingHours() | number: '1.1-1' }} h</div>
+                [class.text-danger]="grant.remainingHours() < 0"><value-unit [value]="grant.remainingHours() | number: '1.1-1'" unit="h" /></div>
         </div>
         <div class="card-body p-0">
             <table stackedTable class="table card-table mb-0" style="table-layout: fixed">

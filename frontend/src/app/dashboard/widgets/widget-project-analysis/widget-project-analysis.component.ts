@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, ResourceRef } from '@angular/core';
 import { Dictionary } from '@constants/constants';
 import { BaseWidgetComponent } from '../base.widget.component';
 import { OptionType } from '../widget-options/widget-options.component';
@@ -14,6 +14,7 @@ import { MILESTONE_STATES } from '@models/milestone/milestone-state.enum';
 import { ProjectState } from '@models/project/project-state.model';
 import type { EChartsOption } from 'echarts';
 import type { TopLevelFormatterParams } from 'echarts/types/dist/shared';
+import { SpinnerComponent } from '@shards/spinner/spinner.component';
 
 interface WorkShare { name: string; color: string; val: number; }
 interface MilestoneStateCount { name: string; count: number; color: string; }
@@ -23,7 +24,7 @@ interface MilestoneStateCount { name: string; count: number; color: string; }
     selector: 'widget-project-analysis',
     templateUrl: './widget-project-analysis.component.html',
     styleUrls: ['./widget-project-analysis.component.scss', './../base.widget.component.scss'],
-    imports: [...WIDGET_SHARED, ChartProgressComponent],
+    imports: [...WIDGET_SHARED, ChartProgressComponent, SpinnerComponent],
 })
 export class WidgetProjectAnalysisComponent extends BaseWidgetComponent {
     #projectService = inject(ProjectService);
@@ -45,6 +46,10 @@ export class WidgetProjectAnalysisComponent extends BaseWidgetComponent {
         return project;
     });
     readonly runningProjects = computed<Project[]>(() => this.#runningProjects.value()?.objects ?? []);
+    readonly loaded = computed(() => {
+        const resource: ResourceRef<unknown> = this.#hasProjectId() ? this.#project : this.#runningProjects;
+        return resource.hasValue() || resource.status() === 'error';
+    });
     readonly milestoneStates = computed<MilestoneStateCount[]>(() => {
         const project = this.project();
         return project ? this.#computeMilestoneStates(project) : [];

@@ -6,6 +6,8 @@ TALVIS combines CRM, project management, invoicing, time tracking, HR, marketing
 
 > Built for digital agencies, IT service companies, consultancies, and software development teams.
 
+**Website:** [talvis.org](https://talvis.org)
+
 ![TALVIS dashboard](docs/screenshots/dashboard-overview.png)
 
 ---
@@ -15,11 +17,11 @@ TALVIS combines CRM, project management, invoicing, time tracking, HR, marketing
 | Module | What it does |
 |---|---|
 | **CRM** | Company and contact management, relationship mapping, revenue analytics |
-| **Projects** | Gantt planning, milestones, tasks, team assignments, budget tracking |
+| **Projects** | Gantt planning, milestone planner with inbox, team and Outlook/iCal calendars and daily workload, tasks, team assignments, budget tracking |
 | **Invoicing** | PDF generation, ZUGFeRD/Factur-X, recurring billing, SEPA direct debit (pain.008), cash flow |
 | **Time Tracking** | Focus sessions, break management, workload heatmaps, billable hours |
 | **HR** | Vacation, sick leave, travel expenses, team capacity analytics |
-| **Marketing** | Prospect pipeline, campaign management, Sankey funnel charts |
+| **Marketing** | Prospect pipeline, outreach queue with call, email and LinkedIn touchpoints, campaign management, Sankey funnel charts |
 | **AI Insights** | Machine-learning predictions — customer churn, revenue forecasts, project overrun risk |
 | **Sentinels** | Visual no-code automation — triggers, conditions, commands |
 | **Uptime Monitoring** | HTTP health checks with alerting via email and team chat |

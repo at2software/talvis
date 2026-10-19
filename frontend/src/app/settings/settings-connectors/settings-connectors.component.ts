@@ -11,6 +11,7 @@ import { Dictionary } from '@constants/constants';
 import { SettingsWebhooksComponent } from '@app/settings/settings-webhooks/settings-webhooks.component';
 import { ModalBaseService } from '@app/_modals/modal-base-service';
 import { ModalM365SetupGuideComponent } from '@app/_modals/modal-m365-setup-guide/modal-m365-setup-guide.component';
+import { SpinnerComponent } from '@shards/spinner/spinner.component';
 
 interface TPipelineJob {
     job: string;
@@ -89,7 +90,7 @@ const DEFAULT_PIPELINE_JOBS: TPipelineJob[] = [
 
 @Component({
     selector: 'settings-connectors',
-    imports: [FormsModule, NgbDropdownModule, NgbTooltipModule, NComponent, SettingsWebhooksComponent],
+    imports: [FormsModule, NgbDropdownModule, NgbTooltipModule, NComponent, SettingsWebhooksComponent, SpinnerComponent],
     templateUrl: './settings-connectors.component.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
 })

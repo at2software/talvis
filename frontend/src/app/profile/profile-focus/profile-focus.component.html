@@ -5,7 +5,9 @@
             <widget-my-working-time></widget-my-working-time>
             <div class="card mb-3">
                 <div class="card-header" i18n="@@i18n.profile.projectFocus30d">project focus in the last 30 days</div>
-                @if (_focusSum.length === 0) {
+                @if (!focusLoaded()) {
+                    <spinner class="py-4"></spinner>
+                } @else if (_focusSum.length === 0) {
                     <empty-state [card]="false" class="profile" i18n-title="@@i18n.profile.noFocusData" title="no tracked time yet">
                         <p class="text-muted small" i18n="@@i18n.profile.noFocusDataBody">Your project focus distribution will appear here once you start tracking time.</p>
                     </empty-state>

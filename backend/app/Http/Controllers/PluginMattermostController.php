@@ -75,9 +75,9 @@ class PluginMattermostController extends PluginChatController {
         return $this->_createOrUpdatePost($cacheId, $channelId, $message, $props, 'id');
     }
     public function createPost(string $channel_id, string $message, $props = null) {
-        return $this->post('posts', ['channel_id' => $channel_id, 'message' => $message, 'props' => $this->toMattermostProps($props ?? [])]);
+        return $this->post('posts', ['channel_id' => $channel_id, 'message' => $message, 'props' => self::postProps($props ?? [])]);
     }
-    private function toMattermostProps(array $props): array {
+    public static function postProps(array $props): array {
         $username = $props['username'] ?? 'TALVIS';
         return array_filter([
             'from_webhook'         => 'true',
@@ -155,7 +155,7 @@ class PluginMattermostController extends PluginChatController {
     public function updatePost(string $id, string $message, $props = null, ?string $channelId = null) {
         $payload = ['id' => $id, 'message' => $message];
         if ($props) {
-            $payload['props'] = $this->toMattermostProps($props);
+            $payload['props'] = self::postProps($props);
         }
         return $this->put('posts/'.$id, $payload);
     }
@@ -187,6 +187,14 @@ class PluginMattermostController extends PluginChatController {
         if ($channelId) {
             $this->createPost($channelId, $message);
         }
+    }
+    public function resolveUserId(string $usernameOrId): ?string {
+        $input = strtolower(ltrim(trim($usernameOrId), '@'));
+        $user  = preg_match('/^[a-z0-9]{26}$/', $input) ? $this->get('users/'.$input) : $this->get('users/username/'.rawurlencode($input));
+        return $user['id'] ?? null;
+    }
+    public function openDialog(string $triggerId, string $url, array $dialog): bool {
+        return $this->post('actions/dialogs/open', ['trigger_id' => $triggerId, 'url' => $url, 'dialog' => $dialog]) !== null;
     }
     public function getDirectChannelIdFor(string $userId): ?string {
         $me = $this->get('users/me');

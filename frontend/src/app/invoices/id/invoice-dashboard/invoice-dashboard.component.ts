@@ -16,12 +16,13 @@ import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { MoneyPipe } from '@pipes/money.pipe';
 import { MoneyShortPipe } from '@pipes/mshort.pipe';
 import { ModalInvoiceAddInstalmentComponent } from '@app/_modals/modal-invoice-add-instalment/modal-invoice-add-instalment.component';
+import { ValueUnitComponent } from '@shards/value-unit/value-unit.component';
 
 @Component({
     changeDetection: ChangeDetectionStrategy.OnPush,
     selector: 'invoice-dashboard',
     templateUrl: './invoice-dashboard.component.html',
-    imports: [ToolbarComponent, ScrollbarComponent, DatePipe, NComponent, InvoicePrepare, NgbTooltipModule, MoneyPipe, MoneyShortPipe],
+    imports: [ValueUnitComponent, ToolbarComponent, ScrollbarComponent, DatePipe, NComponent, InvoicePrepare, NgbTooltipModule, MoneyPipe, MoneyShortPipe],
 })
 export class InvoiceDashboardComponent {
     readonly parent = inject(InvoiceDetailGuard);

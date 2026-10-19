@@ -3,7 +3,7 @@
         <i>schedule</i>
         <span class="flex-fill text-truncate" i18n="@@i18n.common.customerSupport">customer support</span>
         @if (value()) {
-            <div class="chart-title">{{ (value() ?? 0) | short }}h</div>
+            <div class="chart-title"><value-unit [value]="(value() ?? 0) | short" unit="h" /></div>
         }
     </div>
 

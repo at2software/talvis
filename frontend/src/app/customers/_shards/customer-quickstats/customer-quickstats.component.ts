@@ -4,10 +4,11 @@ import { Company } from '@models/company/company.model';
 import { ProgressBarComponent } from '@shards/progress-bar/progress-bar.component';
 import { MoneyShortPipe } from '@pipes/mshort.pipe';
 import { tracked } from '@constants/tracked';
+import { ValueUnitComponent } from '@shards/value-unit/value-unit.component';
 
 @Component({
     selector: 'customer-quickstats',
-    imports: [PercentPipe, DecimalPipe, ProgressBarComponent, MoneyShortPipe],
+    imports: [ValueUnitComponent, PercentPipe, DecimalPipe, ProgressBarComponent, MoneyShortPipe],
     templateUrl: './customer-quickstats.component.html',
     changeDetection: ChangeDetectionStrategy.OnPush,
 })

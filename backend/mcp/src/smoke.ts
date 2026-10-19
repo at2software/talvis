@@ -49,7 +49,7 @@ const call = async <T = any>(name: string, args: Record<string, unknown> = {}): 
 };
 
 const tools = (await client.listTools()).tools.map((_) => _.name);
-check('server exposes the eight flow tools and no approval tool', tools.length === 8 && !tools.some((_) => /approve|decide/.test(_)), tools);
+check('server exposes the nine flow tools and no approval tool', tools.length === 9 && !tools.some((_) => /approve|decide/.test(_)), tools);
 
 const created = [];
 for (let i = 0; i < 2; i++) {
@@ -63,10 +63,13 @@ check('both new jobs are listed as open', [jobA, jobB].every((id) => open.some((
 const claimed = await call<{ state: string; claimed_by: string }>('flow_claim_job', { job_id: jobA });
 check('job A is claimed', claimed.state === 'claimed', claimed);
 
+const mine = await call<{ id: number }[]>('flow_list_my_jobs', { state: 'claimed' });
+check('job A is listed among my claimed jobs', mine.some((_) => _.id === jobA), mine);
+
 const second = await client.callTool({ name: 'flow_claim_job', arguments: { job_id: jobA } });
 check('claiming job A again fails', second.isError === true, second);
 
-const gate = await call<{ job: { state: string }; approval: { id: number; decision: string } }>('flow_request_gate', { job_id: jobA, gate_key: gateKey, options: ['ship', 'hold'], recommendation: 'ship' });
+const gate = await call<{ job: { state: string }; approval: { id: number; decision: string } }>('flow_request_gate', { job_id: jobA, gate_key: gateKey, options: ['ship', 'hold'], recommendation: 'ship', source: 'agent', diff_url: 'https://git.example.com/acme/shop/-/compare/master...smoke' });
 check('gate request puts job A into awaiting_gate', gate.job.state === 'awaiting_gate' && gate.approval.decision === 'pending', gate);
 
 const pending = await call<{ decision: string }[]>('flow_get_gate_decision', { job_id: jobA });
@@ -76,14 +79,25 @@ await team.request('POST', `/flow/approvals/${gate.approval.id}/approve`, { reas
 const decided = await call<{ decision: string; selected_option: string }[]>('flow_get_gate_decision', { job_id: jobA });
 check('a person approved the gate with option "ship"', decided[0]?.decision === 'approved' && decided[0]?.selected_option === 'ship', decided);
 
-const result = await call<{ job: { state: string; metrics: Record<string, number> } }>('flow_report_result', {
-    job_id: jobA,
-    mr_url: 'https://git.example.com/acme/shop/-/merge_requests/1',
-    test_report: 'smoke: 1 passed',
-    metrics: { duration_minutes: 1 },
-    knowledge: { note: 'smoke test' },
-});
-check('result completes job A', result.job.state === 'completed' && result.job.metrics.duration_minutes === 1, result);
+type Result = { job: { state: string; metrics: Record<string, number> }; review_approvals: { id: number }[] };
+const report = () =>
+    call<Result>('flow_report_result', {
+        job_id: jobA,
+        mr_url: 'https://git.example.com/acme/shop/-/merge_requests/1',
+        test_report: 'smoke: 1 passed',
+        metrics: { duration_minutes: 1 },
+        knowledge: { general: { note: 'smoke test' } },
+    });
+const result = await report();
+check('result puts job A into in_review with review approvals', result.job.state === 'in_review' && result.review_approvals.length > 0 && result.job.metrics.duration_minutes === 1, result);
+
+await team.request('POST', `/flow/approvals/${result.review_approvals[0].id}/request-changes`, { reason: 'smoke: please rework' });
+const reworked = await call<{ decision: string; reason: string; review_round: number | null }[]>('flow_get_gate_decision', { job_id: jobA });
+const review = reworked.find((_) => _.review_round === 1);
+check('a person requested changes on the review, the reason is readable', review?.decision === 'changes_requested' && review.reason === 'smoke: please rework', reworked);
+
+const again = await report();
+check('a second result opens the next review round', again.job.state === 'in_review' && again.review_approvals.length > 0, again);
 
 await call('flow_claim_job', { job_id: jobB });
 const failed = await call<{ state: string }>('flow_fail_job', { job_id: jobB, reason: 'smoke test failure path' });
@@ -97,11 +111,11 @@ check('project phase is readable', phase.project_id === projectId && Array.isArr
 
 const jobResource = await client.readResource({ uri: `flow://jobs/${jobA}` });
 const job = JSON.parse((jobResource.contents[0] as { text: string }).text);
-check('resource flow://jobs/{id} returns job A with its approvals', job.id === jobA && job.state === 'completed' && job.approvals.length >= 1, job);
+check('resource flow://jobs/{id} returns job A with its approvals', job.id === jobA && job.state === 'in_review' && job.approvals.length >= 3, job);
 
 const phasesResource = await client.readResource({ uri: 'flow://phases' });
 const config = JSON.parse((phasesResource.contents[0] as { text: string }).text);
-check('resource flow://phases returns the configuration', Array.isArray(config.phases) && Array.isArray(config.job_types), config);
+check('resource flow://phases returns the configuration', Array.isArray(config.phases) && Array.isArray(config.job_types) && Array.isArray(config.job_states?.in_review), config);
 
 await client.close();
 console.log(`smoke test passed (${step} checks)`);

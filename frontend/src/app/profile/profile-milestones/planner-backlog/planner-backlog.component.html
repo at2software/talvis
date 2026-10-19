@@ -1,6 +1,29 @@
 <div class="planner-backlog vstack gap-3">
     <div class="card">
         <div class="card-header hstack gap-2">
+            <span class="flex-fill" i18n="@@i18n.planner.inbox">inbox</span>
+            @if (inbox().length) {
+                <i class="text-primary pointer" role="button" tabindex="0" (click)="processInbox.emit()" (keydown.enter)="processInbox.emit()" ngbTooltip="process inbox" i18n-ngbTooltip="@@i18n.planner.processInbox">play_arrow</i>
+            }
+            <span class="badge bg-secondary rounded-pill">{{ inbox().length }}</span>
+        </div>
+        <ul class="list-group list-group-flush" cdkDropList [cdkDropListSortingDisabled]="true">
+            <li class="list-group-item">
+                <input #captureField class="form-control form-control-sm" placeholder="capture a to-do…" i18n-placeholder="@@i18n.planner.capturePlaceholder" (keydown.enter)="onCapture(captureField)" />
+            </li>
+            @for (task of inbox(); track task.id) {
+                <li class="list-group-item backlog-chip hstack gap-2" [nx]="task" [tables]="inbox()" cdkDrag [cdkDragData]="inboxItem(task)">
+                    @if (task.linkedObject(); as linked) {
+                        <avatar [object]="linked"></avatar>
+                    }
+                    <span class="flex-fill text-break">{{ task.name }}</span>
+                </li>
+            }
+        </ul>
+    </div>
+
+    <div class="card">
+        <div class="card-header hstack gap-2">
             <span class="flex-fill" i18n="@@i18n.planner.unconfigured">unconfigured</span>
             <span class="badge bg-danger rounded-pill">{{ unconfiguredMilestones().length }}</span>
         </div>
@@ -16,7 +39,7 @@
         </ul>
     </div>
 
-    <div class="card">
+    <div class="card" data-unschedule-target [class.drop-target]="unscheduleTarget()">
         <div class="card-header hstack gap-2">
             <span class="flex-fill" i18n="@@i18n.planner.undated">undated</span>
             <span class="badge bg-secondary rounded-pill">{{ undatedMilestones().length }}</span>
@@ -37,7 +60,7 @@
         <div class="card-header hstack gap-2">
             <span class="flex-fill" i18n="@@i18n.planner.externalIssues">external issues</span>
             @if (externalIssuesLoading()) {
-                <span class="spinner-border spinner-border-sm text-primary"></span>
+                <spinner [inline]="true" class="text-primary"></spinner>
             } @else {
                 <span class="badge bg-secondary rounded-pill">{{ externalIssues().length }}</span>
             }
@@ -50,7 +73,7 @@
                     @if (issue.project) {
                         <span class="text-muted small text-truncate issue-project">{{ issue.project.name }}</span>
                     } @else if (issue.resolving) {
-                        <span class="spinner-border spinner-border-sm text-muted"></span>
+                        <spinner [inline]="true" class="text-muted"></spinner>
                     } @else {
                         <i class="text-warning" ngbTooltip="no project related to this repository" i18n-ngbTooltip="@@i18n.planner.issueUnresolvedTooltip">warning</i>
                     }

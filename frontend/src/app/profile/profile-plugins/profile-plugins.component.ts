@@ -8,29 +8,28 @@ import { Encryption } from '@models/encryption/encryption.model';
 import { GlobalService } from '@models/global.service';
 import { PluginInstanceFactory } from '@models/http/plugins/plugin.instance.factory';
 import { MantisPlugin } from '@models/http/plugins/plugin.mantis';
-import { UserService } from '@models/user/user.service';
 import { RsaSettingsEmptyComponent } from '@shards/rsa-settings/rsa-settings-empty.component';
-import { SlicePipe } from '@angular/common';
 import { NComponent } from '@shards/n/n.component';
 import { ToolbarComponent } from '@app/app/toolbar/toolbar.component';
 import { TabPluginsComponent } from '@activity/tab-plugins/tab-plugins.component';
 import { NgbDropdownModule } from '@ng-bootstrap/ng-bootstrap';
 import { PluginEntryDto } from '@models/_core/api-response';
+import { CALENDAR_CONNECTOR, ConnectorService } from './connector.service';
 
 @Component({
     changeDetection: ChangeDetectionStrategy.OnPush,
     selector: 'app-profile-plugins',
     templateUrl: './profile-plugins.component.html',
-    imports: [RsaSettingsEmptyComponent, SlicePipe, NComponent, ToolbarComponent, TabPluginsComponent, NgbDropdownModule],
+    imports: [RsaSettingsEmptyComponent, NComponent, ToolbarComponent, TabPluginsComponent, NgbDropdownModule],
 })
 export class ProfilePluginsComponent {
     global = inject(GlobalService);
     factory = inject(PluginInstanceFactory);
     #http = inject(TalvisHttp);
-    #userService = inject(UserService);
     #confirmationService = inject(ConfirmationService);
     #modalInput = inject(InputModalService);
     #modalService = inject(NgbModal);
+    #connectorService = inject(ConnectorService);
 
     onLinkDelete = (_: Encryption) => {
         this.#confirmationService
@@ -45,7 +44,7 @@ export class ProfilePluginsComponent {
             });
     };
     linkMyId = (_: Encryption) => {
-        this.#modalInput.open('Your ID').then((response) => {
+        this.#modalInput.open($localize`:@@i18n.profile.linkMyId:your user name or ID in this service`).then((response) => {
             _.update({ my_id: response!.text }).subscribe();
         });
     };
@@ -62,6 +61,7 @@ export class ProfilePluginsComponent {
         ...this.factory.getPluginEncryptionsOfType('github').map((p) => this.#makeEntry(p, 'github', 'GitHub')),
         ...this.factory.getPluginEncryptionsOfType('slack').map((p) => this.#makeEntry(p, 'slack', 'Slack')),
         ...this.factory.getPluginEncryptionsOfType('local_ai').map((p) => this.#makeEntry(p, 'local_ai', 'LocalAI Proxy')),
+        ...this.factory.getPluginEncryptionsOfType('calendar').map((p) => this.#makeEntry(p, 'calendar', p.value?.name || CALENDAR_CONNECTOR)),
         ...this.factory.getPluginEncryptionsOfType('talvis').map((p) => this.#makeEntry(p, 'talvis', 'TALVIS')),
     ];
 
@@ -97,45 +97,18 @@ export class ProfilePluginsComponent {
             });
     };
 
-    openNewPluginModal = (type: string, displayName: string) => {
-        const newPlugin = {
-            type,
-            displayName,
-            value: this.#getDefaultValuesForPlugin(type),
-            my_id: null,
-            id: null,
-        };
+    readonly calendarConnector = CALENDAR_CONNECTOR;
 
-        const modalRef = this.#modalService.open(PluginConfigModalComponent, { size: 'lg' });
-        modalRef.componentInstance.plugin = newPlugin;
-        modalRef.componentInstance.isNewPlugin.set(true);
-
-        modalRef.result
-            .then((result) => {
-                if (result === 'save') {
-                    this.#onLinkAdded(type, newPlugin.value);
-                }
-                this.global.reload();
-            })
-            .catch(() => {
-                // Modal dismissed - no action needed
-            });
+    urlHost = (url: string): string => {
+        try {
+            return new URL(url).host || url;
+        } catch {
+            return url;
+        }
     };
 
-    #getDefaultValuesForPlugin(type: string): Record<string, string> {
-        switch (type) {
-            case 'mattermost': return { url: '', team: '', token: '' };
-            case 'git': return { url: '', token: '' };
-            case 'mantis': return { url: '', token: '' };
-            case 'jira': return { url: '', email: '', token: '' };
-            case 'github': return { url: 'https://github.com/', token: '' };
-            case 'slack': return { url: '', token: '' };
-            case 'local_ai': return { url: '', login: '', password: '' };
-            default: return {};
-        }
-    }
+    openNewPluginModal = (type: string, displayName: string) => this.#connectorService.create(type, displayName);
 
-    #onLinkAdded = (key: string, object: Record<string, string>) => this.#userService.encrypt(key, object).subscribe((_) => this.global.reload());
     getPluginType = (plugin: PluginEntryDto): string => plugin.type;
     getPluginDisplayName = (plugin: PluginEntryDto): string => plugin.displayName;
 }

@@ -50,6 +50,21 @@ export function createServer({ baseUrl, tokenFor }: ServerOptions): McpServer {
     );
 
     server.registerTool(
+        'flow_list_my_jobs',
+        {
+            title: 'List my jobs',
+            description: 'Lists jobs this machine holds in a given state (GET /flow/jobs?state=…). For claimed and running TALVIS filters on the calling machine by default; use it after a restart to pick up your own work. Needs flow:jobs:read.',
+            inputSchema: {
+                state: z.enum(['claimed', 'running', 'awaiting_gate', 'in_review']).describe('Job state; claimed and running are filtered to this machine'),
+                claimed_by: z.string().optional().describe('Another machine name, only needed to look at foreign claims'),
+                limit: z.number().int().min(1).max(100).optional(),
+            },
+            annotations: { readOnlyHint: true },
+        },
+        ({ state, claimed_by, limit }, extra) => tool(extra.requestInfo?.headers, (c) => c.request('GET', `/flow/jobs?${new URLSearchParams({ state, ...(claimed_by ? { claimed_by } : {}), ...(limit ? { limit: String(limit) } : {}) })}`)),
+    );
+
+    server.registerTool(
         'flow_claim_job',
         {
             title: 'Claim a job',
@@ -69,6 +84,8 @@ export function createServer({ baseUrl, tokenFor }: ServerOptions): McpServer {
                 gate_key: z.string().describe('Key of a gate in the project\'s current phase, e.g. architecture or release'),
                 options: z.array(z.string()).max(10).optional().describe('Alternatives the deciding person can choose from'),
                 recommendation: z.string().max(2000).optional().describe('Which option you recommend and why'),
+                source: z.enum(['agent', 'rule_check']).optional().describe('agent: the agent decided to ask; rule_check: an escalation rule forced the request'),
+                diff_url: z.string().url().optional().describe('Link to the diff the person should look at (http/https)'),
             },
         },
         ({ job_id, ...body }, extra) => tool(extra.requestInfo?.headers, (c) => c.request('POST', `/flow/jobs/${job_id}/gate-request`, body)),
@@ -78,7 +95,7 @@ export function createServer({ baseUrl, tokenFor }: ServerOptions): McpServer {
         'flow_get_gate_decision',
         {
             title: 'Get gate decisions',
-            description: 'Returns every gate approval of a job with decision (pending, approved, rejected), selected option and reason (GET /flow/jobs/{id}/gates). Needs flow:gates:read.',
+            description: 'Returns every approval of a job — gate requests and reviews — with decision (pending, approved, rejected, changes_requested, withdrawn), selected option, reason and review_round (null for gate requests) (GET /flow/jobs/{id}/gates). On changes_requested the job is running again; read the reason, fix and report again. Needs flow:gates:read.',
             inputSchema: { job_id: jobId },
             annotations: { readOnlyHint: true },
         },
@@ -89,10 +106,11 @@ export function createServer({ baseUrl, tokenFor }: ServerOptions): McpServer {
         'flow_report_result',
         {
             title: 'Report a job result',
-            description: 'Completes a claimed or running job (POST /flow/jobs/{id}/result). If the job type has a release gate, TALVIS opens a release approval for humans. Needs flow:jobs:write.',
+            description: 'Reports the result of a claimed or running job (POST /flow/jobs/{id}/result). The job goes to in_review and TALVIS opens the review approvals of its job type for humans; it is completed when all are approved, rejected on a rejection, and running again on changes_requested. Without applicable review gates it completes at once. Needs flow:jobs:write.',
             inputSchema: {
                 job_id: jobId,
                 mr_url: z.string().url().optional().describe('Merge request with the change'),
+                mr_urls: z.array(z.string().url()).max(20).optional().describe('All merge requests when the change spans several repositories'),
                 test_report: z.string().max(65535).optional().describe('Test summary as text'),
                 metrics: z.record(z.string(), z.number()).optional().describe('Measured numbers, e.g. {"duration_minutes": 14, "cost_eur": 0.37}'),
                 knowledge: z.record(z.string(), z.unknown()).optional().describe('Findings worth keeping, e.g. root cause, pitfalls'),
@@ -105,7 +123,7 @@ export function createServer({ baseUrl, tokenFor }: ServerOptions): McpServer {
         'flow_fail_job',
         {
             title: 'Fail a job',
-            description: 'Marks a claimed, running or waiting job as failed with a reason (POST /flow/jobs/{id}/fail). Final. Needs flow:jobs:write.',
+            description: 'Marks a claimed, running, waiting (awaiting_gate) or in_review job as failed with a reason (POST /flow/jobs/{id}/fail); open approvals of the job are withdrawn. Final. Needs flow:jobs:write.',
             inputSchema: { job_id: jobId, reason: z.string().min(1).max(2000) },
             annotations: { destructiveHint: true },
         },

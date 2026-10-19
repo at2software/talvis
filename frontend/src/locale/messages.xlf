@@ -8127,6 +8127,14 @@
         <source>all</source>
       </segment>
     </unit>
+    <unit id="i18n.marketing.subscribedInitiatives">
+      <notes>
+        <note category="location">src/app/marketing/marketing-initiatives/marketing-initiatives.component.html:34</note>
+      </notes>
+      <segment>
+        <source>my subscribed initiatives</source>
+      </segment>
+    </unit>
     <unit id="i18n.marketing.paused">
       <notes>
         <note category="location">src/app/marketing/marketing-initiatives/marketing-initiatives.component.html:28</note>
@@ -9774,6 +9782,15 @@
       </notes>
       <segment>
         <source>delete plugin</source>
+      </segment>
+    </unit>
+    <unit id="i18n.profile.linkMyId">
+      <notes>
+        <note category="location">src/app/profile/profile-plugins/plugin-config-modal/plugin-config-modal.component.ts:73</note>
+        <note category="location">src/app/profile/profile-plugins/profile-plugins.component.ts:47</note>
+      </notes>
+      <segment>
+        <source>your user name or ID in this service</source>
       </segment>
     </unit>
     <unit id="i18n.common.areYouSure">
@@ -15383,6 +15400,156 @@
         <source>unconfigured</source>
       </segment>
     </unit>
+    <unit id="i18n.planner.inbox">
+      <segment>
+        <source>inbox</source>
+      </segment>
+    </unit>
+    <unit id="i18n.planner.processInbox">
+      <segment>
+        <source>process inbox</source>
+      </segment>
+    </unit>
+    <unit id="i18n.planner.capturePlaceholder">
+      <segment>
+        <source>capture a to-do…</source>
+      </segment>
+    </unit>
+    <unit id="i18n.planner.captureError">
+      <segment>
+        <source>failed to capture to-do</source>
+      </segment>
+    </unit>
+    <unit id="i18n.planner.inboxError">
+      <segment>
+        <source>failed to process inbox item</source>
+      </segment>
+    </unit>
+    <unit id="i18n.planner.discard">
+      <segment>
+        <source>discard</source>
+      </segment>
+    </unit>
+    <unit id="i18n.planner.skip">
+      <segment>
+        <source>skip</source>
+      </segment>
+    </unit>
+    <unit id="i18n.planner.stop">
+      <segment>
+        <source>stop</source>
+      </segment>
+    </unit>
+    <unit id="i18n.planner.viewTimeline">
+      <segment>
+        <source>timeline view</source>
+      </segment>
+    </unit>
+    <unit id="i18n.planner.viewCalendar">
+      <segment>
+        <source>calendar view</source>
+      </segment>
+    </unit>
+    <unit id="i18n.planner.wholeProject">
+      <segment>
+        <source>whole project: name and remaining hours of the project</source>
+      </segment>
+    </unit>
+    <unit id="i18n.projects.wholeProjectMilestone">
+      <segment>
+        <source>One milestone for the whole project, with the remaining hours</source>
+      </segment>
+    </unit>
+    <unit id="i18n.projects.wholeProject">
+      <segment>
+        <source>whole project</source>
+      </segment>
+    </unit>
+    <unit id="i18n.planner.showWeekend">
+      <segment>
+        <source>show weekend</source>
+      </segment>
+    </unit>
+    <unit id="i18n.milestone.sendToBacklog">
+      <segment>
+        <source>send to backlog</source>
+      </segment>
+    </unit>
+    <unit id="i18n.widget-planned-today">
+      <segment>
+        <source>planned for today</source>
+      </segment>
+    </unit>
+    <unit id="i18n.widget-planned-today.empty">
+      <segment>
+        <source>nothing planned for today</source>
+      </segment>
+    </unit>
+    <unit id="i18n.widget-planned-today.dayOff">
+      <segment>
+        <source>day off</source>
+      </segment>
+    </unit>
+    <unit id="i18n.planner.calendars">
+      <segment>
+        <source>calendars</source>
+      </segment>
+    </unit>
+    <unit id="i18n.planner.calendarTeam">
+      <segment>
+        <source>team calendar</source>
+      </segment>
+    </unit>
+    <unit id="i18n.planner.calendarAbsences">
+      <segment>
+        <source>absences</source>
+      </segment>
+    </unit>
+    <unit id="i18n.planner.calendarBirthdays">
+      <segment>
+        <source>birthdays</source>
+      </segment>
+    </unit>
+    <unit id="i18n.profile.calendarConnector">
+      <segment>
+        <source>iCal / WebDAV calendar</source>
+      </segment>
+    </unit>
+    <unit id="i18n.profile.calendarLogin">
+      <segment>
+        <source>login (optional)</source>
+      </segment>
+    </unit>
+    <unit id="i18n.profile.calendarPassword">
+      <segment>
+        <source>password (optional)</source>
+      </segment>
+    </unit>
+    <unit id="i18n.profile.calendarHint">
+      <segment>
+        <source>ICS subscription URL or a WebDAV/CalDAV calendar export URL (https required with login). Prefer a revocable read-only app password or a secret calendar URL over your account password. TALVIS loads the calendar on demand and stores neither the content nor the decrypted credentials.</source>
+      </segment>
+    </unit>
+    <unit id="i18n.planner.addCalendar">
+      <segment>
+        <source>calendar</source>
+      </segment>
+    </unit>
+    <unit id="i18n.planner.calendarFailed">
+      <segment>
+        <source>could not be loaded</source>
+      </segment>
+    </unit>
+    <unit id="i18n.planner.countsAsBusy">
+      <segment>
+        <source>appointments count as busy time</source>
+      </segment>
+    </unit>
+    <unit id="i18n.planner.meetings">
+      <segment>
+        <source>appointments</source>
+      </segment>
+    </unit>
     <unit id="i18n.planner.nothingToPlan">
       <notes>
         <note category="location">src/app/profile/profile-milestones/planner-backlog/planner-backlog.component.html:13</note>
@@ -16233,6 +16400,62 @@
         <source>recommendation</source>
       </segment>
     </unit>
+    <unit id="i18n.flow.sourceAgent">
+      <notes>
+        <note category="location">src/app/flow/approvals/flow-approvals.component.html:25</note>
+      </notes>
+      <segment>
+        <source>agent</source>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.sourceRuleCheck">
+      <notes>
+        <note category="location">src/app/flow/approvals/flow-approvals.component.html:28</note>
+      </notes>
+      <segment>
+        <source>rule check</source>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.sourceReview">
+      <notes>
+        <note category="location">src/app/flow/approvals/flow-approvals.component.html:31</note>
+      </notes>
+      <segment>
+        <source>review</source>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.diff">
+      <notes>
+        <note category="location">src/app/flow/approvals/flow-approvals.component.html:49</note>
+      </notes>
+      <segment>
+        <source>diff</source>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.requestChanges">
+      <notes>
+        <note category="location">src/app/flow/approvals/flow-approvals.component.html:67</note>
+      </notes>
+      <segment>
+        <source>request changes</source>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.requestChangesReason">
+      <notes>
+        <note category="location">src/app/flow/approvals/flow-approvals.component.ts:39</note>
+      </notes>
+      <segment>
+        <source>what has to change?</source>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.system">
+      <notes>
+        <note category="location">src/app/settings/settings-projects/settings-projects-flow/flow-audit-section.component.ts:23</note>
+      </notes>
+      <segment>
+        <source>system</source>
+      </segment>
+    </unit>
     <unit id="i18n.flow.approveReason">
       <notes>
         <note category="location">src/app/flow/approvals/flow-approvals.component.ts:32</note>
@@ -16769,12 +16992,12 @@
         <source>release approvals</source>
       </segment>
     </unit>
-    <unit id="i18n.flow.releaseGate">
+    <unit id="i18n.flow.reviewGates">
       <notes>
         <note category="location">src/app/settings/settings-projects/settings-projects-flow/flow-job-types-section.component.ts:19</note>
       </notes>
       <segment>
-        <source>release gate</source>
+        <source>review gates</source>
       </segment>
     </unit>
     <unit id="i18n.flow.requiredRole">
@@ -16806,7 +17029,7 @@
         <note category="location">src/app/settings/settings-projects/settings-projects-flow/flow-job-types-section.component.ts:46</note>
       </notes>
       <segment>
-        <source>Field types: string, text, url (http/https), list (one entry per line), object (JSON). New types start with an example field.</source>
+        <source>Field types: string, text, url (http/https), list (one entry per line; with "fields" a JSON list of objects), object (JSON). "required_without" names a field that makes this one optional. Review gates: gate keys of the current phase, comma-separated, opened as approvals when a job reports its result. New types start with an example field.</source>
       </segment>
     </unit>
     <unit id="i18n.flow.showDetails">
@@ -17814,6 +18037,471 @@
       </notes>
       <segment>
         <source>setup guide</source>
+      </segment>
+    </unit>
+    <unit id="i18n.common.tomorrow">
+      <notes>
+        <note category="location">src/app/marketing/marketing-calls/marketing-calls.component.ts:53</note>
+        <note category="location">src/app/marketing/marketing-prospects/marketing-prospects.component.ts:202</note>
+      </notes>
+      <segment>
+        <source>tomorrow</source>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.best_time_to_call">
+      <notes>
+        <note category="location">src/app/marketing/marketing-calls/marketing-calls.component.html:56</note>
+      </notes>
+      <segment>
+        <source>best time to call</source>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.contact_history">
+      <notes>
+        <note category="location">src/app/marketing/marketing-calls/marketing-calls.component.html:113</note>
+        <note category="location">src/app/marketing/marketing-prospects/marketing-prospect-detail/marketing-prospect-detail.component.html:274</note>
+      </notes>
+      <segment>
+        <source>contact history</source>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.import_skipped_duplicates">
+      <notes>
+        <note category="location">src/app/marketing/marketing-prospects/marketing-prospects.component.ts:324</note>
+      </notes>
+      <segment>
+        <source><ph id="0" equiv="count" disp="skipped"/> rows skipped as duplicates</source>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.kpi_connect_rate">
+      <notes>
+        <note category="location">src/app/marketing/marketing-calls/marketing-calls.component.html:62</note>
+      </notes>
+      <segment>
+        <source>connect rate</source>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.kpi_connects">
+      <notes>
+        <note category="location">src/app/marketing/marketing-calls/marketing-calls.component.html:61</note>
+      </notes>
+      <segment>
+        <source>reached</source>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.kpi_dials">
+      <notes>
+        <note category="location">src/app/marketing/marketing-calls/marketing-calls.component.html:60</note>
+      </notes>
+      <segment>
+        <source>dials</source>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.kpi_emails_sent">
+      <notes>
+        <note category="location">src/app/marketing/marketing-calls/marketing-calls.component.html:64</note>
+      </notes>
+      <segment>
+        <source>emails sent</source>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.kpi_meetings">
+      <notes>
+        <note category="location">src/app/marketing/marketing-calls/marketing-calls.component.html:63</note>
+      </notes>
+      <segment>
+        <source>meetings</source>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.kpi_replies">
+      <notes>
+        <note category="location">src/app/marketing/marketing-calls/marketing-calls.component.html:65</note>
+      </notes>
+      <segment>
+        <source>replies</source>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.log_contact">
+      <notes>
+        <note category="location">src/app/marketing/marketing-prospects/marketing-prospect-detail/marketing-prospect-detail.component.html:275</note>
+        <note category="location">src/app/marketing/marketing-prospects/marketing-prospect-detail/marketing-prospect-detail.component.ts:108</note>
+        <note category="location">src/app/marketing/marketing-remarketing/marketing-remarketing.component.html:41</note>
+      </notes>
+      <segment>
+        <source>log contact</source>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.merge_into_this">
+      <notes>
+        <note category="location">src/app/marketing/marketing-prospects/marketing-prospect-detail/marketing-prospect-detail.component.html:95</note>
+      </notes>
+      <segment>
+        <source>merge into this prospect</source>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.merge_prospect">
+      <notes>
+        <note category="location">src/app/marketing/marketing-prospects/marketing-prospect-detail/marketing-prospect-detail.component.ts:129</note>
+      </notes>
+      <segment>
+        <source>merge prospect</source>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.merge_prospect_confirm">
+      <notes>
+        <note category="location">src/app/marketing/marketing-prospects/marketing-prospect-detail/marketing-prospect-detail.component.ts:130</note>
+      </notes>
+      <segment>
+        <source>Merge <ph id="0" equiv="name" disp="other.name()"/> into this prospect? Contact data, notes and contact history are taken over, the duplicate is deleted.</source>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.move_overdue">
+      <notes>
+        <note category="location">src/app/marketing/marketing-prospects/marketing-prospects.component.html:14</note>
+      </notes>
+      <segment>
+        <source>move overdue activities</source>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.next_monday">
+      <notes>
+        <note category="location">src/app/marketing/marketing-calls/marketing-calls.component.ts:54</note>
+        <note category="location">src/app/marketing/marketing-prospects/marketing-prospects.component.ts:203</note>
+      </notes>
+      <segment>
+        <source>next monday</source>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.no_contact_yet">
+      <notes>
+        <note category="location">src/app/marketing/marketing-calls/marketing-calls.component.html:127</note>
+        <note category="location">src/app/marketing/marketing-prospects/marketing-prospect-detail/marketing-prospect-detail.component.html:293</note>
+      </notes>
+      <segment>
+        <source>no contact logged yet</source>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.no_phone_number">
+      <notes>
+        <note category="location">src/app/marketing/marketing-calls/marketing-calls.component.html:85</note>
+      </notes>
+      <segment>
+        <source>no phone number</source>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.other_initiative">
+      <notes>
+        <note category="location">src/app/marketing/marketing-prospects/marketing-prospect-detail/marketing-prospect-detail.component.html:97</note>
+      </notes>
+      <segment>
+        <source>other initiative</source>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.outcome_callback">
+      <notes>
+        <note category="location">src/models/marketing/marketing-touchpoint.model.ts:41</note>
+      </notes>
+      <segment>
+        <source>call back</source>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.outcome_gatekeeper">
+      <notes>
+        <note category="location">src/models/marketing/marketing-touchpoint.model.ts:43</note>
+      </notes>
+      <segment>
+        <source>gatekeeper</source>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.outcome_info_requested">
+      <notes>
+        <note category="location">src/models/marketing/marketing-touchpoint.model.ts:42</note>
+      </notes>
+      <segment>
+        <source>info requested</source>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.outcome_meeting_booked">
+      <notes>
+        <note category="location">src/models/marketing/marketing-touchpoint.model.ts:40</note>
+      </notes>
+      <segment>
+        <source>meeting booked</source>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.outcome_not_interested">
+      <notes>
+        <note category="location">src/models/marketing/marketing-touchpoint.model.ts:44</note>
+      </notes>
+      <segment>
+        <source>not interested</source>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.overdue_moved">
+      <notes>
+        <note category="location">src/app/marketing/marketing-calls/marketing-calls.component.ts:94</note>
+        <note category="location">src/app/marketing/marketing-prospects/marketing-prospects.component.ts:213</note>
+      </notes>
+      <segment>
+        <source><ph id="0" equiv="count" disp="moved"/> prospects moved</source>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.possible_duplicates">
+      <notes>
+        <note category="location">src/app/marketing/marketing-prospects/marketing-prospect-detail/marketing-prospect-detail.component.html:85</note>
+      </notes>
+      <segment>
+        <source>possible duplicates</source>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.result_bounced">
+      <notes>
+        <note category="location">src/models/marketing/marketing-touchpoint.model.ts:36</note>
+      </notes>
+      <segment>
+        <source>bounced</source>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.result_busy">
+      <notes>
+        <note category="location">src/models/marketing/marketing-touchpoint.model.ts:32</note>
+      </notes>
+      <segment>
+        <source>busy</source>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.result_connected">
+      <notes>
+        <note category="location">src/models/marketing/marketing-touchpoint.model.ts:29</note>
+      </notes>
+      <segment>
+        <source>reached</source>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.result_no_answer">
+      <notes>
+        <note category="location">src/models/marketing/marketing-touchpoint.model.ts:30</note>
+      </notes>
+      <segment>
+        <source>no answer</source>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.result_replied">
+      <notes>
+        <note category="location">src/models/marketing/marketing-touchpoint.model.ts:35</note>
+      </notes>
+      <segment>
+        <source>replied</source>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.result_sent">
+      <notes>
+        <note category="location">src/models/marketing/marketing-touchpoint.model.ts:34</note>
+      </notes>
+      <segment>
+        <source>sent</source>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.result_voicemail">
+      <notes>
+        <note category="location">src/models/marketing/marketing-touchpoint.model.ts:31</note>
+      </notes>
+      <segment>
+        <source>voicemail</source>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.result_wrong_number">
+      <notes>
+        <note category="location">src/models/marketing/marketing-touchpoint.model.ts:33</note>
+      </notes>
+      <segment>
+        <source>wrong number</source>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.skip">
+      <notes>
+        <note category="location">src/app/marketing/marketing-calls/marketing-calls.component.html:99</note>
+      </notes>
+      <segment>
+        <source>skip</source>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.this_week">
+      <notes>
+        <note category="location">src/app/marketing/marketing-calls/marketing-calls.component.html:54</note>
+      </notes>
+      <segment>
+        <source>this week</source>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.touchpoint_call">
+      <notes>
+        <note category="location">src/models/marketing/marketing-touchpoint.model.ts:23</note>
+      </notes>
+      <segment>
+        <source>call</source>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.touchpoint_outcome">
+      <notes>
+        <note category="location">src/app/marketing/shared/touchpoint-form/touchpoint-form.component.html:25</note>
+      </notes>
+      <segment>
+        <source>outcome</source>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.touchpoint_result">
+      <notes>
+        <note category="location">src/app/marketing/shared/touchpoint-form/touchpoint-form.component.html:15</note>
+      </notes>
+      <segment>
+        <source>result</source>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.touchpoint_retry_at">
+      <notes>
+        <note category="location">src/app/marketing/shared/touchpoint-form/touchpoint-form.component.html:37</note>
+      </notes>
+      <segment>
+        <source>try again on</source>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.touchpoint_save">
+      <notes>
+        <note category="location">src/app/marketing/shared/touchpoint-form/touchpoint-form.component.html:48</note>
+      </notes>
+      <segment>
+        <source>save</source>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.touchpoint_save_failed">
+      <notes>
+        <note category="location">src/app/marketing/marketing-calls/marketing-calls.component.ts:86</note>
+        <note category="location">src/app/marketing/marketing-prospects/marketing-prospect-detail/marketing-prospect-detail.component.ts:116</note>
+        <note category="location">src/app/marketing/marketing-remarketing/marketing-remarketing.component.ts:43</note>
+      </notes>
+      <segment>
+        <source>saving the contact failed – please try again</source>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.wrap_up">
+      <notes>
+        <note category="location">src/app/marketing/marketing-calls/marketing-calls.component.html:96</note>
+      </notes>
+      <segment>
+        <source>wrap-up</source>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.best_time_hint">
+      <notes>
+        <note category="location">src/app/marketing/marketing-calls/marketing-calls.component.ts:44</note>
+      </notes>
+      <segment>
+        <source>best: <ph id="0" equiv="weekday" disp="this.weekdayLabel(best.weekday)"/> <ph id="1" equiv="hour" disp="best.hour"/>:00</source>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.bounced_hint">
+      <notes>
+        <note category="location">src/app/marketing/marketing-calls/marketing-calls.component.ts:46</note>
+      </notes>
+      <segment>
+        <source><ph id="0" equiv="count" disp="this.stats()?.emails_bounced ?? 0"/> bounced</source>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.open_website">
+      <notes>
+        <note category="location">src/app/marketing/marketing-calls/marketing-calls.component.html:74</note>
+      </notes>
+      <segment>
+        <source>open website</source>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.search_company">
+      <notes>
+        <note category="location">src/app/marketing/marketing-calls/marketing-calls.component.html:76</note>
+      </notes>
+      <segment>
+        <source>search company</source>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.add_phone_number">
+      <notes>
+        <note category="location">src/app/marketing/marketing-calls/marketing-calls.component.html:88</note>
+      </notes>
+      <segment>
+        <source>add phone number</source>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.outreach">
+      <notes>
+        <note category="location">src/app/marketing/marketing.component.html:13</note>
+      </notes>
+      <segment>
+        <source>outreach</source>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.outreach_due">
+      <notes>
+        <note category="location">src/app/marketing/marketing-outreach/marketing-outreach.component.html:32</note>
+      </notes>
+      <segment>
+        <source>due</source>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.nothing_due">
+      <notes>
+        <note category="location">src/app/marketing/marketing-outreach/marketing-outreach.component.html:54</note>
+      </notes>
+      <segment>
+        <source>nothing due</source>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.no_email_address">
+      <notes>
+        <note category="location">src/app/marketing/marketing-outreach/marketing-outreach.component.ts:47</note>
+      </notes>
+      <segment>
+        <source>no email address</source>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.add_email_address">
+      <notes>
+        <note category="location">src/app/marketing/marketing-outreach/marketing-outreach.component.ts:47</note>
+      </notes>
+      <segment>
+        <source>add email address</source>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.no_linkedin_profile">
+      <notes>
+        <note category="location">src/app/marketing/marketing-outreach/marketing-outreach.component.ts:48</note>
+      </notes>
+      <segment>
+        <source>no LinkedIn profile</source>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.add_linkedin_profile">
+      <notes>
+        <note category="location">src/app/marketing/marketing-outreach/marketing-outreach.component.ts:48</note>
+      </notes>
+      <segment>
+        <source>add LinkedIn profile URL</source>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.search_on_linkedin">
+      <notes>
+        <note category="location">src/app/marketing/marketing-outreach/marketing-outreach.component.html:96</note>
+      </notes>
+      <segment>
+        <source>search on LinkedIn</source>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.add_contact_value_failed">
+      <notes>
+        <note category="location">src/app/marketing/marketing-outreach/marketing-outreach.component.ts:135</note>
+      </notes>
+      <segment>
+        <source>saving the contact data failed</source>
       </segment>
     </unit>
   </file>

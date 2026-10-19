@@ -149,9 +149,23 @@ input[type='number']::-webkit-outer-spin-button {
 .sticky-side {
     position: sticky !important;
     display: block;
-    overflow: auto;
     width: 100%;
     top: 0 !important;
+
+    @media (min-width: 769px) {
+        max-height: calc(100vh - var(--tv-header-height) - #{$grid-width});
+        overflow: auto;
+
+        &.card:has(> .list-group, > .card-body, > scrollbar, > .table-responsive) {
+            display: flex;
+            overflow: hidden;
+
+            > .list-group, > .card-body, > scrollbar, > .table-responsive {
+                min-height: 0;
+                overflow-y: auto;
+            }
+        }
+    }
 }
 
 .container-full {

@@ -1,7 +1,8 @@
 import { Dictionary } from '@constants/constants';
 import { ChangeDetectionStrategy, Component, computed, effect, ElementRef, inject, linkedSignal, signal, viewChild } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { from, mergeMap, toArray } from 'rxjs';
+import { catchError, EMPTY, firstValueFrom, from, mergeMap, toArray } from 'rxjs';
+import { dayjs } from '@constants/date/dates';
 import { Toast } from '@shards/toast/toast';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
@@ -60,7 +61,7 @@ export class MarketingProspectsComponent {
         }
         : undefined);
     #prospects = modelListResource(this.#prospectParams, (params) => this.#marketingService.indexProspects(params));
-    isLoading = this.#prospects.isLoading;
+    isLoading = computed(() => this.#prospects.isLoading() || this.#prospects.status() === 'idle');
     prospects = linkedSignal(() => this.#prospects.value());
 
     #initiatives = modelResource(() => this.#marketingService.indexInitiatives({ status: 'active' }));
@@ -197,6 +198,22 @@ export class MarketingProspectsComponent {
         });
     }
 
+    readonly rescheduleTargets = [
+        { label: $localize`:@@i18n.common.tomorrow:tomorrow`, date: () => dayjs().add(1, 'day') },
+        { label: $localize`:@@i18n.marketing.next_monday:next monday`, date: () => dayjs().day(8) },
+        { label: $localize`:@@i18n.marketing.postpone_1w:1 week`, date: () => dayjs().add(1, 'week') },
+    ];
+
+    async rescheduleOverdue(date: ReturnType<typeof dayjs>) {
+        const { moved } = await firstValueFrom(this.#marketingService.rescheduleOverdueActivities({
+            date: date.format('YYYY-MM-DD'),
+            user_id: this.userFilter() || null,
+            marketing_initiative_id: this.initiativeFilter() || null,
+        }));
+        Toast.success($localize`:@@i18n.marketing.overdue_moved:${moved}:count: prospects moved`);
+        this.#prospects.reload();
+    }
+
     exportCsv() {
         const prospects = this.filteredProspects();
         const headers = ['Name', 'Company', 'Email', 'Phone', 'Website', 'City', 'Role', 'Status'];
@@ -296,8 +313,15 @@ export class MarketingProspectsComponent {
                 lead_source_id: leadSourceId,
             });
         });
-        from(requests).pipe(mergeMap(req => req, 3), toArray()).subscribe(created => {
+        let skipped = 0;
+        const skipDuplicate = (error: { status?: number }) => {
+            if (error?.status !== 409) throw error;
+            skipped++;
+            return EMPTY;
+        };
+        from(requests).pipe(mergeMap(req => req.pipe(catchError(skipDuplicate)), 3), toArray()).subscribe(created => {
             this.prospects.update(p => [...created, ...p]);
+            if (skipped) Toast.info($localize`:@@i18n.marketing.import_skipped_duplicates:${skipped}:count: rows skipped as duplicates`);
         });
     }
 

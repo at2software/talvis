@@ -3,7 +3,7 @@
 <div class="row">
     <div class="col-12">
         <div class="card">
-            @if (_data && _data.length === 0) {
+            @if (hasLoaded() && _data && _data.length === 0) {
                 <empty-state [card]="false" class="invoices" i18n-title="@@i18n.invoices.noCashflowYet" title="No cash flow data yet">
                     <p i18n="@@i18n.invoices.cashflowEmptyDescription">Upload a bank CSV export to visualize your cash flow and uncover the financial pulse of your business.</p>
                 </empty-state>

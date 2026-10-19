@@ -4634,6 +4634,12 @@
         <target>Filter</target>
       </segment>
     </unit>
+    <unit id="i18n.marketing.subscribedInitiatives">
+      <segment>
+        <source>my subscribed initiatives</source>
+        <target>meine abonnierten Initiativen</target>
+      </segment>
+    </unit>
     <unit id="i18n.marketing.paused">
       <segment>
         <source>paused</source>
@@ -5763,6 +5769,12 @@
       <segment>
         <source>delete plugin</source>
         <target>Plugin löschen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.profile.linkMyId">
+      <segment>
+        <source>your user name or ID in this service</source>
+        <target>Dein Benutzername oder deine ID in diesem Dienst</target>
       </segment>
     </unit>
     <unit id="i18n.common.areYouSure">
@@ -12496,6 +12508,186 @@
         <target>nicht konfiguriert</target>
       </segment>
     </unit>
+    <unit id="i18n.planner.inbox">
+      <segment>
+        <source>inbox</source>
+        <target>Eingang</target>
+      </segment>
+    </unit>
+    <unit id="i18n.planner.processInbox">
+      <segment>
+        <source>process inbox</source>
+        <target>Eingang abarbeiten</target>
+      </segment>
+    </unit>
+    <unit id="i18n.planner.capturePlaceholder">
+      <segment>
+        <source>capture a to-do…</source>
+        <target>To-do erfassen…</target>
+      </segment>
+    </unit>
+    <unit id="i18n.planner.captureError">
+      <segment>
+        <source>failed to capture to-do</source>
+        <target>To-do konnte nicht erfasst werden</target>
+      </segment>
+    </unit>
+    <unit id="i18n.planner.inboxError">
+      <segment>
+        <source>failed to process inbox item</source>
+        <target>Eintrag konnte nicht verarbeitet werden</target>
+      </segment>
+    </unit>
+    <unit id="i18n.planner.discard">
+      <segment>
+        <source>discard</source>
+        <target>verwerfen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.planner.skip">
+      <segment>
+        <source>skip</source>
+        <target>überspringen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.planner.stop">
+      <segment>
+        <source>stop</source>
+        <target>beenden</target>
+      </segment>
+    </unit>
+    <unit id="i18n.planner.viewTimeline">
+      <segment>
+        <source>timeline view</source>
+        <target>Timeline-Ansicht</target>
+      </segment>
+    </unit>
+    <unit id="i18n.planner.viewCalendar">
+      <segment>
+        <source>calendar view</source>
+        <target>Kalenderansicht</target>
+      </segment>
+    </unit>
+    <unit id="i18n.planner.wholeProject">
+      <segment>
+        <source>whole project: name and remaining hours of the project</source>
+        <target>Gesamtes Projekt: Name und verbleibende Stunden des Projekts</target>
+      </segment>
+    </unit>
+    <unit id="i18n.projects.wholeProjectMilestone">
+      <segment>
+        <source>One milestone for the whole project, with the remaining hours</source>
+        <target>Ein Meilenstein für das gesamte Projekt, mit den verbleibenden Stunden</target>
+      </segment>
+    </unit>
+    <unit id="i18n.projects.wholeProject">
+      <segment>
+        <source>whole project</source>
+        <target>Gesamtes Projekt</target>
+      </segment>
+    </unit>
+    <unit id="i18n.planner.showWeekend">
+      <segment>
+        <source>show weekend</source>
+        <target>Wochenende anzeigen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.milestone.sendToBacklog">
+      <segment>
+        <source>send to backlog</source>
+        <target>in den Backlog verschieben</target>
+      </segment>
+    </unit>
+    <unit id="i18n.widget-planned-today">
+      <segment>
+        <source>planned for today</source>
+        <target>heute geplant</target>
+      </segment>
+    </unit>
+    <unit id="i18n.widget-planned-today.empty">
+      <segment>
+        <source>nothing planned for today</source>
+        <target>heute nichts geplant</target>
+      </segment>
+    </unit>
+    <unit id="i18n.widget-planned-today.dayOff">
+      <segment>
+        <source>day off</source>
+        <target>frei</target>
+      </segment>
+    </unit>
+    <unit id="i18n.planner.calendars">
+      <segment>
+        <source>calendars</source>
+        <target>Kalender</target>
+      </segment>
+    </unit>
+    <unit id="i18n.planner.calendarTeam">
+      <segment>
+        <source>team calendar</source>
+        <target>Teamkalender</target>
+      </segment>
+    </unit>
+    <unit id="i18n.planner.calendarAbsences">
+      <segment>
+        <source>absences</source>
+        <target>Abwesenheiten</target>
+      </segment>
+    </unit>
+    <unit id="i18n.planner.calendarBirthdays">
+      <segment>
+        <source>birthdays</source>
+        <target>Geburtstage</target>
+      </segment>
+    </unit>
+    <unit id="i18n.profile.calendarConnector">
+      <segment>
+        <source>iCal / WebDAV calendar</source>
+        <target>iCal-/WebDAV-Kalender</target>
+      </segment>
+    </unit>
+    <unit id="i18n.profile.calendarLogin">
+      <segment>
+        <source>login (optional)</source>
+        <target>Login (optional)</target>
+      </segment>
+    </unit>
+    <unit id="i18n.profile.calendarPassword">
+      <segment>
+        <source>password (optional)</source>
+        <target>Passwort (optional)</target>
+      </segment>
+    </unit>
+    <unit id="i18n.profile.calendarHint">
+      <segment>
+        <source>ICS subscription URL or a WebDAV/CalDAV calendar export URL (https required with login). Prefer a revocable read-only app password or a secret calendar URL over your account password. TALVIS loads the calendar on demand and stores neither the content nor the decrypted credentials.</source>
+        <target>ICS-Abo-URL oder Export-URL eines WebDAV-/CalDAV-Kalenders (mit Login nur https). Nutze lieber ein widerrufbares App-Passwort mit Lesezugriff oder eine geheime Kalender-URL statt deines Kontopassworts. TALVIS lädt den Kalender bei Bedarf und speichert weder Inhalt noch entschlüsselte Zugangsdaten.</target>
+      </segment>
+    </unit>
+    <unit id="i18n.planner.addCalendar">
+      <segment>
+        <source>calendar</source>
+        <target>Kalender</target>
+      </segment>
+    </unit>
+    <unit id="i18n.planner.calendarFailed">
+      <segment>
+        <source>could not be loaded</source>
+        <target>konnte nicht geladen werden</target>
+      </segment>
+    </unit>
+    <unit id="i18n.planner.countsAsBusy">
+      <segment>
+        <source>appointments count as busy time</source>
+        <target>Termine zählen als belegte Zeit</target>
+      </segment>
+    </unit>
+    <unit id="i18n.planner.meetings">
+      <segment>
+        <source>appointments</source>
+        <target>Termine</target>
+      </segment>
+    </unit>
     <unit id="i18n.planner.nothingToPlan">
       <segment>
         <source>nothing to plan</source>
@@ -13349,6 +13541,48 @@
         <target>Empfehlung</target>
       </segment>
     </unit>
+    <unit id="i18n.flow.sourceAgent">
+      <segment>
+        <source>agent</source>
+        <target>Agent</target>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.sourceRuleCheck">
+      <segment>
+        <source>rule check</source>
+        <target>Regelprüfung</target>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.sourceReview">
+      <segment>
+        <source>review</source>
+        <target>Review</target>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.diff">
+      <segment>
+        <source>diff</source>
+        <target>Diff</target>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.requestChanges">
+      <segment>
+        <source>request changes</source>
+        <target>Nachbessern lassen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.requestChangesReason">
+      <segment>
+        <source>what has to change?</source>
+        <target>Was muss nachgebessert werden?</target>
+      </segment>
+    </unit>
+    <unit id="i18n.flow.system">
+      <segment>
+        <source>system</source>
+        <target>System</target>
+      </segment>
+    </unit>
     <unit id="i18n.flow.approveReason">
       <segment>
         <source>reason for the approval (optional)</source>
@@ -13751,10 +13985,10 @@
         <target>Release-Freigaben</target>
       </segment>
     </unit>
-    <unit id="i18n.flow.releaseGate">
+    <unit id="i18n.flow.reviewGates">
       <segment>
-        <source>release gate</source>
-        <target>Release-Gate</target>
+        <source>review gates</source>
+        <target>Review-Gates</target>
       </segment>
     </unit>
     <unit id="i18n.flow.requiredRole">
@@ -13777,8 +14011,8 @@
     </unit>
     <unit id="i18n.flow.schemaHint">
       <segment>
-        <source>Field types: string, text, url (http/https), list (one entry per line), object (JSON). New types start with an example field.</source>
-        <target>Feldtypen: string, text, url (http/https), list (ein Eintrag pro Zeile), object (JSON). Neue Typen starten mit einem Beispielfeld.</target>
+        <source>Field types: string, text, url (http/https), list (one entry per line; with "fields" a JSON list of objects), object (JSON). "required_without" names a field that makes this one optional. Review gates: gate keys of the current phase, comma-separated, opened as approvals when a job reports its result. New types start with an example field.</source>
+        <target>Feldtypen: string, text, url (http/https), list (ein Eintrag pro Zeile; mit "fields" eine JSON-Liste von Objekten), object (JSON). "required_without" nennt ein Feld, das dieses optional macht. Review-Gates: Gate-Schlüssel der aktuellen Phase, durch Komma getrennt, werden beim Ergebnis eines Jobs als Freigaben angelegt. Neue Typen starten mit einem Beispielfeld.</target>
       </segment>
     </unit>
     <unit id="i18n.flow.showDetails">
@@ -14523,6 +14757,348 @@
       <segment>
         <source>setup guide</source>
         <target>Einrichtungsanleitung</target>
+      </segment>
+    </unit>
+    <unit id="i18n.common.tomorrow">
+      <segment>
+        <source>tomorrow</source>
+        <target>morgen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.best_time_to_call">
+      <segment>
+        <source>best time to call</source>
+        <target>beste Anrufzeit</target>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.contact_history">
+      <segment>
+        <source>contact history</source>
+        <target>Kontaktverlauf</target>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.import_skipped_duplicates">
+      <segment>
+        <source><ph id="0" equiv="count" disp="skipped"/> rows skipped as duplicates</source>
+        <target><ph id="0" equiv="count" disp="skipped"/> Zeilen als Dubletten übersprungen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.kpi_connect_rate">
+      <segment>
+        <source>connect rate</source>
+        <target>Erreichungsquote</target>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.kpi_connects">
+      <segment>
+        <source>reached</source>
+        <target>erreicht</target>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.kpi_dials">
+      <segment>
+        <source>dials</source>
+        <target>Anwahlen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.kpi_emails_sent">
+      <segment>
+        <source>emails sent</source>
+        <target>E-Mails gesendet</target>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.kpi_meetings">
+      <segment>
+        <source>meetings</source>
+        <target>Termine</target>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.kpi_replies">
+      <segment>
+        <source>replies</source>
+        <target>Antworten</target>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.log_contact">
+      <segment>
+        <source>log contact</source>
+        <target>Kontakt erfassen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.merge_into_this">
+      <segment>
+        <source>merge into this prospect</source>
+        <target>mit diesem Interessenten zusammenführen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.merge_prospect">
+      <segment>
+        <source>merge prospect</source>
+        <target>Interessenten zusammenführen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.merge_prospect_confirm">
+      <segment>
+        <source>Merge <ph id="0" equiv="name" disp="other.name()"/> into this prospect? Contact data, notes and contact history are taken over, the duplicate is deleted.</source>
+        <target><ph id="0" equiv="name" disp="other.name()"/> mit diesem Interessenten zusammenführen? Kontaktdaten, Notizen und Kontaktverlauf werden übernommen, die Dublette wird gelöscht.</target>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.move_overdue">
+      <segment>
+        <source>move overdue activities</source>
+        <target>überfällige Aktivitäten verschieben</target>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.next_monday">
+      <segment>
+        <source>next monday</source>
+        <target>nächster Montag</target>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.no_contact_yet">
+      <segment>
+        <source>no contact logged yet</source>
+        <target>noch kein Kontakt erfasst</target>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.no_phone_number">
+      <segment>
+        <source>no phone number</source>
+        <target>keine Telefonnummer</target>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.other_initiative">
+      <segment>
+        <source>other initiative</source>
+        <target>andere Initiative</target>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.outcome_callback">
+      <segment>
+        <source>call back</source>
+        <target>Rückruf</target>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.outcome_gatekeeper">
+      <segment>
+        <source>gatekeeper</source>
+        <target>Vorzimmer</target>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.outcome_info_requested">
+      <segment>
+        <source>info requested</source>
+        <target>Infos angefordert</target>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.outcome_meeting_booked">
+      <segment>
+        <source>meeting booked</source>
+        <target>Termin vereinbart</target>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.outcome_not_interested">
+      <segment>
+        <source>not interested</source>
+        <target>kein Interesse</target>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.overdue_moved">
+      <segment>
+        <source><ph id="0" equiv="count" disp="moved"/> prospects moved</source>
+        <target><ph id="0" equiv="count" disp="moved"/> Interessenten verschoben</target>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.possible_duplicates">
+      <segment>
+        <source>possible duplicates</source>
+        <target>mögliche Dubletten</target>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.result_bounced">
+      <segment>
+        <source>bounced</source>
+        <target>unzustellbar</target>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.result_busy">
+      <segment>
+        <source>busy</source>
+        <target>besetzt</target>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.result_connected">
+      <segment>
+        <source>reached</source>
+        <target>erreicht</target>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.result_no_answer">
+      <segment>
+        <source>no answer</source>
+        <target>nicht erreicht</target>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.result_replied">
+      <segment>
+        <source>replied</source>
+        <target>geantwortet</target>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.result_sent">
+      <segment>
+        <source>sent</source>
+        <target>gesendet</target>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.result_voicemail">
+      <segment>
+        <source>voicemail</source>
+        <target>Mailbox</target>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.result_wrong_number">
+      <segment>
+        <source>wrong number</source>
+        <target>falsche Nummer</target>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.skip">
+      <segment>
+        <source>skip</source>
+        <target>überspringen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.this_week">
+      <segment>
+        <source>this week</source>
+        <target>diese Woche</target>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.touchpoint_call">
+      <segment>
+        <source>call</source>
+        <target>Anruf</target>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.touchpoint_outcome">
+      <segment>
+        <source>outcome</source>
+        <target>Ergebnis</target>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.touchpoint_result">
+      <segment>
+        <source>result</source>
+        <target>Status</target>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.touchpoint_retry_at">
+      <segment>
+        <source>try again on</source>
+        <target>erneut versuchen am</target>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.touchpoint_save">
+      <segment>
+        <source>save</source>
+        <target>speichern</target>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.touchpoint_save_failed">
+      <segment>
+        <source>saving the contact failed – please try again</source>
+        <target>Speichern des Kontakts fehlgeschlagen – bitte erneut versuchen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.wrap_up">
+      <segment>
+        <source>wrap-up</source>
+        <target>Nachbereitung</target>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.best_time_hint">
+      <segment>
+        <source>best: <ph id="0" equiv="weekday" disp="this.weekdayLabel(best.weekday)"/> <ph id="1" equiv="hour" disp="best.hour"/>:00</source>
+        <target>beste Zeit: <ph id="0" equiv="weekday" disp="this.weekdayLabel(best.weekday)"/> <ph id="1" equiv="hour" disp="best.hour"/>:00</target>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.bounced_hint">
+      <segment>
+        <source><ph id="0" equiv="count" disp="this.stats()?.emails_bounced ?? 0"/> bounced</source>
+        <target><ph id="0" equiv="count" disp="this.stats()?.emails_bounced ?? 0"/> unzustellbar</target>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.open_website">
+      <segment>
+        <source>open website</source>
+        <target>Webseite öffnen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.search_company">
+      <segment>
+        <source>search company</source>
+        <target>Firma suchen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.add_phone_number">
+      <segment>
+        <source>add phone number</source>
+        <target>Telefonnummer ergänzen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.outreach">
+      <segment>
+        <source>outreach</source>
+        <target>Ansprache</target>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.outreach_due">
+      <segment>
+        <source>due</source>
+        <target>fällig</target>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.nothing_due">
+      <segment>
+        <source>nothing due</source>
+        <target>nichts fällig</target>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.no_email_address">
+      <segment>
+        <source>no email address</source>
+        <target>keine E-Mail-Adresse</target>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.add_email_address">
+      <segment>
+        <source>add email address</source>
+        <target>E-Mail-Adresse ergänzen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.no_linkedin_profile">
+      <segment>
+        <source>no LinkedIn profile</source>
+        <target>kein LinkedIn-Profil</target>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.add_linkedin_profile">
+      <segment>
+        <source>add LinkedIn profile URL</source>
+        <target>LinkedIn-Profil-URL ergänzen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.search_on_linkedin">
+      <segment>
+        <source>search on LinkedIn</source>
+        <target>auf LinkedIn suchen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.add_contact_value_failed">
+      <segment>
+        <source>saving the contact data failed</source>
+        <target>Speichern der Kontaktdaten fehlgeschlagen</target>
       </segment>
     </unit>
   </file>

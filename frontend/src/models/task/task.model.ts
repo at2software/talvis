@@ -6,6 +6,7 @@ import { Assignee } from '@models/assignee/assignee.model';
 import { Type } from '@models/_core/hydrate';
 import { User } from '@models/user/user.model';
 import { Project } from '@models/project/project.model';
+import { Company } from '@models/company/company.model';
 import { getTaskActions } from './task.actions';
 import { Model, TypeFromClass } from '@constants/model/type-discriminators';
 
@@ -31,6 +32,8 @@ export class Task extends Serializable {
     @TypeFromClass() parent: User | Project | undefined;
     @Type(()=>Assignee) assignee!: Assignee;
     @Type(()=>Assignee) co_assignees: Assignee[] = [];
+    @Type(()=>Project) linked_project?: Project;
+    @Type(()=>Company) linked_company?: Company;
 
     declare httpService: ITaskPlugin & HttpWrapper;
 
@@ -38,4 +41,10 @@ export class Task extends Serializable {
 
     getUser = () => this.httpService.getUserFor(this.user_id);
     web_url = () => `projects/${this.project_id}/tasks`;
+    linkedObject = (): Project | Company | undefined => this.linked_project ?? this.linked_company;
+    planningProjects = (fallback: Project[]): Project[] => {
+        const customer = this.linked_project?.company ?? this.linked_company;
+        const candidates = [this.linked_project, ...(customer?.projects_unfinished ?? []), ...fallback].filter((_): _ is Project => !!_);
+        return candidates.filter((p, i) => candidates.findIndex((q) => String(q.id) === String(p.id)) === i);
+    };
 }

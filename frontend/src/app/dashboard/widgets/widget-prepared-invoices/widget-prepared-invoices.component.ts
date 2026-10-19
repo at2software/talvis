@@ -6,13 +6,14 @@ import { Project } from '@models/project/project.model';
 import { REFLECTION } from '@constants/constants';
 import { WIDGET_SHARED } from '../widgets.shared';
 import { PermissionsDirective } from '@directives/permissions.directive';
+import { ValueUnitComponent } from '@shards/value-unit/value-unit.component';
 
 @Component({
     changeDetection: ChangeDetectionStrategy.OnPush,
     selector: 'widget-prepared-invoices',
     templateUrl: './widget-prepared-invoices.component.html',
     styleUrls: ['./../base.widget.component.scss'],
-    imports: [...WIDGET_SHARED, PermissionsDirective],
+    imports: [ValueUnitComponent, ...WIDGET_SHARED, PermissionsDirective],
 })
 export class WidgetPreparedInvoicesComponent extends BaseWidgetComponent {
     #widgetService = inject(WidgetService);

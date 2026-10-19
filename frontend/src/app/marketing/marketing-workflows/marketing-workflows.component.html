@@ -4,18 +4,22 @@
 <div class="row" col-slider>
     <!-- Workflows List -->
     <div class="col-md-3">
-        <div class="sticky-side">
+        <div class="h-100">
             @if (_workflows.length === 0) {
-                <div class="card" data-tour="workflows-list">
+                <div class="card sticky-side" data-tour="workflows-list">
                     <div class="card-header" i18n="@@i18n.marketing.workflows">workflows</div>
-                    <empty-state [card]="false" class="workflows" i18n-title="@@i18n.marketing.no_workflows_created" title="no workflows yet">
-                        <p class="text-muted small" i18n="@@i18n.marketing.create_workflow_to_automate">Create a workflow to automate prospect engagement.</p>
-                    </empty-state>
+                    @if (!workflowsLoaded()) {
+                        <spinner class="py-4"></spinner>
+                    } @else {
+                        <empty-state [card]="false" class="workflows" i18n-title="@@i18n.marketing.no_workflows_created" title="no workflows yet">
+                            <p class="text-muted small" i18n="@@i18n.marketing.create_workflow_to_automate">Create a workflow to automate prospect engagement.</p>
+                        </empty-state>
+                    }
                 </div>
             }
 
             @if (_workflows.length > 0) {
-                <div class="card" data-tour="workflows-list">
+                <div class="card sticky-side" data-tour="workflows-list">
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <div i18n="@@i18n.marketing.workflows">workflows</div>
                         <button data-tour="workflows-add-btn" class="btn btn-plain text-primary p-0" (click)="showCreateModal.set(true)" i18n-title="@@i18n.marketing.create_workflow" title="create workflow">

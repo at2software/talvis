@@ -16,8 +16,8 @@ const EXAMPLE_SCHEMA = { fields: [{ key: 'issue', type: 'url', required: true, l
                         <div class="col-md-4"><input class="form-control form-control-sm fw-bold" [value]="type.name" (change)="save('job-types', type.id, { name: value($event) })" /></div>
                         <div class="col-md-3">
                             <div class="input-group input-group-sm">
-                                <span class="input-group-text" i18n="@@i18n.flow.releaseGate">release gate</span>
-                                <input class="form-control" [value]="type.release_gate_key ?? ''" (change)="save('job-types', type.id, { release_gate_key: value($event).trim() || null })" />
+                                <span class="input-group-text" i18n="@@i18n.flow.reviewGates">review gates</span>
+                                <input class="form-control" [value]="(type.review_gate_keys ?? []).join(', ')" (change)="save('job-types', type.id, { review_gate_keys: gateKeys(value($event)) })" />
                             </div>
                         </div>
                         <div class="col-md-2 text-end">
@@ -43,7 +43,7 @@ const EXAMPLE_SCHEMA = { fields: [{ key: 'issue', type: 'url', required: true, l
                         <i class="text-primary pointer" tabindex="0" i18n-ngbTooltip="@@i18n.flow.addJobType" ngbTooltip="add job type" (click)="add(key, name)" (keyup.enter)="add(key, name)">add</i>
                     </div>
                 </div>
-                <div class="text-muted small mt-2" i18n="@@i18n.flow.schemaHint">Field types: string, text, url (http/https), list (one entry per line), object (JSON). New types start with an example field.</div>
+                <div class="text-muted small mt-2" i18n="@@i18n.flow.schemaHint">Field types: string, text, url (http/https), list (one entry per line; with "fields" a JSON list of objects), object (JSON). "required_without" names a field that makes this one optional. Review gates: gate keys of the current phase, comma-separated, opened as approvals when a job reports its result. New types start with an example field.</div>
             </li>
         </ul>
     `,
@@ -54,6 +54,10 @@ export class FlowJobTypesSectionComponent extends FlowSectionBase {
     readonly invalid = signal<Dictionary<boolean>>({});
 
     pretty = (schema: unknown) => JSON.stringify(schema, null, 2);
+    gateKeys = (raw: string) => {
+        const keys = raw.split(',').map((_) => _.trim()).filter(Boolean);
+        return keys.length ? keys : null;
+    };
 
     saveSchema(id: number, raw: string) {
         try {

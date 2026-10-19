@@ -53,6 +53,7 @@ export class PluginConfigModalComponent {
             case 'github': return { url: 'https://github.com/', token: '' };
             case 'slack': return { url: '', token: '' };
             case 'local_ai': return { url: '', login: '', password: '', model: '' };
+            case 'calendar': return { name: '', url: '', login: '', password: '' };
             default: return {};
         }
     }
@@ -69,7 +70,7 @@ export class PluginConfigModalComponent {
     };
 
     onLinkMyId = () => {
-        this.#inputModalService.open('Your ID').then((response) => {
+        this.#inputModalService.open($localize`:@@i18n.profile.linkMyId:your user name or ID in this service`).then((response) => {
             if (response?.text) this.plugin.update({ my_id: response.text }).subscribe();
         });
     };

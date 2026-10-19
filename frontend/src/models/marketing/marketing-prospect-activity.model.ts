@@ -32,6 +32,15 @@ export class MarketingProspectActivity extends Serializable {
 
     isOverdue = () => new Date(this.scheduled_at) < new Date();
 
+    localizedDescription = (lang = 'de', formality = 'formal'): string => {
+        const desc = this.marketing_activity?.description;
+        if (!desc) return '';
+        if (typeof desc === 'string') return desc;
+        return desc.find((v) => v.language === lang && v.formality === formality)?.text
+            ?? desc.find((v) => v.language === lang)?.text
+            ?? desc[0]?.text ?? '';
+    };
+
     #postpone(days: number) {
         this.httpService.post(`marketing/prospects/${this.marketing_prospect_id}/postpone-activities`, { days }).subscribe();
     }
