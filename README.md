@@ -1,14 +1,58 @@
-# TALVIS
+<p align="center">
+  <img src="docs/logo.svg" alt="TALVIS" width="72">
+</p>
 
-**Open-source business management suite for service-oriented teams.**
+<h1 align="center">TALVIS</h1>
 
-TALVIS combines CRM, project management, invoicing, time tracking, HR, marketing automation, uptime monitoring, and workflow automation into a single, self-hosted web application. Free and open source under the [GNU AGPL v3](LICENSE).
+<p align="center">
+  <strong>The open-source business suite for service teams.</strong><br>
+  CRM · Projects · Time tracking · Invoicing · HR · Marketing automation · Uptime monitoring
+</p>
 
-> Built for digital agencies, IT service companies, consultancies, and software development teams.
+<p align="center">
+  <a href="https://talvis.org">Website</a> ·
+  <a href="https://talvis.org/#demo">Video demo</a> ·
+  <a href="#quick-start">Quick start</a> ·
+  <a href="https://github.com/at2software/talvis/releases">Releases</a> ·
+  <a href="CHANGELOG.md">Changelog</a>
+</p>
 
-**Website:** [talvis.org](https://talvis.org)
+<p align="center">
+  <a href="LICENSE"><img alt="License: AGPL v3" src="https://img.shields.io/badge/license-AGPL%20v3-00C9A7"></a>
+  <a href="https://github.com/at2software/talvis/releases"><img alt="Latest release" src="https://img.shields.io/github/v/release/at2software/talvis?color=00C9A7"></a>
+  <a href="https://github.com/at2software/talvis/stargazers"><img alt="GitHub stars" src="https://img.shields.io/github/stars/at2software/talvis?color=00C9A7"></a>
+  <img alt="Docker ready" src="https://img.shields.io/badge/docker-ready-00C9A7">
+</p>
 
-![TALVIS dashboard](docs/screenshots/dashboard-overview.png)
+![TALVIS product tour: dashboard, planner, customers, invoices and automation](docs/media/demo-tour.gif)
+
+TALVIS replaces the patchwork of CRM, project tool, time tracker, invoicing app and spreadsheet that most agencies, consultancies and IT service companies live with. It is one self-hosted web application with one login and one database — free under the [GNU AGPL v3](LICENSE), with **no per-user pricing, no paid tiers and no feature paywalls**.
+
+- **Your data stays with you.** Self-hosted with Docker; AI features use models you run yourself.
+- **Everything is included.** Every module in this repository is part of the free release.
+- **Built from daily use.** TALVIS has run [at² GmbH](https://www.at2-software.com) for years before it was open-sourced.
+- **Ready in minutes.** One `docker compose up -d`, then a setup wizard.
+
+> Built for digital agencies, IT service companies, consultancies, freelancers and software development teams.
+
+All screenshots and recordings in this README show demo data of a fictional company.
+
+---
+
+## Quick start
+
+You need [Docker](https://docs.docker.com/get-docker/) 24+ with Compose v2 and about 4 GB of RAM.
+
+```bash
+# download and extract the latest release from
+# https://github.com/at2software/talvis/releases, then:
+cp .env.example .env      # set ADMIN_EMAIL, ADMIN_PASSWORD and the database passwords
+docker compose up -d
+```
+
+Open <http://localhost:3200>, sign in with the admin account from `.env`, and let the setup wizard configure your company, invoicing and working time. The [full installation guide](#running-with-docker) follows below.
+
+![Setup wizard](docs/media/setup-wizard.gif)
 
 ---
 
@@ -18,7 +62,7 @@ TALVIS combines CRM, project management, invoicing, time tracking, HR, marketing
 |---|---|
 | **CRM** | Company and contact management, relationship mapping, revenue analytics |
 | **Projects** | Gantt planning, milestone planner with inbox, team and Outlook/iCal calendars and daily workload, tasks, team assignments, budget tracking |
-| **Invoicing** | PDF generation, ZUGFeRD/Factur-X, recurring billing, SEPA direct debit (pain.008), cash flow |
+| **Invoicing** | PDF generation, ZUGFeRD/Factur-X, recurring billing, SEPA direct debit (pain.008), DATEV export, cash flow |
 | **Time Tracking** | Focus sessions, break management, workload heatmaps, billable hours |
 | **HR** | Vacation, sick leave, travel expenses, team capacity analytics |
 | **Marketing** | Prospect pipeline, outreach queue with call, email and LinkedIn touchpoints, campaign management, Sankey funnel charts |
@@ -34,15 +78,50 @@ TALVIS combines CRM, project management, invoicing, time tracking, HR, marketing
 
 ## Screenshots
 
-| | |
-|---|---|
-| **Projects** — timeline, budget, milestones ![Project overview](docs/screenshots/project-overview.png) | **CRM** — customer profile with revenue analytics ![Customer profile](docs/screenshots/customer-profile.png) |
-| **Time Tracking** — daily sessions and breaks ![Time tracking](docs/screenshots/hr-people.png) | **Invoicing** — live invoice editor ![Invoicing](docs/screenshots/invoicing-example.png) |
-| **Capacity Planning** — workload heatmap per person ![Capacity planning](docs/screenshots/time-tracking.png) | **Marketing** — prospect funnel (Sankey) ![Marketing funnel](docs/screenshots/marketing.png) |
+<table>
+  <tr>
+    <td width="50%"><b>Projects</b> — milestone planner and Gantt timeline<br><img src="docs/screenshots/project-overview.webp" alt="Project milestone planner"></td>
+    <td width="50%"><b>Project Flow</b> — phases, jobs and reviews for people and AI agents<br><img src="docs/screenshots/project-flow.webp" alt="Project Flow with jobs in review"></td>
+  </tr>
+  <tr>
+    <td><b>CRM</b> — customer profile with revenue analytics<br><img src="docs/screenshots/customer-profile.webp" alt="Customer profile"></td>
+    <td><b>Invoicing</b> — invoice editor with time-based line items<br><img src="docs/screenshots/invoicing-example.webp" alt="Invoice editor"></td>
+  </tr>
+  <tr>
+    <td><b>PDF invoices</b> — your letterhead, your language<br><img src="docs/screenshots/invoice-pdf.webp" alt="Generated PDF invoice"></td>
+    <td><b>Time Tracking</b> — working time and project focus<br><img src="docs/screenshots/time-tracking.webp" alt="Time tracking"></td>
+  </tr>
+  <tr>
+    <td><b>Capacity Planning</b> — workload heatmap per person<br><img src="docs/screenshots/capacity-heatmap.webp" alt="Capacity heatmap"></td>
+    <td><b>HR</b> — team overview and vacation entitlements<br><img src="docs/screenshots/hr-people.webp" alt="HR vacation overview"></td>
+  </tr>
+  <tr>
+    <td><b>Marketing</b> — prospect funnel (Sankey) and outreach KPIs<br><img src="docs/screenshots/marketing-funnel.webp" alt="Marketing funnel"></td>
+    <td><b>Sentinels</b> — no-code automation: triggers → conditions → actions<br><img src="docs/screenshots/sentinels.webp" alt="Sentinel automation builder"></td>
+  </tr>
+  <tr>
+    <td><b>Uptime Monitoring</b> — health checks with history<br><img src="docs/screenshots/uptime.webp" alt="Uptime monitor"></td>
+    <td><b>Calendar</b> — CalDAV/CardDAV sync, vacation and team events<br><img src="docs/screenshots/calendar.webp" alt="Calendar"></td>
+  </tr>
+  <tr>
+    <td colspan="2"><b>Integrations</b> — GitLab, Mattermost, webhooks and more, configured per connector<br><img src="docs/screenshots/integrations.webp" alt="Integration connectors"></td>
+  </tr>
+</table>
 
-**Sentinels** — visual no-code automation (triggers → conditions → actions):
+More recordings: [time to invoice](docs/media/time-to-invoice.gif) · [building a Sentinel](docs/media/sentinel-build.gif) · [setup wizard](docs/media/setup-wizard.gif)
 
-![Sentinel automation](docs/screenshots/sentinels.png)
+---
+
+## Why TALVIS?
+
+| | TALVIS | Typical alternatives |
+|---|---|---|
+| Per-user pricing | None | Often per seat |
+| Feature paywalls | None — one package | Paid editions or add-ons |
+| Hosting | Self-hosted, Docker | Varies |
+| Automation | Built-in Sentinels, no code | Separate tools or paid add-on |
+| Uptime monitoring | Built in | Separate tool |
+| Calendar and contacts | CalDAV / CardDAV | Often missing |
 
 ---
 
@@ -51,7 +130,7 @@ TALVIS combines CRM, project management, invoicing, time tracking, HR, marketing
 | Layer | Technology |
 |---|---|
 | Frontend | Angular 22, TypeScript, Bootstrap 5, RxJS |
-| Backend | Laravel 13, PHP 8.3+, Eloquent ORM |
+| Backend | Laravel 13, PHP 8.4, Eloquent ORM |
 | Database | MySQL / MariaDB |
 | Real-Time | Laravel Reverb (WebSockets) |
 | Auth | Token (simple) or Keycloak SSO |
