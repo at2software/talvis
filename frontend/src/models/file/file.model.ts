@@ -8,7 +8,11 @@ enum MimeType {
     DEFAULT,
     IMAGE,
     APPLICATION,
+    MARKDOWN,
 }
+
+const MARKDOWN_EXTENSION = /\.(md|markdown)$/i;
+const MARKDOWN_MIMES = ['text/markdown', 'text/x-markdown'];
 
 @Model('File')
 export class File extends Serializable {
@@ -30,13 +34,18 @@ export class File extends Serializable {
 
     protected override buildActions(): NxAction[] { return getFileActions(this) }
 
-    css = computed(() => this.#getColorCss(this.snapshot().mime));
+    css = computed(() => { const { mime, name } = this.snapshot(); return this.#getColorCss(mime, name) });
+
+    isMarkdown(name = this.name, mime = this.mime): boolean {
+        return MARKDOWN_EXTENSION.test(name ?? '') || MARKDOWN_MIMES.includes((mime ?? '').split(';')[0].trim().toLowerCase());
+    }
 
     /**
      * @returns google fonts string
      */
     getIcon(): string {
         if (this.mime === 'application/pdf') return 'picture_as_pdf';
+        if (this.isMarkdown()) return 'description';
         if (this.mime?.endsWith('document')) return 'article';
         if (this.name?.endsWith('.svg')) return 'polyline';
         if (this.mime?.startsWith('image/')) return 'photo';
@@ -46,17 +55,20 @@ export class File extends Serializable {
     /**
      * @returns hex or var color string
      */
-    #getColorCss(mime: string): string {
-        switch (this.getMimeType(mime)) {
+    #getColorCss(mime: string, name: string): string {
+        switch (this.getMimeType(mime, name)) {
             case MimeType.DEFAULT:
                 return '#cccccc';
             case MimeType.IMAGE:
                 return 'var(--color-purple)';
             case MimeType.APPLICATION:
                 return 'var(--color-blue)';
+            case MimeType.MARKDOWN:
+                return 'var(--color-teal)';
         }
     }
-    getMimeType(mime = this.mime): MimeType {
+    getMimeType(mime = this.mime, name = this.name): MimeType {
+        if (this.isMarkdown(name, mime)) return MimeType.MARKDOWN;
         if (mime?.startsWith('image/')) return MimeType.IMAGE;
         if (mime?.startsWith('application/')) return MimeType.APPLICATION;
         return MimeType.DEFAULT;

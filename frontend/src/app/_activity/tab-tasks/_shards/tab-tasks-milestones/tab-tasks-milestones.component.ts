@@ -3,14 +3,11 @@ import { NgTemplateOutlet } from '@angular/common';
 import { Nx } from '@app/nx/nx.directive';
 import { NComponent } from '@shards/n/n.component';
 import { AvatarComponent } from '@shards/avatar/avatar.component';
-import { Milestone } from '@models/milestone/milestone.model';
+import { MilestoneState } from '@models/milestone/milestone-state.enum';
 import { MilestoneService } from '@models/milestone/milestone.service';
 import { modelListResource, modelResource } from '@models/http/model-resource';
 import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { TabTasksBaseComponent } from '../tab-tasks-base.component';
-
-const isOverdue = (m: Milestone) => m.state === 1 && !!m.due_at && new Date(m.due_at) < new Date();
-const needsStarting = (m: Milestone) => m.state === 0 && !!m.started_at && new Date(m.started_at) <= new Date();
 
 @Component({
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -32,14 +29,14 @@ export class TabTasksMilestonesComponent extends TabTasksBaseComponent {
     );
     #pmMilestonesAssigned = computed(() => this.#pmMilestonesOfOthers().filter((m) => m.user_id !== null));
 
-    milestonesOverdue = computed(() => [...this.#ownMilestones().filter(isOverdue), ...this.#pmMilestonesAssigned().filter(isOverdue)]);
+    milestonesOverdue = computed(() => [...this.#ownMilestones().filter((m) => m.isOverdue()), ...this.#pmMilestonesAssigned().filter((m) => m.isOverdue())]);
     milestonesNeedStarting = computed(() => [
-        ...this.#ownMilestones().filter((m) => !isOverdue(m) && needsStarting(m)),
-        ...this.#pmMilestonesAssigned().filter((m) => !isOverdue(m) && needsStarting(m)),
+        ...this.#ownMilestones().filter((m) => !m.isOverdue() && m.needsStart()),
+        ...this.#pmMilestonesAssigned().filter((m) => !m.isOverdue() && m.needsStart()),
     ]);
-    milestonesRunning = computed(() => this.#ownMilestones().filter((m) => !isOverdue(m) && !needsStarting(m) && m.state === 1));
+    milestonesRunning = computed(() => this.#ownMilestones().filter((m) => !m.isOverdue() && !m.needsStart() && m.state === MilestoneState.IN_PROGRESS));
     milestonesNeedAssignment = computed(() => this.#pmMilestonesOfOthers().filter((m) => m.user_id === null));
-    milestonesNoDuration = computed(() => this.#ownMilestones().filter((m) => m.state !== 2 && !m.workload_hours && !m.invoice_items?.length && !m.project?.is_time_based));
+    milestonesNoDuration = computed(() => this.#ownMilestones().filter((m) => m.lacksDuration()));
     projectsNoCoverage = computed(() => this.#pmMilestones.value()?.projectsNoCoverage ?? []);
 
     constructor() {

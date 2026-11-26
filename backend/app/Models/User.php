@@ -8,7 +8,6 @@ use App\Actions\User\GetPredictionAccuracyData;
 use App\Actions\User\GetUserAddressBook;
 use App\Builders\UserBuilder;
 use App\Casts\Permission;
-use App\Enums\MilestoneState;
 use App\Enums\VacationState;
 use App\Http\Controllers\VacationController;
 use App\Queries\TimeBasedEmploymentQuery;
@@ -364,9 +363,8 @@ class User extends BaseAuthenticatable {
         return $assignments;
     }
     public function milestonesInRange(Carbon $startDate, Carbon $endDate) {
-        $meId = (int)Param::get('ME_ID')->value;
         return Milestone::where('user_id', $this->id)
-            ->whereNot('state', MilestoneState::DONE)
+            ->open()
             ->where(function ($query) use ($startDate, $endDate) {
                 $query->whereDate('due_at', '>=', $startDate)
                     ->where(function ($q) use ($endDate) {
@@ -374,16 +372,12 @@ class User extends BaseAuthenticatable {
                     });
             })
             ->with(['project', 'invoiceItems'])
-            ->whereHas('project', fn ($q) => $q->where('company_id', '!=', $meId))
+            ->whereHas('project', fn ($q) => $q->whereExternal())
             ->get();
     }
     public function getUnconfiguredMilestones(): array {
         return Milestone::where('user_id', $this->id)
-            ->where(function ($query) {
-                $query->whereNull('workload_hours')->orWhere('workload_hours', 0);
-            })
-            ->whereNot('state', MilestoneState::DONE)
-            ->whereDoesntHave('invoiceItems')
+            ->unconfigured()
             ->whereHas('project', fn ($q) => $q->where('is_time_based', false))
             ->with('project')
             ->get()
@@ -512,9 +506,12 @@ class User extends BaseAuthenticatable {
         $this->password = Hash::make(Str::random(64));
         $this->save();
         $this->tokens()->delete();
-        $this->syncRoles([]);
-        $this->employments()->update(['is_active' => false]);
+        $this->retire();
         Param::put('SYS_SEED_ADMIN_RETIRED', 1);
+    }
+    public function retire(): void {
+        $this->employments->each(fn (UserEmployment $employment) => $employment->update(['is_active' => false]));
+        $this->syncRoles([]);
     }
     public function assignWorkingHours(array $hours, string $type = UserEmployment::DEFAULT_TYPE, ?string $startedAt = null): UserEmployment {
         $employment = $this->activeEmployment ?? new UserEmployment([
@@ -528,8 +525,14 @@ class User extends BaseAuthenticatable {
         $this->setRelation('activeEmployment', $employment);
         return $employment;
     }
+    public function clearCurrentFocus(): void {
+        $this->update(self::nullPoly('current_focus'));
+    }
     public function hasValidVacationGrant(): bool {
-        return $this->vacation_grants()->where('expires_at', '>', now())->exists();
+        return $this->vacation_grants()->unexpired()->exists();
+    }
+    public function currentVacationGrant(): ?VacationGrant {
+        return $this->vacation_grants()->unexpired()->latest()->first();
     }
     public function grantVacationDays(float $days): VacationGrant {
         $year = now()->year;

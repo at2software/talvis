@@ -4,7 +4,7 @@ import { Assignee, I18N_REMOVE_FROM_TEAM } from '@models/assignee/assignee.model
 import { Project } from '@models/project/project.model';
 import { User } from '@models/user/user.model';
 import { UserService } from '@models/user/user.service';
-import { dayjs, Dayjs } from '@constants/date/dates';
+import { dayjs, Dayjs, shortMonth } from '@constants/date/dates';
 import { ActionEmitterType } from '@app/nx/nx.directive';
 import { Color } from '@constants/Color';
 import { ProjectState } from '@models/project/project-state.model';
@@ -98,7 +98,7 @@ export class HrWorkloadComponent {
 
     readonly monthLabels: TLABEL[] = [0, 1, 2].map((i) => {
         const month = D_START.add(i, 'months').startOf('month').add(1, 'month');
-        return { label: month.format('MMM'), percent: month.diff(D_START, 'seconds') / D_END.diff(D_START, 'seconds') };
+        return { label: shortMonth(month), percent: month.diff(D_START, 'seconds') / D_END.diff(D_START, 'seconds') };
     });
 
     filterIcons = {

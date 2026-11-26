@@ -77,7 +77,6 @@ export class ProjectMilestonesComponent {
     readonly milestoneList = computed<Milestone[]>(() => [...(this.#milestones.value()?.milestones ?? [])].sort((a, b) => (a.started_at ?? '').localeCompare(b.started_at ?? '')));
 
     readonly stateInfo = getMilestoneStateInfo;
-    isOverdue = (m: Milestone) => m.state !== 2 && !!m.due_at && dayjs(m.due_at).isBefore(dayjs(), 'day');
     userFor = (m: Milestone) => this.#global.userFor(m.user_id ?? '');
 
     constructor() {

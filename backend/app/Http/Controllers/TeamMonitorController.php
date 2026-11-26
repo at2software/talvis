@@ -7,7 +7,7 @@ use App\Services\WorkingTimeService;
 
 class TeamMonitorController extends Controller {
     public function index() {
-        $users = User::whereHas('activeEmployments')
+        $users = User::whereEmployed()
             ->with(['current_focus', 'vacations', 'activeVacations', 'active_sick_notes'])
             ->get()
             ->each(function ($user) {

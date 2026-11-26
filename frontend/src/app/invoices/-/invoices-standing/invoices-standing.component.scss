@@ -12,11 +12,11 @@
     color: var(--bs-body-color);
 
     &:hover {
-        background: rgba(255, 255, 255, 0.05);
+        background: rgba(var(--tv-ink-rgb), 0.05);
     }
 
     &.active {
-        background: rgba(255, 255, 255, 0.08);
+        background: rgba(var(--tv-ink-rgb), 0.08);
         color: var(--bs-body-color);
         border-color: var(--bs-border-color-translucent);
     }

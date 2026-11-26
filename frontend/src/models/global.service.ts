@@ -1,5 +1,5 @@
 import { Enum } from '@models/_core/enum';
-import { inject, signal, Service } from '@angular/core';
+import { inject, Injector, signal, Service } from '@angular/core';
 import { APP_BASE_HREF } from '@angular/common';
 import { environment } from '@environments/environment';
 import { User } from '@models/user/user.model';
@@ -21,7 +21,8 @@ import { Serializable } from '@models/_core/serializable';
 import type { NxAction } from '@models/_core/nx.actions';
 import type { INxContextMenu } from '@models/_core/nx.contextmenu.interface';
 import { Dictionary } from '@constants/constants';
-import { DashboardDto, FlowTransitionDto, TableRelationDto, TableSchemaDto, UserEnvironmentDto } from '@models/_core/api-response';
+import { AssignmentRoleDto, DashboardDto, TableRelationDto, TableSchemaDto, UserEnvironmentDto } from '@models/_core/api-response';
+import { EXTENSIONS } from '@app/extensions';
 
 const DEV_ROLES: string[] | null = null; // e.g. ['user', 'invoicing']
 
@@ -58,6 +59,7 @@ export class GlobalService extends TalvisHttpService<Serializable> {
     readonly #factory = inject(PluginInstanceFactory);
     readonly #router = inject(Router);
     readonly #baseHref = inject(APP_BASE_HREF);
+    readonly #injector = inject(Injector);
 
     apiPath = '';
     tables!: TableSchemaDto[];
@@ -73,8 +75,9 @@ export class GlobalService extends TalvisHttpService<Serializable> {
     settings!: Record<string, any>;
     readonly lead_sources = signal<LeadSource[]>([]);
     project_states: ProjectState[] = [];
+    assignment_roles: AssignmentRoleDto[] = [];
+    orchestrated_state_ids: number[] = [];
     roles: unknown[] = [];
-    euCountries!: string[];
     me_id: string = '';
     selectedRootObject: unknown;
     selectedSubObject: unknown;
@@ -152,12 +155,6 @@ export class GlobalService extends TalvisHttpService<Serializable> {
             },
         });
 
-    reloadTransitions = () =>
-        this.aget('flow/transitions', null, Object).subscribe({
-            next: (_: FlowTransitionDto[]) => (ProjectState.transitions = _),
-            error: () => (ProjectState.transitions = undefined),
-        });
-
     reloadInvoiceNumber = () => this.get('invoices/current_no_int').pipe(tap((_) => (this.settings['INVOICE_NO_CURRENT'] = '' + _)));
 
     setTokenInterceptor = (token: string) => {
@@ -199,10 +196,11 @@ export class GlobalService extends TalvisHttpService<Serializable> {
         this.dashboards = sanitizeDashboards(env.dashboards);
         this.#plugins = env.plugins;
         this.project_states = env.project_states.map((_) => ProjectState.fromJson(_));
-        this.reloadTransitions();
+        this.assignment_roles = env.assignment_roles ?? [];
+        this.orchestrated_state_ids = env.orchestrated_state_ids ?? [];
+        EXTENSIONS.forEach((_) => _.onEnvironmentLoaded?.(this.#injector));
         this.lead_sources.set(env.lead_sources.map((_) => LeadSource.fromJson(_)));
         this.roles = env.roles || [];
-        this.euCountries = env.eu_countries;
         this.isSeedAdmin.set(!!env.is_seed_admin);
 
         this.me_id = env.settings.ME_ID as string;
@@ -316,7 +314,6 @@ export class GlobalService extends TalvisHttpService<Serializable> {
         const i18nProducts = $localize`:@@i18n.common.products:products`;
         const i18nTeam = $localize`:@@i18n.common.team:team`;
         const i18nCalendar = $localize`:@@i18n.common.calendar:calendar`;
-        const i18nApprovals = $localize`:@@i18n.flow.openApprovals:open approvals`;
         const i18nSettings = $localize`:@@i18n.common.settings:settings`;
 
         this.navigationItems.set([
@@ -328,7 +325,7 @@ export class GlobalService extends TalvisHttpService<Serializable> {
             { logo: 'product', tooltip: i18nProducts, link: '/products', visible: this.#hasRole('product_manager') },
             { logo: 'team', tooltip: i18nTeam, link: '/hr', visible: this.#hasAnyRole(['hr', 'project_manager']) },
             { logo: 'calendar', tooltip: i18nCalendar, link: '/calendar', visible: this.#hasRole('user') },
-            { logo: 'approval', tooltip: i18nApprovals, link: '/flow/approvals', visible: this.#hasRole('user') },
+            ...EXTENSIONS.flatMap((_) => _.navigation ?? []).map(({ roles, ...item }) => ({ ...item, visible: this.#hasRole(roles) })),
         ]);
 
         this.bottomNavigationItems.set([{ logo: 'settings', tooltip: i18nSettings, link: '/settings', visible: this.#hasRole('admin') }]);

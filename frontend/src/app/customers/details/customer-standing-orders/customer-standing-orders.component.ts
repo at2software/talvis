@@ -26,12 +26,10 @@ export class CustomerStandingOrdersComponent {
     readonly InvoiceItemType = InvoiceItemType;
 
     onCreate(rec: InvoiceItemType) {
-        const item = InvoiceItem.fromJson({});
+        const item = InvoiceItem.fromJson({ type: rec, next_recurrence_at: dayjs().format('YYYY-MM-DD') });
         const company = this.company();
         this.#modal.open(ModalEditInvoiceItemComponent, item, company).then((response) => {
             if (response?.item) {
-                response.item.type = rec;
-                response.item.next_recurrence_at = dayjs().toISOString();
                 response.item.company_id = company.id;
                 response.item.store().subscribe(() => this.standing().reload());
             }

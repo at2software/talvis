@@ -93,8 +93,8 @@ export abstract class TimetrackingComponent {
         this.observer = this.onReload();
     };
     userForFocus = (x: Focus) => this.#global.userFor(x.user_id);
-    durationFor = (user: User) => this.parent.object().foci.filter((_) => _.user_id === user.id).reduce((a, b) => a + b.duration, 0);
-    getTotal = () => this.filteredFoci().reduce((a, b) => a + b.duration, 0);
+    durationFor = (user: User) => Focus.totalDuration(this.parent.object().foci, user.id);
+    getTotal = () => Focus.totalDuration(this.filteredFoci());
 
     setupUsersFromWorkShares() {
         const timeline_chart = this.parent.object().timeline_chart;

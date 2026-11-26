@@ -19,9 +19,10 @@ class ProjectState extends BaseModel {
         ];
     }
 
-    const Prepared = 0;
-    const Running  = 1;
-    const Finished = 2;
+    const Prepared  = 0;
+    const Running   = 1;
+    const Finished  = 2;
+    const HyperCare = 9; // project_states.id from seed_master_data, not a progress value
 
     public function projects() {
         return $this->belongsToMany(Project::class);

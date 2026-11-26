@@ -12,6 +12,7 @@ import { Focus } from '@models/focus/focus.model';
 import { FocusService } from '@models/focus/focus.service';
 import { GlobalService } from '@models/global.service';
 import { InvoiceItem } from '@models/invoice/invoice-item.model';
+import { InvoiceItemStage } from '@enums/invoice-item.stage';
 import { InvoiceItemService } from '@models/invoice/invoice-item.service';
 import { Product } from '@models/product/product.model';
 import { ProductService } from '@models/product/product.service';
@@ -41,7 +42,7 @@ import { StackedTableDirective } from '@directives/stacked-table.directive';
 })
 export class ProjectSupportComponent {
 
-    static readonly isPendingSupportItem = (_: InvoiceItem) => _.stage === 1 && !_.invoice_id;
+    static readonly isPendingSupportItem = (_: InvoiceItem) => _.isOpenInStage(InvoiceItemStage.Support);
 
     #focusService = inject(FocusService);
     #invoiceItemService = inject(InvoiceItemService);
@@ -69,7 +70,7 @@ export class ProjectSupportComponent {
     readonly isProject = computed(() => this.parent() instanceof Project);
     readonly hasIssueTracker = computed(() => (this.isProject() ? this.#pluginFactory.getTaskInstances(this.parent()).length > 0 : false));
     readonly fociColumns = computed(() => (this.hasIssueTracker() ? ['user_id', 'started_at', 'comment', 'ext_issue', 'duration'] : ['user_id', 'started_at', 'comment', 'duration']));
-    readonly vatId = computed(() => (this.parent() instanceof Project ? (this.parent() as Project).company?.vat_id : (this.parent() as Company).vat_id));
+    readonly isVatExempt = computed(() => (this.parent() instanceof Project ? (this.parent() as Project).company : (this.parent() as Company))?.isVatExcempt() ?? false);
     readonly invoicingRoute = computed(() => (this.isProject() ? ['..', 'invoicing', 'support'] : ['..', 'billing']));
 
     readonly descField = viewChild<ElementRef>('desc');
@@ -103,6 +104,12 @@ export class ProjectSupportComponent {
     readonly supportItems = linkedSignal(this.#supportItems.value);
     readonly supportItemsLoaded = this.#supportItems.hasValue;
 
+    /** open items the selected foci can be linked to; subscription templates themselves are no target */
+    readonly targetCandidates = computed(() => this.supportItems().filter((_) => !_.isRepeating()));
+    /** null = create a new item from the selection */
+    readonly selectionTarget = signal<InvoiceItem | null>(null);
+    readonly compareTargets = (a: InvoiceItem | null, b: InvoiceItem | null) => (a?.id ?? null) === (b?.id ?? null);
+
     constructor() {
         effect(() => {
             if (this.#foci.isLoading()) this.fociSpinner()?.show();
@@ -123,8 +130,11 @@ export class ProjectSupportComponent {
         setTimeout(() => {
             const selected = [_].flat();
             const foci = (selected.length && selected[0] instanceof Focus ? selected : []) as Focus[];
+            const wasEmpty = this.selection().length === 0;
             this.selection.set(foci);
-            this.selectionSum.set(foci.reduce((b: number, a: Focus) => a.duration + b, 0).toString());
+            if (!foci.length) this.selectionTarget.set(null);
+            else if (wasEmpty) this.selectionTarget.set(this.preselectTarget());
+            this.selectionSum.set(Focus.totalDuration(foci).toString());
             foci.forEach((s: Focus) => {
                 if (s.comment?.length) {
                     this.selectionDescription.set(s.comment);
@@ -157,6 +167,38 @@ export class ProjectSupportComponent {
                 this.parentReloadRequested.emit();
             });
         }
+    }
+
+    /** in hyper care, the most recent subscription spawn is the natural target for support time */
+    preselectTarget(): InvoiceItem | null {
+        const parent = this.parent();
+        if (!(parent instanceof Project) || !parent.isInHyperCare()) return null;
+        const spawns = this.targetCandidates().filter((_) => _.isRecurrenceSpawn());
+        if (!spawns.length) return null;
+        const age = (_: InvoiceItem) => _.createdAt().valueOf() || 0;
+        return spawns.reduce((latest, _) => (age(_) > age(latest) || (age(_) === age(latest) && +_.id > +latest.id) ? _ : latest));
+    }
+
+    targetLabel(item: InvoiceItem): string {
+        const text = (new DOMParser().parseFromString(item.text ?? '', 'text/html').body.textContent ?? '').replace(/\s+/g, ' ').trim();
+        return text.length > 40 ? text.slice(0, 39) + '…' : text;
+    }
+
+    onLinkToSupportItem() {
+        const target = this.selectionTarget();
+        if (!target) return;
+        const selectedIds = this.selection().map((_) => _.id);
+        if (!selectedIds.length) return;
+        this.selection.set([]);
+        this.selectionTarget.set(null);
+        this.allFoci.update((f) => f.filter((_: Focus) => !selectedIds.includes(_.id)));
+        this.#focusService.linkToInvoiceItem(this.parent(), selectedIds, target.id).subscribe({
+            next: (item) => {
+                this.supportItems.update((items) => items.map((_) => (_.id === item.id ? item : _)));
+                this.parentReloadRequested.emit();
+            },
+            error: () => this.#foci.reload(),
+        });
     }
 
     onMoveSupportToCustomer() {

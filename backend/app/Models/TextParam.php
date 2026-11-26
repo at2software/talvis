@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Casts\I18n;
 use App\Traits\HasI18nTrait;
 use App\Traits\ParamDataTrait;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class TextParam extends BaseModel {
     use HasI18nTrait, ParamDataTrait;
@@ -16,5 +17,8 @@ class TextParam extends BaseModel {
         return [
             'value' => I18n::class,
         ];
+    }
+    public function user(): BelongsTo {
+        return $this->belongsTo(User::class);
     }
 }

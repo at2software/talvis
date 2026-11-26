@@ -4,26 +4,63 @@
 
 // WCAG 2 relative luminance; above ~0.179 black text has the higher contrast ratio.
 @function readable-on($background) {
+    @if luminance($background) > 0.179 {
+        @return black;
+    }
+    @return white;
+}
+
+// WCAG 2 contrast ratio between two opaque colors.
+@function contrast-ratio($a, $b) {
+    $la: luminance($a);
+    $lb: luminance($b);
+    @return math.div(math.max($la, $lb) + 0.05, math.min($la, $lb) + 0.05);
+}
+
+@function luminance($color) {
     $luminance: 0;
     @each $channel, $weight in ('red': 0.2126, 'green': 0.7152, 'blue': 0.0722) {
-        $value: math.div(color.channel($background, $channel, $space: rgb), 255);
+        $value: math.div(color.channel($color, $channel, $space: rgb), 255);
         $linear: math.pow(math.div($value + 0.055, 1.055), 2.4);
         @if $value <= 0.04045 {
             $linear: math.div($value, 12.92);
         }
         $luminance: $luminance + $weight * $linear;
     }
-    @if $luminance > 0.179 {
-        @return black;
-    }
-    @return white;
+    @return $luminance;
 }
 
-$bg-darker : #050909;  // deepest surface, near-black green-gray
-$bg-card   : #101818;  // cards
-$bg-body   : #162020;  // body / modals / navbars
-$bg-hover  : #1d2929;  // hover states
-$bg-muted  : #233232;  // inputs / secondary containers
+// Darkens $color in small lightness steps until it reaches $ratio against $background.
+// Used to derive light-mode text variants of the neon accents, which are too bright on white.
+@function readable-text-on($color, $background, $ratio: 4.5) {
+    $result: $color;
+    @while contrast-ratio($result, $background) < $ratio and color.channel($result, 'lightness', $space: hsl) > 0% {
+        $result: color.adjust($result, $lightness: -2%, $space: hsl);
+    }
+    @return $result;
+}
+
+// Raw surface palettes per theme. Sass code that needs a real color (color.adjust, rgba(), …) uses these;
+// everything else uses the theme-aware $bg-* below, which resolve to the --tv-surface-* CSS variables.
+$bg-darker-dark : #050909;  // deepest surface, near-black green-gray
+$bg-card-dark   : #101818;  // cards
+$bg-body-dark   : #162020;  // body / modals / navbars
+$bg-hover-dark  : #1d2929;  // hover states
+$bg-muted-dark  : #233232;  // inputs / secondary containers
+
+$bg-darker-light: #d3dddd;  // dividers / recessed areas between surfaces
+$bg-card-light  : #ffffff;  // cards
+$bg-body-light  : #eef3f3;  // body / modals / navbars
+$bg-hover-light : #e1e9e9;  // hover states
+$bg-muted-light : #e7eeee;  // inputs / secondary containers
+
+$body-color-light: #1b2727;  // body text in light mode (≈ 15:1 on $bg-card-light)
+
+$bg-darker : var(--tv-surface-darker);
+$bg-card   : var(--tv-surface-card);
+$bg-body   : var(--tv-surface-body);
+$bg-hover  : var(--tv-surface-hover);
+$bg-muted  : var(--tv-surface-muted);
 
 $custom-colors: (
     'blue'           : #135BCD,                              // projects
@@ -52,7 +89,7 @@ $custom-colors: (
     'success-darker' : color.adjust(#30E800, $lightness: -30%),
     'info'           : #00C9A7,
     'info-darker'    : color.adjust(#00C9A7, $lightness: -30%),
-    'card'           : $bg-card,
+    'card'           : $bg-card-dark,
 );
 
 $blue   : map.get($custom-colors, 'blue');
@@ -77,3 +114,120 @@ $success: #6bf57e;
 $warning: #e2f56b;
 $danger : #f57e6b;
 $info   : #6be2f5;
+
+// Light-mode text variants: accents darkened until they reach WCAG AA (4.5:1) even on the darkest light surface.
+$primary-text-light: readable-text-on($primary, $bg-muted-light);
+$text-variants-light: ();
+@each $key, $value in $custom-colors {
+    @if $key != 'card' {
+        $text-variants-light: map.set($text-variants-light, $key, readable-text-on($value, $bg-muted-light));
+    }
+}
+$soft-colors: ('success': $success, 'danger': $danger, 'warning': $warning, 'info': $info);
+
+// Theme tokens, emitted as --tv-<name> per [data-bs-theme] in _bootstrap-setup.scss.
+// Component SCSS uses these variables instead of fixed colors that assume a dark background.
+$theme-tokens: (
+    'dark': (
+        'surface-darker'       : $bg-darker-dark,
+        'surface-card'         : $bg-card-dark,
+        'surface-body'         : $bg-body-dark,
+        'surface-hover'        : $bg-hover-dark,
+        'surface-muted'        : $bg-muted-dark,
+        'card-bg'              : color.adjust($bg-card-dark, $lightness: -1%),
+        'card-cap-bg'          : color.adjust($bg-card-dark, $lightness: -3%),
+        'surface-raised'       : color.adjust($bg-body-dark, $lightness: 2%),
+        'dropdown-bg'          : rgba($bg-darker-dark, .95),
+        'dropdown-border'      : rgba(black, .3),
+        'backdrop'             : #0009,
+        'border-subtle'        : #fff1,
+        'text-strong'          : #fff,
+        'text-soft'            : #ccc,
+        'text-dim'             : #999,
+        'text-faint'           : #666,
+        'shadow-light'         : #fff1,
+        'shadow-dark'          : #0009,
+        'overlay-1'            : #fff1,
+        'overlay-2'            : #fff2,
+        'overlay-3'            : #fff3,
+        'scrim-1'              : #0003,
+        'scrim-2'              : #0006,
+        'scrim-3'              : #0009,
+        'scrim-4'              : #000c,
+        'text-shadow'          : 1px 1px 2px #000,
+        'text-shadow-soft'     : 0 0 2px #000,
+        'text-shadow-emboss'   : (0 -2px 4px #000, 0 2px 4px #fff3),
+        'edge'                 : #000,
+        'icon-stroke'          : #eee,
+        'ink-rgb'              : (255, 255, 255),
+        'primary-subtle'       : $primary-4,
+        'map-tile-filter'      : invert(1) hue-rotate(180deg) brightness(0.9) contrast(0.9) saturate(0.4),
+        'map-attribution-bg'   : rgba(0, 0, 0, 0.6),
+        'popup-bg'             : #212529,
+        'grid-line'            : #333,
+        'primary-hover'        : color.adjust($primary, $lightness: 10%),
+        'scrollbar-thumb'      : rgba(255, 255, 255, .3),
+        'scrollbar-thumb-hover': rgba(255, 255, 255, .5),
+        'icon-filter'          : none,
+        'syntax-variable'      : #9cdcfe,  // VS Code Dark+ / Light+ token colors (sentinel editor)
+        'syntax-string'        : #ce9178,
+        'syntax-keyword'       : #c586c0,
+        'syntax-function'      : #dcdcaa,
+        'syntax-type'          : #4ec9b0,
+        'heatmap-empty'        : #333,
+        'heatmap-break'        : #444,
+        'liquid-glass'         : (inset 0 1px 0 0 #fff2, inset 0 8px 16px -6px #fff1, inset 0 -6px 12px -4px #0004),
+        'liquid-glass-hover'   : (inset 0 1px 0 0 #fff3, inset 0 10px 20px -6px #fff1, inset 0 -6px 12px -4px #0005, 0 6px 20px -4px #0004),
+    ),
+    'light': (
+        'surface-darker'       : $bg-darker-light,
+        'surface-card'         : $bg-card-light,
+        'surface-body'         : $bg-body-light,
+        'surface-hover'        : $bg-hover-light,
+        'surface-muted'        : $bg-muted-light,
+        'card-bg'              : $bg-card-light,
+        'card-cap-bg'          : #f5f8f8,
+        'surface-raised'       : color.adjust($bg-body-light, $lightness: -3%),
+        'dropdown-bg'          : rgba(white, .97),
+        'dropdown-border'      : rgba(black, .12),
+        'backdrop'             : rgba(#0d1a1a, .35),
+        'border-subtle'        : #0000001a,
+        'text-strong'          : $body-color-light,
+        'text-soft'            : #354343,
+        'text-dim'             : #566464,
+        'text-faint'           : #7a8888,
+        'shadow-light'         : #ffffffb3,
+        'shadow-dark'          : #00000029,
+        'overlay-1'            : #0000000a,
+        'overlay-2'            : #00000014,
+        'overlay-3'            : #0000001f,
+        'scrim-1'              : #0000000a,
+        'scrim-2'              : #00000012,
+        'scrim-3'              : #0000001f,
+        'scrim-4'              : #0000002e,
+        'text-shadow'          : none,
+        'text-shadow-soft'     : 0 0 2px #fff,
+        'text-shadow-emboss'   : none,
+        'edge'                 : rgba(0, 0, 0, .18),
+        'icon-stroke'          : #354343,
+        'ink-rgb'              : (27, 39, 39),
+        'primary-subtle'       : #cfeee8,
+        'map-tile-filter'      : saturate(0.6) contrast(0.95),
+        'map-attribution-bg'   : rgba(255, 255, 255, 0.7),
+        'popup-bg'             : #ffffff,
+        'grid-line'            : #d5dddd,
+        'primary-hover'        : color.adjust($primary-text-light, $lightness: -8%),
+        'scrollbar-thumb'      : rgba(0, 0, 0, .25),
+        'scrollbar-thumb-hover': rgba(0, 0, 0, .4),
+        'icon-filter'          : invert(1),
+        'syntax-variable'      : #001080,
+        'syntax-string'        : #a31515,
+        'syntax-keyword'       : #af00db,
+        'syntax-function'      : #795e26,
+        'syntax-type'          : #267f99,
+        'heatmap-empty'        : #dde5e5,
+        'heatmap-break'        : #c5d0d0,
+        'liquid-glass'         : (inset 0 1px 0 0 #fff, inset 0 -6px 12px -4px #0000000d, 0 1px 3px #0000001f),
+        'liquid-glass-hover'   : (inset 0 1px 0 0 #fff, inset 0 -6px 12px -4px #00000012, 0 6px 20px -4px #00000029),
+    ),
+);

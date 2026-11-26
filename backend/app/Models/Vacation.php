@@ -64,4 +64,7 @@ class Vacation extends BaseModel {
     public function scopePendingRequests($query) {
         return $query->where('vacations.state', VacationState::Open);
     }
+    public function scopeAbsences($query) {
+        return $query->whereIn('vacations.state', VacationState::Absences);
+    }
 }

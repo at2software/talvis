@@ -39,7 +39,7 @@ export class ModalImportExtIssuesComponent extends ModalBaseComponent<Task[]> {
         const obsolete = this.#obsoleteVersionNames();
         return Array.from(new Set(this.allTasks().flatMap((_) => _.labels))).filter((_) => !obsolete.has(_)).sort();
     });
-    readonly #unresolvedTasks = computed(() => this.allTasks().filter((_) => _.state !== 1));
+    readonly #unresolvedTasks = computed(() => this.allTasks().filter((_) => !_.isClosed()));
     readonly importableTasks = computed(() => this.#unresolvedTasks().filter((_) => !this.#existingIssueIds.has(_.id)));
     readonly skippedCount = computed(() => this.#unresolvedTasks().length - this.importableTasks().length);
     readonly filteredTasks = computed(() => {

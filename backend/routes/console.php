@@ -28,7 +28,7 @@ Schedule::command('cron:m365-mirror')->everyThirtyMinutes()->withoutOverlapping(
 Schedule::command('assignments:reset-finished-projects')->daily();
 Schedule::command('assignments:compute-timebased-averages')->daily();
 Schedule::command('timetracker:reset-idle')->everyMinute();
-Schedule::command('flow:release-stale-claims')->hourly()->withoutOverlapping();
+Schedule::command('cron:chat-channel-headers')->hourly()->withoutOverlapping();
 Schedule::command('git:detect-frameworks')->daily();
 Schedule::command('git:detect-frameworks', ['--fresh'])->weekly();
 Schedule::command('git:fetch-latest-framework-versions')->daily();
@@ -36,6 +36,7 @@ Schedule::command('cron:uptime-monitor')->everyFiveMinutes();
 Schedule::command('cron:gitlab-audits')->hourly();
 Schedule::command('cron:mantis-issue-events')->everyFiveMinutes()->withoutOverlapping();
 Schedule::command('cron:check-project-work-thresholds')->hourly();
+Schedule::command('cron:check-invoice-item-thresholds')->hourly();
 Schedule::command('ml:train-all')->weekly();
 Schedule::command('cron:check-project-overrun-predictions')->daily();
 Schedule::command('cron:refresh-customer-predictions')->daily();

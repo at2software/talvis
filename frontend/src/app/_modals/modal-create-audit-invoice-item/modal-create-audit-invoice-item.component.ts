@@ -1,19 +1,11 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ModalBaseComponent } from '../modal-base.component';
-import { InvoiceItemType, REPEATING_TYPES } from '@enums/invoice-item.type';
+import { InvoiceItemType, REPEATING_TYPES, INVOICE_ITEM_REPEAT_LABELS } from '@enums/invoice-item.type';
 import { SpinnerComponent } from '@shards/spinner/spinner.component';
 import { Company } from '@models/company/company.model';
 import { Product } from '@models/product/product.model';
 import { InvoiceItem } from '@models/invoice/invoice-item.model';
-
-const TYPE_LABELS: Record<number, string> = {
-    [InvoiceItemType.Daily]: 'daily',
-    [InvoiceItemType.Weekly]: 'weekly',
-    [InvoiceItemType.Monthly]: 'monthly',
-    [InvoiceItemType.Quarterly]: 'quarterly',
-    [InvoiceItemType.Yearly]: 'yearly',
-};
 
 @Component({
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -32,7 +24,7 @@ export class ModalCreateAuditInvoiceItemComponent extends ModalBaseComponent<Inv
     type = signal(InvoiceItemType.Monthly);
     next_recurrence_at = signal(new Date().toISOString().slice(0, 10));
 
-    readonly typeOptions = REPEATING_TYPES.map((t) => ({ value: t, label: TYPE_LABELS[t] }));
+    readonly typeOptions = REPEATING_TYPES.map((t) => ({ value: t, label: INVOICE_ITEM_REPEAT_LABELS[t] }));
 
     init(company: Company, product?: Product) {
         this.company = company;

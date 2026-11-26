@@ -20,6 +20,7 @@ import { IHasFoci } from '@models/focus/has-foci.interface';
 import { CompanyContact } from '@models/company/company-contact.model';
 import { NxAction } from '@models/_core/nx.actions';
 import { ProjectState } from './project-state.model';
+import { InvoiceItemStage } from '@enums/invoice-item.stage';
 import { Type } from '@models/_core/hydrate';
 import { File } from '@models/file/file.model';
 import { Toast } from '@shards/toast/toast';
@@ -95,6 +96,8 @@ export class Project extends Serializable implements HasInvoiceItems, IHasFiles,
     cashflow_value?: number;
     oldest_unbilled_focus_at?: string;
     invoiced_downpayments?: number;
+    repeating_items_count?: number;
+    open_items_by_stage?: Record<number, number>;
     work_estimated?: number;
     ml_predicted_hours?: number;
     ml_predicted_at?: string;
@@ -109,6 +112,8 @@ export class Project extends Serializable implements HasInvoiceItems, IHasFiles,
     readonly mlOverrunRatio          = computed((): number | undefined => { const j = this.snapshotAsThis(); return j.ml_predicted_hours === null || j.ml_predicted_hours === undefined || !j.work_estimated ? undefined : j.ml_predicted_hours / j.work_estimated; });
     readonly mlOverrunHours          = computed((): number | undefined => { const j = this.snapshotAsThis(); return j.ml_predicted_hours === null || j.ml_predicted_hours === undefined || !j.work_estimated ? undefined : j.ml_predicted_hours - j.work_estimated; });
     readonly needsReminder           = computed(() => this.#calcNeedsReminder());
+    readonly isInHyperCare           = computed(() => { const id = this.snapshotAsThis().state?.id; return id !== undefined && +id === ProjectState.HyperCare; });
+    readonly isOrchestrated          = computed(() => { const id = this.snapshotAsThis().state?.id; return id !== undefined && nx().global.orchestrated_state_ids.includes(+id); });
     readonly isRelevant              = computed(() => this.isOverdue() || this.needsReminder() || (nx().global.user?.hasRole('financial') ? this.net !== 0 : false) || this.progress() > 0.8);
     readonly deadlineColor           = computed(() => { const s = this.snapshot(); return !s.due_at ? 'text-dark-grey' : dayjs(s.due_at).isBefore(dayjs()) ? 'text-danger' : 'text-orange'; });
     readonly progress                = computed(() => { this.snapshot(); return this.is_time_based ? 1 : this.net === 0 ? 1 : (this.work_estimated && this.work_estimated > 0 ? this.hours_invested / this.work_estimated : 0); });
@@ -136,6 +141,29 @@ export class Project extends Serializable implements HasInvoiceItems, IHasFiles,
     readonly momentDue               = computed((): Dayjs => { this.snapshot(); return dayjs(this.due_at); });
     readonly momentRemind            = computed((): Dayjs => { this.snapshot(); return dayjs(this.remind_at); });
     readonly frontendUrl             = computed((): string => { this.snapshot(); return `/projects/${this.id}`; });
+
+    /** Open (unbilled) items of a billing stage that would end up on the invoice. */
+    openItemsInStage(stage: InvoiceItemStage): number {
+        this.snapshot();
+        if (Array.isArray(this.invoice_items)) return this.invoice_items.filter((_) => _.isOpenInStage(stage) && !_.company_id && _.willAddToSum()).length;
+        return this.open_items_by_stage?.[stage] ?? 0;
+    }
+    repeatingItemsCount(): number {
+        this.snapshot();
+        if (Array.isArray(this.invoice_items)) return this.invoice_items.filter((_) => _.isRepeating() && !_.invoice_id).length;
+        return this.repeating_items_count ?? 0;
+    }
+    /** Project › invoicing › recurring (support + subscriptions, stage 1) */
+    showsRecurringInvoicing(): boolean {
+        return !!this.is_time_based || this.isInHyperCare() || this.repeatingItemsCount() > 0 || this.openItemsInStage(InvoiceItemStage.Support) > 0;
+    }
+    /** In hyper care only quote and recurring stay, unless items are still open in a stage. */
+    showsDownpaymentInvoicing(): boolean {
+        return !this.isInHyperCare() || this.openItemsInStage(InvoiceItemStage.Downpayment) > 0;
+    }
+    showsFinalInvoicing(): boolean {
+        return !this.isInHyperCare() || this.openItemsInStage(InvoiceItemStage.Final) > 0;
+    }
 
     projectManagerChanged = new Subject<void>();
 
@@ -208,6 +236,16 @@ export class Project extends Serializable implements HasInvoiceItems, IHasFiles,
     }
 
     worksharePerc = (u: { val: number }) => (100 * u.val) / this.worksharesTotal();
+    syncWorkshares = (): void => {
+        this.var.workshares = (this.timeline_chart ?? []).map((entry) => {
+            const val = entry.data.reduce((sum, point) => sum + (Number(point.value) || 0), 0);
+            if (entry.user) entry.user.hours_invested = val;
+            return { name: entry.user?.name || 'Unknown', color: entry.user?.color || '#cccccc', val };
+        });
+    };
+    hasBudgetChart = (): boolean =>
+        !this.is_time_based && !this.is_internal && (this.state.isRunning() || this.state.isFinishedAny()) && this.var?.workshares?.length > 0 && this.worksharesTotal() > 0 && (this.work_estimated ?? 0) > 0;
+    probabilityLabel = (): string => $localize`:@@i18n.common.probability:probability` + ': ' + ((this.lead_probability || 0) * 100).toFixed(1) + '%';
     setParent = (_: Serializable): void => {
         if (_ instanceof Company) {
             this.update({ company_id: _.id, project_id: null }).subscribe();

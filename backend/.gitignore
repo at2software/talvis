@@ -34,4 +34,5 @@ tmpclaude-*-cwd
 talvis-sync-office.bat
 storage/app/api-benchmark-report.json
 storage/app/ml/
-docs
+docs/*
+!docs/agents/

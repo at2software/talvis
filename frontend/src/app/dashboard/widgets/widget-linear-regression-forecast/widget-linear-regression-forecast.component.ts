@@ -10,6 +10,7 @@ import type { EChartsOption } from 'echarts';
 import type { EChartsType, TopLevelFormatterParams } from 'echarts/types/dist/shared';
 import { LinearRegressionDataDto } from '@models/_core/api-response';
 import { ValueUnitComponent } from '@shards/value-unit/value-unit.component';
+import { injectChartPalette } from '@charts/echarts-theme';
 
 @Component({
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -22,6 +23,7 @@ import { ValueUnitComponent } from '@shards/value-unit/value-unit.component';
 export class WidgetLinearRegressionForecastComponent extends BaseWidgetComponent {
     #stats = inject(StatsService);
     #moneyPipe = inject(MoneyShortPipe);
+    #palette = injectChartPalette();
     #echartsInstance: EChartsType | undefined;
 
     defaultOptions = () => ({});
@@ -31,6 +33,7 @@ export class WidgetLinearRegressionForecastComponent extends BaseWidgetComponent
 
     readonly chartOptions = computed<EChartsOption>(() => {
         const data = this.data();
+        const palette = this.#palette();
         if (!data) return { ...EChartsRangeAreaOptions, series: [] };
 
         const sorted = [...data.historical_data].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
@@ -76,7 +79,7 @@ export class WidgetLinearRegressionForecastComponent extends BaseWidgetComponent
                 ...this.#confidenceBand('confidence68', ci68, categories, 25, 0.5, 5),
                 { name: 'Forecast', type: 'line', symbol: 'none', z: 10, lineStyle: { color: Color.fromVar('primary').darken(20).toHexString(), width: 2 }, data: forecasts.map((f, i) => [categories[i], f]) },
                 { name: 'Expenses', type: 'line', symbol: 'none', z: 11, lineStyle: { color: Color.fromVar('red').toHexString(), width: 2, type: 'dashed' }, data: expenses.map((v, i) => [categories[i], v]) },
-                { name: 'real Revenue', type: 'line', symbol: 'none', zlevel: 1, z: 12, lineStyle: { color: '#ffffff', width: 2 }, data: revenue_12.map((v, i) => [categories[i], v]) },
+                { name: 'real Revenue', type: 'line', symbol: 'none', zlevel: 1, z: 12, lineStyle: { color: palette.text, width: 2 }, data: revenue_12.map((v, i) => [categories[i], v]) },
             ],
         } as EChartsOption);
     });

@@ -8,13 +8,13 @@
         background: transparent;
     }
     &::-webkit-scrollbar-thumb {
-        background: rgba(255, 255, 255, 0.3);
+        background: var(--tv-scrollbar-thumb);
         border-radius: 1px;
         &:hover {
-            background: rgba(255, 255, 255, 0.5);
+            background: var(--tv-scrollbar-thumb-hover);
         }
     }
 
     scrollbar-width: thin;
-    scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+    scrollbar-color: var(--tv-scrollbar-thumb) transparent;
 }

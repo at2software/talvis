@@ -12,6 +12,7 @@ import type { TopLevelFormatterParams } from 'echarts/types/dist/shared';
 
 import { RevenueCurrentYearDto } from '@models/_core/api-response';
 import { ValueUnitComponent } from '@shards/value-unit/value-unit.component';
+import { injectChartPalette } from '@charts/echarts-theme';
 
 @Component({
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -24,6 +25,7 @@ import { ValueUnitComponent } from '@shards/value-unit/value-unit.component';
 export class WidgetRevenueCurrentYearComponent extends BaseWidgetComponent {
     #stats = inject(StatsService);
     #global = inject(GlobalService);
+    #palette = injectChartPalette();
 
     defaultOptions = () => ({});
 
@@ -46,6 +48,7 @@ export class WidgetRevenueCurrentYearComponent extends BaseWidgetComponent {
 
     readonly chartOptions = computed<EChartsOption>(() => {
         const data = this.data();
+        const palette = this.#palette();
         if (!data) return { ...EChartsStackedBarOptions, series: [] };
 
         while (data.current.length < 12) data.current.push({ sum: 0 });
@@ -95,7 +98,7 @@ export class WidgetRevenueCurrentYearComponent extends BaseWidgetComponent {
             const last = line.reduce<number>((acc, _, i) => (_ == null ? acc : i), -1);
             return last < 0 || line[last]! >= monthlyCost[last];
         };
-        const costColor = '#ffffff';
+        const costColor = palette.text;
         const ytdColor = coversCost(ytdAverage) ? hex('--color-success') : hex('--color-danger');
         const r12Color = coversCost(revenue12) ? lighter('--color-success') : lighter('--color-danger');
 
@@ -142,7 +145,7 @@ export class WidgetRevenueCurrentYearComponent extends BaseWidgetComponent {
                 { name: $localize`:@@i18n.dashboard.lowRevenue:Low Revenue (< Avg Cost)`, type: 'bar' as const, stack: 'revenue', itemStyle: { color: colorLow }, data: mcmin },
                 { name: $localize`:@@i18n.dashboard.growthHighRevenue:Growth High Revenue`, type: 'bar' as const, stack: 'revenue', itemStyle: { color: colorGrowthHigh }, data: mlcappedmax },
                 { name: $localize`:@@i18n.dashboard.growthLowRevenue:Growth Low Revenue`, type: 'bar' as const, stack: 'revenue', itemStyle: { color: colorGrowthLow }, data: mlcappedmin },
-                { name: $localize`:@@i18n.dashboard.missingVsLastYear:Missing vs Last Year`, type: 'bar' as const, stack: 'revenue', itemStyle: { color: '#444444' }, data: mlmissing },
+                { name: $localize`:@@i18n.dashboard.missingVsLastYear:Missing vs Last Year`, type: 'bar' as const, stack: 'revenue', itemStyle: { color: palette.axisLine }, data: mlmissing },
                 { name: $localize`:@@i18n.dashboard.monthlyCost:Monthly Cost`, type: 'line' as const, itemStyle: { color: costColor, borderWidth: 2 }, lineStyle: { color: costColor, width: 2 }, symbol: 'none', data: monthlyCost },
                 { name: $localize`:@@i18n.dashboard.revenue12m:Revenue (12m)`, type: 'line' as const, smooth: true, connectNulls: true, itemStyle: { color: r12Color }, lineStyle: { color: r12Color, width: 2 }, symbol: 'none', data: revenue12 },
                 { name: $localize`:@@i18n.dashboard.avgRevenueYtd:Revenue (YTD)`, type: 'line' as const, smooth: true, connectNulls: false, itemStyle: { color: ytdColor }, lineStyle: { color: ytdColor, width: 2, type: 'dotted' as const }, symbol: 'none', data: ytdAverage },

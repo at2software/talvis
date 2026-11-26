@@ -7,7 +7,6 @@ import { SettingsPdfComponent } from '@app/settings/pdf/settings-pdf.component';
 import { UsersComponent } from '@app/settings/roles/roles.component';
 import { SettingsConnectorsComponent } from '@app/settings/settings-connectors/settings-connectors.component';
 import { SettingsProjectsNotificationsComponent } from '@app/settings/settings-projects/settings-projects-notifications/settings-projects-notifications.component';
-import { SettingsProjectsFlowComponent } from '@app/settings/settings-projects/settings-projects-flow/settings-projects-flow.component';
 
 const components: [string, Type<unknown>][] = [
     ['SettingsCommandsComponent', SettingsCommandsComponent],
@@ -16,7 +15,6 @@ const components: [string, Type<unknown>][] = [
     ['UsersComponent', UsersComponent],
     ['SettingsConnectorsComponent', SettingsConnectorsComponent],
     ['SettingsProjectsNotificationsComponent', SettingsProjectsNotificationsComponent],
-    ['SettingsProjectsFlowComponent', SettingsProjectsFlowComponent],
 ];
 
 // Every component here loads through the Resource API. Nothing resolves under the testing

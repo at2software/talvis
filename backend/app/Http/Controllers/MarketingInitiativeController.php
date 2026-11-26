@@ -227,6 +227,15 @@ class MarketingInitiativeController extends Controller {
 
         return $marketingInitiativeActivity->updateWithRelations($validated);
     }
+    public function indexSharedActivities(Request $request) {
+        return MarketingInitiativeActivity::sharedWithDueCounts($request->user()->id);
+    }
+    public function completeSharedActivity(Request $request, MarketingInitiativeActivity $marketingInitiativeActivity) {
+        if (! $marketingInitiativeActivity->is_shared) {
+            return response()->json(['error' => 'Activity is not shared'], 422);
+        }
+        return ['completed' => $marketingInitiativeActivity->completeDueForAll($request->user()->id)];
+    }
     public function destroyInitiativeActivity(MarketingInitiative $marketingInitiative, MarketingInitiativeActivity $marketingInitiativeActivity) {
         if ($error = $this->assertBelongsTo($marketingInitiativeActivity, 'marketing_initiative_id', $marketingInitiative->id, 'Activity does not belong to this initiative')) {
             return $error;

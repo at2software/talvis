@@ -8,7 +8,7 @@ import { modelListResource, modelResource } from '@models/http/model-resource';
 import { MarketingInitiative } from '@models/marketing/marketing-initiative.model';
 import { MarketingWorkflow } from '@models/marketing/marketing-workflow.model';
 import { IActivityBase } from '@models/marketing/activity-base.interface';
-import { QuickActionType } from '@models/marketing/marketing-activity.model';
+import { MarketingActivity, QuickActionType } from '@models/marketing/marketing-activity.model';
 import { NgbDropdownModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { SpinnerComponent } from '@shards/spinner/spinner.component';
 import { I18nTextareaComponent } from '@app/_shards/i18n-textarea/i18n-textarea.component';
@@ -49,16 +49,14 @@ export class MarketingActivityDetailComponent {
     editDescription: string | { language: string; formality: string; text: string }[] = '';
     editIsRequired = false;
     editHasExternalDependency = false;
+    editIsShared = false;
     editParentActivityId = signal('');
     editQuickAction = signal<QuickActionType>(null);
     selectedKpiId = signal('');
 
     readonly quickActions: { value: QuickActionType; label: string; icon?: string }[] = [
         { value: null, label: 'none' },
-        { value: 'EMAIL', label: 'Email', icon: 'email' },
-        { value: 'LINKEDIN', label: 'LinkedIn', icon: 'group' },
-        { value: 'LINKEDIN_SEARCH', label: 'LinkedIn Search', icon: 'person_search' },
-        { value: 'CALL', label: 'Call', icon: 'call' },
+        ...MarketingActivity.QUICK_ACTIONS.map((value) => ({ value, label: MarketingActivity.quickActionLabel(value), icon: MarketingActivity.quickActionIcon(value) })),
     ];
 
     readonly siblingActivities = computed<IActivityBase[]>(() => {
@@ -106,6 +104,7 @@ export class MarketingActivityDetailComponent {
         this.editDescription = activity.description ?? '';
         this.editIsRequired = activity.is_required;
         this.editHasExternalDependency = activity.has_external_dependency ?? false;
+        this.editIsShared = activity.is_shared ?? false;
         this.editParentActivityId.set(activity.parent_activity_id != null ? String(activity.parent_activity_id) : '');
         this.editQuickAction.set(activity.quick_action ?? null);
         this.selectedKpiId.set(activity.performance_metrics?.[0]?.id?.toString() ?? '');
@@ -127,6 +126,7 @@ export class MarketingActivityDetailComponent {
             description: this.editDescription || null,
             is_required: this.editIsRequired,
             has_external_dependency: this.editHasExternalDependency,
+            is_shared: this.editIsShared,
             parent_activity_id: this.editParentActivityId() || null,
             quick_action: this.editQuickAction(),
         };

@@ -100,7 +100,7 @@ export class ProjectPlanningComponent {
 
     updatePredictions = () => this.#predictionStats.reload();
 
-    mean = (p: InvoiceItem) => (p.predictions.length ? p.predictions.reduce((a, b) => a + b.qty, 0) / p.predictions.length : 0);
+    mean = (p: InvoiceItem) => p.predictionMean() ?? 0;
     variance = (p: InvoiceItem) => {
         if (p.predictions.length == 0) return 0;
         const mean = this.mean(p);

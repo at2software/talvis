@@ -3,7 +3,7 @@ import { inject, Type, Service } from '@angular/core';
 import { hasLinkableProjects, IPlugin, PluginInstance } from './plugin.instance';
 import { Encryption } from '@models/encryption/encryption.model';
 import { MattermostPlugin } from './plugin.mattermost';
-import { GitLabPlugin } from './plugin.gitlab';
+import { GitLabLinkError, GitLabPlugin } from './plugin.gitlab';
 import { nx } from '@models/_core/nx-bridge';
 import { HttpClient } from '@angular/common/http';
 import { MantisPlugin } from './plugin.mantis';
@@ -15,6 +15,18 @@ import { GitHubPlugin } from './plugin.github';
 import { PluginLink } from '@models/plugin-link/plugin-link.model';
 import { TaskService } from '@models/task/task.service';
 import type { INxModal } from '@models/_core/nx.modal.interface';
+import type { Serializable } from '@models/_core/serializable';
+import { Toast } from '@shards/toast/toast';
+import { catchError, concatMap, defaultIfEmpty, firstValueFrom, from, map, Observable, of, toArray } from 'rxjs';
+
+/** Above this many links from one input, the user confirms before they are stored. */
+export const PLUGIN_LINK_CONFIRM_THRESHOLD = 10;
+
+export interface StoredPluginLinks {
+    created: PluginLink[];
+    skipped: number;
+    failed: number;
+}
 
 let MantisSubPlugin: Type<PluginInstance> | null = null;
 let GitLabSubPlugin: Type<PluginInstance> | null = null;
@@ -79,20 +91,101 @@ export class PluginInstanceFactory {
         }
     }
 
-    static async promptLinkId(pluginInstance: PluginInstance): Promise<string | undefined> {
+    /**
+     * Asks for what to link. GitLab input may be an id, a project URL or a group URL, so the result is a
+     * list of ids; every other plugin yields exactly one. `undefined` means cancelled or not resolvable
+     * (an error toast has been shown then).
+     */
+    static async promptLinkId(pluginInstance: PluginInstance): Promise<string[] | undefined> {
         const { ModalBaseService } = await import('@app/_modals/modal-base-service');
         if (pluginInstance instanceof MantisPlugin) {
             const { MantisProjectSelectionComponent } = await import('@app/_modals/mantis-project-selection/mantis-project-selection.component');
-            return ModalBaseService.open(MantisProjectSelectionComponent, pluginInstance);
+            return PluginInstanceFactory.#asList(await ModalBaseService.open(MantisProjectSelectionComponent, pluginInstance));
         }
         if (hasLinkableProjects(pluginInstance)) {
             const { TrackerProjectSelectionComponent } = await import('@app/_modals/tracker-project-selection/tracker-project-selection.component');
-            return ModalBaseService.open(TrackerProjectSelectionComponent, pluginInstance);
+            return PluginInstanceFactory.#asList(await ModalBaseService.open(TrackerProjectSelectionComponent, pluginInstance));
         }
         const { InputModalService } = await import('@app/_modals/modal-input/modal-input.service');
         const response = await nx().getService(InputModalService).open(pluginInstance.newPluginText);
-        return response && 'text' in response ? response.text : undefined;
+        const text = response && 'text' in response ? response.text : undefined;
+        if (!(pluginInstance instanceof GitLabPlugin)) return PluginInstanceFactory.#asList(text);
+        if (text === undefined || text === null || String(text).trim() === '') return undefined;
+        try {
+            return await firstValueFrom(pluginInstance.resolveLinkInput(String(text)));
+        } catch (err) {
+            Toast.error(PluginInstanceFactory.gitLabLinkErrorMessage(err));
+            return undefined;
+        }
     }
+
+    static gitLabLinkErrorMessage(err: unknown): string {
+        switch (err instanceof GitLabLinkError ? err.reason : undefined) {
+            case 'foreign-host':
+                return $localize`:@@i18n.plugins.gitlab_link_foreign_host:The URL does not belong to the GitLab instance of this token.`;
+            case 'empty-group':
+                return $localize`:@@i18n.plugins.gitlab_link_empty_group:The group contains no repositories you have access to.`;
+            case 'not-found':
+            case 'empty':
+                return $localize`:@@i18n.plugins.gitlab_link_not_found:No GitLab project or group found for this input, or your token has no access to it.`;
+            default:
+                return $localize`:@@i18n.plugins.gitlab_link_failed:The GitLab project or group could not be resolved.`;
+        }
+    }
+
+    /**
+     * Stores one plugin link per id under `parent`, one after another. Links whose URL is already in
+     * `parent.plugin_links` (or repeats within `ids`) are skipped. The caller refreshes `plugin_links`
+     * once with the result; nothing is pushed here.
+     */
+    static storeLinks(pluginInstance: PluginInstance, parent: Serializable & { plugin_links?: PluginLink[] }, ids: string[]): Observable<StoredPluginLinks> {
+        const known = new Set((parent.plugin_links ?? []).map((_) => _.url));
+        const fresh: PluginLink[] = [];
+        for (const id of ids) {
+            const link = pluginInstance.toPluginLink(id);
+            if (known.has(link.url)) continue;
+            known.add(link.url);
+            fresh.push(link);
+        }
+        const skipped = ids.length - fresh.length;
+        return from(fresh).pipe(
+            concatMap((link) => link.storeUnder(parent, true).pipe(catchError(() => of(undefined)))),
+            toArray(),
+            defaultIfEmpty([] as (PluginLink | undefined)[]),
+            map((stored) => {
+                const created = stored.filter((_): _ is PluginLink => !!_);
+                return { created, skipped, failed: stored.length - created.length };
+            }),
+        );
+    }
+
+    /** Confirms large batches, stores them and reports what happened. Resolves with the created links. */
+    static async addLinks(pluginInstance: PluginInstance, parent: Serializable & { plugin_links?: PluginLink[] }, ids: string[]): Promise<PluginLink[]> {
+        const known = new Set((parent.plugin_links ?? []).map((_) => _.url));
+        const count = new Set(ids.map((_) => pluginInstance.toPluginLink(_).url).filter((_) => !known.has(_))).size;
+        if (count > PLUGIN_LINK_CONFIRM_THRESHOLD) {
+            const { ConfirmationService } = await import('@app/_modals/modal-confirm/confirmation.service');
+            const ok = await nx()
+                .getService(ConfirmationService)
+                .ask({
+                    title: $localize`:@@i18n.plugins.links_confirm_title:Add plugin links`,
+                    message: $localize`:@@i18n.plugins.links_confirm_message:${count}:count: repositories will be linked. Continue?`,
+                });
+            if (!ok) return [];
+        }
+        const result = await firstValueFrom(PluginInstanceFactory.storeLinks(pluginInstance, parent, ids));
+        PluginInstanceFactory.notifyStored(result);
+        return result.created;
+    }
+
+    static notifyStored({ created, skipped, failed }: StoredPluginLinks): void {
+        const message = $localize`:@@i18n.plugins.links_created_skipped:${created.length}:created: link(s) added, ${skipped}:skipped: already linked.`;
+        if (failed) Toast.warn(message + ' ' + $localize`:@@i18n.plugins.links_failed:${failed}:failed: could not be saved.`);
+        else if (created.length) Toast.success(message);
+        else Toast.info(message);
+    }
+
+    static #asList = (value: string | null | undefined): string[] | undefined => (value === undefined || value === null || value === '' ? undefined : [value]);
 
     constructor() {
         this.talvisTaskInstance.init.next();

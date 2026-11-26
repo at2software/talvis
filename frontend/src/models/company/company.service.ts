@@ -8,7 +8,7 @@ import { notifyHttpError } from '@models/http/file-download';
 import { Connection } from './connection.model';
 import { Dictionary } from '@constants/constants';
 import { nx } from '@models/_core/nx-bridge';
-import { CustomerLocationDto, MonthlyBiasDataDto } from '@models/_core/api-response';
+import { CompanyNetworkDto, CustomerLocationDto, MonthlyBiasDataDto } from '@models/_core/api-response';
 import { Param } from '@models/param/param.model';
 
 @Service()
@@ -22,6 +22,13 @@ export class CompanyService extends TalvisHttpService<Company> {
     indexByChurnRisk = () => this.aget('companies/churn-risk');
     showForPath = (path: string) => this.show(path.split('/')[1]);
     showConnections = (_: Company | string | number) => this.aget(`companies/${idOf(_)}/connections`, {}, Connection);
+    showNetwork = (_: Company | string | number): Observable<CompanyNetworkDto> =>
+        this.aget(`companies/${idOf(_)}/network`, {}, Object).pipe(
+            map((r: unknown) => {
+                const raw = r as { connections: Dictionary[]; depth: Record<string, number>; path: (string | number)[] };
+                return { connections: raw.connections.map((c) => Connection.fromJson(c)), depth: raw.depth, path: raw.path.map(String) };
+            }),
+        );
     indexAllConnections = (): Observable<Connection[]> => this.aget(`connections`, {}, Connection);
     create = (name: string = 'New company') => this.post('companies', { name: name });
     createOwnCompany = (name: string): Observable<Company> =>

@@ -10,19 +10,39 @@
         </empty-state>
     }
     @if (_connections.length > 0) {
-        <network-chart [data]="_connections" [focus]="_focusCompanyId" (nodeSelected)="onNodeSelected($event)"></network-chart>
-    }
-    @if (_selectedCompany) {
-        <div class="row">
-            <div class="col-12 col-md-3">
-                <div class="card cursor-pointer" (click)="navigateToCompany()" tabindex="0" (keydown.enter)="navigateToCompany()" (keyup.enter)="navigateToCompany()">
-                    <div class="card-body d-flex align-items-center gap-3">
-                        <img [src]="_selectedCompany.getAvatar()" [alt]="_selectedCompany.getName()" style="width: 48px; height: 48px; object-fit: contain" />
-                        <div class="flex-fill text-truncate fw-bold">{{ _selectedCompany.getName() }}</div>
-                    </div>
+        @let _hidden = hiddenTypes();
+        @let _counts = typeCounts();
+        <div class="network-stage">
+            <network-chart [data]="visibleConnections()" [focus]="_focusCompanyId" (nodeSelected)="onNodeSelected($event)" (nodeOpened)="openNetwork($event)"></network-chart>
+            <div class="card network-legend small">
+                <div class="card-header" i18n="@@i18n.customers.networkLegend">legend</div>
+                <ul class="list-group list-group-flush">
+                    @for (_ of types; track _.key) {
+                    <li class="list-group-item d-flex align-items-center gap-2 cursor-pointer" [class.text-muted]="_hidden.has(_.key)" (click)="toggleType(_.key)" (keydown.enter)="toggleType(_.key)" tabindex="0">
+                        <span class="legend-line" [style.background]="_hidden.has(_.key) ? null : 'var(--tv-accent-' + _.color + ')'" [class.dashed]="_.key === 'competitor' && !_hidden.has(_.key)"></span>
+                        <span class="flex-fill">{{ _.label }}</span>
+                        <span class="text-muted">{{ _counts.get(_.key) ?? 0 }}</span>
+                    </li>
+                    }
+                    <li class="list-group-item d-flex align-items-center gap-2 cursor-pointer" [class.text-muted]="_hidden.has('none')" (click)="toggleType('none')" (keydown.enter)="toggleType('none')" tabindex="0">
+                        <span class="legend-line" [style.background]="_hidden.has('none') ? null : 'var(--tv-accent-dark-grey)'"></span>
+                        <span class="flex-fill" i18n="@@i18n.connections.unclassified">unclassified</span>
+                        <span class="text-muted">{{ _counts.get('none') ?? 0 }}</span>
+                    </li>
+                    <li class="list-group-item vstack gap-1 text-muted">
+                        <div class="d-flex align-items-center gap-2"><span class="legend-dot key-ring"></span><span i18n="@@i18n.customers.keyAccountOn">key account</span></div>
+                        <div class="d-flex align-items-center gap-2"><span class="legend-dot sizes"></span><span i18n="@@i18n.customers.networkSizeByRevenue">size = total revenue</span></div>
+                    </li>
+                </ul>
+            </div>
+            @if (_selectedCompany) {
+            <div class="card cursor-pointer network-selection" (click)="navigateToCompany()" tabindex="0" (keydown.enter)="navigateToCompany()">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <img [src]="_selectedCompany.getAvatar()" [alt]="_selectedCompany.getName()" style="width: 48px; height: 48px; object-fit: contain" />
+                    <div class="flex-fill text-truncate fw-bold">{{ _selectedCompany.getName() }}</div>
                 </div>
             </div>
-            <div class="col-12 col-md-9"></div>
+            }
         </div>
     }
 }

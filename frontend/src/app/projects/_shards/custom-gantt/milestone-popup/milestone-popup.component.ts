@@ -71,11 +71,7 @@ export class MilestonePopupComponent {
 
     readonly hasInvoiceItems = computed(() => !!this.trackedMilestone()?.invoice_items?.length);
 
-    readonly totalInvoiceItemDuration = computed(() => {
-        const items = this.trackedMilestone()?.invoice_items;
-        if (!Array.isArray(items)) return 0;
-        return items.reduce((total, item) => total + (item.qty || 0), 0);
-    });
+    readonly totalInvoiceItemDuration = computed(() => this.trackedMilestone()?.invoiceItemDuration() ?? 0);
 
     #formBuilder = inject(FormBuilder);
     #projectService = inject(ProjectService);

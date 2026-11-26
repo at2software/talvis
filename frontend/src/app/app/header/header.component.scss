@@ -32,7 +32,7 @@
             height: 6px;
             width: 100%;
             top: -3px;
-            background: linear-gradient(to right, transparent, #0006 1rem, #0006 calc(100% - 1rem), transparent);
+            background: linear-gradient(to right, transparent, var(--tv-scrim-2) 1rem, var(--tv-scrim-2) calc(100% - 1rem), transparent);
             filter: blur(3px);
         }
     }
@@ -55,7 +55,7 @@
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
-            border: 1px black solid;
+            border: 1px var(--tv-edge) solid;
             border-radius: var(--bs-border-radius);
             box-shadow: var(--tv-liquid-glass);
         }
@@ -86,7 +86,7 @@
             .nav-link {
                 padding: 0 (.25 * $grid-width);
                 font-size: $nav-font-size * 0.8 !important;
-                color: #cccccc;
+                color: var(--tv-text-soft);
                 pointer-events: all;
 
                 &.active {

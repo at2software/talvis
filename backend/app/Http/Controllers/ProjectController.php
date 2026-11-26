@@ -46,13 +46,7 @@ class ProjectController extends Controller {
         $requestedStates = $request->has('states') ? explode(',', $request->states) : null;
         unset($request['states']);
 
-        $query = $builder->whereRequest()->withRequest();
-        if (request('only-mine') === 'true') {
-            $query->whereHas('myAssignment');
-        }
-        if (request('only-mine-as-pm') === 'true') {
-            $query->where('project_manager_id', request()->user()->id);
-        }
+        $query = $builder->whereRequest()->withRequest()->whereMineRequest();
         if (request('missing_project_manager') === 'true') {
             $query->whereNull('project_manager_id');
         }
@@ -72,7 +66,7 @@ class ProjectController extends Controller {
             $query->where('net', '>=', $request->budget_min);
         }
         if ($request->has('assignee_id')) {
-            $query->whereHas('assignees', fn ($q) => $q->where('assignee_id', $request->assignee_id)->where('assignee_type', 'App\Models\User'));
+            $query->whereHas('assignees', fn ($q) => $q->whereUserAssignee($request->assignee_id));
         }
         if ($request->has('project_manager_id')) {
             $query->where('project_manager_id', $request->project_manager_id);
@@ -116,7 +110,7 @@ class ProjectController extends Controller {
         return $this->_index($request, $builder);
     }
     public function indexAssignees(Request $request, Project $_) {
-        return $_->assignees()->latest('role_id')->with('assignee')->get();
+        return $_->assignees()->oldest('id')->with('assignee')->get();
     }
     public function indexComments(Request $request, Project $_) {
         return $_->comments;
@@ -128,10 +122,13 @@ class ProjectController extends Controller {
             return $query->whereNull('company_id')->whereNull('invoice_id')->get()->appendRequest();
         }
 
-        $items = $query->withCount('billedFoci')->withSum('billedFoci', 'duration')->withSum('foci', 'duration')->get();
+        $items = $query->withFociStats()->get();
         $items->appendRequest();
         $items->append(['progress']);
         return $items;
+    }
+    public function indexRepeatingItems(Project $_) {
+        return $_->repeatingItems()->whereNull('invoice_id')->get();
     }
     public function indexFeatures(Project $_) {
         $items = $_->invoiceItems()
@@ -143,9 +140,7 @@ class ProjectController extends Controller {
                 'milestones' => fn ($q) => $q->select('milestones.id', 'invoice_item_id', 'name', 'progress', 'state', 'flags', 'user_id')->without('invoiceItem'),
                 'milestones.user:id,name,color',
             ])
-            ->withCount('billedFoci')
-            ->withSum('billedFoci', 'duration')
-            ->withSum('foci', 'duration')
+            ->withFociStats()
             ->oldest('position')
             ->get();
 
@@ -163,7 +158,7 @@ class ProjectController extends Controller {
         if ($request->boolean('support_only')) {
             $items = $query->whereNull('company_id')->whereNull('invoice_id')->get();
         } else {
-            $items = $query->withCount('billedFoci')->withSum('billedFoci', 'duration')->withSum('foci', 'duration')->get();
+            $items = $query->withFociStats()->get();
         }
 
         $financialFields = [
@@ -307,8 +302,7 @@ class ProjectController extends Controller {
         }
 
         if (! isset($data['position'])) {
-            $maxPosition      = $_->milestones()->max('position') ?? -1;
-            $data['position'] = $maxPosition + 1;
+            $data['position'] = $_->nextMilestonePosition();
         }
 
         unset($data['project_id']);

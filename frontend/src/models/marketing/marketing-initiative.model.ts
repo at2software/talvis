@@ -16,6 +16,11 @@ import type { Dictionary } from '@constants/constants';
 export class MarketingInitiative extends Serializable {
     static API_PATH = (): string => 'marketing/initiatives';
     static DB_TABLE_NAME = (): string => 'marketing_initiatives';
+    static countByStatus = (initiatives: MarketingInitiative[]): Record<MarketingInitiative['status'], number> => ({
+        active: initiatives.filter((i) => i.status === 'active').length,
+        paused: initiatives.filter((i) => i.status === 'paused').length,
+        completed: initiatives.filter((i) => i.status === 'completed').length,
+    });
 
     override update(changes?: Dictionary, silent = false): Observable<this> {
         return super.update(changes, silent).pipe(tap(() => nx().broadcast({ type: TBroadcast.Update, data: this })));
@@ -89,5 +94,6 @@ export class MarketingInitiative extends Serializable {
         ];
     }
 
+    hasUser = (userId: string | number | undefined): boolean => this.users?.some((u) => u.id === userId) ?? false;
     leadSourceId = (): number | null => this.channels?.find((c) => c.pivot?.is_primary)?.id ?? this.channels?.[0]?.id ?? null;
 }

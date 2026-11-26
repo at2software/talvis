@@ -23,9 +23,20 @@ class AssignmentController extends Controller {
             abort(403, 'You do not have permission to allocate time for this assignment.');
         }
 
+        $roleIds = $request->has('role_ids')
+            ? collect($request->validate(['role_ids' => 'present|array', 'role_ids.*' => 'integer|exists:assignment_roles,id'])['role_ids'])->map(fn ($id) => (int)$id)->unique()->sort()->values()->all()
+            : null;
+        if ($roleIds !== null && $roleIds !== $assignment->role_ids && ! $request->user()->hasAnyRole(['admin', 'project_manager'])) {
+            abort(403, 'Only project managers may change assignment roles.');
+        }
+
         $oldHoursPlanned = $assignment->hours_planned ?? 0;
 
         $assignment->applyAndSave($request, ['parent_id', 'parent_type', 'assignee_id', 'assignee_type', 'flags']);
+        if ($roleIds !== null) {
+            $assignment->roles()->sync($roleIds);
+            $assignment->unsetRelation('roles');
+        }
 
         if ($request->has('hours_planned') && $oldHoursPlanned != $assignment->hours_planned) {
             $assignment->createHoursChangeComment($oldHoursPlanned, $assignment->hours_planned);

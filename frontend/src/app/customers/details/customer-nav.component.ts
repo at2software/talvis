@@ -21,5 +21,5 @@ import { SmartLinkDirective } from '@directives/smart-link.directive';
 export class CustomerNavComponent {
     #parent = inject(CustomerDetailGuard);
     company = tracked(this.#parent.object);
-    onDndUploaded = () => window.location.reload();
+    onDndUploaded = (responses: unknown[]) => this.company()?.applyAvatarUpload(responses);
 }

@@ -12,16 +12,16 @@
     border-radius: var(--bs-border-radius);
     transition: background-color 0.2s ease;
     min-width: 70px;
-    color: white;
-    background-color: rgba(0, 0, 0, 0.2);
+    color: var(--tv-text-strong);
+    background-color: var(--tv-scrim-1);
 
     &:hover {
-        background-color: rgba(0, 0, 0, 0.3);
+        background-color: color-mix(in srgb, var(--tv-scrim-1), var(--tv-scrim-2));
     }
 
     &.active {
-        background-color: rgba(0, 0, 0, 0.4);
-        border: 2px solid rgba(255, 255, 255, 0.5);
+        background-color: var(--tv-scrim-2);
+        border: 2px solid rgba(var(--tv-ink-rgb), 0.5);
     }
 
     .stat-value {
@@ -30,13 +30,13 @@
         line-height: 1;
         
         &.text-muted {
-            color: rgba(255, 255, 255, 0.3) !important;
+            color: rgba(var(--tv-ink-rgb), 0.3) !important;
         }
     }
 
     .stat-label {
         font-size: 0.75rem;
-        color: rgba(255, 255, 255, 0.8);
+        color: rgba(var(--tv-ink-rgb), 0.8);
         margin-top: 0.25rem;
         text-align: center;
     }
@@ -104,7 +104,7 @@ hr {
 }
 
 .progress {
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: rgba(var(--tv-ink-rgb), 0.1);
 }
 
 .modal {
@@ -121,4 +121,19 @@ hr {
 
 .material-icons {
     user-select: none;
+}
+
+// Metric type colors; light mode uses darker shades of the same hues (WCAG AA on light surfaces).
+.metric-counter    { color: #6366f1; }
+.metric-percentage { color: #10b981; }
+.metric-conversion { color: #f59e0b; }
+.metric-currency   { color: #06b6d4; }
+.metric-duration   { color: #8b5cf6; }
+
+:host-context([data-bs-theme=light]) {
+    .metric-counter    { color: #4338ca; }
+    .metric-percentage { color: #047857; }
+    .metric-conversion { color: #b45309; }
+    .metric-currency   { color: #0e7490; }
+    .metric-duration   { color: #6d28d9; }
 }

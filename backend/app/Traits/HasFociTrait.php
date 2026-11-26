@@ -2,6 +2,7 @@
 
 namespace App\Traits;
 
+use App\Http\Requests\Focus\LinkFociToInvoiceItemRequest;
 use App\Models\Company;
 use App\Models\Focus;
 use App\Models\InvoiceItem;
@@ -13,6 +14,8 @@ use Auth;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 trait HasFociTrait {
     abstract protected function hasTimeBudget(): Attribute;
@@ -86,10 +89,7 @@ trait HasFociTrait {
         }
 
         $product  = Product::findOrFail($data->productId);
-        $vat_rate = Param::get('INVOICE_DEFAULT_VAT')->value;
-        if ($company->vat_id) {
-            $vat_rate = 0;
-        }
+        $vat_rate = $company->vatCategory() === 'S' ? Param::get('INVOICE_DEFAULT_VAT')->value : 0;
 
         $newItem = null;
         foreach ($product->invoiceItems as $i) {
@@ -117,5 +117,46 @@ trait HasFociTrait {
         }
         $this->touch();
         return $newItem->fresh(['productSource', 'company']);
+    }
+
+    /**
+     * Assigns unbilled foci of this parent to an already existing, open invoice item
+     * (e.g. a prepared SLA item spawned by cron:standing-orders). qty and price stay untouched.
+     */
+    public function linkFociToInvoiceItem(LinkFociToInvoiceItemRequest $request): InvoiceItem {
+        $data     = $request->validated();
+        $focusIds = array_values(array_unique(array_map('intval', $data['itemIds'])));
+
+        return DB::transaction(function () use ($data, $focusIds) {
+            $item = InvoiceItem::whereKey($data['invoiceItemId'])->lockForUpdate()->first();
+            if (! $item || ! $this->ownsInvoiceItem($item) || $item->invoice_id !== null || $item->isRepeating()) {
+                throw ValidationException::withMessages(['invoiceItemId' => 'The invoice item is not an open item of this parent.']);
+            }
+
+            $foci  = Focus::whereIn('id', $focusIds)->lockForUpdate()->get();
+            $valid = $foci->filter(fn (Focus $f) => $f->parent_type === $this::class
+                && (int)$f->parent_id === (int)$this->getKey()
+                && $f->invoiced_in_item_id === null
+                && ! $f->is_unpaid);
+            if ($foci->count() !== count($focusIds) || $valid->count() !== count($focusIds)) {
+                throw ValidationException::withMessages(['itemIds' => 'All foci must belong to this parent and must be unbilled.']);
+            }
+
+            Focus::whereIn('id', $focusIds)->update(['invoiced_in_item_id' => $item->id]);
+            $this->touch();
+            $item->touch();
+
+            return $item->fresh(['productSource', 'company']);
+        });
+    }
+
+    private function ownsInvoiceItem(InvoiceItem $item): bool {
+        if ($this instanceof Project) {
+            return (int)$item->project_id === (int)$this->getKey();
+        }
+        if ($this instanceof Company) {
+            return (int)$item->company_id === (int)$this->getKey() && $item->project_id === null;
+        }
+        return false;
     }
 }

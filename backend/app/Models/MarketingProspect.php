@@ -16,6 +16,8 @@ class MarketingProspect extends BaseModel {
     use VcardGenderTrait;
     use VcardTrait;
 
+    public const INACTIVE_STATUSES = ['unresponsive', 'disqualified', 'converted', 'on_hold'];
+
     protected $table    = 'marketing_prospects';
     protected $fillable = [
         'marketing_initiative_id',
@@ -243,15 +245,17 @@ class MarketingProspect extends BaseModel {
         preg_match('/\/in\/([^\/\?]+)/', $linkedinUrl, $matches);
         return $matches[1] ?? null;
     }
-    public function postponeActivities(int $days): bool {
-        $updated = $this->activities()
-            ->where('status', 'pending')
-            ->update([
-                'scheduled_at' => DB::raw("DATE_ADD(scheduled_at, INTERVAL {$days} DAY)"),
-            ]);
+    public function postponeActivities(Carbon $until): bool {
+        $earliest = $this->pendingActivities()->orderBy('scheduled_at')->first();
+        if (! $earliest) {
+            return false;
+        }
 
+        $days = (int)$earliest->scheduled_at->copy()->startOfDay()->diffInDays($until->copy()->startOfDay(), false);
+
+        $earliest->rescheduleWithSuccessors($until);
         $this->increment('days_skipped', $days);
-        return $updated > 0;
+        return true;
     }
     public function getLastCompletedActivityAtAttribute(): ?string {
         $lastCompletedAt = $this->activities()

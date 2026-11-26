@@ -6,13 +6,8 @@ import { VacationGuardComponent } from './profile/vacation-details/vacation-guar
 import { LoginComponent } from './app/login/login.component';
 import { Environment404Component } from './app/environment404/environment404.component';
 import { AuthenticationService } from '@models/auth.service';
-import { handleChunkError, isChunkError } from '@constants/ChunkErrorHandler';
-
-const moduleLoadError = (error: unknown) => {
-    if (isChunkError(error)) handleChunkError(error);
-    else console.error('lazy load error', error);
-    return Promise.reject(error);
-};
+import { moduleLoadError } from '@constants/ChunkErrorHandler';
+import { EXTENSIONS } from '@app/extensions';
 
 export const routes = (): Routes => [
     { path: 'login', component: LoginComponent },
@@ -99,12 +94,7 @@ export const routes = (): Routes => [
                 data: { roles: 'user' },
                 loadChildren: () => import('./calendar/calendar.routes').then((m) => m.CALENDAR_ROUTES).catch((err) => moduleLoadError(err)),
             },
-            {
-                path: 'flow',
-                canActivate: [PermissionsGuard],
-                data: { roles: 'user' },
-                loadChildren: () => import('./flow/flow.routes').then((m) => m.FLOW_ROUTES).catch((err) => moduleLoadError(err)),
-            },
+            ...EXTENSIONS.flatMap((_) => _.routes ?? []),
             {
                 title: $localize`:@@i18n.common.vacationRequest:vacation request`,
                 path: 'vacation/:id',

@@ -11,19 +11,19 @@
     }
     .visu-recurring-project { 
         width: 100%; 
-        border-top: 1px #0009 solid;
+        border-top: 1px var(--tv-scrim-3) solid;
     }
     .visu-planned-project { 
         height: 100%; 
         display: inline-block; 
         position: absolute;
-        border-right: 1px #0009 solid;
+        border-right: 1px var(--tv-scrim-3) solid;
     }
     .bg-unpaid {
         background-image: repeating-linear-gradient(
             45deg,
-            #0006 0,
-            #0006 5px,
+            var(--tv-scrim-2) 0,
+            var(--tv-scrim-2) 5px,
             transparent 5px,
             transparent 10px
         );
@@ -33,9 +33,9 @@
         position: absolute;
         top: 0; bottom: 0;
         width: 0;
-        border-left:1px #666 solid;
+        border-left:1px var(--tv-text-faint) solid;
         .visu-month-label-text {
-            color: #ffffff99;
+            color: rgba(var(--tv-ink-rgb), 0.6);
             transform: rotate(90deg) translate3d( 0, 0, 0);
             -webkit-transform: rotate(90deg) translate3d( 0, 0, 0);
             position: absolute;
@@ -46,9 +46,9 @@
     .visu-break {
         position: absolute;
         top: 0; bottom: 0;
-        border: 1px black solid;
+        border: 1px var(--tv-edge) solid;
     }
     .visu-sick { background-color: var(--color-cyan); }
     .visu-vacation { background-color: var(--color-orange); }
-    .visu-holiday { background-color: #666666; }
+    .visu-holiday { background-color: var(--tv-text-faint); }
 }

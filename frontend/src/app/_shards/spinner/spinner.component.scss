@@ -10,7 +10,7 @@
 }
 .talvis-loader {
   display: inline-block;
-  filter: drop-shadow(0 -1px 1px #fff2) drop-shadow(0 1px 1px #0009);
+  filter: drop-shadow(0 -1px 1px var(--tv-overlay-2)) drop-shadow(0 1px 1px var(--tv-shadow-dark));
 }
 
 .loader-bar,

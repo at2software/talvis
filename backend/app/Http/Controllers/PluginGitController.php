@@ -8,6 +8,7 @@ use App\Jobs\GitNoteWebhookJob;
 use App\Jobs\GitPipelineWebhookJob;
 use App\Jobs\GitPushWebhookJob;
 use App\Models\PluginLink;
+use App\Models\Vault;
 use App\Services\FrameworkDetectionService;
 use App\Support\ChatProps;
 use App\Traits\HasVaultCredentials;
@@ -70,6 +71,39 @@ class PluginGitController extends PluginController {
     public function getProject(string $pathWithNamespace): ?array {
         $url = $this->env('URL').'api/v4/projects/'.urlencode($pathWithNamespace);
         return $this->get($url);
+    }
+    public function isActive(): bool {
+        return Vault::isActive($this->vaultPrefix());
+    }
+    public function getCompareByWebUrl(string $url): ?array {
+        if (! preg_match('#^(.+?)/-/compare/(.+?)\.{2,3}(.+)$#', $this->webPath($url) ?? '', $match)) {
+            return null;
+        }
+        $query = http_build_query(['from' => urldecode($match[2]), 'to' => urldecode($match[3])]);
+        return $this->get($this->env('URL').'api/v4/projects/'.urlencode($match[1]).'/repository/compare?'.$query);
+    }
+    public function getIssueByWebUrl(string $url): ?array {
+        if (! preg_match('#^(.+?)/-/(?:issues|work_items)/(\d+)#', $this->webPath($url) ?? '', $match)) {
+            return null;
+        }
+        return $this->get($this->env('URL').'api/v4/projects/'.urlencode($match[1]).'/issues/'.$match[2]);
+    }
+    public function getMergeRequestByWebUrl(string $url): ?array {
+        if (! preg_match('#^(.+?)/-/merge_requests/(\d+)#', $this->webPath($url) ?? '', $match)) {
+            return null;
+        }
+        return $this->get($this->env('URL').'api/v4/projects/'.urlencode($match[1]).'/merge_requests/'.$match[2]);
+    }
+    public function createIssue(int $projectId, string $title, string $description, array $labels = []): ?array {
+        $url = $this->env('URL').'api/v4/projects/'.$projectId.'/issues';
+        return $this->post($url, array_filter(['title' => $title, 'description' => $description, 'labels' => implode(',', $labels)]));
+    }
+    private function webPath(string $url): ?string {
+        $base = rtrim($this->env('URL') ?? '', '/').'/';
+        return $base !== '/' && str_starts_with($url, $base) ? substr($url, strlen($base)) : null;
+    }
+    public function getLinkedProject(PluginLink $link): ?array {
+        return $this->get($link->buildApiPath());
     }
     public function getEnvironments(int $projectId): ?array {
         $url = $this->env('URL').'api/v4/projects/'.$projectId.'/environments?states=available&per_page=100';

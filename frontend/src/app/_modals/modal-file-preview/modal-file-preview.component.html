@@ -6,9 +6,11 @@
     </button>
     <button type="button" class="btn-close" (click)="decline()" i18n-aria-label="@@i18n.common.close" aria-label="Close"></button>
 </div>
-<div class="modal-body file-preview-body">
-    @if (!blobUrl()) {
+<div class="modal-body file-preview-body" [class.file-preview-body-markdown]="isMarkdown()">
+    @if (!blobUrl() && markdownText() === null) {
         <spinner [centered]="true"></spinner>
+    } @else if (isMarkdown()) {
+        <div class="file-preview-markdown markdown" [innerHTML]="markdownText() | markdown | safe: 'html'"></div>
     } @else if (isImage()) {
         <img [src]="blobUrl()" [alt]="file()?.name" class="file-preview-image" />
     } @else if (isPdf()) {

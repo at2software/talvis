@@ -3,7 +3,7 @@ import { Dictionary } from '@constants/constants';
 import { CompanyService } from '@models/company/company.service';
 import { CompanyContact } from './company-contact.model';
 import { Project } from '../project/project.model';
-import { Serializable } from '@models/_core/serializable';
+import { resolveIconUrl, Serializable } from '@models/_core/serializable';
 import { VcardClass } from '../vcard/vcard-class.model';
 import { Invoice } from '../invoice/invoice.model';
 import { nx } from '@models/_core/nx-bridge';
@@ -18,6 +18,7 @@ import { IHasFoci } from '@models/focus/has-foci.interface';
 import { User } from '@models/user/user.model';
 import { LeadSource } from '@models/project/lead-source.model';
 import { Transform, Type } from '@models/_core/hydrate';
+import { ProductGroup } from '@models/product/product-group.model';
 import { dayjs, Dayjs } from '@constants/date/dates';
 import { IHasAssignees } from '@interfaces/hasAssignees.interface';
 import { ConnectionProjects } from './connection-projects.model';
@@ -43,7 +44,9 @@ export class Company extends VcardClass implements HasInvoiceItems, IHasFiles, I
     static readonly ML_CHURN_HIGH = 0.5;
     static readonly ML_CHURN_ELEVATED = 0.2;
 
-    override readonly getAvatar = computed(() => { this.snapshot(); return environment.envApi + `companies/${this.id}/icon`; });
+    // The payload icon carries `?{updated_at}` as a cache buster, so a new logo gets a new url while
+    // unchanged logos keep hitting the browser cache. Lean payloads without icon fall back to the bare url.
+    override readonly getAvatar = computed(() => resolveIconUrl(this.snapshot().icon, `companies/${this.id}/icon`));
 
     isDraft = (): boolean => this.hasFlag(Company.FLAG_DRAFT);
     hasSepaMandate = (): boolean => !!this.getParam('INVOICE_DD_IBAN') && !!this.getParam('INVOICE_DD_MANDATE');
@@ -69,6 +72,8 @@ export class Company extends VcardClass implements HasInvoiceItems, IHasFiles, I
     invoice_email: string = '';
     has_direct_debit: boolean = false;
     is_deprecated: boolean = false;
+    is_key_account: boolean = false;
+    @Type(() => ProductGroup) primary_group: ProductGroup | null = null;
     lat: number | null = null;
     lon: number | null = null;
     requires_po: boolean = false;
@@ -107,8 +112,11 @@ export class Company extends VcardClass implements HasInvoiceItems, IHasFiles, I
     frontendUrl = (): string => `/customers/${this.id}`;
     companyId = (): string => this.id;
     lastContactDuration = () => dayjs().diff(dayjs(this.last_contacted_at ?? this.created_at), 'days');
-    isVatExcempt = computed(() => (this.snapshot().vat_id?.length ?? 0) > 0);
-    vatRate = computed(() => this.isVatExcempt() || !this.isEuropeanCountry() ? 0 : nx().global.user!.getFloatParam('VAT_RATE', 19)!);
+    isVatExcempt = computed(() => {
+        const company = this.snapshotAsThis();
+        return company.needs_vat_handling === false || (!!company.vat_id && company.is_domestic === false);
+    });
+    vatRate = computed(() => this.isVatExcempt() ? 0 : nx().global.user!.getFloatParam('VAT_RATE', 19)!);
     remarketingOption = computed((): RecurrenceOption => recurrenceOf(this.snapshotAsThis().remarketing_interval));
     remarketingDays = computed((): number => this.remarketingOption().days);
     assignedUsers = computed((): Assignee[] => { this.snapshot(); return this.assignees.filter((_) => _.assignee instanceof User) });

@@ -49,34 +49,43 @@
         }
         <ul class="list-group">
             @for (c of _assignees; track c.id) {
-                <li class="list-group-item hstack gap-2" [nx]="c" [tables]="_assignees">
+                <li class="list-group-item hstack gap-3" [nx]="c" [tables]="_assignees" (singleActionResolved)="refreshAssignees()">
                     <div class="position-relative">
                         <avatar [object]="c.assignee"></avatar>
                         @if (_project?.project_manager?.id === c.assignee.id) {
                             <i class="pm-badge" i18n-title="@@i18n.common.projectManager" title="project manager">manage_accounts</i>
                         }
                     </div>
-                    <div class="flex-fill text-truncate" [title]="c.assignee.getName()">
-                        {{ c.assignee.getName() }}
+                    <div class="flex-fill assignee-main">
+                        <div class="text-truncate" [title]="c.assignee.getName()">{{ c.assignee.getName() }}</div>
+                        <div class="hstack gap-1 assignee-meta">
+                            @for (role of c.roles(); track role) {
+                                <i [class]="roleTextClass(role)" [ngbTooltip]="role">{{ roleGlyph(role) }}</i>
+                            } @empty {
+                                <i class="text-muted" i18n-ngbTooltip="@@i18n.assignee.noRole" ngbTooltip="no role">person_off</i>
+                            }
+                            <span class="hstack gap-1 ms-2">
+                                @if (c.assignee.getUserIdForPlugin('X-NEXUS-MANTISBT') && _mantisInstance) {
+                                    <a class="text-decoration-none cursor-pointer" ngbTooltip="Mantis" (click)="openLink($event, _mantisInstance)" (keyup.enter)="openLink($event, _mantisInstance)" tabindex="0">
+                                        <n [class]="c.assignee.getInstanceIconClass(_mantisInstance)">mantis</n>
+                                    </a>
+                                }
+                                @if (c.assignee.getUserIdForPlugin('X-NEXUS-GIT') && _gitInstance) {
+                                    <a class="text-decoration-none cursor-pointer" ngbTooltip="GitLab" (click)="openLink($event, _gitInstance)" (keyup.enter)="openLink($event, _gitInstance)" tabindex="0">
+                                        <n [class]="c.assignee.getInstanceIconClass(_gitInstance)">git</n>
+                                    </a>
+                                }
+                                @for (chat of _chatInstances; track chat.id) {
+                                    @if (c.assignee.getUserIdForPlugin(chat.getVcardAttributeName())) {
+                                        <a class="text-decoration-none cursor-pointer" [ngbTooltip]="chat.icon()" (click)="openLink($event, chat)" (keyup.enter)="openLink($event, chat)" tabindex="0">
+                                            <n [class]="c.assignee.getInstanceIconClass(chat)">{{ chat.icon() }}</n>
+                                        </a>
+                                    }
+                                }
+                            </span>
+                        </div>
                     </div>
                     <div class="input-group w-auto flex-nowrap">
-                        @if (c.assignee.getUserIdForPlugin('X-NEXUS-MANTISBT') && _mantisInstance) {
-                            <a class="input-group-text text-decoration-none px-1 cursor-pointer" (click)="openLink($event, _mantisInstance)" (keyup.enter)="openLink($event, _mantisInstance)" tabindex="0">
-                                <n [class]="c.assignee.getInstanceIconClass(_mantisInstance)" style="font-size: 0.7rem">mantis</n>
-                            </a>
-                        }
-                        @if (c.assignee.getUserIdForPlugin('X-NEXUS-GIT') && _gitInstance) {
-                            <a class="input-group-text text-decoration-none px-1 cursor-pointer" (click)="openLink($event, _gitInstance)" (keyup.enter)="openLink($event, _gitInstance)" tabindex="0">
-                                <n [class]="c.assignee.getInstanceIconClass(_gitInstance)" style="font-size: 0.7rem">git</n>
-                            </a>
-                        }
-                        @for (chat of _chatInstances; track chat.id) {
-                            @if (c.assignee.getUserIdForPlugin(chat.getVcardAttributeName())) {
-                                <a class="input-group-text text-decoration-none px-1 cursor-pointer" (click)="openLink($event, chat)" (keyup.enter)="openLink($event, chat)" tabindex="0">
-                                    <n [class]="c.assignee.getInstanceIconClass(chat)" style="font-size: 0.7rem">{{ chat.icon() }}</n>
-                                </a>
-                            }
-                        }
                         @if (_project?.is_time_based || isProjectManager()) {
                             @if (isProjectManager()) {
                                 <input class="form-control text-end" style="width: 50px;" i18n-title="@@i18n.projects.plannedHours" title="planned hours" [(ngModel)]="c.hours_planned" (blur)="c.hours_planned = roundHours(c.hours_planned)" [autosave]="c" roles="project_manager" />
@@ -89,5 +98,13 @@
                 </li>
             }
         </ul>
+        @let _missing = missingRequiredRoles();
+        @if (_missing.length) {
+            <div class="card-body hstack flex-wrap gap-1 py-2 smaller">
+                @for (role of _missing; track role) {
+                    <span class="badge bg-danger hstack gap-1" i18n-ngbTooltip="@@i18n.projects.gateRoleMissing" ngbTooltip="not named yet"><i>{{ roleGlyph(role) }}</i>{{ role }}</span>
+                }
+            </div>
+        }
     </div>
 }

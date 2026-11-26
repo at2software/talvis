@@ -1,5 +1,6 @@
 import { ShortPipe } from '@pipes/short.pipe';
 import type { EChartsOption, PieSeriesOption } from 'echarts';
+import type { ChartPalette } from './echarts-theme';
 
 declare module 'echarts/types/dist/shared' {
     interface CallbackDataParams {
@@ -21,9 +22,10 @@ export const ECHARTS_DONUT_ITEM_STYLE = {
     borderWidth: 0,
 };
 
-export const ECHARTS_DONUT_TRACK_COLOR = 'rgba(255, 255, 255, 0.08)';
+/** Remainder ring of donut charts; take it from the theme palette (`injectChartPalette()`). */
+export const donutTrackColor = (palette: ChartPalette) => palette.track;
 
-export const ECHARTS_DONUT_CENTER_TEXT = { fill: '#fff', fontSize: 16, fontWeight: 300 } as const;
+export const donutCenterText = (palette: ChartPalette) => ({ fill: palette.text, fontSize: 16, fontWeight: 300 }) as const;
 
 export const ECHARTS_DONUT_SERIES = {
     type: 'pie',
@@ -113,16 +115,16 @@ export const EChartsRangeAreaOptions = {
     },
 } satisfies EChartsOption;
 
-export const eAnnotateY = (v: number, pipe: ShortPipe) => ({
+export const eAnnotateY = (v: number, pipe: ShortPipe, palette: ChartPalette) => ({
     yAxis: v,
     name: pipe.transform(v),
-    lineStyle: { color: '#ffffff44', type: 'dashed' as const, width: 1 },
-    label: { show: true, formatter: pipe.transform(v), position: 'insideEndTop' as const, color: '#ffffff44', fontSize: 10 },
+    lineStyle: { color: palette.annotation, type: 'dashed' as const, width: 1 },
+    label: { show: true, formatter: pipe.transform(v), position: 'insideEndTop' as const, color: palette.annotation, fontSize: 10 },
 });
 
-export const eAnnotateX = (x: number, label: string) => ({
+export const eAnnotateX = (x: number, label: string, palette: ChartPalette) => ({
     xAxis: x,
     name: label,
-    lineStyle: { color: '#ffffff80', type: 'solid' as const, width: 1 },
-    label: { show: true, formatter: label, position: 'insideStartBottom' as const, color: '#fff', fontSize: 10 },
+    lineStyle: { color: palette.annotationStrong, type: 'solid' as const, width: 1 },
+    label: { show: true, formatter: label, position: 'insideStartBottom' as const, color: palette.text, fontSize: 10 },
 });

@@ -3,12 +3,12 @@
 
 .ngb-dp-header { background-color: colors.$bg-hover !important; }
 .ngb-dp-arrow-btn { box-shadow: none !important; }
-.ngb-dp-week { background-color: colors.$bg-card; color:#ffffff; }
-.ngb-dp-weekday { color: colors.$primary !important;}
+.ngb-dp-week { background-color: colors.$bg-card; color: var(--tv-text-strong); }
+.ngb-dp-weekday { color: var(--bs-primary) !important;}
 .ngb-dp-weekdays { background-color: colors.$bg-hover !important;}
 
 .md-drppicker {
-    background-color: colors.$bg-hover !important; color:#ffffff;
+    background-color: colors.$bg-hover !important; color: var(--tv-text-strong);
     width: 500px !important;
     &.show-ranges {
         width: 650px !important;
@@ -16,7 +16,7 @@
     .off { background-color: inherit !important; }
     .calendar-table { background-color: colors.$bg-card !important; border: none !important; }
 
-    .active { background-color: inherit !important; color: colors.$primary !important; }
+    .active { background-color: inherit !important; color: var(--bs-primary) !important; }
     .in-range, .start-date:not(.off) { background-color: color.adjust(colors.$primary, $lightness: -10%) !important; }
 
     .buttons {
@@ -33,7 +33,7 @@
     }
 }
 ngb-datepicker {
-    .btn:not(.btn-fancy) { color: var(--color-primary-0) !important;}
+    .btn:not(.btn-fancy) { color: var(--bs-primary) !important;}
     .btn-light:hover { color: #000; background-color: color.adjust(colors.$primary, $lightness: -10%);}
     .btn-light.active { color: #000; background-color: colors.$primary;}
 }

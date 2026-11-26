@@ -1,15 +1,10 @@
 @use 'colors';
 
-$nx-trigger-zone: 28px;
-
-table:has(tr.nx:not(.nx-no-trigger, .nx-no-trigger *)) tr > :last-child { padding-right: $nx-trigger-zone !important; box-sizing: content-box; }
-
 .nx {
     -webkit-user-select: none;
     user-select: none;
     transition: background-color 0.05s linear;
     cursor: context-menu;
-    &:is(li, div):not(.avatar, .nx-no-trigger, .nx-no-trigger *) { padding-right: $nx-trigger-zone !important; }
     &:hover { background-color: rgba(colors.$primary, 0.1) !important; }
     &.active { background-color: rgba(colors.$primary, 0.2) !important; }
     &.active:hover { background-color: rgba(colors.$primary, 0.3) !important; }

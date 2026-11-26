@@ -74,8 +74,8 @@ export class ProjectFeaturesListComponent {
                 contributions: this.#computeUserContributions(item),
                 safeText: this.#sanitizer.bypassSecurityTrustHtml(sanitizeHtml(item.text ?? '')),
                 done,
-                textColor: !milestones.length ? '' : done ? 'text-white' : milestones.some((m) => m.state === MilestoneState.TODO) ? 'text-muted' : '',
-                progressColor: !item.progress ? 'text-muted' : item.progress < 1 ? 'text-white' : item.progress < 1.5 ? 'text-warning' : 'text-danger',
+                textColor: !milestones.length ? '' : done ? 'text-body-emphasis' : milestones.some((m) => m.state === MilestoneState.TODO) ? 'text-muted' : '',
+                progressColor: !item.progress ? 'text-muted' : item.progress < 1 ? 'text-body-emphasis' : item.progress < 1.5 ? 'text-warning' : 'text-danger',
             });
         }
         return meta;

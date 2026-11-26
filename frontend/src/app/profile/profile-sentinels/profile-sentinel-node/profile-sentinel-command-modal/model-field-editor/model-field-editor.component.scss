@@ -37,7 +37,7 @@
 }
 
 .field-label {
-  color: #9cdcfe;
+  color: var(--tv-syntax-variable);
   font-weight: 500;
   white-space: nowrap;
   overflow: hidden;
@@ -67,7 +67,7 @@
   border: 1px solid var(--bs-border-color);
   border-radius: var(--bs-border-radius);
   padding: 0.25rem 0.5rem;
-  color: #ce9178;
+  color: var(--tv-syntax-string);
   font-family: inherit;
   font-size: inherit;
 
@@ -110,7 +110,7 @@
   }
 
   &.relation .suggestion-name {
-    color: #4ec9b0;
+    color: var(--tv-syntax-type);
   }
 }
 
@@ -126,7 +126,7 @@
 
 .suggestion-name {
   flex: 1;
-  color: #9cdcfe;
+  color: var(--tv-syntax-variable);
 }
 
 .suggestion-type {

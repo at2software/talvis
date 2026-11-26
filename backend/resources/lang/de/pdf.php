@@ -22,12 +22,12 @@ return [
     'gross_value'               => 'Bruttowert',
 
     // VAT handling
-    'vat_on_net'        => ':rate% MwSt. auf Nettopreisartikel',
-    'vat_in_gross'      => ':rate% MwSt. in Bruttopreisartikel',
-    'vat_exempt_eu'     => 'Steuerfrei nach §4 Nummer 1b in Verbindung mit §6a UStG',
-    'our_vat_id'        => 'Unsere USt-IdNr.:',
-    'your_vat_id'       => 'Ihre USt-IdNr.:',
-    'vat_exempt_export' => 'Steuerfreie Ausfuhrlieferung gemäß §4 Nr. 1a UStG i.V.m. §6 UStG',
+    'vat_on_net'         => ':rate% MwSt. auf Nettopreisartikel',
+    'vat_in_gross'       => ':rate% MwSt. in Bruttopreisartikel',
+    'vat_reverse_charge' => 'Steuerschuldnerschaft des Leistungsempfängers (Reverse Charge, Art. 196 MwStSystRL)',
+    'our_vat_id'         => 'Unsere USt-IdNr.:',
+    'your_vat_id'        => 'Ihre USt-IdNr.:',
+    'vat_not_taxable'    => 'Nicht im Inland steuerbare Leistung (Leistungsort beim Empfänger gemäß §3a Abs. 2 UStG)',
 
     // Discount
     'including_discount' => 'Inklusive :percent % Rabatt',
@@ -60,5 +60,6 @@ return [
     // Document titles
     'quote'         => 'Angebot',
     'draft_invoice' => 'Rechnungsentwurf',
+    'invoice'       => 'Rechnung',
     'quote_preview' => 'Angebotsvorschau',
 ];

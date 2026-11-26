@@ -69,7 +69,7 @@
                     <i>checklist</i>
                     <span i18n="@@i18n.invoice.noItemsSelected">no items selected</span>
                 </div>
-                <div class="card-body py-2 small text-muted" i18n="@@i18n.projects.selectFociHint">select unbilled entries to turn them into a support item</div>
+                <div class="card-body py-2 small text-muted" i18n="@@i18n.projects.selectFociHint">select unbilled entries to turn them into a support item or link them to an open one</div>
             </div>
         } @else {
             <div class="card mb-3">
@@ -79,26 +79,41 @@
                 </div>
                 <div class="card-body clearfix">
                     <div class="mb-2 input-group">
-                        <div class="input-group-text" [class.text-warning]="!selectionProduct()">
-                            <n i18n-ngbTooltip="@@i18n.common.product" ngbTooltip="product">product</n>
-                        </div>
-                        <search-input class="form-control p-0" only="Product" [query]="selectionProduct()?.name ?? ''" [has_icon]="true" (itemSelected)="onProductSelect($event)"></search-input>
-                    </div>
-                    <div class="mb-2 input-group">
                         <div class="input-group-text">
                             <i i18n-ngbTooltip="@@i18n.common.sum" ngbTooltip="sum">functions</i>
                         </div>
-                        <input type="text" class="form-control" affix suffix="h" [ngModel]="selectionSum()" (ngModelChange)="selectionSum.set($event)" />
+                        <input type="text" class="form-control" affix suffix="h" [readonly]="!!selectionTarget()" [ngModel]="selectionSum()" (ngModelChange)="selectionSum.set($event)" />
                     </div>
-                    <div class="mb-3">
-                        <div class="form-label text-muted d-block" i18n="@@i18n.common.description">description</div>
-                        <textarea #desc class="form-control" rows="4" [ngModel]="selectionDescription()" (ngModelChange)="selectionDescription.set($event)"></textarea>
+                    <div class="mb-2 input-group">
+                        <div class="input-group-text">
+                            <i i18n-ngbTooltip="@@i18n.projects.supportTarget" ngbTooltip="target">call_merge</i>
+                        </div>
+                        <select class="form-select" data-test="support-target" [compareWith]="compareTargets" [ngModel]="selectionTarget()" (ngModelChange)="selectionTarget.set($event)">
+                            <option [ngValue]="null" i18n="@@i18n.projects.newSupportItem">new item</option>
+                            @for (item of targetCandidates(); track item.id) {
+                                <option [ngValue]="item">{{ targetLabel(item) }} ({{ item.net | money }})</option>
+                            }
+                        </select>
                     </div>
-                    @if (vatId()) {
-                        <div class="mb-2 card card-info" i18n="@@i18n.projects.vatexcemptionApplied">VAT-excemption applied</div>
-                    }
-                    @if (selectionProduct()) {
-                        <button class="btn btn-primary float-end" (click)="onCreateNewSupportItem()"><i>add</i></button>
+                    @if (!selectionTarget()) {
+                        <div class="mb-2 input-group">
+                            <div class="input-group-text" [class.text-warning]="!selectionProduct()">
+                                <n i18n-ngbTooltip="@@i18n.common.product" ngbTooltip="product">product</n>
+                            </div>
+                            <search-input class="form-control p-0" only="Product" [query]="selectionProduct()?.name ?? ''" [has_icon]="true" (itemSelected)="onProductSelect($event)"></search-input>
+                        </div>
+                        <div class="mb-3">
+                            <div class="form-label text-muted d-block" i18n="@@i18n.common.description">description</div>
+                            <textarea #desc class="form-control" rows="4" [ngModel]="selectionDescription()" (ngModelChange)="selectionDescription.set($event)"></textarea>
+                        </div>
+                        @if (isVatExempt()) {
+                            <div class="mb-2 card card-info" i18n="@@i18n.projects.vatexcemptionApplied">VAT-excemption applied</div>
+                        }
+                        @if (selectionProduct()) {
+                            <button class="btn btn-primary float-end" data-test="create-support-item" (click)="onCreateNewSupportItem()"><i>add</i></button>
+                        }
+                    } @else {
+                        <button class="btn btn-primary float-end" data-test="link-support-item" i18n-ngbTooltip="@@i18n.projects.linkToSupportItem" ngbTooltip="link" (click)="onLinkToSupportItem()"><i>link</i></button>
                     }
                 </div>
             </div>

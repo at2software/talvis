@@ -15,11 +15,15 @@
     $cyan                          : colors.$cyan,
     $primary                       : colors.$primary,
     $secondary                     : colors.$secondary,
+    $link-decoration               : none,
     $success                       : map.get(colors.$custom-colors, 'success'),
     $danger                        : map.get(colors.$custom-colors, 'danger'),
     $warning                       : map.get(colors.$custom-colors, 'warning'),
     $info                          : map.get(colors.$custom-colors, 'info'),
-    $body-bg-dark                  : colors.$bg-body,
+    $body-bg                       : colors.$bg-body-light,
+    $body-color                    : colors.$body-color-light,
+    $body-tertiary-bg              : transparent,
+    $body-bg-dark                  : colors.$bg-body-dark,
     $body-tertiary-bg-dark         : transparent,
     $font-family-sans-serif        : ('SourceSans', Arial, Helvetica, sans-serif),
     $border-radius                 : var.$border-radius,
@@ -33,31 +37,32 @@
     $popover-border-radius         : var.$border-radius,
     $toast-border-radius           : var.$border-radius,
     $btn-border-width              : 0,
-    $card-bg                       : color.adjust(colors.$bg-card, $lightness: -1%),
-    $card-cap-bg                   : color.adjust(colors.$bg-card, $lightness: -3%),
+    $card-bg                       : var(--tv-card-bg),
+    $card-cap-bg                   : var(--tv-card-cap-bg),
     $card-border-width             : 0,
-    $dropdown-bg                   : rgba(colors.$bg-darker, .95),
-    $dropdown-border-color         : rgba(black, .3),
+    $dropdown-bg                   : var(--tv-dropdown-bg),
+    $dropdown-border-color         : var(--tv-dropdown-border),
     $dropdown-border-width         : 2px,
     $dropdown-divider-bg           : var(--bs-border-color-translucent),
     $input-padding-y               : .125rem,
+    $form-range-thumb-focus-box-shadow: (0 0 0 1px white, 0 0 0 .25rem rgba(colors.$primary, .25)),
     $input-border-width            : 0,
     $form-select-padding-y         : .125rem,
     $form-floating-height          : 58px,
     $form-floating-transition      : none,
     $list-group-bg                 : transparent,
     $list-group-border-width       : 0,
-    $list-group-color              : white,
-    $list-group-action-color       : white,
+    $list-group-color              : var(--tv-text-strong),
+    $list-group-action-color       : var(--tv-text-strong),
     $list-group-item-padding-y     : 5px,
     $list-group-active-bg          : transparent,
     $list-group-active-border-color: transparent,
     $list-group-active-color       : colors.$primary,
-    $modal-backdrop-bg             : #0009,
+    $modal-backdrop-bg             : var(--tv-backdrop),
     $modal-backdrop-opacity        : 1,
     $modal-content-border-width    : 0,
     $table-bg                      : transparent,
-    $table-border-color            : #fff1,
+    $table-border-color            : var(--tv-border-subtle),
     $tooltip-bg                    : #000c,
     $tooltip-color                 : white,
     $tooltip-opacity               : 1,
@@ -65,31 +70,152 @@
 
 :root {
     @each $key, $value in colors.$custom-colors {
-        --color-#{$key}: #{$value};
-        --bs-#{$key}: #{$value};
+        @if $key == 'card' {
+            --color-card: var(--tv-surface-card);
+            --bs-card: var(--tv-surface-card);
+        } @else {
+            --color-#{$key}: #{$value};
+            --bs-#{$key}: #{$value};
+        }
     }
     --color-primary-filter: invert(0.5) sepia(1) saturate(5) hue-rotate(130deg);
-    --color-success-soft: #{colors.$success};
-    --color-danger-soft: #{colors.$danger};
-    --color-warning-soft: #{colors.$warning};
-    --color-info-soft: #{colors.$info};
 
-    --tv-surface-darker: #{colors.$bg-darker};
-    --tv-surface-card: #{colors.$bg-card};
-    --tv-surface-body: #{colors.$bg-body};
-    --tv-surface-hover: #{colors.$bg-hover};
-    --tv-surface-muted: #{colors.$bg-muted};
     --tv-modules-width: #{var.$m-modules};
     --tv-activity-width: #{var.$m-activity};
     --tv-activity-rail-width: #{var.$m-activity-rail};
     --tv-header-height: #{var.$header-height};
     --tv-container-max: #{var.$container-app};
-    --tv-liquid-glass: #{var.liquid-glass()};
+}
+
+// Theme tokens. data-bs-theme on <html> is the single source of truth; it is set before the first
+// paint by the inline script in index.html and kept in sync by ThemeService. Dark is the default.
+@mixin theme-tokens($theme) {
+    @each $name, $value in map.get(colors.$theme-tokens, $theme) {
+        --tv-#{$name}: #{$value};
+    }
+}
+
+@function rgb-triplet($color) {
+    @return color.channel($color, 'red', $space: rgb), color.channel($color, 'green', $space: rgb), color.channel($color, 'blue', $space: rgb);
+}
+
+:root,
+[data-bs-theme=dark] {
+    @include theme-tokens('dark');
+    color-scheme: dark;
+
+    // Accent colors for text/icons in component SCSS (light mode swaps in the AA-readable variants).
+    @each $key, $value in colors.$custom-colors {
+        @if $key != 'card' {
+            --tv-accent-#{$key}: #{$value};
+        }
+    }
+    --color-success-soft: #{colors.$success};
+    --color-danger-soft: #{colors.$danger};
+    --color-warning-soft: #{colors.$warning};
+    --color-info-soft: #{colors.$info};
+}
+
+$text-utilities: '.text-primary, .text-secondary, .text-muted, .text-body-secondary, .text-body-emphasis';
+@each $key, $value in colors.$custom-colors {
+    $text-utilities: '#{$text-utilities}, .text-#{$key}';
+}
+
+[data-bs-theme=light] {
+    $link-hover: color.adjust(colors.$primary-text-light, $lightness: -8%);
+    @include theme-tokens('light');
+    color-scheme: light;
+
+    // The neon primary only reaches ~2:1 on white; clickable text uses a darkened teal (WCAG AA).
+    --bs-primary: #{colors.$primary-text-light};
+    --color-primary-0: #{colors.$primary-text-light};
+    --bs-primary-rgb: #{rgb-triplet(colors.$primary-text-light)};
+    --bs-link-color: #{colors.$primary-text-light};
+    --bs-link-color-rgb: #{rgb-triplet(colors.$primary-text-light)};
+    --bs-link-hover-color: #{$link-hover};
+    --bs-link-hover-color-rgb: #{rgb-triplet($link-hover)};
+    --bs-border-color: #{colors.$bg-darker-light};
+
+    @each $key, $value in colors.$soft-colors {
+        --color-#{$key}-soft: #{colors.readable-text-on($value, colors.$bg-muted-light)};
+    }
+
+    @each $key, $value in colors.$text-variants-light {
+        --tv-accent-#{$key}: #{$value};
+    }
+
+    @each $key, $value in colors.$text-variants-light {
+        @if $value != map.get(colors.$custom-colors, $key) {
+            .text-#{$key} { color: #{$value} !important; }
+        }
+    }
+
+    // Utilities written for dark surfaces: on a light surface "white text" means emphasized text.
+    // Badges, buttons and elements with their own background keep white.
+    :is(.text-white, .text-light):not(.badge, .btn, [class*='bg-']) {
+        color: var(--bs-emphasis-color) !important;
+    }
+
+    // .bg-dark / .text-bg-dark / .bg-black mark subtle recessed chips and blocks (inactive filter pills, state badges,
+    // code) on dark cards. Bootstrap keeps them near-black in light mode; the light equivalent is the muted surface.
+    // Translucent .bg-black overlays (.bg-opacity-*) stay dark.
+    .bg-dark,
+    .text-bg-dark,
+    .bg-black:not([class*='bg-opacity']) {
+        --bs-badge-color: var(--tv-text-strong);
+        background-color: var(--tv-surface-muted) !important;
+    }
+
+    // Bootstrap's .text-bg-dark forces white text; explicit text utilities on the same element keep precedence.
+    .text-bg-dark:not(#{$text-utilities}),
+    .bg-dark:is(.text-white, .text-light) {
+        color: var(--bs-emphasis-color) !important;
+    }
+
+    // --bs-primary is darkened for text above; filled primary surfaces keep the brand teal (with black text, as .btn-primary).
+    .bg-primary {
+        background-color: #{colors.$primary} !important;
+    }
+
+    .border-black {
+        border-color: var(--tv-border-subtle) !important;
+    }
+
+    .btn-close-white {
+        filter: none;
+    }
+
+    .btn-outline-primary {
+        --bs-btn-color: var(--bs-primary);
+        --bs-btn-border-color: var(--bs-primary);
+        --bs-btn-hover-border-color: var(--bs-primary);
+        --bs-btn-disabled-color: var(--bs-primary);
+        --bs-btn-disabled-border-color: var(--bs-primary);
+    }
+}
+
+// Tooltips stay dark in both themes (inverse surface), so series-colored text in chart tooltips stays readable.
+[data-bs-theme=light] :is(.tooltip, .echarts-tooltip) {
+    --bs-body-color: #dee2e6;
+    --bs-emphasis-color: #fff;
+    --bs-secondary-color: rgba(222, 226, 230, .75);
+    --bs-border-color: #495057;
+    --tv-text-strong: #fff;
+    --tv-text-soft: #ccc;
+    --tv-text-dim: #999;
+    --tv-text-faint: #666;
+    --tv-text-shadow: none;
+    color-scheme: dark;
 }
 
 @each $key, $value in colors.$custom-colors {
-    .bg-#{$key}   { background-color: #{$value} !important; color: colors.readable-on($value); }
-    .text-#{$key} { color: #{$value} !important; }
+    @if $key == 'card' {
+        .bg-card   { background-color: var(--tv-surface-card) !important; color: var(--tv-text-strong); }
+        .text-card { color: var(--tv-surface-card) !important; }
+    } @else {
+        .bg-#{$key}   { background-color: #{$value} !important; color: colors.readable-on($value); }
+        .text-#{$key} { color: #{$value} !important; }
+    }
 }
 
 .bg-primary,
@@ -115,14 +241,10 @@ app-root > router-outlet + * {
     transition: box-shadow 0.3s ease;
 
     &:hover {
-        box-shadow:
-            inset 0 1px 0 0 #fff3,
-            inset 0 10px 20px -6px #fff1,
-            inset 0 -6px 12px -4px #0005,
-            0 6px 20px -4px #0004;
+        box-shadow: var(--tv-liquid-glass-hover);
         .card-header :is(n, i):not([class*='text-'], button *, a *) {
             transition: color 0.3s ease;
-            color: #999;
+            color: var(--tv-text-dim);
         }
     }
     & > table:last-child > tr:last-child > td:last-child {
@@ -161,7 +283,7 @@ app-root > router-outlet + * {
 
 .card-header {
     --bs-card-cap-bg: transparent;
-    text-shadow: 1px 1px 2px #000;
+    text-shadow: var(--tv-text-shadow);
     cursor: default;
 }
 
@@ -181,6 +303,10 @@ ul.list-group:not(:last-child) > li.list-group-item:last-child {
     box-shadow: inset var.light-top(), inset var.dark-bottom();
 }
 
+.badge {
+    text-shadow: none;
+}
+
 .form-control .form-control {
     box-shadow: none;
 }
@@ -194,7 +320,7 @@ ul.list-group:not(:last-child) > li.list-group-item:last-child {
 }
 
 .input-group-text-darker {
-    background-color: #0006;
+    background-color: var(--tv-scrim-2);
 }
 
 .dropdown {

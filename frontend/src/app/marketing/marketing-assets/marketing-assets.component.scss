@@ -18,7 +18,7 @@
 }
 
 .dropdown-toggle-split {
-  border-left: 1px solid rgba(255, 255, 255, 0.2);
+  border-left: 1px solid rgba(var(--tv-ink-rgb), 0.2);
 }
 
 .badge {

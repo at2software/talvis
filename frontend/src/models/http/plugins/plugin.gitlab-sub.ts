@@ -48,7 +48,7 @@ export class GitLabSubPlugin extends GitLabPlugin {
                 this.#users = data[0];
                 this.#labels = data[1];
                 this.#pname = data[2].name;
-                if (pluginLink && pluginLink.name != this.#pname) {
+                if (pluginLink?.id && pluginLink.name != this.#pname) {
                     pluginLink.update({ name: this.#pname }).subscribe();
                 }
                 resolve();

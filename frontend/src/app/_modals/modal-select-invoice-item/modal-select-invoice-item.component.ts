@@ -5,15 +5,7 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { InvoiceItemService } from '@models/invoice/invoice-item.service';
 import { InvoiceItem } from '@models/invoice/invoice-item.model';
 import { SpinnerComponent } from '@shards/spinner/spinner.component';
-import { InvoiceItemType, getInvoiceItemTypeRepeatColor } from '@enums/invoice-item.type';
-
-const TYPE_LABELS: Record<number, string> = {
-    [InvoiceItemType.Daily]: 'daily',
-    [InvoiceItemType.Weekly]: 'weekly',
-    [InvoiceItemType.Monthly]: 'monthly',
-    [InvoiceItemType.Quarterly]: 'quarterly',
-    [InvoiceItemType.Yearly]: 'yearly',
-};
+import { InvoiceItemType, getInvoiceItemTypeRepeatColor, INVOICE_ITEM_REPEAT_LABELS } from '@enums/invoice-item.type';
 
 @Component({
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -30,7 +22,7 @@ export class ModalSelectInvoiceItemComponent {
     loading = this.#items.isLoading;
 
     typeLabel(type: number) {
-        return TYPE_LABELS[type] ?? '';
+        return INVOICE_ITEM_REPEAT_LABELS[type] ?? '';
     }
     typeColor(type: number) {
         return getInvoiceItemTypeRepeatColor(type as InvoiceItemType);

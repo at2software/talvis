@@ -3510,7 +3510,7 @@
     </unit>
     <unit id="i18n.common.humanRessources">
       <segment>
-        <source>human ressources</source>
+        <source>human resources</source>
         <target>Personalmanagement</target>
       </segment>
     </unit>
@@ -7481,12 +7481,6 @@
         <target>Anzahlungsrechnung</target>
       </segment>
     </unit>
-    <unit id="i18n.invoices.support-invoice">
-      <segment>
-        <source>support invoice</source>
-        <target>Supportrechnung</target>
-      </segment>
-    </unit>
     <unit id="i18n.invoices.final-invoice">
       <segment>
         <source>final invoice</source>
@@ -7751,6 +7745,48 @@
         <target>Angebot erstellen</target>
       </segment>
     </unit>
+    <unit id="i18n.projects.delegates">
+      <segment>
+        <source>delegates</source>
+        <target>Vertretungen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.projects.delegateAllGates">
+      <segment>
+        <source>all gates</source>
+        <target>alle Gates</target>
+      </segment>
+    </unit>
+    <unit id="i18n.projects.delegateUser">
+      <segment>
+        <source>select person</source>
+        <target>Person wählen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.projects.delegateExpires">
+      <segment>
+        <source>valid until</source>
+        <target>gültig bis</target>
+      </segment>
+    </unit>
+    <unit id="i18n.projects.noDelegates">
+      <segment>
+        <source>no delegates</source>
+        <target>Keine Vertretungen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.assignee.noRole">
+      <segment>
+        <source>no role</source>
+        <target>keine Rolle</target>
+      </segment>
+    </unit>
+    <unit id="i18n.projects.gateRoleMissing">
+      <segment>
+        <source>not named yet</source>
+        <target>noch nicht benannt</target>
+      </segment>
+    </unit>
     <unit id="i18n.projects.noAssigneesYet">
       <segment>
         <source>no one assigned yet</source>
@@ -7765,8 +7801,26 @@
     </unit>
     <unit id="i18n.projects.selectFociHint">
       <segment>
-        <source>select unbilled entries to turn them into a support item</source>
-        <target>Offene Einträge auswählen, um daraus eine Support-Position zu erstellen</target>
+        <source>select unbilled entries to turn them into a support item or link them to an open one</source>
+        <target>Offene Einträge auswählen, um daraus eine Support-Position zu erstellen oder sie einer offenen zuzuordnen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.projects.supportTarget">
+      <segment>
+        <source>target</source>
+        <target>Ziel</target>
+      </segment>
+    </unit>
+    <unit id="i18n.projects.newSupportItem">
+      <segment>
+        <source>new item</source>
+        <target>neue Position</target>
+      </segment>
+    </unit>
+    <unit id="i18n.projects.linkToSupportItem">
+      <segment>
+        <source>link</source>
+        <target>verknüpfen</target>
       </segment>
     </unit>
     <unit id="i18n.projects.noOpenSupportItems">
@@ -8635,6 +8689,36 @@
         <target>Keine Schwellenwerte konfiguriert</target>
       </segment>
     </unit>
+    <unit id="i18n.settings.itemThresholds">
+      <segment>
+        <source>feature email thresholds</source>
+        <target>E-Mail-Schwellenwerte pro Feature</target>
+      </segment>
+    </unit>
+    <unit id="i18n.settings.itemThresholdsDesc">
+      <segment>
+        <source>Send an email to the project manager and to everyone who booked time on a feature when its booked hours divided by its estimated work reach a threshold. Notifications reset automatically if the ratio drops below the threshold again.</source>
+        <target>Sendet eine E-Mail an den Projektmanager und an alle, die auf ein Feature gebucht haben, wenn das Verhältnis von gebuchten Stunden zum geschätzten Aufwand des Features einen Schwellenwert erreicht. Benachrichtigungen werden automatisch zurückgesetzt, wenn das Verhältnis wieder unter den Schwellenwert fällt.</target>
+      </segment>
+    </unit>
+    <unit id="i18n.settings.itemAlertRuleDesc">
+      <segment>
+        <source>To avoid mail spam, only features that are at least this large OR make up at least this share of the project's estimated work trigger an email. Set both to 0 to include every feature.</source>
+        <target>Um Mail-Spam zu vermeiden, lösen nur Features eine E-Mail aus, die mindestens so groß sind ODER mindestens diesen Anteil am geschätzten Projektaufwand ausmachen. Beide auf 0 setzen, um jedes Feature einzubeziehen.</target>
+      </segment>
+    </unit>
+    <unit id="i18n.settings.itemAlertMinHours">
+      <segment>
+        <source>minimum feature size</source>
+        <target>Mindestgröße eines Features</target>
+      </segment>
+    </unit>
+    <unit id="i18n.settings.itemAlertMinShare">
+      <segment>
+        <source>minimum share of project work</source>
+        <target>Mindestanteil am Projektaufwand</target>
+      </segment>
+    </unit>
     <unit id="i18n.project.quoteText">
       <segment>
         <source>quoteText</source>
@@ -8719,10 +8803,16 @@
         <target>mit Mattermost-Benutzer verknüpfen</target>
       </segment>
     </unit>
-    <unit id="i18n.companies.changeRoleTo">
+    <unit id="i18n.assignee.addRole">
       <segment>
-        <source>change role to...</source>
-        <target>Rolle ändern zu...</target>
+        <source>add role...</source>
+        <target>Rolle hinzufügen...</target>
+      </segment>
+    </unit>
+    <unit id="i18n.assignee.removeRole">
+      <segment>
+        <source>remove role...</source>
+        <target>Rolle entfernen...</target>
       </segment>
     </unit>
     <unit id="i18n.common.developer">
@@ -12072,10 +12162,10 @@
       </segment>
     </unit>
     
-    <unit id="i18n.invoicing.support">
+    <unit id="i18n.invoicing.recurring">
       <segment>
-        <source>support</source>
-        <target>Support</target>
+        <source>recurring</source>
+        <target>Laufend</target>
       </segment>
     </unit>
     
@@ -13523,216 +13613,6 @@
         <target>Passwort wiederholen</target>
       </segment>
     </unit>
-    <unit id="i18n.flow.openApprovals">
-      <segment>
-        <source>open approvals</source>
-        <target>Offene Freigaben</target>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.noOpenApprovals">
-      <segment>
-        <source>nothing is waiting for your approval</source>
-        <target>Nichts wartet auf deine Freigabe</target>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.recommendation">
-      <segment>
-        <source>recommendation</source>
-        <target>Empfehlung</target>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.sourceAgent">
-      <segment>
-        <source>agent</source>
-        <target>Agent</target>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.sourceRuleCheck">
-      <segment>
-        <source>rule check</source>
-        <target>Regelprüfung</target>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.sourceReview">
-      <segment>
-        <source>review</source>
-        <target>Review</target>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.diff">
-      <segment>
-        <source>diff</source>
-        <target>Diff</target>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.requestChanges">
-      <segment>
-        <source>request changes</source>
-        <target>Nachbessern lassen</target>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.requestChangesReason">
-      <segment>
-        <source>what has to change?</source>
-        <target>Was muss nachgebessert werden?</target>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.system">
-      <segment>
-        <source>system</source>
-        <target>System</target>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.approveReason">
-      <segment>
-        <source>reason for the approval (optional)</source>
-        <target>Begründung der Freigabe (optional)</target>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.rejectReason">
-      <segment>
-        <source>why is this rejected?</source>
-        <target>Warum wird abgelehnt?</target>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.tab">
-      <segment>
-        <source>flow</source>
-        <target>Flow</target>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.phase">
-      <segment>
-        <source>phase</source>
-        <target>Phase</target>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.noPhase">
-      <segment>
-        <source>This project state is not mapped to a phase.</source>
-        <target>Dieser Projektstatus ist keiner Phase zugeordnet.</target>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.nextPhase">
-      <segment>
-        <source>next phase</source>
-        <target>nächste Phase</target>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.riskClass">
-      <segment>
-        <source>risk class</source>
-        <target>Risikoklasse</target>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.gateNotRequired">
-      <segment>
-        <source>not required for this risk class</source>
-        <target>für diese Risikoklasse nicht nötig</target>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.requestApproval">
-      <segment>
-        <source>request approval</source>
-        <target>Freigabe anfordern</target>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.jobs">
-      <segment>
-        <source>development jobs</source>
-        <target>Development-Jobs</target>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.newJob">
-      <segment>
-        <source>new job</source>
-        <target>Job anlegen</target>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.jsonPreview">
-      <segment>
-        <source>JSON preview</source>
-        <target>JSON-Vorschau</target>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.createJob">
-      <segment>
-        <source>create job</source>
-        <target>Job anlegen</target>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.noJobs">
-      <segment>
-        <source>no development jobs yet</source>
-        <target>noch keine Development-Jobs</target>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.mergeRequest">
-      <segment>
-        <source>merge request</source>
-        <target>Merge Request</target>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.viewTable">
-      <segment>
-        <source>table</source>
-        <target>Tabelle</target>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.viewDiagram">
-      <segment>
-        <source>flow diagram</source>
-        <target>Flussdiagramm</target>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.legendFree">
-      <segment>
-        <source>transition without requirements</source>
-        <target>Übergang ohne Anforderungen</target>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.legendRequirements">
-      <segment>
-        <source>transition with requirements (role or gates)</source>
-        <target>Übergang mit Anforderungen (Rolle oder Gates)</target>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.legendColumns">
-      <segment>
-        <source>columns follow the phases; finished states on the right</source>
-        <target>Spalten folgen den Phasen; abgeschlossene Status rechts</target>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.approvalsFromRiskClass">
-      <segment>
-        <source>per risk class</source>
-        <target>lt. Risikoklasse</target>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.riskAtLeast">
-      <segment>
-        <source>risk ≥</source>
-        <target>Risiko ≥</target>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.requiresRole">
-      <segment>
-        <source>role</source>
-        <target>Rolle</target>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.requiresGates">
-      <segment>
-        <source>gates</source>
-        <target>Gates</target>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.leavesPhase">
-      <segment>
-        <source>leaves phase</source>
-        <target>verlässt Phase</target>
-      </segment>
-    </unit>
     <unit id="i18n.settings.contactDetails">
       <segment>
         <source>contact details</source>
@@ -13755,312 +13635,6 @@
       <segment>
         <source>These details appear as the sender on invoices, quotes and PDF templates.</source>
         <target>Diese Angaben erscheinen als Absender auf Rechnungen, Angeboten und PDF-Vorlagen.</target>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.action">
-      <segment>
-        <source>action</source>
-        <target>Aktion</target>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.actionApproval">
-      <segment>
-        <source>approvals</source>
-        <target>Freigaben</target>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.actionConfig">
-      <segment>
-        <source>configuration</source>
-        <target>Konfiguration</target>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.actionJob">
-      <segment>
-        <source>jobs</source>
-        <target>Jobs</target>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.actionProject">
-      <segment>
-        <source>project state changes</source>
-        <target>Statuswechsel</target>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.active">
-      <segment>
-        <source>active</source>
-        <target>aktiv</target>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.actor">
-      <segment>
-        <source>actor</source>
-        <target>Akteur</target>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.addGate">
-      <segment>
-        <source>add gate</source>
-        <target>Gate hinzufügen</target>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.addJobType">
-      <segment>
-        <source>add job type</source>
-        <target>Job-Typ hinzufügen</target>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.addPhase">
-      <segment>
-        <source>add phase</source>
-        <target>Phase hinzufügen</target>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.addRiskClass">
-      <segment>
-        <source>add risk class</source>
-        <target>Risikoklasse hinzufügen</target>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.addTransition">
-      <segment>
-        <source>add transition</source>
-        <target>Übergang hinzufügen</target>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.allActions">
-      <segment>
-        <source>all actions</source>
-        <target>alle Aktionen</target>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.allActors">
-      <segment>
-        <source>users and machines</source>
-        <target>Nutzer und Maschinen</target>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.allSubjects">
-      <segment>
-        <source>all subjects</source>
-        <target>alle Objekte</target>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.approvals">
-      <segment>
-        <source>approvals</source>
-        <target>Freigaben</target>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.auditEmpty">
-      <segment>
-        <source>nothing recorded yet</source>
-        <target>noch nichts protokolliert</target>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.condition">
-      <segment>
-        <source>condition</source>
-        <target>Bedingung</target>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.conditionAlways">
-      <segment>
-        <source>always</source>
-        <target>immer</target>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.conditionRisk">
-      <segment>
-        <source>risk level ≥</source>
-        <target>ab Risiko-Level</target>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.deleteMessage">
-      <segment>
-        <source>delete this entry? The change is recorded in the protocol.</source>
-        <target>diesen Eintrag löschen? Die Änderung wird protokolliert.</target>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.deleteTitle">
-      <segment>
-        <source>delete</source>
-        <target>löschen</target>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.details">
-      <segment>
-        <source>details</source>
-        <target>Details</target>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.from">
-      <segment>
-        <source>from</source>
-        <target>von</target>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.gate">
-      <segment>
-        <source>gate</source>
-        <target>Gate</target>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.inputSchema">
-      <segment>
-        <source>input schema (JSON)</source>
-        <target>Input-Schema (JSON)</target>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.invalidJson">
-      <segment>
-        <source>This is not valid JSON.</source>
-        <target>Das ist kein gültiges JSON.</target>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.jobTypes">
-      <segment>
-        <source>job types</source>
-        <target>Job-Typen</target>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.jobsShort">
-      <segment>
-        <source>jobs</source>
-        <target>Jobs</target>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.key">
-      <segment>
-        <source>key</source>
-        <target>Schlüssel</target>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.level">
-      <segment>
-        <source>level</source>
-        <target>Level</target>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.machines">
-      <segment>
-        <source>machines</source>
-        <target>Maschinen</target>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.newGateKey">
-      <segment>
-        <source>new gate key</source>
-        <target>neuer Gate-Schlüssel</target>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.newJobTypeKey">
-      <segment>
-        <source>new job type key</source>
-        <target>neuer Job-Typ-Schlüssel</target>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.newPhaseKey">
-      <segment>
-        <source>new phase key</source>
-        <target>neuer Phasen-Schlüssel</target>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.phasesAndGates">
-      <segment>
-        <source>phases &amp; gates</source>
-        <target>Phasen &amp; Gates</target>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.protocol">
-      <segment>
-        <source>protocol</source>
-        <target>Protokoll</target>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.releaseApprovals">
-      <segment>
-        <source>release approvals</source>
-        <target>Release-Freigaben</target>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.reviewGates">
-      <segment>
-        <source>review gates</source>
-        <target>Review-Gates</target>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.requiredRole">
-      <segment>
-        <source>required role</source>
-        <target>Pflichtrolle</target>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.riskClassHint">
-      <segment>
-        <source>Projects without a risk class count as level 0. Gates whose approval count is empty take it from the release approvals of the project's risk class.</source>
-        <target>Projekte ohne Risikoklasse zählen als Level 0. Gates ohne eigene Freigabe-Anzahl übernehmen die Release-Freigaben der Risikoklasse des Projekts.</target>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.riskClasses">
-      <segment>
-        <source>risk classes</source>
-        <target>Risikoklassen</target>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.schemaHint">
-      <segment>
-        <source>Field types: string, text, url (http/https), list (one entry per line; with "fields" a JSON list of objects), object (JSON). "required_without" names a field that makes this one optional. Review gates: gate keys of the current phase, comma-separated, opened as approvals when a job reports its result. New types start with an example field.</source>
-        <target>Feldtypen: string, text, url (http/https), list (ein Eintrag pro Zeile; mit "fields" eine JSON-Liste von Objekten), object (JSON). "required_without" nennt ein Feld, das dieses optional macht. Review-Gates: Gate-Schlüssel der aktuellen Phase, durch Komma getrennt, werden beim Ergebnis eines Jobs als Freigaben angelegt. Neue Typen starten mit einem Beispielfeld.</target>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.showDetails">
-      <segment>
-        <source>show</source>
-        <target>anzeigen</target>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.sort">
-      <segment>
-        <source>sort</source>
-        <target>Sortierung</target>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.stateMachine">
-      <segment>
-        <source>project state machine</source>
-        <target>Projekt-State-Machine</target>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.subject">
-      <segment>
-        <source>subject</source>
-        <target>Objekt</target>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.to">
-      <segment>
-        <source>to</source>
-        <target>nach</target>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.transitionExists">
-      <segment>
-        <source>this transition already exists</source>
-        <target>dieser Übergang existiert schon</target>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.transitions">
-      <segment>
-        <source>transitions</source>
-        <target>Übergänge</target>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.users">
-      <segment>
-        <source>users</source>
-        <target>Nutzer</target>
       </segment>
     </unit>
     <unit id="i18n.invoice.collectedViaSepa">
@@ -14909,6 +14483,48 @@
         <target><ph id="0" equiv="count" disp="moved"/> Interessenten verschoben</target>
       </segment>
     </unit>
+    <unit id="i18n.marketing.edit_contact_details">
+      <segment>
+        <source>edit contact details</source>
+        <target>Kontaktdaten bearbeiten</target>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.status_change_failed">
+      <segment>
+        <source>changing the status failed – please try again</source>
+        <target>Statusänderung fehlgeschlagen – bitte erneut versuchen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.shared_activity">
+      <segment>
+        <source>shared (can be completed for all prospects at once)</source>
+        <target>gemeinsam (kann für alle Interessenten auf einmal abgeschlossen werden)</target>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.shared_activities">
+      <segment>
+        <source>shared activities</source>
+        <target>Gemeinsame Aktivitäten</target>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.complete_for_all">
+      <segment>
+        <source>complete for all</source>
+        <target>für alle abschließen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.complete_shared_confirm">
+      <segment>
+        <source>Complete this activity for all <ph id="0" equiv="count" disp="activity.due_count"/> waiting prospects?</source>
+        <target>Diese Aktivität für alle <ph id="0" equiv="count" disp="activity.due_count"/> wartenden Interessenten abschließen?</target>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.shared_completed">
+      <segment>
+        <source><ph id="0" equiv="count" disp="completed"/> activities completed</source>
+        <target><ph id="0" equiv="count" disp="completed"/> Aktivitäten abgeschlossen</target>
+      </segment>
+    </unit>
     <unit id="i18n.marketing.possible_duplicates">
       <segment>
         <source>possible duplicates</source>
@@ -15005,6 +14621,12 @@
         <target>speichern</target>
       </segment>
     </unit>
+    <unit id="i18n.marketing.touchpoint_save_next_task">
+      <segment>
+        <source>save and next task</source>
+        <target>speichern und nächste Aufgabe</target>
+      </segment>
+    </unit>
     <unit id="i18n.marketing.touchpoint_save_failed">
       <segment>
         <source>saving the contact failed – please try again</source>
@@ -15099,6 +14721,264 @@
       <segment>
         <source>saving the contact data failed</source>
         <target>Speichern der Kontaktdaten fehlgeschlagen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.plugins.gitlab_link_foreign_host">
+      <segment>
+        <source>The URL does not belong to the GitLab instance of this token.</source>
+        <target>Die URL gehört nicht zur GitLab-Instanz dieses Tokens.</target>
+      </segment>
+    </unit>
+    <unit id="i18n.plugins.gitlab_link_empty_group">
+      <segment>
+        <source>The group contains no repositories you have access to.</source>
+        <target>Die Gruppe enthält keine Repositories, auf die du Zugriff hast.</target>
+      </segment>
+    </unit>
+    <unit id="i18n.plugins.gitlab_link_not_found">
+      <segment>
+        <source>No GitLab project or group found for this input, or your token has no access to it.</source>
+        <target>Kein GitLab-Projekt und keine Gruppe zu dieser Eingabe gefunden, oder dein Token hat keinen Zugriff darauf.</target>
+      </segment>
+    </unit>
+    <unit id="i18n.plugins.gitlab_link_failed">
+      <segment>
+        <source>The GitLab project or group could not be resolved.</source>
+        <target>Das GitLab-Projekt bzw. die Gruppe konnte nicht aufgelöst werden.</target>
+      </segment>
+    </unit>
+    <unit id="i18n.plugins.links_confirm_title">
+      <segment>
+        <source>Add plugin links</source>
+        <target>Plugin-Links hinzufügen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.plugins.links_confirm_message">
+      <segment>
+        <source><ph id="0" equiv="count" disp="count"/> repositories will be linked. Continue?</source>
+        <target><ph id="0" equiv="count" disp="count"/> Repositories werden verknüpft. Fortfahren?</target>
+      </segment>
+    </unit>
+    <unit id="i18n.plugins.links_created_skipped">
+      <segment>
+        <source><ph id="0" equiv="created" disp="created.length"/> link(s) added, <ph id="1" equiv="skipped" disp="skipped"/> already linked.</source>
+        <target><ph id="0" equiv="created" disp="created.length"/> Link(s) angelegt, <ph id="1" equiv="skipped" disp="skipped"/> bereits verknüpft.</target>
+      </segment>
+    </unit>
+    <unit id="i18n.plugins.links_failed">
+      <segment>
+        <source><ph id="0" equiv="failed" disp="failed"/> could not be saved.</source>
+        <target><ph id="0" equiv="failed" disp="failed"/> konnten nicht gespeichert werden.</target>
+      </segment>
+    </unit>
+    <unit id="i18n.invoices.activateSubscription">
+      <segment>
+        <source>activate subscription</source>
+        <target>Abo aktivieren</target>
+      </segment>
+    </unit>
+    <unit id="i18n.invoices.pauseSubscription">
+      <segment>
+        <source>pause subscription</source>
+        <target>Abo pausieren</target>
+      </segment>
+    </unit>
+    <unit id="i18n.invoices.subscriptions">
+      <segment>
+        <source>subscriptions</source>
+        <target>Abos</target>
+      </segment>
+    </unit>
+    <unit id="i18n.invoices.subscriptionNext">
+      <segment>
+        <source>next:</source>
+        <target>nächste:</target>
+      </segment>
+    </unit>
+    <unit id="i18n.invoices.noSubscriptionsHint">
+      <segment>
+        <source>Subscriptions are added as repeating items in the quote tab.</source>
+        <target>Abos werden im Tab „Angebot“ als wiederkehrende Posten angelegt.</target>
+      </segment>
+    </unit>
+    <unit id="i18n.invoices.toQuote">
+      <segment>
+        <source>to the quote</source>
+        <target>zum Angebot</target>
+      </segment>
+    </unit>
+    <unit id="i18n.connections.type_customer">
+      <segment>
+        <source>customer relationship</source>
+        <target>Kundenbeziehung</target>
+      </segment>
+    </unit>
+    <unit id="i18n.connections.role_customer">
+      <segment>
+        <source>customer</source>
+        <target>Kunde</target>
+      </segment>
+    </unit>
+    <unit id="i18n.connections.role_contractor">
+      <segment>
+        <source>contractor</source>
+        <target>Auftragnehmer</target>
+      </segment>
+    </unit>
+    <unit id="i18n.connections.type_partner">
+      <segment>
+        <source>partnership</source>
+        <target>Partnerschaft</target>
+      </segment>
+    </unit>
+    <unit id="i18n.connections.role_partner">
+      <segment>
+        <source>partner</source>
+        <target>Partner</target>
+      </segment>
+    </unit>
+    <unit id="i18n.connections.type_group">
+      <segment>
+        <source>group of companies</source>
+        <target>Unternehmensgruppe</target>
+      </segment>
+    </unit>
+    <unit id="i18n.connections.role_subsidiary">
+      <segment>
+        <source>subsidiary</source>
+        <target>Tochtergesellschaft</target>
+      </segment>
+    </unit>
+    <unit id="i18n.connections.role_parent">
+      <segment>
+        <source>parent company</source>
+        <target>Muttergesellschaft</target>
+      </segment>
+    </unit>
+    <unit id="i18n.connections.type_competitor">
+      <segment>
+        <source>competition</source>
+        <target>Konkurrenz</target>
+      </segment>
+    </unit>
+    <unit id="i18n.connections.role_competitor">
+      <segment>
+        <source>competitor</source>
+        <target>Wettbewerber</target>
+      </segment>
+    </unit>
+    <unit id="i18n.connections.type_referral">
+      <segment>
+        <source>referral</source>
+        <target>Vermittlung</target>
+      </segment>
+    </unit>
+    <unit id="i18n.connections.role_referrer">
+      <segment>
+        <source>referrer</source>
+        <target>Vermittler</target>
+      </segment>
+    </unit>
+    <unit id="i18n.connections.role_referred">
+      <segment>
+        <source>referred</source>
+        <target>vermittelt</target>
+      </segment>
+    </unit>
+    <unit id="i18n.connections.setType">
+      <segment>
+        <source>set relationship...</source>
+        <target>Beziehung festlegen...</target>
+      </segment>
+    </unit>
+    <unit id="i18n.connections.unclassified">
+      <segment>
+        <source>unclassified</source>
+        <target>nicht eingeordnet</target>
+      </segment>
+    </unit>
+    <unit id="i18n.connections.reverse">
+      <segment>
+        <source>reverse direction</source>
+        <target>Richtung umkehren</target>
+      </segment>
+    </unit>
+    <unit id="i18n.connections.openSource">
+      <segment>
+        <source>open source</source>
+        <target>Quelle öffnen</target>
+      </segment>
+    </unit>
+    <unit id="i18n.connections.relationship">
+      <segment>
+        <source>relationship</source>
+        <target>Beziehung</target>
+      </segment>
+    </unit>
+    <unit id="i18n.connections.researched">
+      <segment>
+        <source>researched</source>
+        <target>recherchiert</target>
+      </segment>
+    </unit>
+    <unit id="i18n.customers.keyAccountOn">
+      <segment>
+        <source>key account</source>
+        <target>Key Account</target>
+      </segment>
+    </unit>
+    <unit id="i18n.customers.keyAccountOff">
+      <segment>
+        <source>not a key account</source>
+        <target>kein Key Account</target>
+      </segment>
+    </unit>
+    <unit id="i18n.customers.networkSizeByRevenue">
+      <segment>
+        <source>size = total revenue</source>
+        <target>Größe = Gesamtumsatz</target>
+      </segment>
+    </unit>
+    <unit id="i18n.customers.networkLegend">
+      <segment>
+        <source>legend</source>
+        <target>Legende</target>
+      </segment>
+    </unit>
+    <unit id="i18n.connections.secondDegree">
+      <segment>
+        <source>via two hops</source>
+        <target>über zwei Ecken</target>
+      </segment>
+    </unit>
+    <unit id="i18n.settings.appearance">
+      <segment>
+        <source>appearance</source>
+        <target>Darstellung</target>
+      </segment>
+    </unit>
+    <unit id="i18n.settings.colorScheme">
+      <segment>
+        <source>color scheme</source>
+        <target>Farbschema</target>
+      </segment>
+    </unit>
+    <unit id="i18n.settings.themeAuto">
+      <segment>
+        <source>automatic</source>
+        <target>automatisch</target>
+      </segment>
+    </unit>
+    <unit id="i18n.settings.themeLight">
+      <segment>
+        <source>light</source>
+        <target>hell</target>
+      </segment>
+    </unit>
+    <unit id="i18n.settings.themeDark">
+      <segment>
+        <source>dark</source>
+        <target>dunkel</target>
       </segment>
     </unit>
   </file>

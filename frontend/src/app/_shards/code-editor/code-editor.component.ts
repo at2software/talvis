@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
 
-type Lang = 'html' | 'css';
+type Lang = 'html' | 'css' | 'json';
 
 const esc = (s: string): string => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
@@ -18,6 +18,25 @@ function highlightCss(code: string): string {
         },
     );
 }
+
+function highlightJson(code: string): string {
+    const re = /("(?:[^"\\]|\\.)*")(\s*:)?|(-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?)|\b(true|false|null)\b|([{}[\],])/g;
+    let out = '';
+    let last = 0;
+    let m: RegExpExecArray | null;
+    while ((m = re.exec(code))) {
+        out += esc(code.slice(last, m.index));
+        const [, str, colon, num, literal, punc] = m;
+        if (str) out += colon ? `<span class="t-prop">${esc(str)}</span><span class="t-punc">${esc(colon)}</span>` : `<span class="t-str">${esc(str)}</span>`;
+        else if (num) out += `<span class="t-num">${num}</span>`;
+        else if (literal) out += `<span class="t-at">${literal}</span>`;
+        else out += `<span class="t-punc">${esc(punc)}</span>`;
+        last = m.index + m[0].length;
+    }
+    return out + esc(code.slice(last));
+}
+
+const HIGHLIGHTERS: Record<Lang, (code: string) => string> = { html: (code) => highlightHtml(code), css: highlightCss, json: highlightJson };
 
 function highlightTag(tag: string): string {
     const lead = tag.startsWith('</') ? '</' : '<';
@@ -50,28 +69,32 @@ function highlightHtml(code: string): string {
     selector: 'app-code-editor',
     changeDetection: ChangeDetectionStrategy.OnPush,
     template: `
-        <pre class="ce-pre" aria-hidden="true"><code [innerHTML]="highlighted()"></code></pre>
-        <textarea
-            #ta
-            class="ce-ta"
-            spellcheck="false"
-            wrap="off"
-            [value]="value()"
-            (input)="onInput(ta.value)"
-            (scroll)="syncScroll(ta)"
-            (keydown)="onKeydown($event, ta)"
-        ></textarea>
+        <pre class="ce-pre" [attr.aria-hidden]="!readonly()"><code [innerHTML]="highlighted()"></code></pre>
+        @if (!readonly()) {
+            <textarea
+                #ta
+                class="ce-ta"
+                spellcheck="false"
+                wrap="off"
+                [value]="value()"
+                (input)="onInput(ta.value)"
+                (scroll)="syncScroll(ta)"
+                (keydown)="onKeydown($event, ta)"
+            ></textarea>
+        }
     `,
     styleUrl: './code-editor.component.scss',
+    host: { '[class.readonly]': 'readonly()' },
 })
 export class CodeEditorComponent {
     readonly value = input('');
     readonly language = input<Lang>('html');
+    readonly readonly = input(false);
     readonly valueChange = output<string>();
 
     readonly highlighted = computed(() => {
         const code = this.value();
-        const html = this.language() === 'css' ? highlightCss(code) : highlightHtml(code);
+        const html = HIGHLIGHTERS[this.language()](code);
         return html + (code.endsWith('\n') ? ' ' : '');
     });
 

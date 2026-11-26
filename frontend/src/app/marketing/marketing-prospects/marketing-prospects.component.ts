@@ -159,7 +159,7 @@ export class MarketingProspectsComponent {
 
     isSubscribedToInitiative(initiative: MarketingInitiative): boolean {
         const checkId = this.userFilter() ? parseInt(this.userFilter()) : this.#global.user?.id;
-        return initiative.users?.some(u => u.id === checkId) ?? false;
+        return initiative.hasUser(checkId);
     }
 
     actionsResolved = () => this.prospects.update(p => [...p]);

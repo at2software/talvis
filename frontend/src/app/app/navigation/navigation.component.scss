@@ -61,6 +61,10 @@ $accent-width: 2px;
         flex-shrink: 0;
         max-width: none !important;
         opacity: .65;
+
+        &:not(.img-round, .themed-logo) {
+            filter: var(--tv-icon-filter);
+        }
     }
 
     a:hover img,

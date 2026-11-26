@@ -38,7 +38,7 @@
                 <ul class="list-group list-group-flush">
                     @for (activity of _queue; track activity.id) {
                         <li class="list-group-item hstack gap-2 cursor-pointer" [class.active]="activity === _current" [nx]="activity" tabindex="0" (click)="select(activity)" (keyup.enter)="select(activity)">
-                            <avatar [object]="activity.marketing_prospect!" size="sm"></avatar>
+                            <i [class]="activity.marketing_prospect?.statusTextClass()" [ngbTooltip]="activity.marketing_prospect?.status">{{ activity.marketing_prospect?.statusIcon() }}</i>
                             <div class="flex-fill text-truncate">
                                 <div class="text-truncate">{{ activity.marketing_prospect?.name() }}</div>
                                 <small class="text-muted text-truncate d-block">{{ activity.marketing_prospect?.company() }}</small>
@@ -46,7 +46,7 @@
                             @if (activity.bumps > 0) {
                                 <span class="badge text-bg-dark" i18n-ngbTooltip="@@i18n.marketing.bumps_tooltip" ngbTooltip="call attempts">×{{ activity.bumps }}</span>
                             }
-                            <small class="text-nowrap" [class.text-danger]="isOverdue(activity)" [class.text-muted]="!isOverdue(activity)">{{ activity.scheduled_at | date: 'shortDate' }}</small>
+                            <small class="text-nowrap" [class.text-danger]="activity.isOverdue()" [class.text-muted]="!activity.isOverdue()">{{ activity.scheduled_at | date: 'shortDate' }}</small>
                         </li>
                     }
                 </ul>
@@ -54,6 +54,23 @@
                 <empty-state [card]="false" class="marketing" i18n-title="@@i18n.marketing.nothing_due" title="nothing due"></empty-state>
             }
         </div>
+        @if (sharedActivities().length) {
+            <div class="card mb-3">
+                <div class="card-header" i18n="@@i18n.marketing.shared_activities">shared activities</div>
+                <ul class="list-group list-group-flush">
+                    @for (activity of sharedActivities(); track activity.id) {
+                        <li class="list-group-item hstack gap-2">
+                            <div class="flex-fill text-truncate">
+                                <div class="text-truncate">{{ activity.name }}</div>
+                                <small class="text-muted text-truncate d-block">{{ activity.marketing_initiative?.name }}</small>
+                            </div>
+                            <span class="badge bg-dark rounded-pill">{{ activity.due_count }}</span>
+                            <button type="button" class="btn btn-plain text-primary" i18n-ngbTooltip="@@i18n.marketing.complete_for_all" ngbTooltip="complete for all" (click)="completeShared(activity)"><i class="text-primary">done_all</i></button>
+                        </li>
+                    }
+                </ul>
+            </div>
+        }
     </div>
 
     <div class="col-12 col-md-9">
@@ -74,26 +91,39 @@
                 <div class="col-12 col-lg-8">
                     <div class="card mb-3">
                         <div class="card-header hstack gap-2">
-                            <avatar [object]="_prospect"></avatar>
+                            <div ngbDropdown>
+                                <button type="button" class="btn btn-plain p-0 dropdown-toggle-simple" ngbDropdownToggle [ngbTooltip]="_prospect.status">
+                                    <i [class]="_prospect.statusTextClass()">{{ _prospect.statusIcon() }}</i>
+                                </button>
+                                <div ngbDropdownMenu>
+                                    @for (_ of statusOptions; track _.key) {
+                                        <button ngbDropdownItem [disabled]="_prospect.status === _.key" (click)="markStatus(_.key)">{{ _.label }}</button>
+                                    }
+                                </div>
+                            </div>
                             <div class="flex-fill text-truncate">
                                 <div class="fw-bold text-truncate">{{ _prospect.name() }}</div>
                                 <small class="text-muted">{{ _prospect.company() }} · {{ _prospect.marketing_initiative?.name }}</small>
                             </div>
                             @if (_website) {
-                                <a class="text-primary" [href]="_website" target="_blank" rel="noopener" i18n-ngbTooltip="@@i18n.marketing.open_website" ngbTooltip="open website"><i>language</i></a>
+                                <a class="text-primary" [href]="_website" target="_blank" rel="noopener" i18n-ngbTooltip="@@i18n.marketing.open_website" ngbTooltip="open website"><i class="text-primary">language</i></a>
                             }
-                            <a class="text-primary" [href]="_prospect.companySearchUrl()" target="_blank" rel="noopener" i18n-ngbTooltip="@@i18n.marketing.search_company" ngbTooltip="search company"><i>travel_explore</i></a>
-                            <a class="text-primary" [routerLink]="['/marketing/prospects', _prospect.id]" i18n-ngbTooltip="@@i18n.common.view" ngbTooltip="view"><i>open_in_new</i></a>
+                            <a class="text-primary" [href]="_prospect.companySearchUrl()" target="_blank" rel="noopener" i18n-ngbTooltip="@@i18n.marketing.search_company" ngbTooltip="search company"><i class="text-primary">travel_explore</i></a>
+                            <i class="text-primary cursor-pointer" tabindex="0" (click)="vcardOpen.set(!vcardOpen())" (keyup.enter)="vcardOpen.set(!vcardOpen())" i18n-ngbTooltip="@@i18n.marketing.edit_contact_details" ngbTooltip="edit contact details">edit</i>
+                            <a class="text-primary" [routerLink]="['/marketing/prospects', _prospect.id]" i18n-ngbTooltip="@@i18n.common.view" ngbTooltip="view"><i class="text-primary">open_in_new</i></a>
+                            <span #menuHost class="nx-no-trigger" [nx]="_prospect">
+                                <i class="text-primary cursor-pointer" tabindex="0" (click)="openProspectMenu($event, menuHost)" (keyup.enter)="openProspectMenu($event, menuHost)" i18n-ngbTooltip="@@i18n.common.moreActions" ngbTooltip="more actions">more_vert</i>
+                            </span>
                         </div>
                         <div class="card-body">
                             <div class="hstack gap-3 flex-wrap mb-3">
                                 @for (value of contactValues(); track value) {
-                                    <a class="text-primary hstack gap-1 fs-5 text-truncate" [href]="contactHref(value)" [attr.target]="_channel === 'linkedin' ? '_blank' : null" rel="noopener"><i>{{ _ui.icon }}</i><span class="text-truncate">{{ value }}</span></a>
+                                    <a class="badge text-bg-dark hstack gap-1 fs-6 fw-normal text-decoration-none text-primary text-truncate" [href]="contactHref(value)" [attr.target]="_channel === 'linkedin' ? '_blank' : null" rel="noopener"><i class="text-primary">{{ _ui.icon }}</i><span class="text-truncate text-primary">{{ value }}</span></a>
                                 } @empty {
                                     <span class="text-warning hstack gap-1"><i>block</i><span>{{ _ui.missing }}</span></span>
                                 }
                                 @if (_channel === 'linkedin') {
-                                    <a class="text-primary hstack gap-1" [href]="linkedInSearchUrl(_prospect)" target="_blank" rel="noopener"><i>person_search</i><span i18n="@@i18n.marketing.search_on_linkedin">search on LinkedIn</span></a>
+                                    <a class="badge text-bg-dark hstack gap-1 fs-6 fw-normal text-decoration-none text-primary" [href]="linkedInSearchUrl(_prospect)" target="_blank" rel="noopener"><i class="text-primary">person_search</i><span class="text-primary" i18n="@@i18n.marketing.search_on_linkedin">search on LinkedIn</span></a>
                                 }
                             </div>
                             <div class="input-group input-group-sm mb-3">
@@ -107,10 +137,20 @@
                         </div>
                     </div>
 
+                    @if (vcardOpen()) {
+                        @if (_prospect.company_contact) {
+                            <app-vcard [object]="_prospect.company_contact.contact"></app-vcard>
+                            <app-vcard [object]="_prospect.company_contact"></app-vcard>
+                            <app-vcard [object]="_prospect.company_contact.company"></app-vcard>
+                        } @else {
+                            <app-vcard [object]="_prospect"></app-vcard>
+                        }
+                    }
+
                     <div class="card mb-3">
                         <div class="card-header" i18n="@@i18n.marketing.wrap_up">wrap-up</div>
                         <div class="card-body">
-                            <touchpoint-form [initialChannel]="_channel" [channelLocked]="true" [busy]="saving()" (submitted)="save($event)">
+                            <touchpoint-form [initialChannel]="_channel" [channelLocked]="true" [busy]="saving()" [hasNextTask]="upcoming().length > 0" (submitted)="save($event)" (submittedForNextTask)="save($event, true)">
                                 <button type="button" class="btn btn-plain text-primary hstack gap-1" (click)="skip()"><i>skip_next</i><span i18n="@@i18n.marketing.skip">skip</span></button>
                             </touchpoint-form>
                         </div>
@@ -122,6 +162,20 @@
                         <div class="card-header" i18n="@@i18n.common.notes">notes</div>
                         <rte [object]="_prospect" [compact]="true" key="notes"></rte>
                     </div>
+                    @if (pendingActivities().length) {
+                        <div class="card mb-3">
+                            <div class="card-header" i18n="@@i18n.marketing.pending_activities">pending activities</div>
+                            <ul class="list-group list-group-flush">
+                                @for (_ of pendingActivities(); track _.id) {
+                                    <li class="list-group-item hstack gap-2 cursor-pointer" [class.active]="_.id === _current.id" tabindex="0" (click)="focusUpcoming(_)" (keyup.enter)="focusUpcoming(_)">
+                                        <i>{{ iconOfActivity(_) }}</i>
+                                        <span class="flex-fill text-truncate">{{ _.getName() }}</span>
+                                        <small class="text-nowrap" [class.text-danger]="_.isOverdue()" [class.text-muted]="!_.isOverdue()">{{ _.scheduled_at | date: 'shortDate' }}</small>
+                                    </li>
+                                }
+                            </ul>
+                        </div>
+                    }
                     <div class="card mb-3">
                         <div class="card-header" i18n="@@i18n.marketing.contact_history">contact history</div>
                         <ul class="list-group list-group-flush">

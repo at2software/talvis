@@ -27,7 +27,7 @@ class TalvisController extends Controller {
         };
 
         $return = [];
-        $fnMerge($return, Invoice::where('due_at', '<', now())->where('paid_at', null),
+        $fnMerge($return, Invoice::whereOverdue(),
             function ($x) {
                 return $x->name;
             },

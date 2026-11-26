@@ -26,7 +26,7 @@ export class ModalEditWidgetOptionsComponent extends ModalBaseComponent<boolean>
         this.onUpdate.emit(this.options);
     }
     init(options: TOptions, onUpdate: { emit(v: TOptions): void }): void {
-        this.options = options;
+        this.options = structuredClone(options);
         this.onUpdate = onUpdate;
     }
     onSuccess = () => true;

@@ -3,8 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\VacationState;
-use App\Flow\ApprovalService;
-use App\Flow\Models\Approval;
+use App\Events\VacationDecided;
 use App\Http\Requests\Vacation\ApproveRequest;
 use App\Http\Requests\Vacation\StoreGrantRequest;
 use App\Http\Requests\Vacation\StoreManualRequest;
@@ -23,30 +22,29 @@ use Storage;
 class VacationController extends Controller {
     public function indexGrants(User $_) {
         return $_->vacation_grants()
-            ->whereAfter(now(), 'expires_at')
+            ->unexpired()
             ->with('vacations', fn ($q) => $q->whereNot('state', VacationState::Sick))
             ->latest()->get();
     }
     public function indexRequests(User $_) {
-        $collection = $_->vacations()->with('grant')->where('state', VacationState::Open)->get();
+        $collection = $_->vacations()->with('grant')->pendingRequests()->get();
         return $collection;
     }
     public function indexAbsences(User $_) {
         return $_->vacations()
-            ->whereIn('state', [VacationState::Approved, VacationState::Sick])
+            ->absences()
             ->select('vacations.id', 'vacations.state', 'vacations.started_at', 'vacations.ended_at', 'vacations.comment')
             ->orderBy('vacations.started_at')
             ->get();
     }
     public function indexSickNotes() {
-        return Vacation::where('state', VacationState::Sick)
-            ->whereNull('approved_at')
+        return Vacation::sickNotes()
             ->with(['user' => fn ($q) => $q->without('activeEmployment')])
             ->get()
             ->each(fn ($v) => $v->user?->makeHidden('is_retired'));
     }
     public function indexPendingRequests() {
-        return Vacation::where('state', VacationState::Open)->with('user', 'grant')->get();
+        return Vacation::pendingRequests()->with('user', 'grant')->get();
     }
     private function _indexHolidays($year) {
         $filePath = "holidays/$year.json";
@@ -116,16 +114,11 @@ class VacationController extends Controller {
         $vacation->update(['state' => VacationState::Cancelled]);
         return $vacation;
     }
-    public function approve(ApproveRequest $request, Vacation $vacation, ApprovalService $approvals) {
+    public function approve(ApproveRequest $request, Vacation $vacation) {
         $data  = $this->getBody();
         $state = VacationState::from((int)$data->state);
-        DB::transaction(function () use ($approvals, $vacation, $state, $data, $request) {
-            if ($state !== VacationState::Cancelled) {
-                $approval = Approval::pendingFor($vacation) ?? $approvals->request($vacation, 'hr', null);
-                $state === VacationState::Approved
-                    ? $approvals->approve($approval, $request->user(), @$data->reason)
-                    : $approvals->reject($approval, $request->user(), @$data->reason);
-            }
+        DB::transaction(function () use ($vacation, $state, $data, $request) {
+            event(new VacationDecided($vacation, $state, $request->user(), @$data->reason));
             $vacation->state          = $data->state;
             $vacation->approved_by_id = $request->user()->id;
             $vacation->approved_at    = now();
@@ -158,8 +151,7 @@ class VacationController extends Controller {
             abort(403, 'not permitted');
         }
 
-        $grant = VacationGrant::where('user_id', $userId)->where('expires_at', '>', now())->latest()->first();
-        if ($grant) {
+        if ($grant = User::findOrFail($userId)->currentVacationGrant()) {
             $v = Vacation::create([
                 'amount'            => 0,
                 'state'             => VacationState::Sick,

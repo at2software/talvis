@@ -20,7 +20,7 @@
     content: '';
     position: fixed;
     inset: 0 var(--tv-activity-width) 0 0;
-    background-color: #000c;
+    background-color: var(--tv-scrim-4);
 }
 
 .activity-tabs.border-bottom {
@@ -103,9 +103,9 @@
     }
 
     .header {
-        background-color: #0006;
+        background-color: var(--tv-scrim-2);
         padding-block: 2px;
-        color: #999;
+        color: var(--tv-text-dim);
         border-bottom-color: var(--tv-surface-darker);
     }
 }

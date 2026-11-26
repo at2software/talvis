@@ -176,6 +176,9 @@
         </div>
 
         <project-team-planning [entity]="_project"></project-team-planning>
+        @for (card of extensionCards.value() ?? []; track $index) {
+            <ng-container *ngComponentOutlet="card; inputs: { project: _project }"></ng-container>
+        }
 
         @if (!_project.is_internal) {
         <div class="card mb-3">

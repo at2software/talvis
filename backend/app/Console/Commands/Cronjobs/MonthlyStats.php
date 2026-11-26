@@ -15,7 +15,7 @@ class MonthlyStats extends Command {
         $this->info('Starting monthly stats calculation...');
 
         $startDate = now()->subMonths(36);
-        $users     = User::whereHas('activeEmployments')->get();
+        $users     = User::whereEmployed()->get();
 
         foreach ($users as $user) {
             $this->info("Processing user: {$user->name}");

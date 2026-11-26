@@ -3,7 +3,7 @@ import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, afterNextRe
 import { CompanyService } from '@models/company/company.service';
 import { ToolbarComponent } from '@app/app/toolbar/toolbar.component';
 import * as L from 'leaflet';
-import { addDarkTileLayer } from '@constants/map-tiles';
+import { addThemedTileLayer } from '@constants/map-tiles';
 import { SpinnerComponent } from '@shards/spinner/spinner.component';
 import { CustomerLocationDto } from '@models/_core/api-response';
 import { modelListResource } from '@models/http/model-resource';
@@ -51,7 +51,7 @@ export class CustomersMapComponent {
             attributionControl: false,
         });
 
-        addDarkTileLayer(this.#map);
+        addThemedTileLayer(this.#map);
 
         if (this.customers().length > 0) {
             this.#addMarkersToMap();

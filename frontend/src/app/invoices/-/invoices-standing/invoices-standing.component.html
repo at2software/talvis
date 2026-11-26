@@ -44,8 +44,8 @@
                     </thead>
                     <tbody>
                         @for (item of filteredItems(); track item.id) {
-                            <tr [nx]="item" [tables]="filteredItems()">
-                                <td class="p-2 text-end text-muted small align-middle">{{ getDaysUntilNext(item) }}d</td>
+                            <tr [nx]="item" [tables]="filteredItems()" (singleActionResolved)="reload()">
+                                <td class="p-2 text-end text-muted small align-middle">{{ item.daysUntilNext() }}d</td>
                                 <td class="p-2">
                                     <input class="form-control form-control-sm" placeholder="yyyy-mm-dd" (click)="d.toggle()" (dateSelect)="updateDate(item, 'next_recurrence_at', $event)" [(ngModel)]="item.next_recurrence_at" ngbDatepicker #d="ngbDatepicker" />
                                 </td>

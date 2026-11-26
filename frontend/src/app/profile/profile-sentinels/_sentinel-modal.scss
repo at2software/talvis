@@ -47,29 +47,29 @@
   font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
   background: var(--bs-card-bg);
   border-color: var(--bs-border-color);
-  color: #ce9178;
+  color: var(--tv-syntax-string);
 
   &:focus {
     background: var(--bs-card-bg);
     border-color: var(--bs-primary);
-    color: #ce9178;
+    color: var(--tv-syntax-string);
   }
 }
 
 .sentinel-table {
-  color: #9cdcfe;
+  color: var(--tv-syntax-variable);
   font-weight: 500;
 }
 
 .sentinel-value {
-  color: #ce9178;
+  color: var(--tv-syntax-string);
 }
 
 .sentinel-operator {
-  color: #c586c0;
+  color: var(--tv-syntax-keyword);
 }
 
 .sentinel-command {
-  color: #dcdcaa;
+  color: var(--tv-syntax-function);
   font-weight: 500;
 }

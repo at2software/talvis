@@ -104,6 +104,9 @@ export class Vacation extends Serializable {
         }
     };
 
+    isRequested = (): boolean => this.state === Vacation.STATE_REQUESTED;
+    isDenied = (): boolean => this.state === Vacation.STATE_DENIED;
+    isDeniedOrCancelled = (): boolean => this.state === Vacation.STATE_DENIED || this.state === Vacation.STATE_CANCELLED;
     isSick = () => this.state === Vacation.STATE_SICK;
     isVacation = () => this.state !== Vacation.STATE_SICK;
 

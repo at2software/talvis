@@ -21,13 +21,6 @@ class Expense extends BaseModel {
         return $this->belongsTo(InvoiceItem::class);
     }
     public function yearlySum() {
-        switch ($this->repeat) {
-            case InvoiceItemType::Daily: return $this->price * 365;
-            case InvoiceItemType::Weekly: return $this->price * 52;
-            case InvoiceItemType::Monthly: return $this->price * 12;
-            case InvoiceItemType::Quarterly: return $this->price * 4;
-            case InvoiceItemType::Yearly: return $this->price;
-        }
-        return 0;
+        return $this->price * ($this->repeat?->perYear() ?? 0);
     }
 }

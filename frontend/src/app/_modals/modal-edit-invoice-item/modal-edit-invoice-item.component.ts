@@ -13,15 +13,21 @@ import { AffixInputDirective } from '@directives/affix-input.directive';
 import { HotkeyDirective } from '@directives/hotkey.directive';
 import { MoneyPipe } from '@pipes/money.pipe';
 import { ModalBaseComponent } from '@app/_modals/modal-base.component';
+import { NgbDateAdapter, NgbDatepickerModule, NgbDropdownModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbDateCarbonAdapter } from '@directives/ngb-date.adapter';
+import { InvoiceItemType } from '@enums/invoice-item.type';
 
 @Component({
     changeDetection: ChangeDetectionStrategy.OnPush,
     selector: 'modal-edit-invoice-item',
     templateUrl: './modal-edit-invoice-item.component.html',
     styleUrls: ['./modal-edit-invoice-item.component.scss'],
-    imports: [SearchInputComponent, QuillEditorComponent, FormsModule, AffixInputDirective, HotkeyDirective, MoneyPipe],
+    imports: [SearchInputComponent, QuillEditorComponent, FormsModule, AffixInputDirective, HotkeyDirective, MoneyPipe, NgbDropdownModule, NgbDatepickerModule],
+    providers: [{ provide: NgbDateAdapter, useClass: NgbDateCarbonAdapter }],
 })
 export class ModalEditInvoiceItemComponent extends ModalBaseComponent<{ item: InvoiceItem; continue: boolean }> {
+    readonly InvoiceItemType = InvoiceItemType;
+
     readonly toolbarId = `modal-edit-invoice-item-toolbar-${Math.random().toString(36).slice(2)}`;
     readonly modules: QuillModules = { toolbar: { container: `#${this.toolbarId}` } };
 

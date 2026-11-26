@@ -28,16 +28,7 @@ class WidgetController extends Controller {
 
         $projects = Project::getAllWithSupportItems();
 
-        $finishedProjects = Project::whereFinishedSuccessfull()
-            ->where('is_ignored_from_prepared', false)
-            ->whereHas('unbilledInvoiceItems')
-            ->withSum('unbilledInvoiceItems as net_remaining', 'net')
-            ->with(['unbilledInvoiceItems' => function ($q) {
-                $q->select('id', 'company_id', 'project_id', 'created_at', 'net', 'type')
-                    ->orderBy('created_at', 'asc')
-                    ->limit(1);
-            }])
-            ->get();
+        $finishedProjects = Project::getAllFinishedWithUnbilledItems();
         $companies->each->makeHidden('support_items');
         $projects->each->makeHidden(['params', 'support_items', 'company']);
         $finishedProjects->each->makeHidden(['params', 'unbilled_invoice_items', 'company']);
@@ -146,14 +137,14 @@ class WidgetController extends Controller {
     }
     public function GET_CASHFLOW_CUSTOMER_SUPPORT($baseWage = 0) {
         return new CashflowBuilder(
-            builder: Company::whereHasUnbilledFoci()->whereNot('id', Param::get('ME_ID')->value),
+            builder: Company::whereHasUnbilledFoci()->whereNotMe(),
             appends: ['ml_predicted_support_hours'],
             sum: fn ($company) => $company->foci_unbilled_sum_duration * $company->getWage($baseWage)
         );
     }
     public function GET_CASHFLOW_INVOICES() {
         return new CashflowBuilder(
-            builder: Invoice::where('paid_at', null)
+            builder: Invoice::whereUnpaid()
                 ->with('company')
                 ->withSum([
                     'invoiceItems as gross_remaining_calculated' => function ($query) {
@@ -166,47 +157,24 @@ class WidgetController extends Controller {
     public function GET_CASHFLOW_INVOICES_RECURRING() {
         return new CashflowBuilder(
             builder: InvoiceItem::whereIn('type', InvoiceItemType::Repeating)->with(['company', 'project']),
-            sum: function ($item) {
-                return match ($item->type) {
-                    InvoiceItemType::Daily     => $item->net * 365,
-                    InvoiceItemType::Weekly    => $item->net * 52,
-                    InvoiceItemType::Monthly   => $item->net * 12,
-                    InvoiceItemType::Quarterly => $item->net * 4,
-                    InvoiceItemType::Yearly    => $item->net,
-                    default                    => 0
-                };
-            }
+            sum: fn ($item) => $item->net * $item->type->perYear()
         );
     }
     public function GET_CASHFLOW_PROJECTS_ACQUISITIONS() {
         $builder = Project::wherePrepared()
             ->whereNot('is_internal', true)
-            ->with(['latestState', 'company']);
-
-        if (request('only-mine') === 'true') {
-            $builder->whereHas('myAssignment');
-        }
-        if (request('only-mine-as-pm') === 'true') {
-            $builder->where('project_manager_id', request()->user()->id);
-        }
+            ->with(['latestState', 'company'])
+            ->whereMineRequest();
         return new CashflowBuilder(
             builder: $builder,
             sum: fn ($project) => $project->net * $project->lead_probability * $project->lead_probability_multiplier,
         );
     }
     public function GET_CASHFLOW_PROJECTS_TIMEBASED($baseWage = 0) {
-        $builder = Project::wherePreparedOrRunning()
-            ->whereNot('is_internal', true)
-            ->where('is_time_based', true)
+        $builder = Project::whereActiveTimeBased()
             ->withSum('foci_unbilled', 'duration')
-            ->with(['latestState', 'company']);
-
-        if (request('only-mine') === 'true') {
-            $builder->whereHas('myAssignment');
-        }
-        if (request('only-mine-as-pm') === 'true') {
-            $builder->where('project_manager_id', request()->user()->id);
-        }
+            ->with(['latestState', 'company'])
+            ->whereMineRequest();
         return new CashflowBuilder(
             builder: $builder,
             appends: ['uninvoiced_hours'],
@@ -215,17 +183,10 @@ class WidgetController extends Controller {
     }
     public function GET_CASHFLOW_PROJECTS() {
         $builder = Project::wherePreparedOrRunning()
-            ->whereNot('is_internal', true)
-            ->where('is_time_based', false)
+            ->whereBudgetBased()
             ->whereHas('latestState', fn ($q) => $q->where('progress', '!=', ProjectState::Prepared))
-            ->with(['latestState', 'company', 'hoursInvestedSum']);
-
-        if (request('only-mine') === 'true') {
-            $builder->whereHas('myAssignment');
-        }
-        if (request('only-mine-as-pm') === 'true') {
-            $builder->where('project_manager_id', request()->user()->id);
-        }
+            ->with(['latestState', 'company', 'hoursInvestedSum'])
+            ->whereMineRequest();
         return new CashflowBuilder(
             builder: $builder,
             appends: ['progress', 'work_estimated', 'hours_invested'],
@@ -258,9 +219,8 @@ class WidgetController extends Controller {
         $upcomingDateBirthdays = $now->copy()->addDays(30);
         $upcomingDateJubilees  = $now->copy()->addDays(180);
 
-        foreach (User::where('vcard', 'like', '%BDAY%')->whereHas('activeEmployments')->get() as $_) {
-            $bday           = $this->parseBirthday($_->vcard->getFirstValue('BDAY'));
-            $nextOccurrence = $bday ? $this->getNextOccurence($bday, $now) : null;
+        foreach (User::whereHasBirthday()->whereEmployed()->get() as $_) {
+            $nextOccurrence = $_->nextBirthday($now);
             if (! $nextOccurrence || $nextOccurrence > $upcomingDateBirthdays) {
                 continue;
             }
@@ -269,14 +229,13 @@ class WidgetController extends Controller {
                 'next'  => $nextOccurrence->format('Y-m-d'),
                 'path'  => $_->path,
                 'name'  => $_->name,
-                'label' => round($bday->diffInYears($now, true)).'. Geburtstag',
+                'label' => round($_->birthday()->diffInYears($now, true)).'. Geburtstag',
             ];
         }
 
-        $companyContacts = CompanyContact::whereNot('is_retired')->whereHas('company')->whereHas('contact', fn ($q) => $q->where('vcard', 'like', '%BDAY%'))->with('contact', 'company')->get();
+        $companyContacts = CompanyContact::whereNot('is_retired')->whereHas('company')->whereHas('contact', fn ($q) => $q->whereHasBirthday())->with('contact', 'company')->get();
         foreach ($companyContacts->unique('contact_id') as $_) {
-            $bday           = $this->parseBirthday($_->contact->vcard->getFirstValue('BDAY'));
-            $nextOccurrence = $bday ? $this->getNextOccurence($bday, $now) : null;
+            $nextOccurrence = $_->contact->nextBirthday($now);
             if (! $nextOccurrence || $nextOccurrence > $upcomingDateBirthdays) {
                 continue;
             }
@@ -285,11 +244,11 @@ class WidgetController extends Controller {
                 'next'  => $nextOccurrence->format('Y-m-d'),
                 'path'  => $_->company->path,
                 'name'  => $_->contact->name,
-                'label' => round($bday->diffInYears($now, true)).'. Geburtstag',
+                'label' => round($_->contact->birthday()->diffInYears($now, true)).'. Geburtstag',
             ];
         }
 
-        foreach (User::whereHas('activeEmployments')->withMin('employments', 'started_at')->get() as $_) {
+        foreach (User::whereEmployed()->withMin('employments', 'started_at')->get() as $_) {
             if (! $_->employments_min_started_at) {
                 continue;
             }
@@ -337,12 +296,6 @@ class WidgetController extends Controller {
         }
         return $collection;
     }
-    private function parseBirthday(?string $value): ?Carbon {
-        if (! $value) {
-            return null;
-        }
-        return rescue(fn () => Carbon::parse($value)->startOfDay(), null, false);
-    }
     private function getNextOccurence($carbonDate, $now) {
         $next = Carbon::create($now->year, $carbonDate->month, $carbonDate->day);
         if ($next < $now) {
@@ -357,16 +310,7 @@ class WidgetController extends Controller {
 
                 $projects = Project::getAllWithSupportItems()->load('company');
 
-                $finishedProjects = Project::whereFinishedSuccessfull()
-                    ->where('is_ignored_from_prepared', false)
-                    ->whereHas('unbilledInvoiceItems')
-                    ->withSum('unbilledInvoiceItems as net_remaining', 'net')
-                    ->with(['company', 'unbilledInvoiceItems' => function ($q) {
-                        $q->select('id', 'company_id', 'project_id', 'created_at', 'net', 'type')
-                            ->orderBy('created_at', 'asc')
-                            ->limit(1);
-                    }])
-                    ->get();
+                $finishedProjects = Project::getAllFinishedWithUnbilledItems()->load('company');
                 return collect()
                     ->merge($companies)
                     ->merge($projects)

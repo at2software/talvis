@@ -2,16 +2,14 @@ import { ChangeDetectionStrategy, Component, computed, inject, ResourceRef } fro
 import { Dictionary } from '@constants/constants';
 import { BaseWidgetComponent } from '../base.widget.component';
 import { OptionType } from '../widget-options/widget-options.component';
-import { WIDGET_SHARED } from '../widgets.shared';
+import { injectChartPalette, WIDGET_SHARED } from '../widgets.shared';
 import { Project } from '@models/project/project.model';
-import type { ProjectTimelineEntryDto } from '@models/_core/api-response';
 import { ProjectService } from '@models/project/project.service';
 import { WidgetService } from '@models/widget.service';
 import { Color } from '@constants/Color';
-import { ECHARTS_DEFAULT_TOOLTIP_OPTIONS, ECHARTS_DONUT_CENTER_TEXT, ECHARTS_DONUT_ITEM_STYLE, ECHARTS_DONUT_SERIES, ECHARTS_DONUT_TRACK_COLOR } from '@charts/echarts-presets';
+import { ECHARTS_DEFAULT_TOOLTIP_OPTIONS, donutCenterText, ECHARTS_DONUT_ITEM_STYLE, ECHARTS_DONUT_SERIES } from '@charts/echarts-presets';
 import { ChartProgressComponent } from '@charts/chart-progress/chart-progress.component';
 import { MILESTONE_STATES } from '@models/milestone/milestone-state.enum';
-import { ProjectState } from '@models/project/project-state.model';
 import type { EChartsOption } from 'echarts';
 import type { TopLevelFormatterParams } from 'echarts/types/dist/shared';
 import { SpinnerComponent } from '@shards/spinner/spinner.component';
@@ -29,6 +27,7 @@ interface MilestoneStateCount { name: string; count: number; color: string; }
 export class WidgetProjectAnalysisComponent extends BaseWidgetComponent {
     #projectService = inject(ProjectService);
     #widgetService = inject(WidgetService);
+    #palette = injectChartPalette();
 
     defaultOptions = () => ({
         'project-id': { type: OptionType.String, value: '', i18n: $localize`:@@i18n.common.projectId:project ID` },
@@ -42,7 +41,7 @@ export class WidgetProjectAnalysisComponent extends BaseWidgetComponent {
     readonly project = computed<Project | null>(() => {
         const project = this.#project.value();
         if (!project) return null;
-        this.#computeWorkshares(project);
+        project.syncWorkshares();
         return project;
     });
     readonly runningProjects = computed<Project[]>(() => this.#runningProjects.value()?.objects ?? []);
@@ -65,33 +64,21 @@ export class WidgetProjectAnalysisComponent extends BaseWidgetComponent {
         this._onUpdate(newOptions);
     }
 
-    #computeWorkshares(project: Project): void {
-        project.var = project.var || ({} as Dictionary);
-        project.var['workshares'] = (project.timeline_chart || []).map((_: ProjectTimelineEntryDto) => ({
-            name: _.user?.name || 'Unknown',
-            color: _.user?.color || '#cccccc',
-            val: _.data.reduce((sum: number, d) => sum + (parseFloat(String(d.value)) || 0), 0),
-        } as WorkShare));
-    }
-
     #shouldShowBudgetChart(): boolean {
-        const p = this.project();
-        if (!p) return false;
-        return !p.is_time_based && !p.is_internal &&
-            (p.state.progress === ProjectState.ProgressRunning || p.state.progress === ProjectState.ProgressFinished) &&
-            p.var?.workshares?.length > 0 && p.worksharesTotal() > 0 && (p.work_estimated ?? 0) > 0;
+        return this.project()?.hasBudgetChart() ?? false;
     }
 
     #buildBudgetChart() {
         const project = this.project()!;
+        const palette = this.#palette();
         const timePercentage = project.timePercentage();
         const dangerColor = Color.fromVar('danger').toHexString();
         const workShares: WorkShare[] = project.var['workshares'] || [];
         const centerText = `${(timePercentage * 100).toFixed(0)}%`;
-        const centerColor = timePercentage >= 1 ? dangerColor : '#ffffff';
+        const centerColor = timePercentage >= 1 ? dangerColor : palette.text;
 
         const pieData = timePercentage < 1
-            ? [...workShares.map((u) => ({ value: u.val, name: u.name, itemStyle: { color: u.color, ...ECHARTS_DONUT_ITEM_STYLE } })), { value: (project.work_estimated ?? 0) - project.hours_invested, name: 'remaining', itemStyle: { color: ECHARTS_DONUT_TRACK_COLOR, ...ECHARTS_DONUT_ITEM_STYLE } }]
+            ? [...workShares.map((u) => ({ value: u.val, name: u.name, itemStyle: { color: u.color, ...ECHARTS_DONUT_ITEM_STYLE } })), { value: (project.work_estimated ?? 0) - project.hours_invested, name: 'remaining', itemStyle: { color: palette.track, ...ECHARTS_DONUT_ITEM_STYLE } }]
             : workShares.map((u) => ({ value: u.val, name: u.name, itemStyle: { color: u.color, ...ECHARTS_DONUT_ITEM_STYLE } }));
 
         return {
@@ -99,7 +86,7 @@ export class WidgetProjectAnalysisComponent extends BaseWidgetComponent {
                 backgroundColor: 'transparent',
                 animation: false,
                 tooltip: { trigger: 'item', ...ECHARTS_DEFAULT_TOOLTIP_OPTIONS, formatter: (params: TopLevelFormatterParams) => { const p = Array.isArray(params) ? params[0] : params; return `${p.name}: ${(p.value as number).toFixed(1)}h`; } },
-                graphic: [{ type: 'text', left: 'center', top: 'center', style: { ...ECHARTS_DONUT_CENTER_TEXT, text: centerText, fill: centerColor, fontFamily: 'BrunoAce' } }],
+                graphic: [{ type: 'text', left: 'center', top: 'center', style: { ...donutCenterText(palette), text: centerText, fill: centerColor, fontFamily: 'BrunoAce' } }],
                 series: [{ ...ECHARTS_DONUT_SERIES, data: pieData }],
             } satisfies EChartsOption,
             wrapperStyle: (timePercentage >= 1

@@ -103,6 +103,13 @@ export class Milestone extends Serializable implements IHasExtIssue {
         return d;
     });
     isDuePast = (): boolean => (this.due_at ? dayjs().isAfter(this.due_at) : false);
+    isDone = (): boolean => this.state === MilestoneState.DONE;
+    isOverdue = (): boolean => !this.isDone() && !!this.due_at && dayjs(this.due_at).isBefore(dayjs(), 'day');
+    needsStart = (): boolean => this.state === MilestoneState.TODO && !!this.started_at && dayjs(this.started_at).isSameOrBefore(dayjs(), 'day');
+    isLateStart = (): boolean => this.state === MilestoneState.TODO && !this.isOverdue() && !!this.started_at && dayjs(this.started_at).isBefore(dayjs(), 'day');
+    isNotStarted = (): boolean => this.state === MilestoneState.TODO && !this.isLateStart() && !this.isOverdue();
+    lacksDuration = (): boolean => !this.isDone() && !this.workload_hours && !this.invoice_items?.length && !this.project?.is_time_based;
+    invoiceItemDuration = (): number => (this.invoice_items ?? []).reduce((total, item) => total + (item.qty || 0), 0);
     getStateInfo() {
         return getMilestoneStateInfo(this.state);
     }

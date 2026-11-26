@@ -2,7 +2,7 @@
 <router-outlet></router-outlet>
 
 <app-header>
-    <div class="logo" [style.background-image]="'url(' + _company.getAvatar() + ')'" [nx]="_company" smartLink="/customers/{{ _company.id }}" [dnd]="_company.apiPathWithId() + '/avatar'" [dndAllowed]="['image/']" (dndUploaded)="onDndUploaded()"></div>
+    <div class="logo" [style.background-image]="'url(' + _company.getAvatar() + ')'" [nx]="_company" smartLink="/customers/{{ _company.id }}" [dnd]="_company.apiPathWithId() + '/avatar'" [dndAllowed]="['image/']" (dndUploaded)="onDndUploaded($event)"></div>
     <h1>{{ _company.getName() }}</h1>
     <ul class="nav">
         <header-route-nav [context]="_company"></header-route-nav>

@@ -37,7 +37,7 @@
                             [attr.y]="getRowY(rowIndex)"
                             [attr.width]="_svgWidth"
                             [attr.height]="HEADER_ROW_HEIGHT"
-                            fill="rgb(16, 24, 24)"
+                            style="fill: var(--tv-surface-card)"
                         />
                     </g>
                 } @else if (row.type === 'milestone') {
@@ -73,7 +73,7 @@
                             [attr.y]="TIMELINE_HEADER_HEIGHT"
                             [attr.width]="UNIT_WIDTH()"
                             [attr.height]="_svgHeight - TIMELINE_HEADER_HEIGHT"
-                            fill="#0009"
+                            style="fill: var(--tv-scrim-3)"
                             opacity="0.5"
                         />
                     }
@@ -89,7 +89,7 @@
                     [attr.y1]="TIMELINE_HEADER_HEIGHT"
                     [attr.x2]="unit.x"
                     [attr.y2]="_svgHeight"
-                    [attr.stroke]="GRID_COLOR"
+                    [style.stroke]="GRID_COLOR"
                     stroke-width="1"
                 />
             }
@@ -124,7 +124,7 @@
                     style="overflow: visible;"
                 >
                     <div xmlns="http://www.w3.org/1999/xhtml" class="header-content-wrapper">
-                        <div class="project-label cursor-pointer" [style.left.px]="_viewportLeft + 16" style="text-shadow: 0 0 3px #000" (click)="navigateToProject(row.project!)" (keydown.enter)="navigateToProject(row.project!)" (keydown.space)="navigateToProject(row.project!)" tabindex="0" role="button">
+                        <div class="project-label cursor-pointer" [style.left.px]="_viewportLeft + 16" style="text-shadow: 0 0 3px var(--tv-edge)" (click)="navigateToProject(row.project!)" (keydown.enter)="navigateToProject(row.project!)" (keydown.space)="navigateToProject(row.project!)" tabindex="0" role="button">
                             {{ row.project.name }}
                         </div>
                         <div class="header-add-button" [style.left.px]="_viewportRight - 50" ngbDropdown #dropdown="ngbDropdown" placement="bottom-end" container="body" (openChange)="onDropdownOpenChange()">
@@ -152,7 +152,7 @@
             @for (dep of _dependencies; track dep) {
                 <path
                     [attr.d]="getDependencyPath(dep)"
-                    stroke="#666"
+                    style="stroke: var(--tv-text-faint)"
                     stroke-width="2"
                     fill="none"
                     marker-end="url(#arrowhead)"
@@ -189,8 +189,8 @@
                         height="32"
                         [attr.fill]="getMilestoneColor(rendered.milestone)"
                         rx="4"
-                        [attr.stroke]="isMilestoneOverdue(rendered.milestone) ? '#dc3545' : '#000'"
-                        [attr.stroke-width]="isMilestoneOverdue(rendered.milestone) ? '2' : '1'"
+                        [attr.stroke]="rendered.milestone.isOverdue() ? '#dc3545' : '#000'"
+                        [attr.stroke-width]="rendered.milestone.isOverdue() ? '2' : '1'"
                         class="milestone-rect"
                     />
 
@@ -278,7 +278,7 @@
                             font-size="12"
                             font-weight="500"
                             class="milestone-label"
-                        ><title>{{ decodeHtmlEntities(rendered.milestone.name) }}: {{ rendered.milestone.started_at | date: 'dd.MM.' }} – {{ rendered.milestone.due_at | date: 'dd.MM.yyyy' }}</title>{{ decodeHtmlEntities(rendered.milestone.name) }}@if (rendered.milestone.computed_workload_percent) {<tspan class="workload-percent" fill="#666" font-size="10" dx="8">{{ rendered.milestone.computed_workload_percent | number:'1.0-0' }}%</tspan>}</text>
+                        ><title>{{ decodeHtmlEntities(rendered.milestone.name) }}: {{ rendered.milestone.started_at | date: 'dd.MM.' }} – {{ rendered.milestone.due_at | date: 'dd.MM.yyyy' }}</title>{{ decodeHtmlEntities(rendered.milestone.name) }}@if (rendered.milestone.computed_workload_percent) {<tspan class="workload-percent" style="fill: var(--tv-text-faint)" font-size="10" dx="8">{{ rendered.milestone.computed_workload_percent | number:'1.0-0' }}%</tspan>}</text>
                     </g>
 
                     <!-- Resize handles -->
@@ -297,7 +297,7 @@
                         [attr.y]="rendered.y + 13"
                         width="5"
                         height="22"
-                        fill="#999"
+                        style="fill: var(--tv-text-dim)"
                         class="resize-handle right"
                         (mousedown)="onResizeMouseDown($event, rendered, 'right')"
                     />
@@ -386,7 +386,7 @@
                             [attr.x]="group.x + group.width / 2"
                             y="20"
                             text-anchor="middle"
-                            fill="#ccc"
+                            style="fill: var(--tv-text-soft)"
                             font-size="20"
                             font-family="Michroma"
                         >{{ group.label }}</text>
@@ -420,7 +420,7 @@
                         [attr.x]="unit.x + UNIT_WIDTH() / 2"
                         [attr.y]="_timelineGroups.length > 0 ? 50 : 35"
                         text-anchor="middle"
-                        [attr.fill]="_viewMode === 'Year' ? '#ccc' : '#999'"
+                        [style.fill]="_viewMode === 'Year' ? 'var(--tv-text-soft)' : 'var(--tv-text-dim)'"
                         [attr.font-size]="_viewMode === 'Year' ? 20 : 11"
                         [attr.font-family]="_viewMode === 'Year' ? 'Michroma' : ''"
                     >{{ unit.label }}</text>
@@ -438,7 +438,7 @@
                 refY="3"
                 orient="auto"
             >
-                <polygon points="0 0, 10 3, 0 6" fill="#666" />
+                <polygon points="0 0, 10 3, 0 6" style="fill: var(--tv-text-faint)" />
             </marker>
         </defs>
 
@@ -467,7 +467,7 @@
                         [attr.y]="indicator.y"
                         text-anchor="middle"
                         dominant-baseline="middle"
-                        [attr.fill]="indicator.isOverdue ? '#dc3545' : '#999'"
+                        [style.fill]="indicator.isOverdue ? '#dc3545' : 'var(--tv-text-dim)'"
                         font-family="Material Icons"
                         font-size="24"
                         class="off-screen-chevron"
@@ -481,7 +481,7 @@
                         [attr.y]="indicator.y"
                         text-anchor="middle"
                         dominant-baseline="middle"
-                        [attr.fill]="indicator.isOverdue ? '#dc3545' : '#999'"
+                        [style.fill]="indicator.isOverdue ? '#dc3545' : 'var(--tv-text-dim)'"
                         font-family="Material Icons"
                         font-size="24"
                         class="off-screen-chevron"

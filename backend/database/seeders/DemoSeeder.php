@@ -7,6 +7,7 @@ use App\Enums\CommentType;
 use App\Enums\InvoiceItemType;
 use App\Enums\MilestoneState;
 use App\Enums\VacationState;
+use App\Models\AssignmentRole;
 use App\Models\CalendarEntry;
 use App\Models\Comment;
 use App\Models\Company;
@@ -58,7 +59,6 @@ class DemoSeeder extends Seeder {
     private const LEAD_FAILED          = 7;
     private const BETA_TESTING         = 8;
     private const HYPER_CARE           = 9;
-    private const ROLE_DEVELOPER       = 2;
 
     private ?Generator $faker = null;
 
@@ -161,9 +161,9 @@ class DemoSeeder extends Seeder {
         $this->createProducts();
         $this->createExpenses();
 
-        $this->orga = $this->me()->createProject('Interne Organisation', null, $this->user('owner')->id);
-        $this->orga->update(['is_internal' => true, 'description' => 'Interne Zeiten: Teammeetings, Akquise, Buchhaltung, Weiterbildung']);
-        $this->orga->addAssignee($this->user('pm'), self::ROLE_DEVELOPER);
+        $this->orga = $this->me()->createProject('Internal organisation', null, $this->user('owner')->id);
+        $this->orga->update(['is_internal' => true, 'description' => 'Internal time: team meetings, sales outreach, bookkeeping, training']);
+        $this->orga->addAssignee($this->user('pm'), AssignmentRole::DEVELOPER);
         $this->transition($this->orga, self::STARTED);
 
         $this->snapshotParams();
@@ -198,7 +198,7 @@ class DemoSeeder extends Seeder {
         foreach (DemoSeederData::users() as $key => $data) {
             if (! $this->userExists($key) && $day->gte($this->start->copy()->addMonths($data['hired']))) {
                 $this->hire($key, $day);
-                $this->orga()->addAssignee($this->users[$key], self::ROLE_DEVELOPER);
+                $this->orga()->addAssignee($this->users[$key], AssignmentRole::DEVELOPER);
             }
         }
     }
@@ -341,7 +341,7 @@ class DemoSeeder extends Seeder {
 
         $project->update([
             'product_id'       => $this->product($config['items'][0][0])->id,
-            'description'      => $config['name'].' für '.$company->name,
+            'description'      => $config['name'].' for '.$company->name,
             'lead_probability' => mt_rand(3, 8) / 10,
             'remind_at'        => now()->addDays(mt_rand(5, 14)),
         ]);
@@ -373,7 +373,7 @@ class DemoSeeder extends Seeder {
         $wantsNew  = $this->customerCount() < count(DemoSeederData::customers()) && ($customers->count() < 4 || mt_rand(1, 100) <= 40);
         $company   = $wantsNew ? $this->createCustomer() : $this->faker()->randomElement($customers->all());
         $lead      = $this->createLead($company);
-        $this->comment($lead, 'Erstgespräch geführt, Anforderungen aufgenommen.', $this->user('pm'));
+        $this->comment($lead, 'Initial call held, requirements captured.', $this->user('pm'));
     }
     private function advanceLeads(Carbon $day): void {
         foreach (Project::whereStateIn([self::PREPARED, self::QUOTED])->get() as $project) {
@@ -419,7 +419,7 @@ class DemoSeeder extends Seeder {
             $assignment->update(['hours_planned' => round($estimated * 0.1)]);
         }
         foreach ($devs as $dev) {
-            ($project->addAssignee($dev, self::ROLE_DEVELOPER) ?? $project->assignees()->whereAssignee($dev)->first())
+            ($project->addAssignee($dev, AssignmentRole::DEVELOPER) ?? $project->assignees()->whereAssignee($dev)->first())
                 ->update(['hours_planned' => round($estimated * 0.9 / count($devs))]);
         }
 
@@ -537,7 +537,7 @@ class DemoSeeder extends Seeder {
             $stateId   = $project->state->id;
 
             if ($stateId === self::STARTED && $this->roll($project, 'fail', 18) === 0 && $invested >= $estimated * 0.45) {
-                $this->comment($project, 'Kunde hat das Projekt aus Budgetgründen gestoppt.', $this->user('owner'));
+                $this->comment($project, 'Client stopped the project for budget reasons.', $this->user('owner'));
                 $this->transition($project, self::FAILED);
             } elseif ($stateId === self::HYPER_CARE) {
                 if ($this->daysInState($project, $day) >= 10) {
@@ -622,7 +622,9 @@ class DemoSeeder extends Seeder {
                     'fee'        => Param::get('INVOICE_REMINDER_FEE')->value,
                     'invoice_id' => $invoice->id,
                 ]);
-                $invoice->sendReminder();
+                $invoice->sent      = 1;
+                $invoice->remind_at = now()->addDays((int)Param::get('INVOICE_PAYMENT_DURATION')->value);
+                $invoice->save();
             }
         }
     }
@@ -693,7 +695,7 @@ class DemoSeeder extends Seeder {
                 'state'             => $future ? VacationState::Open : VacationState::Approved,
                 'approved_at'       => $approved,
                 'approved_by_id'    => $approved ? $this->user('owner')->id : null,
-                'comment'           => $length >= 10 ? 'Sommerurlaub' : 'Urlaub',
+                'comment'           => $length >= 10 ? 'Summer vacation' : 'Vacation',
                 'log'               => '',
             ]);
             if (! $future) {
@@ -713,7 +715,7 @@ class DemoSeeder extends Seeder {
             'amount'            => 0,
             'state'             => VacationState::Sick,
             'approved_by_id'    => $this->user('owner')->id,
-            'comment'           => 'Krankmeldung',
+            'comment'           => 'Sick leave',
             'log'               => '',
         ]);
         $this->markAbsent($user, $day, $endsAt);
@@ -810,6 +812,7 @@ class DemoSeeder extends Seeder {
             'BEGIN:VCALENDAR',
             'VERSION:2.0',
             'BEGIN:VEVENT',
+            'UID:'.substr(hash('sha256', $summary), 0, 32).'@nordlicht-software.example.com',
             'SUMMARY:'.$summary,
             $rrule ? 'RRULE:'.$rrule : null,
             'DTSTART;TZID=Europe/Berlin:'.$start->format('Ymd\THis'),
@@ -823,12 +826,12 @@ class DemoSeeder extends Seeder {
         $review   = $this->end->copy()->next(Carbon::FRIDAY)->setTime(13, 0);
         $year     = $this->end->year;
 
-        $event('Jour fixe Team', $jourFixe, $jourFixe->copy()->addMinutes(30), 'FREQ=WEEKLY');
-        $event('Steuerberater Quartalsgespräch', $taxTalk, $taxTalk->copy()->addMinutes(90));
-        $event('Sommerfest Nordlicht', Carbon::create($year, 7, 17, 17), Carbon::create($year, 7, 17, 23));
+        $event('Team stand-up', $jourFixe, $jourFixe->copy()->addMinutes(30), 'FREQ=WEEKLY');
+        $event('Tax advisor quarterly call', $taxTalk, $taxTalk->copy()->addMinutes(90));
+        $event('Nordlicht summer party', Carbon::create($year, 7, 17, 17), Carbon::create($year, 7, 17, 23));
         $event('Messe IT-Tage Nord', $fair, $fair->copy()->addDay()->setTime(18, 0));
-        $event('Quartalsreview Projekte', $review, $review->copy()->addHours(2));
-        $event('Weihnachtsfeier', Carbon::create($year, 12, 11, 18), Carbon::create($year, 12, 11, 23));
+        $event('Quarterly project review', $review, $review->copy()->addHours(2));
+        $event('Christmas party', Carbon::create($year, 12, 11, 18), Carbon::create($year, 12, 11, 23));
     }
 
     // -------------------------------------------------------------------------

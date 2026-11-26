@@ -1,4 +1,4 @@
-import { inject, LOCALE_ID, Pipe, PipeTransform } from '@angular/core';
+import { Pipe, PipeTransform } from '@angular/core';
 
 const UNITS: [Intl.RelativeTimeFormatUnit, number][] = [
     ['year', 31536000],
@@ -14,10 +14,8 @@ const UNITS: [Intl.RelativeTimeFormatUnit, number][] = [
     name: 'relativeTime',
 })
 export class RelativeTimePipe implements PipeTransform {
-    #locale = inject(LOCALE_ID);
-
     transform(value: string | Date | null | undefined): string {
-        return value ? RelativeTimePipe.format(value, this.#locale) : '';
+        return value ? RelativeTimePipe.format(value, ($localize.locale ?? 'en').startsWith('de') ? 'de' : 'en') : '';
     }
 
     static format = (value: string | Date, locale: string): string => {

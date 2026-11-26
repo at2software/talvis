@@ -1,7 +1,8 @@
-import { ChangeDetectionStrategy, Component, ElementRef, effect, input, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, effect, input, untracked, viewChild } from '@angular/core';
 import { Dictionary } from '@constants/constants';
 
 import { CategoryBreakdownDto } from '@models/_core/api-response';
+import { injectChartPalette } from '@charts/echarts-theme';
 
 @Component({
     selector: 'debrief-radar-chart',
@@ -22,6 +23,7 @@ export class DebriefRadarChartComponent {
     height = input<string>('200px');
 
     protected readonly canvasRef = viewChild.required<ElementRef<HTMLCanvasElement>>('canvas');
+    #palette = injectChartPalette();
 
     readonly #severityColors: Dictionary<string> = {
         low: '#888888',
@@ -42,6 +44,7 @@ export class DebriefRadarChartComponent {
     constructor() {
         effect((onCleanup) => {
             const canvas = this.canvasRef().nativeElement;
+            this.#palette(); // redraw on theme change
 
             const observer = new ResizeObserver(() => this.#draw());
             observer.observe(canvas);
@@ -83,7 +86,7 @@ export class DebriefRadarChartComponent {
     }
 
     #drawRings(ctx: CanvasRenderingContext2D, cx: number, cy: number, maxRadius: number) {
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+        ctx.strokeStyle = untracked(this.#palette).ink(0.1);
         ctx.lineWidth = 1;
 
         for (let i = 1; i <= 5; i++) {
@@ -94,9 +97,10 @@ export class DebriefRadarChartComponent {
     }
 
     #drawAxes(ctx: CanvasRenderingContext2D, cx: number, cy: number, maxRadius: number, categoryNames: string[], angleStep: number) {
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+        const palette = untracked(this.#palette);
+        ctx.strokeStyle = palette.ink(0.15);
         ctx.lineWidth = 1;
-        ctx.fillStyle = '#adb5bd';
+        ctx.fillStyle = palette.dark ? '#adb5bd' : palette.textMuted;
         ctx.font = '11px sans-serif';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';

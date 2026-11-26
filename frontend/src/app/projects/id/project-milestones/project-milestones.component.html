@@ -56,10 +56,10 @@
                         @for (m of milestoneList(); track m.id) {
                             @let _state = stateInfo(m.state);
                             <li class="list-group-item hstack gap-3" [nx]="m" [tables]="milestoneList()" (actionsResolved)="loadMilestones()">
-                                <i [class]="_state.textClass" [ngbTooltip]="_state.name">{{ m.state === 2 ? 'check_circle' : m.state === 1 ? 'timelapse' : 'radio_button_unchecked' }}</i>
+                                <i [class]="_state.textClass" [ngbTooltip]="_state.name">{{ _state.icon }}</i>
                                 <span class="flex-fill text-truncate">{{ m.name }}</span>
                                 @if (m.started_at && m.due_at) {
-                                    <span class="small text-nowrap" [class.text-danger]="isOverdue(m)" [class.text-muted]="!isOverdue(m)">{{ m.started_at | date: 'dd.MM.' }} – {{ m.due_at | date: 'dd.MM.yyyy' }}</span>
+                                    <span class="small text-nowrap" [class.text-danger]="m.isOverdue()" [class.text-muted]="!m.isOverdue()">{{ m.started_at | date: 'dd.MM.' }} – {{ m.due_at | date: 'dd.MM.yyyy' }}</span>
                                 }
                                 @if (m.workload_hours) {
                                     <span class="small text-muted text-nowrap">{{ m.workload_hours | number: '1.0-1' }} h</span>

@@ -15,7 +15,9 @@ export class TouchpointFormComponent {
     channelLocked = input(false);
     withRetry = input(true);
     busy = input(false);
+    hasNextTask = input(false);
     submitted = output<TouchpointPayloadDto>();
+    submittedForNextTask = output<TouchpointPayloadDto>();
 
     readonly channels = MarketingTouchpoint.CHANNELS;
     readonly outcomes = MarketingTouchpoint.OUTCOMES;
@@ -31,15 +33,16 @@ export class TouchpointFormComponent {
     showRetry = computed(() => this.withRetry() && (MarketingTouchpoint.ATTEMPTS.includes(this.result()!) || this.outcome() === 'callback'));
     canSubmit = computed(() => !!this.result() && (this.result() !== 'connected' || !!this.outcome()) && !this.busy());
 
-    submit() {
+    submit(forNextTask = false) {
         if (!this.canSubmit()) return;
-        this.submitted.emit({
+        const payload: TouchpointPayloadDto = {
             channel: this.channel(),
             result: this.result()!,
             outcome: this.showOutcome() ? (this.outcome() ?? null) : null,
             notes: this.notes().trim() || null,
             retry_at: this.showRetry() ? this.retryAt() : null,
-        });
+        };
+        (forNextTask ? this.submittedForNextTask : this.submitted).emit(payload);
     }
 
     reset() {

@@ -22,6 +22,16 @@ enum InvoiceItemType: int {
     public const array ProjectTotal          = [self::Default, self::Discount];
     public const array ProjectTotalRemaining = [self::Default, self::Discount, self::Paydown, self::Instalment];
 
+    public function perYear(): int {
+        return match ($this) {
+            self::Daily     => 365,
+            self::Weekly    => 52,
+            self::Monthly   => 12,
+            self::Quarterly => 4,
+            self::Yearly    => 1,
+            default         => 0,
+        };
+    }
     public static function asArray(): array {
         return array_column(self::cases(), 'value', 'name');
     }

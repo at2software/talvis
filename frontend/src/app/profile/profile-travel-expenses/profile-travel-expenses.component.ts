@@ -128,7 +128,7 @@ export class ProfileTravelExpensesComponent {
             days: this.days,
             expenses: this.expenses,
         };
-        dragDrop.formData.append('data', JSON.stringify(data));
+        dragDrop.formData.set('data', JSON.stringify(data));
         this.fileService.uploadTravelExpenses(dragDrop.formData, () => dragDrop.clear());
     }
 

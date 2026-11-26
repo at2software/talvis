@@ -165,13 +165,13 @@
                                             }
                                         </td>
                                         <td class="text-end">
-                                            <small class="text-nowrap" [class.text-danger]="isActivityOverdue(activity)">
+                                            <small class="text-nowrap" [class.text-danger]="activity.isOverdue()">
                                                 {{ activity.scheduled_at | date: 'shortDate' }}
                                             </small>
                                         </td>
 
                                         <td>
-                                            <div class="status {{ isActivityOverdue(activity) ? 'status-red' : 'status-dark-grey' }} m-0 p-0" ngbTooltip="{{ activity.status }}"></div>
+                                            <div class="status {{ activity.isOverdue() ? 'status-red' : 'status-dark-grey' }} m-0 p-0" ngbTooltip="{{ activity.status }}"></div>
                                         </td>
                                     </tr>
                                 }

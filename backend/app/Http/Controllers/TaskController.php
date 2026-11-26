@@ -60,7 +60,7 @@ class TaskController extends Controller {
     }
     public function assign(Request $request, Project $_, Task $task) {
         $data                = $request->validate(['user_id' => 'required|integer|exists:users,id']);
-        $task->assignment_id = $_->assignees()->where('assignee_type', User::class)->where('assignee_id', $data['user_id'])->firstOrFail()->id;
+        $task->assignment_id = $_->assignees()->whereUserAssignee($data['user_id'])->firstOrFail()->id;
         $task->save();
         return $task;
     }

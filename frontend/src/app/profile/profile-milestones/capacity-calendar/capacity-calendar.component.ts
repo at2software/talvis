@@ -2,11 +2,10 @@ import { ChangeDetectionStrategy, Component, DestroyRef, ElementRef, computed, i
 import { DecimalPipe } from '@angular/common';
 import { NgbPopover, NgbPopoverModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { CdkDropList, CdkDragDrop } from '@angular/cdk/drag-drop';
-import { dayjs, Dayjs } from '@constants/date/dates';
+import { dayjs, Dayjs, shortMonth } from '@constants/date/dates';
 import { Color } from '@constants/Color';
 import { AvatarComponent } from '@shards/avatar/avatar.component';
 import { Milestone } from '@models/milestone/milestone.model';
-import { MilestoneState } from '@models/milestone/milestone-state.enum';
 import { CalendarEventDto, DailyWorkloadDto, DailyWorkloadElementDto, WorkloadDataDto } from '@models/_core/api-response';
 import { Nx } from '@app/nx/nx.directive';
 
@@ -99,7 +98,7 @@ export class CapacityCalendarComponent {
 
     readonly overdueMilestones = computed<Milestone[]>(() => {
         const startDate = dayjs(this.workloadData().start_date);
-        return this.milestones().filter((m) => m.due_at && dayjs(m.due_at).isBefore(startDate, 'day') && this.isMilestoneOverdue(m));
+        return this.milestones().filter((m) => m.due_at && dayjs(m.due_at).isBefore(startDate, 'day') && m.isOverdue());
     });
 
     dropListId = (day: DailyWorkloadDto): string => `capacity-day-${day.date}`;
@@ -120,17 +119,9 @@ export class CapacityCalendarComponent {
     barLeft = (bar: BarSegment): string => `${(bar.startCol / this.columns()) * 100}%`;
     barWidth = (bar: BarSegment): string => `${(bar.span / this.columns()) * 100}%`;
 
-    isMilestoneDone = (milestone: Milestone): boolean => milestone.state === MilestoneState.DONE;
-    isMilestoneOverdue = (milestone: Milestone): boolean => !this.isMilestoneDone(milestone) && !!milestone.due_at && dayjs().isAfter(milestone.due_at, 'day');
-    /** Still TODO although the planned start date has already passed. */
-    isMilestoneLateStart = (milestone: Milestone): boolean =>
-        milestone.state === MilestoneState.TODO && !this.isMilestoneOverdue(milestone) && !!milestone.started_at && dayjs().isAfter(milestone.started_at, 'day');
-    /** TODO and its planned start date hasn't arrived yet. */
-    isMilestoneNotStarted = (milestone: Milestone): boolean => milestone.state === MilestoneState.TODO && !this.isMilestoneLateStart(milestone) && !this.isMilestoneOverdue(milestone);
-
     milestoneTooltip = (milestone: Milestone): string => {
-        if (this.isMilestoneOverdue(milestone)) return $localize`:@@i18n.planner.milestoneOverdue:${milestone.name} — overdue`;
-        if (this.isMilestoneLateStart(milestone)) return $localize`:@@i18n.planner.milestoneLateStart:${milestone.name} — not started yet, planned start date has passed`;
+        if (milestone.isOverdue()) return $localize`:@@i18n.planner.milestoneOverdue:${milestone.name} — overdue`;
+        if (milestone.isLateStart()) return $localize`:@@i18n.planner.milestoneLateStart:${milestone.name} — not started yet, planned start date has passed`;
         return milestone.name;
     };
 
@@ -280,7 +271,7 @@ export class CapacityCalendarComponent {
                 if (i === 0) {
                     const monthName = day.format('MMM YYYY');
                     if (monthName !== currentMonth) {
-                        monthLabel = day.format('MMM');
+                        monthLabel = shortMonth(day);
                         currentMonth = monthName;
                     }
                 }

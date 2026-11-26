@@ -19,32 +19,25 @@ class MilestoneController extends Controller {
     }
     public function indexOverview(Request $request) {
         $unassigned = Milestone::whereNull('user_id')
-            ->where('state', '!=', MilestoneState::DONE)
+            ->open()
             ->whereHas('project', fn ($q) => $q->whereRunning())
             ->with(['project:id,name,company_id', 'project.company', 'project.assignees'])
             ->orderBy('due_at')
             ->get();
 
-        $overdue = Milestone::where('state', MilestoneState::TODO)
-            ->where('started_at', '<', now()->startOfDay())
+        $overdue = Milestone::needsStart()
             ->whereHas('project', fn ($q) => $q->whereRunning())
             ->with(['project:id,name,company_id', 'project.company', 'user'])
             ->orderBy('started_at')
             ->get();
 
-        $noWorkload = Milestone::where('state', '!=', MilestoneState::DONE)
-            ->where(function ($q) {
-                $q->whereNull('workload_hours')->orWhere('workload_hours', 0);
-            })
-            ->whereDoesntHave('invoiceItems')
+        $noWorkload = Milestone::unconfigured()
             ->whereHas('project', fn ($q) => $q->whereRunning())
             ->with(['project:id,name,company_id', 'project.company', 'user'])
             ->orderBy('due_at')
             ->get();
 
-        $projects = Project::whereRunning()
-            ->where('is_time_based', false)
-            ->where('company_id', '!=', Param::get('ME_ID')->value)
+        $projects = Project::whereNeedsMilestoneCoverage()
             ->with([
                 'company',
                 'milestones' => fn ($q) => $q->with('invoiceItems'),
@@ -52,17 +45,7 @@ class MilestoneController extends Controller {
             ->get()
             ->map(function ($project) {
                 $estimatedHours = $project->work_estimated ?? 0;
-
-                $milestoneHours = $project->milestones->sum(function ($milestone) {
-                    if ($milestone->workload_hours !== null && $milestone->workload_hours > 0) {
-                        return $milestone->workload_hours;
-                    }
-                    return $milestone->invoiceItems->sum(fn ($item) => $item->assumedWorkload());
-                });
-
-                $deviation = $estimatedHours > 0
-                    ? round((($milestoneHours - $estimatedHours) / $estimatedHours) * 100, 1)
-                    : ($milestoneHours > 0 ? 100 : 0);
+                $milestoneHours = $project->milestoneHours();
                 return [
                     'id'               => $project->id,
                     'icon'             => $project->icon,
@@ -71,7 +54,7 @@ class MilestoneController extends Controller {
                     'company_name'     => $project->company->name ?? '',
                     'estimated_hours'  => round($estimatedHours, 1),
                     'milestone_hours'  => round($milestoneHours, 1),
-                    'deviation'        => $deviation,
+                    'deviation'        => $project->milestoneDeviation(),
                     'milestone_count'  => $project->milestones->count(),
                     'missing_coverage' => $estimatedHours > 0 && $milestoneHours == 0,
                 ];
@@ -97,9 +80,9 @@ class MilestoneController extends Controller {
     public function index(Request $request) {
         $userId   = $request->user()->id;
         $response = [
-            'overdue'     => Milestone::where('user_id', $userId)->whereState(1)->with('project')->whereBefore(now(), 'due_at')->get(),
-            'needs_start' => Milestone::where('user_id', $userId)->whereState(0)->with('project')->whereBefore(now(), 'started_at')->get(),
-            'running'     => Milestone::where('user_id', $userId)->whereState(1)->with('project')->whereAfter(now(), 'due_at')->get(),
+            'overdue'     => Milestone::where('user_id', $userId)->overdue()->with('project')->get(),
+            'needs_start' => Milestone::where('user_id', $userId)->needsStart()->with('project')->get(),
+            'running'     => Milestone::where('user_id', $userId)->where('state', MilestoneState::IN_PROGRESS)->with('project')->whereDate('due_at', '>=', today())->get(),
         ];
         return $response;
     }
@@ -116,7 +99,7 @@ class MilestoneController extends Controller {
 
         $duration = $estimatedHours;
 
-        $estimatedDays = ceil($estimatedHours / $hoursPerDay);
+        $estimatedDays = ceil($invoiceItem->estimatedDays());
 
         $updateData = [];
         if (! $milestone->duration || $milestone->duration < $duration) {
@@ -250,11 +233,7 @@ class MilestoneController extends Controller {
         ]);
     }
     public function destroy(Milestone $milestone) {
-        $milestone->dependees()->detach();
-        $milestone->dependants()->detach();
-
-        $milestone->invoiceItems()->detach();
-
+        $milestone->detachAll();
         $milestone->delete();
         return response()->json([
             'message'    => 'Milestone deleted successfully',
@@ -274,12 +253,7 @@ class MilestoneController extends Controller {
             ]);
         }
 
-        foreach ($milestones as $milestone) {
-            $milestone->dependees()->detach();
-            $milestone->dependants()->detach();
-
-            $milestone->invoiceItems()->detach();
-        }
+        $milestones->each(fn (Milestone $milestone) => $milestone->detachAll());
 
         $project->milestones()->delete();
         return response()->json([

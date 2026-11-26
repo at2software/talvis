@@ -119,6 +119,11 @@
                     </div>
                     } }
                     <div class="hstack gap-2 mt-2">
+                        <ng-container roles="project_manager|marketing">
+                            <button type="button" class="btn btn-sm btn-plain hover-primary flex-fill d-flex align-items-center justify-content-center" [class.text-warning]="_company.is_key_account" [class.text-muted]="!_company.is_key_account" (click)="_company.update({is_key_account: !_company.is_key_account}).subscribe()" [ngbTooltip]="_company.is_key_account ? keyAccountOn : keyAccountOff" placement="bottom">
+                                <i>star</i>
+                            </button>
+                        </ng-container>
                         <ng-container roles="financial">
                             <button type="button" class="btn btn-sm btn-plain hover-primary flex-fill d-flex align-items-center justify-content-center" [class.text-danger]="_company.is_deprecated" [class.text-muted]="!_company.is_deprecated" (click)="_company.update({is_deprecated: !_company.is_deprecated}).subscribe()" [ngbTooltip]="_company.is_deprecated ? 'Customer is deprecated and ignored for maintenance checks' : 'Customer is active for maintenance checks'" placement="bottom">
                                 <i>block</i>
@@ -198,7 +203,7 @@
                                         <span class="ms-auto font-monospace">{{_mlRevenue | money}}</span>
                                     </div>
                                     }
-                                    <div class="hstack gap-3 mt-1" style="border-top: 1px solid rgba(255, 255, 255, 0.15); padding-top: 4px">
+                                    <div class="hstack gap-3 mt-1" style="border-top: 1px solid rgba(var(--tv-ink-rgb), 0.15); padding-top: 4px">
                                         <span class="text-muted">Δ</span>
                                         <span class="ms-auto font-monospace" [class.text-success]="_forecastUp" [class.text-danger]="!_forecastUp"> {{_forecastChange | percent:'1.0-0'}} </span>
                                     </div>

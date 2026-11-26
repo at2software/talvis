@@ -72,13 +72,13 @@
     }
 
     &.today {
-        outline: 2px solid #fff;
+        outline: 2px solid var(--tv-text-strong);
         outline-offset: -1px;
     }
 }
 
 .workload-empty {
-    background-color: #333;
+    background-color: var(--tv-heatmap-empty);
 }
 
 .workload-green {
@@ -104,10 +104,10 @@
 .workload-break {
     background: repeating-linear-gradient(
         45deg,
-        #444,
-        #444 2px,
-        #333 2px,
-        #333 4px
+        var(--tv-heatmap-break),
+        var(--tv-heatmap-break) 2px,
+        var(--tv-heatmap-empty) 2px,
+        var(--tv-heatmap-empty) 4px
     );
 }
 
@@ -162,7 +162,7 @@
         align-items: center;
         gap: 4px;
         padding: 4px;
-        background: rgba(255, 255, 255, 0.05);
+        background: rgba(var(--tv-ink-rgb), 0.05);
         border-radius: var(--bs-border-radius);
 
         a {

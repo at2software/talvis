@@ -12,6 +12,7 @@ use App\Models\MarketingProspect;
 use App\Models\MarketingProspectActivity;
 use App\Models\Vcard;
 use App\Services\MarketingDashboardService;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -110,9 +111,9 @@ class MarketingProspectController extends Controller {
         ]);
     }
     public function postponeProspectActivities(Request $request, MarketingProspect $marketingProspect) {
-        $validated = $request->validate(['days' => 'required|integer|min:1|max:365']);
+        $validated = $request->validate(['until' => 'required|date']);
 
-        $success = $marketingProspect->postponeActivities($validated['days']);
+        $success = $marketingProspect->postponeActivities(Carbon::parse($validated['until']));
 
         if (! $success) {
             return response()->json(['error' => 'No pending activities to postpone'], 422);

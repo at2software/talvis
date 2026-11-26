@@ -48,9 +48,9 @@
                     <col style="width: 60px" />
                 </colgroup>
                 @for (_ of grant.vacations; track _.track_id) {
-                <tr [nx]="_" [tables]="grant.vacations" [class.text-decoration-line-through]="[2, 4].contains(_.state)"
-                    (actionsResolved)="reload()" [class.text-dark-grey]="_.state === 2"
-                    [class.text-warning]="_.state === 0">
+                <tr [nx]="_" [tables]="grant.vacations" [class.text-decoration-line-through]="_.isDeniedOrCancelled()"
+                    (actionsResolved)="reload()" [class.text-dark-grey]="_.isDenied()"
+                    [class.text-warning]="_.isRequested()">
                     <td class="text-muted small ps-2 text-truncate">{{ _.started_at | date: 'dd.MM.yyyy' }}</td>
                     <td class="text-muted small text-truncate">{{ _.ended_at | date: 'dd.MM.yyyy' }}</td>
                     <td class="flex-fill text-truncate">

@@ -4,10 +4,54 @@
     display: block;
     height: 100%;
 }
-network-chart {
+.network-stage {
     position: fixed;
-    left: 0;
-    top: var.$header-height;
-    right: 0;
-    bottom: 0;
+    inset: var.$header-height var(--tv-activity-offset) 0 var(--tv-modules-width);
+    z-index: 1;
+}
+network-chart {
+    position: absolute;
+    inset: 0;
+}
+.network-selection {
+    position: absolute;
+    left: 16px;
+    bottom: 16px;
+    width: 280px;
+    z-index: 2;
+}
+.network-legend {
+    position: absolute;
+    right: 16px;
+    bottom: 16px;
+    width: 230px;
+    max-height: calc(100% - 32px);
+    overflow-y: auto;
+    z-index: 2;
+    .list-group-item {
+        padding: 0.3rem 0.75rem;
+    }
+}
+.legend-line {
+    display: inline-block;
+    width: 18px;
+    height: 3px;
+    border-radius: 2px;
+    background: var(--tv-grid-line);
+    &.dashed {
+        background: repeating-linear-gradient(90deg, var(--tv-accent-red) 0 4px, transparent 4px 7px) !important;
+    }
+}
+.legend-dot {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    &.key-ring {
+        border: 2px solid var(--tv-accent-yellow);
+    }
+    &.sizes {
+        background: radial-gradient(circle, var(--tv-text-strong) 35%, transparent 36%), radial-gradient(circle, var(--tv-text-dim) 70%, transparent 71%);
+    }
 }

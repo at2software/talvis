@@ -22,6 +22,10 @@ export abstract class ChatPluginInstance extends PluginInstance implements IChat
     getRootInstance = (): ChatPluginInstance => (this.baseInstance as ChatPluginInstance) ?? this;
     getUser = (userId: string): User | undefined => (userId in this.getRootInstance().users ? this.getRootInstance().users[userId] : undefined);
     getUsers = (): User[] => Object.values(this.getRootInstance().users);
+    mention = (chatUserId: string): string | undefined => {
+        const username = this.getUser(chatUserId)?.var.username as string | undefined;
+        return username ? `@${username}` : undefined;
+    };
     abstract setChannelName: (data: unknown) => void;
 
     getHref = () => this._baseUrl;

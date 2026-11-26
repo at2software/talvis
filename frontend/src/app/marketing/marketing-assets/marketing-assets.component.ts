@@ -73,7 +73,9 @@ export class MarketingAssetsComponent {
         this.#allAssets.reload();
     }
 
-    onDropOnGrid() {}
+    onDropOnGrid() {
+        // Dropping back onto the grid is a no-op; the list only acts as a drag source for the categories.
+    }
 
     onDropOnCategory(event: CdkDragDrop<File[]>, categoryName: string) {
         if (event.previousContainer === event.container) return;

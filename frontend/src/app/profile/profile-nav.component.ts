@@ -33,5 +33,5 @@ export class ProfileNavComponent {
         }
     };
 
-    onDndUploaded = () => window.location.reload();
+    onDndUploaded = (responses: unknown[]) => this.global.user?.applyAvatarUpload(responses);
 }

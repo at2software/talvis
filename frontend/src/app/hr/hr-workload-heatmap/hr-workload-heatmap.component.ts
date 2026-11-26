@@ -5,7 +5,7 @@ import { NgbPopoverModule } from '@ng-bootstrap/ng-bootstrap';
 import { RouterModule } from '@angular/router';
 import { User } from '@models/user/user.model';
 import { UserService } from '@models/user/user.service';
-import { dayjs } from '@constants/date/dates';
+import { dayjs, shortMonth } from '@constants/date/dates';
 import { Nx } from '@app/nx/nx.directive';
 import { AvatarComponent } from '@shards/avatar/avatar.component';
 import { CompactItemDirective } from '@shards/ul-compact/CompactItemDirective';
@@ -71,7 +71,7 @@ export class HrWorkloadHeatmapComponent {
                 if (i === 0) {
                     const monthName = day.format('MMM YYYY');
                     if (monthName !== currentMonth) {
-                        monthLabel = day.format('MMM');
+                        monthLabel = shortMonth(day);
                         currentMonth = monthName;
                     }
                 }

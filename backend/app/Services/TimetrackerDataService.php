@@ -27,7 +27,7 @@ class TimetrackerDataService {
                 }
                 $_->latest_focus       = $_->latest_focus ? $_->latest_focus->only(['started_at', 'comment']) : null;
                 $_->is_project         = true;
-                $_->needs_progress_bar = ! $_->is_time_based && ! $_->is_internal;
+                $_->needs_progress_bar = $_->isBudgetBased();
                 $_->target             = self::TARGET_PROJECT;
                 if (! $_->is_time_based) {
                     $_->items = $_->invoiceItems()->whereType(InvoiceItemType::Default)->with('milestones:id,state,name,started_at')->get()

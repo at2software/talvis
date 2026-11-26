@@ -90,7 +90,7 @@ export class InvoicePrepare {
             this.#invoiceService.getInvoiceItems(this.parent(), { append: 'my_prediction', with: 'predictions' }).pipe(
                 map((items) => {
                     const stage = this.stageFilter();
-                    const filtered = stage === undefined ? items : items.filter((item) => item.stage === stage && !item.invoice_id);
+                    const filtered = stage === undefined ? items : items.filter((item) => item.isOpenInStage(stage));
                     return filtered.sort((a, b) => a.position - b.position);
                 }),
             ),

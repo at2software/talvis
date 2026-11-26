@@ -55,7 +55,7 @@ class CompanyCalendar {
 
     private function absences() {
         return Vacation::with('user')
-            ->whereIn('state', [VacationState::Approved, VacationState::Sick])
+            ->absences()
             ->where('amount', '<=', 0)
             ->where(fn ($query) => $query->where('state', VacationState::Approved)->orWhere('ended_at', '>=', Carbon::tomorrow()));
     }

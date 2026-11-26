@@ -4,7 +4,7 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
 import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { IActivityBase } from '@models/marketing/activity-base.interface';
 import { MarketingPerformanceMetric } from '@models/marketing/marketing-performance-metrics.model';
-import { Dictionary } from '@constants/constants';
+import { MarketingActivity } from '@models/marketing/marketing-activity.model';
 import { StackedTableDirective } from '@directives/stacked-table.directive';
 
 @Component({
@@ -21,7 +21,7 @@ export class ActivityTableComponent {
     activityClicked = output<IActivityBase>();
     progressBar = input(true);
 
-    readonly STATS_COLORS = { completed: 'bg-success', overdue: 'bg-danger', skipped: 'bg-purple', pending: 'bg-dark-grey' };
+    readonly STATS_COLORS = MarketingActivity.STATS_COLORS;
 
     hoveredActivityId: string | null = null;
 
@@ -78,25 +78,8 @@ export class ActivityTableComponent {
         return metrics.map((m) => m.name).join(', ');
     }
 
-    formatQuickAction(action: string): string {
-        const labels: Dictionary<string> = {
-            EMAIL: 'Email',
-            LINKEDIN: 'LinkedIn',
-            LINKEDIN_SEARCH: 'LinkedIn Search',
-            CALL: 'Phone Call',
-        };
-        return labels[action] || action.replace(/_/g, ' ');
-    }
-
-    getQuickActionIcon(action: string): string {
-        const icons: Dictionary<string> = {
-            EMAIL: 'email',
-            LINKEDIN: 'open_in_new',
-            LINKEDIN_SEARCH: 'search',
-            CALL: 'phone',
-        };
-        return icons[action] || '';
-    }
+    formatQuickAction = MarketingActivity.quickActionLabel;
+    getQuickActionIcon = MarketingActivity.quickActionIcon;
 
     onActivityClick(activity: IActivityBase) {
         this.activityClicked.emit(activity);

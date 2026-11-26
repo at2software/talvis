@@ -35,6 +35,10 @@ class HandleProjectStateTransitionAction {
         ]);
         $project = $project->fresh('states');
 
+        if ((int)$from?->id === ProjectState::HyperCare && (int)$to->id !== ProjectState::HyperCare) {
+            $project->stopSubscriptions();
+        }
+
         event(new ProjectStateTransitioned($project, $from, $to, $actor, $reason));
         return $project;
     }
@@ -54,8 +58,12 @@ class HandleProjectStateTransitionAction {
                     $item->update(['next_recurrence_at' => now()]);
                 }
             });
+            $project->postponeReminderByEstimate();
 
-            Comment::create([...$project->toPoly(), 'text' => $stateChangeMessage, 'user_id' => $userId, 'is_mini' => true, 'type' => CommentType::Info]);
+            $orchestrated = $project->isOrchestrated();
+            if (! $orchestrated) {
+                Comment::create([...$project->toPoly(), 'text' => $stateChangeMessage, 'user_id' => $userId, 'is_mini' => true, 'type' => CommentType::Info]);
+            }
 
             if (! config('app.debug')) {
                 $props        = ChatProps::sender($name, $icon);
@@ -63,12 +71,12 @@ class HandleProjectStateTransitionAction {
                 $featuresText = PHP_EOL.'#### Bestellte Features:'.PHP_EOL;
                 $featuresText .= $project->orderedFeatures->map(fn ($item) => "* [ ] $item->text ($item->qty $item->unit_name)")->implode(PHP_EOL);
 
-                Bus::chain([
+                Bus::chain(array_values(array_filter([
                     new ChatGetOrCreateChannelJob($project),
                     new ChatAddUsersJob($project, $userIds),
-                    new ChatSendMessageJob($stateChangeMessage, $props, channelEnvKey: 'TOWN_SQUARE', appendProjectIcon: true),
+                    $orchestrated ? null : new ChatSendMessageJob($stateChangeMessage, $props, channelEnvKey: 'TOWN_SQUARE', appendProjectIcon: true),
                     new ChatSendMessageJob($featuresText, $props, $project, imagePath: 'images/projekt_gestartet.png'),
-                ])->dispatch();
+                ])))->dispatch();
             }
         }
 

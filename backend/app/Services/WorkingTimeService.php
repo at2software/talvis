@@ -53,7 +53,7 @@ class WorkingTimeService {
         $vacations    = $payload['vacation_start']
             ->concat($payload['vacation_end'])
             ->unique('id')
-            ->whereIn('state', [VacationState::Approved, VacationState::Sick]);
+            ->whereIn('state', VacationState::Absences);
         foreach ($vacations as $vacation) {
             if (! $vacation->started_at || ! $vacation->ended_at) {
                 continue;

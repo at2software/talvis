@@ -64,6 +64,7 @@ export abstract class PluginInstance extends HttpWrapper implements IPlugin {
     getRootInstance = (): PluginInstance => this.baseInstance ?? this;
     isRootInstance = (): boolean => (this.baseInstance ? false : true);
     canCreateTasks = (): boolean => false;
+    canConnect = (): boolean => this.state !== 'no token' && this.state !== 'connection fail';
 
     protected fetchAllPages = <T>(requestPage: (page: number) => Observable<T[]>, pageSize: number, maxPages = 10): Observable<T[]> =>
         requestPage(1).pipe(

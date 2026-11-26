@@ -16,6 +16,10 @@ final class ChatProps {
         ]);
     }
 
+    public static function icon(string $file): string {
+        return config('app.api_url').'../icons/'.$file;
+    }
+
     /** @return ChatAttachment */
     public static function attachment(string $text, ?string $author = null, ?string $color = null): array {
         return array_filter([

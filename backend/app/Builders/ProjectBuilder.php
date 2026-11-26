@@ -2,8 +2,11 @@
 
 namespace App\Builders;
 
+use App\Enums\InvoiceItemType;
+use App\Models\Param;
 use App\Models\Project;
 use App\Models\ProjectState;
+use App\Models\User;
 use App\Traits\HasParamsBuilder;
 use Illuminate\Support\Facades\DB;
 
@@ -50,6 +53,9 @@ class ProjectBuilder extends BaseBuilder {
     public function whereIsTimeBased() {
         return $this->whereNot('is_internal', true)->where('is_time_based', true);
     }
+    public function whereActiveTimeBased() {
+        return $this->wherePreparedOrRunning()->whereIsTimeBased();
+    }
     public function onlyFinished() {
         return $this->whereHas('latestState', fn ($_) => $_->where('progress', ProjectState::Finished));
     }
@@ -83,7 +89,28 @@ class ProjectBuilder extends BaseBuilder {
     public function statsKeyVal() {
         return $this->withItems()->select(DB::raw("DATE_FORMAT(projects.created_at, '%Y-%m') AS `key`"), DB::raw('SUM(invoice_items.net) AS `value`'));
     }
+    public function whereAssignedTo(User $user) {
+        return $this->whereHas('assignees', fn ($q) => $q->whereAssignee($user));
+    }
+    public function whereManagedBy(User $user) {
+        return $this->where('project_manager_id', $user->id);
+    }
+    public function whereMineRequest() {
+        $user = request()->user();
+        return $this
+            ->when(request('only-mine') === 'true', fn ($q) => $q->whereAssignedTo($user))
+            ->when(request('only-mine-as-pm') === 'true', fn ($q) => $q->whereManagedBy($user));
+    }
+    public function whereExternal() {
+        return $this->where('company_id', '!=', Param::get('ME_ID')->value);
+    }
+    public function whereNeedsMilestoneCoverage() {
+        return $this->whereRunning()->where('is_time_based', false)->whereExternal();
+    }
     public function whereHasSupportItems() {
-        return $this->whereRunning()->where('is_time_based', true)->where('is_internal', false)->whereHas('supportItems');
+        return $this->whereRunning()
+            ->where('is_internal', false)
+            ->where(fn ($q) => $q->where('is_time_based', true)->orWhereHas('invoiceItems', fn ($q) => $q->whereIn('type', InvoiceItemType::Repeating)))
+            ->whereHas('supportItems');
     }
 }

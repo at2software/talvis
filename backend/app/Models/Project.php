@@ -14,7 +14,9 @@ use App\Casts\Precomputed;
 use App\Casts\PrecomputedAuth;
 use App\Collections\ProjectCollection;
 use App\Enums\InvoiceItemType;
+use App\Http\Controllers\PluginMattermostController;
 use App\Queries\FociTimelineQuery;
+use App\Support\ProjectOrchestrator;
 use App\Traits\CanMakeInvoiceTrait;
 use App\Traits\HasAssignmentsTrait;
 use App\Traits\HasAvatarProjection;
@@ -58,6 +60,18 @@ class Project extends BaseModel {
             (float)FloatParam::where('param_id', $param->id)->max('value')
         );
         return (int)ceil($years * 12);
+    }
+    public static function getAllFinishedWithUnbilledItems() {
+        return self::whereFinishedSuccessfull()
+            ->where('is_ignored_from_prepared', false)
+            ->whereHas('unbilledInvoiceItems')
+            ->withSum('unbilledInvoiceItems as net_remaining', 'net')
+            ->with(['unbilledInvoiceItems' => function ($q) {
+                $q->select('id', 'company_id', 'project_id', 'created_at', 'net', 'type')
+                    ->orderBy('created_at', 'asc')
+                    ->limit(1);
+            }])
+            ->get();
     }
     public static function incrementQuoteNumber(): void {
         Param::incrementNumber('QUOTE_NO_CURRENT');
@@ -256,6 +270,31 @@ class Project extends BaseModel {
     public function company() {
         return $this->belongsTo(Company::class);
     }
+
+    /** @return list<array{title: string, hint: string, icon: string, url: string}> */
+    public function chatHeaderLinks(): array {
+        $talvis = rtrim((string)config('app.url'), '/');
+        return [
+            ['title' => 'TALVIS', 'hint' => "TALVIS: {$this->name}", 'icon' => 'talvis.png', 'url' => "{$talvis}/projects/{$this->id}"],
+            ...$this->pluginLinks
+                ->where('type', '!=', PluginMattermostController::getKey())
+                ->sortBy('id')
+                ->map(fn (PluginLink $link) => ['title' => $link->name ?: $link->type, 'hint' => $link->name ?: $link->type, 'icon' => basename($link->icon), 'url' => $link->url])
+                ->values()
+                ->all(),
+            ...app(ProjectOrchestrator::class)->chatHeaderLinks($this),
+        ];
+    }
+
+    public function isOrchestrated(): bool {
+        return app(ProjectOrchestrator::class)->orchestrates($this);
+    }
+    public function isInHyperCare(): bool {
+        return (int)$this->state?->id === ProjectState::HyperCare;
+    }
+    public function stopSubscriptions(): void {
+        $this->repeatingItems()->whereNotNull('next_recurrence_at')->get()->each(fn (InvoiceItem $item) => $item->update(['next_recurrence_at' => null]));
+    }
     public function connectionProjects() {
         return $this->hasMany(ConnectionProject::class)->with(['connection.company1', 'connection.company2']);
     }
@@ -379,6 +418,9 @@ class Project extends BaseModel {
     public function isTrackable(): bool {
         return $this->state->progress < ProjectState::Finished || $this->isInWarranty();
     }
+    public function isBudgetBased(): bool {
+        return ! $this->is_time_based && ! $this->is_internal;
+    }
     public function cascadingParam(string $key, string $default): string {
         return $this->param($key)->value
             ?: $this->company?->param($key)->value
@@ -392,6 +434,13 @@ class Project extends BaseModel {
     }
     public function postpone(int $duration, ?string $comment = null): static {
         return app(PostponeProjectAction::class)->execute($this, $duration, $comment);
+    }
+    public function postponeReminderByEstimate(): void {
+        $personDays = (int)ceil((float)$this->work_estimated / (float)Param::get('INVOICE_HPD')->value);
+        if ($personDays <= 0) {
+            return;
+        }
+        $this->update(['remind_at' => now()->startOfDay()->addWeekdays($personDays)->toDateTimeString()]);
     }
     public function duplicate(string $name): Project {
         return app(DuplicateProjectAction::class)->execute($this, $name);
@@ -412,8 +461,7 @@ class Project extends BaseModel {
                 Assignment::create([
                     ...$this->toPoly(),
                     ...$assignee->assignee->toPoly('assignee'),
-                    'role_id' => $assignee->role_id,
-                ]);
+                ])->roles()->sync($assignee->role_ids);
             }
         }
         foreach ($parent->pluginLinks()->get() as $link) {
@@ -453,6 +501,20 @@ class Project extends BaseModel {
     }
     public function convertItemsToMilestones(): array {
         return app(ConvertInvoiceItemsToMilestonesAction::class)->execute($this);
+    }
+    public function nextMilestonePosition(): int {
+        return ($this->milestones()->max('position') ?? -1) + 1;
+    }
+    public function milestoneHours(): float {
+        return $this->milestones->sum(fn (Milestone $milestone) => $milestone->plannedHours());
+    }
+    public function milestoneDeviation(): int|float {
+        $estimatedHours = $this->work_estimated ?? 0;
+        $milestoneHours = $this->milestoneHours();
+        if ($estimatedHours > 0) {
+            return round((($milestoneHours - $estimatedHours) / $estimatedHours) * 100, 1);
+        }
+        return $milestoneHours > 0 ? 100 : 0;
     }
     public function newEloquentBuilder($query) {
         return new ProjectBuilder($query);

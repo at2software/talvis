@@ -60,7 +60,7 @@ Open <http://localhost:3200>, sign in with the admin account from `.env`, and le
 
 | Module | What it does |
 |---|---|
-| **CRM** | Company and contact management, relationship mapping, revenue analytics |
+| **CRM** | Company and contact management, company network with typed relationships and key accounts, revenue analytics |
 | **Projects** | Gantt planning, milestone planner with inbox, team and Outlook/iCal calendars and daily workload, tasks, team assignments, budget tracking |
 | **Invoicing** | PDF generation, ZUGFeRD/Factur-X, recurring billing, SEPA direct debit (pain.008), DATEV export, cash flow |
 | **Time Tracking** | Focus sessions, break management, workload heatmaps, billable hours |
@@ -70,7 +70,6 @@ Open <http://localhost:3200>, sign in with the admin account from `.env`, and le
 | **Sentinels** | Visual no-code automation — triggers, conditions, commands |
 | **Uptime Monitoring** | HTTP health checks with alerting via email and team chat |
 | **Security Audits** | Scheduled re-runs of the dependency, container and SAST scan jobs of each deployed GitLab pipeline, reported to team chat |
-| **Project Flow** | Configurable project phases with gates, four-eyes approvals and risk classes; development jobs that AI agents claim through an MCP server |
 | **Integrations** | Mattermost, Slack and Microsoft Teams; issues from GitLab, Mantis, Jira and GitHub; Microsoft 365 calendar, contacts and automatic replies; signed outgoing webhooks for n8n, Make or Zapier |
 | **Calendar** | CalDAV and CardDAV protocol support for universal device sync, subscribable ICS feed for Outlook and Google Calendar |
 
@@ -81,7 +80,7 @@ Open <http://localhost:3200>, sign in with the admin account from `.env`, and le
 <table>
   <tr>
     <td width="50%"><b>Projects</b> — milestone planner and Gantt timeline<br><img src="docs/screenshots/project-overview.webp" alt="Project milestone planner"></td>
-    <td width="50%"><b>Project Flow</b> — phases, jobs and reviews for people and AI agents<br><img src="docs/screenshots/project-flow.webp" alt="Project Flow with jobs in review"></td>
+    <td width="50%"><b>Integrations</b> — GitLab, Mattermost, webhooks and more, configured per connector<br><img src="docs/screenshots/integrations.webp" alt="Integration connectors"></td>
   </tr>
   <tr>
     <td><b>CRM</b> — customer profile with revenue analytics<br><img src="docs/screenshots/customer-profile.webp" alt="Customer profile"></td>
@@ -102,9 +101,6 @@ Open <http://localhost:3200>, sign in with the admin account from `.env`, and le
   <tr>
     <td><b>Uptime Monitoring</b> — health checks with history<br><img src="docs/screenshots/uptime.webp" alt="Uptime monitor"></td>
     <td><b>Calendar</b> — CalDAV/CardDAV sync, vacation and team events<br><img src="docs/screenshots/calendar.webp" alt="Calendar"></td>
-  </tr>
-  <tr>
-    <td colspan="2"><b>Integrations</b> — GitLab, Mattermost, webhooks and more, configured per connector<br><img src="docs/screenshots/integrations.webp" alt="Integration connectors"></td>
   </tr>
 </table>
 

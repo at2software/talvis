@@ -1,5 +1,5 @@
 import { Directive, ElementRef, inject, input, output } from '@angular/core';
-import { HttpEventType } from '@angular/common/http';
+import { HttpEventType, HttpResponse } from '@angular/common/http';
 import { Toast, ToastItem } from '@shards/toast/toast';
 import { forkJoin, last, Observable, tap } from 'rxjs';
 import { FileService } from '@models/file/file.service';
@@ -16,7 +16,8 @@ export class DndDirective {
     readonly dndCategory = input<string>('');
     readonly dndHoverHint = input<boolean>(true);
     readonly collect = input<boolean>(false);
-    readonly dndUploaded = output();
+    /** Emits the response bodies of all uploads (in drop order) once every upload has succeeded. */
+    readonly dndUploaded = output<unknown[]>();
     readonly dndDrop = output<File[]>();
 
     readonly #fileService = inject(FileService);
@@ -114,10 +115,10 @@ export class DndDirective {
         });
 
         forkJoin(uploads).subscribe({
-            next: () => {
+            next: (responses) => {
                 Toast.remove(progressToast);
                 Toast.success(`${label} uploaded`);
-                this.dndUploaded.emit();
+                this.dndUploaded.emit(responses.map((r) => (r instanceof HttpResponse ? r.body : undefined)));
             },
             error: (err: any) => {
                 Toast.remove(progressToast);

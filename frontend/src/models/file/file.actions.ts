@@ -4,7 +4,7 @@ import { nx } from '@models/_core/nx-bridge';
 import { FileService } from './file.service';
 import { MODAL } from '@models/_core/modal-registry';
 
-const isPreviewable = (file: File): boolean => file.mime === 'application/pdf' || !!file.mime?.startsWith('image/');
+export const isPreviewable = (file: File): boolean => file.mime === 'application/pdf' || !!file.mime?.startsWith('image/') || file.isMarkdown();
 
 export function getFileActions(self: File): NxAction[] {
     return [

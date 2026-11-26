@@ -5,7 +5,6 @@ namespace App\ML;
 use App\Models\Company;
 use App\Models\Focus;
 use App\Models\Invoice;
-use App\Models\Param;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
@@ -15,10 +14,8 @@ class CustomerSnapshots {
 
     /** Exclude the own company (ME_ID) and deprecated/inactive customers — mirrors CompanyBuilder::whereActive(). */
     public static function eligibleCompaniesQuery(): Builder {
-        $meId = Param::get('ME_ID')->value;
-
         return Company::whereActive()
-            ->whereNot('id', $meId);
+            ->whereNotMe();
     }
 
     /**

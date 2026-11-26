@@ -5,7 +5,8 @@ import { Nx } from '@app/nx/nx.directive';
 import { NComponent } from '@shards/n/n.component';
 import { AutosaveDirective } from '@directives/autosave.directive';
 import { PermissionsDirective } from '@directives/permissions.directive';
-import { Assignee } from '@models/assignee/assignee.model';
+import { Assignee, roleGlyph, roleTextClass } from '@models/assignee/assignee.model';
+import { EXTENSIONS } from '@app/extensions';
 import { AssignmentService } from '@models/assignee/assignment.service';
 import { GlobalService } from '@models/global.service';
 import { Project } from '@models/project/project.model';
@@ -126,6 +127,14 @@ export class ProjectTeamPlanningComponent {
         return (p.hours_invested + p.remainingAllocatedTime()) / estimated < 0.5;
     });
 
+    missingRequiredRoles = computed(() => {
+        const project = this.asProject();
+        const required = project ? EXTENSIONS.flatMap((_) => _.requiredProjectRoles?.(project) ?? []) : [];
+        return required.filter((role) => !this.assignees().some((_) => _.roles().includes(role)));
+    });
+
+    refreshAssignees = () => this.assignees.update((_) => [..._]);
+
     isProjectManager = computed(() => this.#global.user?.hasRole('project_manager') ?? false);
 
     mantisInstance = computed(() => this.#factory.instancesFor(this.trackedEntity(), MantisPlugin));
@@ -139,4 +148,7 @@ export class ProjectTeamPlanningComponent {
     }
 
     roundHours = (value: number) => Math.round(value * 10) / 10;
+
+    readonly roleGlyph = roleGlyph;
+    readonly roleTextClass = roleTextClass;
 }

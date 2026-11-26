@@ -15,7 +15,7 @@ import { Nx } from '@app/nx/nx.directive';
 import { NgbDropdownModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { SpinnerComponent } from '@shards/spinner/spinner.component';
 import * as Leaflet from 'leaflet';
-import { addDarkTileLayer } from '@constants/map-tiles';
+import { addThemedTileLayer } from '@constants/map-tiles';
 import { DB_COUNTRIES } from '../db.countries';
 import { CountryEntryDto } from '@models/_core/api-response';
 import { PlzDbService } from '../plz-db.service';
@@ -312,7 +312,7 @@ export class VcardComponent {
             scrollWheelZoom: true,
         }).setView([lat, lon], 15);
 
-        addDarkTileLayer(map);
+        addThemedTileLayer(map);
 
         const pinIcon = Leaflet.divIcon({
             className: 'map-pin',

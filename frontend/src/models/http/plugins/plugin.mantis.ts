@@ -124,7 +124,7 @@ export class MantisPlugin extends PluginInstance implements ITaskPlugin {
     toLabel = (_: MantisLabel) => new Label(Color.uniqueColorFromString('' + _.id), _.name, String(_.id));
 
     toTask = (data: unknown): Task[] => {
-        const { issues } = data as { issues: MantisIssue[] };
+        const issues = (data as { issues?: MantisIssue[] } | undefined)?.issues ?? [];
         return issues.map((_: MantisIssue) => {
             const t = Task.fromJson({
                 id: '' + _.id,

@@ -11,12 +11,12 @@ class GetUserAddressBook {
         $addressbook = [];
 
         if ($user->hasAnyRole(['admin', 'hr', 'project_manager'])) {
-            foreach (User::whereHas('activeEmployments')->whereNot('id', 0)->get() as $employee) {
+            foreach (User::whereEmployed()->whereNot('id', 0)->get() as $employee) {
                 $addressbook[] = $employee->getAddressBookVcard();
             }
         } else {
             $adminProjectManagers = User::whereHas('roles', fn ($query) => $query->whereIn('name', ['admin', 'project_manager']))
-                ->whereHas('activeEmployments')
+                ->whereEmployed()
                 ->whereNot('id', 0)
                 ->get();
             foreach ($adminProjectManagers as $manager) {

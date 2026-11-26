@@ -52,6 +52,9 @@ class PluginLink extends BaseModel {
 }
 
 class PluginLinkCollection extends Collection {
+    public function withoutOrchestratedProjects(): static {
+        return $this->reject(fn (PluginLink $link) => $link->parent instanceof Project && $link->parent->isOrchestrated());
+    }
     public function siblingsOfType($type) {
         if (class_exists($type) && is_subclass_of($type, PluginController::class)) {
             $controllers = PluginController::getPluginControllers($type);

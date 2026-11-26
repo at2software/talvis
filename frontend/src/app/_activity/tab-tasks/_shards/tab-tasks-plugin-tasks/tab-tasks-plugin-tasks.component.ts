@@ -68,7 +68,7 @@ export class TabTasksPluginTasksComponent extends TabTasksBaseComponent {
                         .subscribe((response) => {
                             const newTask = Task.fromJson(response);
                             newTask.var.user = entry.instance.getUserFor(newTask.assignee?.id);
-                            newTask.var.compact = newTask.state == 1;
+                            newTask.var.compact = newTask.isClosed();
                             newTask.httpService = entry.instance;
                             entry.tasks.update((t) => [...t, newTask]);
                         });

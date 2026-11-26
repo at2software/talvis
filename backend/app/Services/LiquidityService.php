@@ -103,8 +103,7 @@ class LiquidityService {
     }
     protected static function getStandingOrderEvents(Carbon $start, Carbon $end, array $avgDaysCache, int $globalAvgDays): array {
         $events = [];
-        $items  = InvoiceItem::whereIn('type', InvoiceItemType::Repeating)
-            ->whereNotNull('next_recurrence_at')
+        $items  = InvoiceItem::whereActiveStandingOrder()
             ->whereNull('invoice_id')
             ->with('company')
             ->get();
@@ -138,8 +137,7 @@ class LiquidityService {
     }
     protected static function getOpenInvoiceEvents(Carbon $start, Carbon $end): array {
         $events   = [];
-        $invoices = Invoice::whereNull('paid_at')
-            ->where('is_cancelled', false)
+        $invoices = Invoice::whereOpen()
             ->whereNull('cancellation_invoice_id')
             ->with('company')
             ->get();
@@ -216,9 +214,7 @@ class LiquidityService {
         $events   = [];
         $baseWage = (float)(Param::get('HR_HOURLY_WAGE')?->value ?? 0);
 
-        $projects = Project::wherePreparedOrRunning()
-            ->whereNot('is_internal', true)
-            ->where('is_time_based', true)
+        $projects = Project::whereActiveTimeBased()
             ->withSum('foci_unbilled', 'duration')
             ->with('company')
             ->get();

@@ -37,7 +37,7 @@
         </button>
     </div>
 
-    @if (activeTracker() && !canConnect(activeTracker()!)) {
+    @if (activeTracker() && !activeTracker()!.instance.canConnect()) {
         <div class="card card-body text-warning mb-3" i18n="@@i18n.issues.noCredentials">no credentials for this tracker</div>
     }
 

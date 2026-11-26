@@ -15,7 +15,7 @@
 .list-group-item {
     cursor: pointer;
     &.active {
-        background-color: #0003;
+        background-color: var(--tv-scrim-1);
     }
 }
 // .btn-group { width: 100%;

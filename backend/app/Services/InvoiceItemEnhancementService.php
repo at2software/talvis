@@ -12,11 +12,13 @@ class InvoiceItemEnhancementService {
     private string $lang = 'de';
     private string $kNET;
     private string $kGROSS;
+    private string $vatCategory = 'S';
 
     public function enhanceItemsForPdf(Collection $items, Company $company): array {
-        $this->lang   = $company->getLanguage();
-        $this->kNET   = __('pdf.net_value', [], $this->lang);
-        $this->kGROSS = __('pdf.gross_value', [], $this->lang);
+        $this->lang        = $company->getLanguage();
+        $this->vatCategory = $company->vatCategory();
+        $this->kNET        = __('pdf.net_value', [], $this->lang);
+        $this->kGROSS      = __('pdf.gross_value', [], $this->lang);
 
         $pos       = 0;
         $all       = 0;
@@ -86,16 +88,16 @@ class InvoiceItemEnhancementService {
                 break;
         }
 
-        if ($item->vat_rate == 0) {
-            if ($company->needs_vat_handling) {
-                $handling = __('pdf.vat_exempt_eu', [], $this->lang).'<br>';
-                $handling .= __('pdf.our_vat_id', [], $this->lang).' '.Param::get('ME_VAT_ID')->value.'<br>';
-                $handling .= __('pdf.your_vat_id', [], $this->lang).' '.$company->vat_id;
-            } else {
-                $handling = __('pdf.vat_exempt_export', [], $this->lang).'<br>';
-            }
+        if ($item->vat_rate != 0) {
+            return $handling;
         }
-        return $handling;
+        return match ($this->vatCategory) {
+            'AE' => __('pdf.vat_reverse_charge', [], $this->lang).'<br>'
+                .__('pdf.our_vat_id', [], $this->lang).' '.Param::get('ME_VAT_ID')->value.'<br>'
+                .__('pdf.your_vat_id', [], $this->lang).' '.$company->vat_id,
+            'O'     => __('pdf.vat_not_taxable', [], $this->lang).'<br>',
+            default => $handling,
+        };
     }
     private function buildFooters(array $footers): array {
         $_footers = [];

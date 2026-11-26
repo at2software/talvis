@@ -8,11 +8,11 @@ use App\Http\Requests\Timetracker\SearchRequest;
 use App\Http\Requests\Timetracker\StoreRequest;
 use App\Http\Requests\Timetracker\UpdateStatusRequest;
 use App\Models\Assignment;
+use App\Models\AssignmentRole;
 use App\Models\Company;
 use App\Models\Focus;
 use App\Models\Param;
 use App\Models\Project;
-use App\Models\ProjectState;
 use App\Services\TimetrackerDataService;
 use Carbon\Carbon;
 use Illuminate\Support\Arr;
@@ -31,9 +31,7 @@ class TimetrackerController extends Controller {
     }
     public function index() {
         $builderCompanies = request()->user()->assigned_companies();
-        $meCompanyId      = Param::get('ME_ID')->value;
-        if ($meCompanyId) {
-            $my   = Company::find($meCompanyId);
+        if ($my = Company::me()) {
             $orga = [
                 'color'        => '#FF6700',
                 'company_name' => self::ORGANIZATIONAL_NAME,
@@ -44,7 +42,6 @@ class TimetrackerController extends Controller {
                 'id'           => $my->id,
                 'target'       => self::TARGET_COMPANY,
             ];
-            // $builderCompanies->whereNot('id', $meCompanyId);
         }
         $projects  = $this->dataService->mapProjects(request()->user()->projects()->with('company')->whereTrackable());
         $companies = $this->dataService->mapCompanies($builderCompanies);
@@ -77,7 +74,7 @@ class TimetrackerController extends Controller {
             $payload['ext_issue_id'] = request('ext_issue_id');
         }
         if ($parent = $this->getParentPolyFromRequest()) {
-            if (is_a($parent, Project::class) && $parent->state->progress == ProjectState::Finished && ! $parent->isInWarranty()) {
+            if (is_a($parent, Project::class) && ! $parent->isTrackable()) {
                 abort(400, 'Cannot create foci on finished projects outside their warranty period!');
             }
             if (is_a($parent, Project::class)) {
@@ -86,7 +83,7 @@ class TimetrackerController extends Controller {
                     $assignment->save();
                 }
             }
-            request()->user()->update(Param::nullPoly('current_focus'));
+            request()->user()->clearCurrentFocus();
             return $this->createFocus([...$parent->toPoly(), ...$payload]);
         } else {
             abort(400, 'no valid parent found');
@@ -99,8 +96,9 @@ class TimetrackerController extends Controller {
         $assignment = Assignment::firstOrCreate([
             ...Auth::user()->toPoly('assignee'),
             ...$parent->toPoly(),
-        ], ['role_id' => 2]);
+        ]);
         abort_unless($assignment->wasRecentlyCreated, 406, 'Already subscribed');
+        $assignment->assignRoles(AssignmentRole::DEVELOPER);
         return $this->getParent();
     }
     public function unsubscribe(ParentRequest $request) {
@@ -127,7 +125,7 @@ class TimetrackerController extends Controller {
         if (empty($q['parent_type']) || empty($q['parent_id'])) {
             abort(400, 'parent is invalid');
         }
-        request()->user()->update(['current_focus_id' => null, 'current_focus_type' => null]);
+        request()->user()->clearCurrentFocus();
         return Focus::create($q);
     }
     public function update() {
@@ -205,8 +203,7 @@ class TimetrackerController extends Controller {
     }
     public function updateStatus(UpdateStatusRequest $request) {
         if (request('status') === 'offline') {
-            request()->user()->fill(Param::nullPoly('current_focus'));
-            request()->user()->save();
+            request()->user()->clearCurrentFocus();
         }
 
         try {

@@ -8,6 +8,12 @@ export function isChunkError(error: unknown): boolean {
     return CHUNK_ERROR_MARKERS.some((marker) => message.includes(marker));
 }
 
+export const moduleLoadError = (error: unknown) => {
+    if (isChunkError(error)) handleChunkError(error);
+    else console.error('lazy load error', error);
+    return Promise.reject(error);
+};
+
 let prompting = false;
 
 export function handleChunkError(error: unknown) {

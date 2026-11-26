@@ -12,7 +12,7 @@ use Carbon\Carbon;
 class FocusStatisticsService {
     public static function getFocusCategories(): array {
         $startDate = now()->subYears(3);
-        $users     = User::whereHas('activeEmployments')->get();
+        $users     = User::whereEmployed()->get();
 
         $result = [];
 
@@ -53,12 +53,12 @@ class FocusStatisticsService {
     }
     public static function getPredictionAccuracy(): array {
         $startDate = now()->subYears(2);
-        $users     = User::whereHas('activeEmployments')->get();
+        $users     = User::whereEmployed()->get();
         return $users->map(fn ($user) => $user->getPredictionAccuracyData($startDate))->toArray();
     }
     public static function getFocusAccuracy(): array {
         $startDate = now()->subYears(2);
-        $users     = User::whereHas('activeEmployments')->get();
+        $users     = User::whereEmployed()->get();
 
         $allFoci = Focus::query()
             ->whereIn('foci.user_id', $users->pluck('id'))

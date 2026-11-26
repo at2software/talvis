@@ -162,4 +162,8 @@ return [
     'PROJECT_PREDICTED_OVERRUN_THRESHOLDS'   => ['type' => TextParam::class, 'history' => false],
     'PROJECT_OVERRUN_WARN_THRESHOLD'         => ['type' => FloatParam::class, 'history' => false, 'default' => 110],
     'PROJECT_PREDICTED_OVERRUN_NOTIFIED'     => ['type' => TextParam::class, 'history' => false],
+    'INVOICE_ITEM_WORK_THRESHOLDS'           => ['type' => TextParam::class, 'history' => false, 'default' => '[100]'],
+    'INVOICE_ITEM_ALERT_MIN_HOURS'           => ['type' => FloatParam::class, 'history' => false, 'default' => 8],
+    'INVOICE_ITEM_ALERT_MIN_SHARE'           => ['type' => FloatParam::class, 'history' => false, 'default' => 10],
+    'INVOICE_ITEM_THRESHOLD_NOTIFIED'        => ['type' => TextParam::class, 'history' => false],
 ];

@@ -38,7 +38,7 @@
                 </li>
                 <li class="list-group-item d-flex justify-content-between align-items-center cursor-pointer" (click)="navigateToSection('prospects')" tabindex="0" (keydown.enter)="navigateToSection('prospects')">
                     <span><i class="align-middle me-2 text-danger">task_alt</i>activities</span>
-                    <span><span class="me-1">{{ _stats.activities.pending }}</span><small class="text-danger">({{ _stats.activities.overdue }} overdue)</small></span>
+                    <span><span class="me-1">{{ _stats.activities.pending }}</span><small [class.text-danger]="_stats.activities.overdue > 0" [class.text-muted]="_stats.activities.overdue === 0">({{ _stats.activities.overdue }} overdue)</small></span>
                 </li>
             </ul>
         </div>
@@ -268,7 +268,7 @@
                         @for (bar of _agingBars; track bar.label) {
                             <div class="flex-fill d-flex flex-column align-items-center justify-content-end" style="height: 100%" [ngbTooltip]="bar.label + ': ' + bar.value">
                                 <small class="text-muted mb-1" style="font-size: 0.6rem; line-height: 1">{{ bar.value }}</small>
-                                <div class="w-100" style="background: rgba(255,255,255,0.75); min-height: 2px" [style.height.px]="bar.h"></div>
+                                <div class="w-100" style="background: rgba(var(--tv-ink-rgb), 0.75); min-height: 2px" [style.height.px]="bar.h"></div>
                             </div>
                         }
                     </div>

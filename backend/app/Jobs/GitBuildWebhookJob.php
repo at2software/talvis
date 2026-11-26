@@ -2,9 +2,11 @@
 
 namespace App\Jobs;
 
+use App\Events\SecurityReportReceived;
 use App\Http\Controllers\PluginChatController;
 use App\Http\Controllers\PluginGitController;
 use App\Models\PluginLink;
+use App\Models\Project;
 use App\Traits\GitWebhookTrait;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -69,11 +71,18 @@ class GitBuildWebhookJob implements ShouldQueue {
         }
 
         if (in_array($this->buildData['build_status'], ['success', 'failed'], true)) {
-            $this->dispatchSecurityReport(
-                $this->buildData['build_name'],
-                $this->buildData['build_id'],
-                $props,
-            );
+            $report = $this->securityReport($this->buildData['build_name'], $this->buildData['build_id']);
+            if ($report) {
+                $this->dispatchSecurityReport($this->buildData['build_name'], $this->buildData['build_id'], $report);
+                event(new SecurityReportReceived(
+                    $controller,
+                    $this->links->pluck('parent')->filter(fn ($parent) => $parent instanceof Project)->values(),
+                    $this->project,
+                    $pipelineId,
+                    $ref,
+                    $report,
+                ));
+            }
         }
     }
 }

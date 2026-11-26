@@ -5,6 +5,7 @@ namespace App\Builders;
 use App\Models\Company;
 use App\Models\CompanyContact;
 use App\Models\Contact;
+use App\Models\Param;
 use App\Traits\HasParamsBuilder;
 use App\Traits\HasVcardBuilder;
 use Illuminate\Support\Facades\Auth;
@@ -22,6 +23,9 @@ class CompanyBuilder extends BaseBuilder {
                 $i->whereBetweenString($within, 'invoices.created_at');
             }
         }], 'net');
+    }
+    public function whereNotMe() {
+        return $this->whereNot('companies.id', Param::get('ME_ID')->value);
     }
     public function whereActive() {
         return $this->where('is_deprecated', false);

@@ -7,7 +7,7 @@ class ModelRelationship {
         [
             'table'     => 'assignments',
             'relations' => [
-                'role'     => ['type' => 'belongsTo', 'model' => 'roles'],
+                'roles'    => ['type' => 'belongsToMany', 'model' => 'assignment_roles'],
                 'parent'   => ['type' => 'morphTo'],
                 'assignee' => ['type' => 'morphTo'],
             ],
@@ -15,7 +15,7 @@ class ModelRelationship {
         [
             'table'     => 'assignment_roles',
             'relations' => [
-                'assignments' => ['type' => 'hasMany', 'model' => 'assignments'],
+                'assignments' => ['type' => 'belongsToMany', 'model' => 'assignments'],
             ],
         ],
         [

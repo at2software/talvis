@@ -19,4 +19,11 @@ network-chart.chart {
   position: sticky;
   top: $header-height;
   height: calc(100vh - $header-height - 1 * $grid-width) !important;
+}.info-box-card .list-group {
+  overflow-y: auto;
+}
+.role-heading {
+  padding-top: 0.6rem;
+  padding-bottom: 0.2rem;
+  background: transparent;
 }

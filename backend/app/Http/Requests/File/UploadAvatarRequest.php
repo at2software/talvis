@@ -10,7 +10,7 @@ class UploadAvatarRequest extends FormRequest {
     }
     public function rules(): array {
         return [
-            'file' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'file' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
         ];
     }
 }

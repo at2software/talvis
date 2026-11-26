@@ -31,6 +31,17 @@
     }
 }
 
+:host(.readonly) {
+    height: auto;
+    min-height: 0;
+    border: 0;
+
+    .ce-pre {
+        position: static;
+        white-space: pre-wrap;
+    }
+}
+
 .ce-ta {
     background: transparent;
     color: transparent;
@@ -52,4 +63,24 @@
     .t-num { color: #b5cea8; }
     .t-at { color: #c586c0; }
     .t-punc { color: #808080; }
+}
+
+// Light mode: VS Code "Light+" token colors on a white editor surface.
+:host-context([data-bs-theme=light]) {
+    background: var(--tv-popup-bg);
+
+    .ce-pre { color: #1f1f1f; }
+    .ce-ta { caret-color: #000; }
+    .ce-ta::selection { background: rgba(0, 96, 192, 0.2); }
+
+    ::ng-deep {
+        .t-tag { color: #800000; }
+        .t-attr { color: #e50000; }
+        .t-str { color: #a31515; }
+        .t-com { color: #008000; }
+        .t-prop { color: #0451a5; }
+        .t-num { color: #098658; }
+        .t-at { color: #af00db; }
+        .t-punc { color: #616161; }
+    }
 }

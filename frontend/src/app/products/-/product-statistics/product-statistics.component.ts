@@ -20,6 +20,7 @@ import { Dictionary } from '@constants/constants';
 import { ChartAxisTooltipParamDto } from '@models/_core/api-response';
 import { ProductGroup } from '@models/product/product-group.model';
 import { SpinnerComponent } from '@shards/spinner/spinner.component';
+import { injectChartPalette } from '@charts/echarts-theme';
 
 echarts.use([TitleComponent, TooltipComponent, LegendComponent, GridComponent, BarChart, CanvasRenderer]);
 
@@ -63,6 +64,7 @@ const CHART_BASE: EChartsOption = {
 })
 export class ProductStatisticsComponent {
     readonly #productService = inject(ProductService);
+    #palette = injectChartPalette();
 
     readonly period = signal<{ startDate: Dayjs; endDate: Dayjs } | undefined>({
         startDate: dayjs().subtract(3, 'year'),
@@ -136,8 +138,10 @@ export class ProductStatisticsComponent {
             });
         });
 
+        const palette = this.#palette();
         return {
             ...CHART_BASE,
+            yAxis: { ...(CHART_BASE.yAxis as object), splitLine: { lineStyle: { color: palette.dark ? '#222' : palette.splitLine } } },
             legend: { ...CHART_BASE.legend, data: Array.from(groups.values()).map((g) => g.name) },
             xAxis: { ...CHART_BASE.xAxis, data: months.map((m) => dayjs(m + '-01').format('MMM YYYY')) },
             series,

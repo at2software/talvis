@@ -7,7 +7,7 @@ use App\Models\User;
 
 class TeamStatisticsService {
     public static function getTeamStatus() {
-        return User::whereHas('activeEmployments')
+        return User::whereEmployed()
             ->with(['current_focus', 'activeVacations', 'active_sick_notes', 'activeEmployments'])
             ->get()
             ->map(function ($user) {
@@ -45,7 +45,7 @@ class TeamStatisticsService {
             })->values();
     }
     public static function getTeamMonitorData() {
-        $data = User::whereHas('activeEmployments')
+        $data = User::whereEmployed()
             ->with(['current_focus', 'vacations', 'activeVacations', 'active_sick_notes', 'activeEmployments'])
             ->get()
             ->append(['availability_status', 'is_sick', 'is_on_vacation']);

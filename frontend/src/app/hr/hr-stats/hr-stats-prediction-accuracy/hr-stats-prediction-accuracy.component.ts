@@ -5,11 +5,12 @@ import { StatsService } from '@models/stats.service';
 import { GlobalService } from '@models/global.service';
 import { NgxEchartsModule } from 'ngx-echarts';
 import { Color } from '@constants/Color';
-import { EChartsSimpleOptions, ECHARTS_DONUT_ITEM_STYLE, ECHARTS_DONUT_SERIES, ECHARTS_DONUT_TRACK_COLOR } from '@charts/echarts-presets';
+import { EChartsSimpleOptions, ECHARTS_DONUT_ITEM_STYLE, ECHARTS_DONUT_SERIES } from '@charts/echarts-presets';
 import { EmptyStateComponent } from '@shards/empty-state/empty-state.component';
 import type { EChartsOption, SeriesOption } from 'echarts';
 import { ChartAxisTooltipParamDto } from '@models/_core/api-response';
 import { SpinnerComponent } from '@shards/spinner/spinner.component';
+import { injectChartPalette } from '@charts/echarts-theme';
 
 interface PredictionAccuracyData {
     id: number;
@@ -42,6 +43,7 @@ interface PredictionAccuracyData {
 export class HrStatsPredictionAccuracyComponent {
     #statsService = inject(StatsService);
     #global = inject(GlobalService);
+    #palette = injectChartPalette();
 
     readonly #predictionAccuracy = modelListResource<PredictionAccuracyData>(() => this.#statsService.showPredictionAccuracy());
     readonly loaded = this.#predictionAccuracy.hasValue;
@@ -205,7 +207,7 @@ export class HrStatsPredictionAccuracyComponent {
                             value: maxDeviation - deviation,
                             name: $localize`:@@i18n.hr.perfectRange:Perfect Range`,
                             itemStyle: {
-                                color: ECHARTS_DONUT_TRACK_COLOR,
+                                color: this.#palette().track,
                             },
                             label: { show: false },
                             labelLine: { show: false },
@@ -217,7 +219,7 @@ export class HrStatsPredictionAccuracyComponent {
                         formatter: `${overallAverage.toFixed(2)}x`,
                         fontSize: 16,
                         fontWeight: 300,
-                        color: '#ccc',
+                        color: this.#palette().textSoft,
                     },
                     labelLine: {
                         show: false,

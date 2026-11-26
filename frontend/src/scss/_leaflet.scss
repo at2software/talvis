@@ -1,0 +1,9 @@
+// Leaflet chrome per theme. Tiles are OSM's light tiles; dark mode inverts them.
+.leaflet-tile-pane {
+    filter: var(--tv-map-tile-filter);
+}
+
+.leaflet-container .leaflet-control-attribution {
+    background: var(--tv-map-attribution-bg) !important;
+    color: var(--bs-secondary-color);
+}

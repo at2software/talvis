@@ -180,7 +180,7 @@ export class SankeyChartComponent {
         const labels = this.showLabels()
             ? svg.append('g')
                 .style('font', '10px sans-serif')
-                .style('fill', '#fff')
+                .style('fill', 'var(--tv-text-strong)')
                 .selectAll<SVGTextElement, ComputedNode>('text')
                 .data(graph.nodes)
                 .join('text')

@@ -92,7 +92,7 @@
                             <div class="form-label" i18n="@@i18n.common.description">description</div>
                             <input type="text" #desc class="form-control" [ngModel]="selectionDescription()" (ngModelChange)="selectionDescription.set($event)" />
                         </div>
-                        @if (co.vat_id) {
+                        @if (co.isVatExcempt()) {
                             <div class="mb-3 card card-info" i18n="@@i18n.projects.vatexcemptionApplied">VAT-excemption applied</div>
                         }
                         <div class="text-end">

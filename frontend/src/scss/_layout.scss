@@ -61,15 +61,15 @@ app-root {
         background: transparent;
     }
     &::-webkit-scrollbar-thumb {
-        background: rgba(255, 255, 255, 0.3);
+        background: var(--tv-scrollbar-thumb);
         border-radius: 1px;
         &:hover {
-            background: rgba(255, 255, 255, 0.5);
+            background: var(--tv-scrollbar-thumb-hover);
         }
     }
 
     scrollbar-width: thin;
-    scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+    scrollbar-color: var(--tv-scrollbar-thumb) transparent;
 }
 
 /**** MAIN CHANGES ****/
@@ -114,6 +114,7 @@ input[type='number']::-webkit-outer-spin-button {
 
 
 .cursor-pointer, .pointer { cursor: pointer; }
+.min-width-0 { min-width: 0; }
 .sortable { cursor: pointer; user-select: none; }
 .table > thead th { font-weight: normal; color: var(--bs-secondary-color); }
 .table > thead th.sortable { color: var(--bs-primary); }
@@ -142,7 +143,7 @@ input[type='number']::-webkit-outer-spin-button {
     font-weight: bold;
     top: 6px;
     right: 10px;
-    color: #999;
+    color: var(--tv-text-dim);
     margin: -6px 0;
 }
 
@@ -186,7 +187,7 @@ input[type='number']::-webkit-outer-spin-button {
     left: 0;
     right: 0;
     bottom: 0;
-    background: repeating-linear-gradient(45deg, #0009, #0009 5px, transparent 5px, transparent 10px);
+    background: repeating-linear-gradient(45deg, var(--tv-scrim-3), var(--tv-scrim-3) 5px, transparent 5px, transparent 10px);
 }
 
 .marker {
@@ -243,10 +244,10 @@ input[type='number']::-webkit-outer-spin-button {
     background-color: colors.$bg-body !important;
     box-shadow: var(--tv-liquid-glass) !important;
     padding: 6px 10px 0px !important;
-    color: colors.$primary !important;
-    text-shadow: 0 -2px 4px #000, 0 2px 4px #fff3;
+    color: var(--bs-primary) !important;
+    text-shadow: var(--tv-text-shadow-emboss);
     &:hover {
-        background-color: color.adjust(colors.$bg-body, $lightness: 2%) !important;
+        background-color: var(--tv-surface-raised) !important;
     }
     &.btn-fancy-te {
         top: 0;
@@ -263,12 +264,12 @@ input[type='number']::-webkit-outer-spin-button {
     border: 0 !important;
     box-shadow: none !important;
     background-color: transparent !important;
-    color: colors.$primary !important;
+    color: var(--bs-primary) !important;
     font-size: 1.1rem;
     line-height: 1;
     transition: color 0.2s ease;
     &:hover {
-        color: color.adjust(colors.$primary, $lightness: 10%) !important;
+        color: var(--tv-primary-hover) !important;
     }
 }
 
@@ -295,7 +296,7 @@ input[type='number']::-webkit-outer-spin-button {
         box-shadow: none !important;
         i, n { color: inherit; }
     }
-    i, n { color: #666; }
+    i, n { color: var(--tv-text-faint); }
 }
 
 .card-header-actions {
@@ -327,7 +328,7 @@ input[type='number']::-webkit-outer-spin-button {
     width: 1rem;
     height: 1rem;
     font-size: 1rem;
-    border: 1px black solid;
+    border: 1px var(--tv-edge) solid;
 }
 
 .avatar-img {
@@ -342,7 +343,7 @@ input[type='number']::-webkit-outer-spin-button {
     bottom: -0.2rem;
     right: -0.2rem;
     display: block;
-    border: 0.1rem solid #000;
+    border: 0.1rem solid var(--tv-edge);
     border-radius: 50em;
     width: 0.75rem;
     height: 0.75rem;
@@ -512,7 +513,7 @@ table {
             &::before {
                 content: attr(data-label);
                 flex: 0 0 auto;
-                color: #999;
+                color: var(--tv-text-dim);
                 text-transform: capitalize;
             }
 
@@ -530,7 +531,7 @@ table {
 .header {
     padding: 0.5rem 1rem;
     margin-bottom: 0;
-    color: #fff;
+    color: var(--tv-text-strong);
     background-color: colors.$bg-card;
     border-bottom: 1px var(--bs-border-color) solid;
 }
@@ -601,11 +602,11 @@ table {
         bottom: 0;
         right: 0;
         left: 0;
-        color: #666;
+        color: var(--tv-text-faint);
         box-sizing: border-box;
         border-radius: inherit;
-        text-shadow: 0 0 2px #000;
-        border: 2px #666 dashed !important;
+        text-shadow: var(--tv-text-shadow-soft);
+        border: 2px var(--tv-text-faint) dashed !important;
     }
 }
 

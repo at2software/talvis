@@ -59,11 +59,13 @@ export class TabPluginsComponent {
 
     onNewPluginLink(_: PluginInstance) {
         PluginInstanceFactory.promptLinkId(_)
-            .then((id) => {
-                if (!id) return;
-                _.toPluginLink(id).storeUnder(this.project()!, true).subscribe((link) => {
+            .then((ids) => {
+                const project = this.project();
+                if (!ids?.length || !project) return;
+                return PluginInstanceFactory.addLinks(_, project, ids).then((created) => {
+                    if (!created.length) return;
                     this.project.update((p) => {
-                        p?.plugin_links.push(link);
+                        p?.plugin_links.push(...created);
                         return p ? Object.assign(Object.create(Object.getPrototypeOf(p)), p) : p;
                     });
                 });

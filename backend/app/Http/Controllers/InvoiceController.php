@@ -22,7 +22,7 @@ class InvoiceController extends Controller {
     public function _index(Request $r) {
         $query = Invoice::select()->whereRequest()->withRequest();
         if (@$r->input('onlyUnpaid') == 'true') {
-            $query = $query->where('paid_at', null);
+            $query = $query->whereUnpaid();
         }
         if (@$r->input('onlyPaid') == 'true') {
             $query = $query->whereNotNull('paid_at');
@@ -113,8 +113,7 @@ class InvoiceController extends Controller {
         return $_;
     }
     public function indexSepaDirectDebits() {
-        return Invoice::whereNull('paid_at')
-            ->where('is_cancelled', false)
+        return Invoice::whereOpen()
             ->with(['company' => fn ($query) => $query->with(HasParams::$WITH)])
             ->latest()
             ->get()
@@ -132,7 +131,7 @@ class InvoiceController extends Controller {
             ->get();
 
         $blocked = $invoices->mapWithKeys(fn (Invoice $invoice) => [
-            $invoice->name => $invoice->paid_at || $invoice->is_cancelled ? ['settled'] : $invoice->sepaDirectDebitIssues(),
+            $invoice->name => $invoice->isSettled() ? ['settled'] : $invoice->sepaDirectDebitIssues(),
         ])->filter();
         if ($blocked->isNotEmpty()) {
             return response()->json(['message' => 'Some invoices cannot be collected.', 'errors' => $blocked], 422);

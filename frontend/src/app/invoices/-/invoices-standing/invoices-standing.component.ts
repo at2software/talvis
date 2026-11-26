@@ -99,12 +99,6 @@ export class InvoicesStandingComponent {
         item.update({ [field]: dateString }).subscribe(() => this.reload());
     }
 
-    getDaysUntilNext = (item: InvoiceItem): number => {
-        if (!item.next_recurrence_at) return 0;
-        const diffTime = new Date(item.next_recurrence_at).getTime() - Date.now();
-        return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    };
-
     toggleCategory(name: string) {
         this.selectedCategories.update(sel => {
             const next = new Set(sel);

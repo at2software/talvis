@@ -17,13 +17,20 @@ class File extends BaseModel {
     use HasFactory;
     use ProvidesFileIcons;
 
-    protected $fillable = ['name', 'parent_type', 'parent_id', 'dir', 'mime', 'category', 'tags', 'file_size', 'dimensions', 'uploaded_by'];
+    protected $fillable = ['name', 'parent_type', 'parent_id', 'dir', 'mime', 'category', 'tags', 'file_size', 'dimensions', 'uploaded_by', 'permissions'];
 
     protected function casts(): array {
         return ['type' => FileType::class];
     }
     public function parent() {
         return $this->morphTo();
+    }
+    public function isVisibleTo(User $user): bool {
+        return match ($this->permissions) {
+            'invoices.values' => $user->hasAnyRole($this->parent_type === Project::class ? ['invoicing', 'project_manager'] : ['invoicing']),
+            'hr.module'       => ($this->parent_type === User::class && (int)$this->parent_id === $user->id) || $user->hasRole('hr'),
+            default           => true,
+        };
     }
     public function getThumbnailAttribute(): ?string {
         if (! $this->mime) {

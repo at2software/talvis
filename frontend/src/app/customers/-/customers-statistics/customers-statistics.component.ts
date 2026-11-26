@@ -2,7 +2,8 @@ import { ChangeDetectionStrategy, Component, computed, inject, resource } from '
 import { Company } from '@models/company/company.model';
 import { InvoiceService } from '@models/invoice/invoice.service';
 import { StatsService } from '@models/stats.service';
-import { ECHARTS_DEFAULT_TOOLTIP_OPTIONS, ECHARTS_DONUT_CENTER_TEXT, ECHARTS_DONUT_ITEM_STYLE, ECHARTS_DONUT_SERIES_LABELED, ECHARTS_DONUT_TRACK_COLOR } from '@charts/echarts-presets';
+import { ECHARTS_DEFAULT_TOOLTIP_OPTIONS, donutCenterText, ECHARTS_DONUT_ITEM_STYLE, ECHARTS_DONUT_SERIES_LABELED } from '@charts/echarts-presets';
+import { injectChartPalette } from '@charts/echarts-theme';
 import { Color } from '@constants/Color';
 import { GlobalService } from '@models/global.service';
 import { dayjs } from '@constants/date/dates';
@@ -40,6 +41,7 @@ export class CustomersStatisticsComponent {
     invoiceService = inject(InvoiceService);
     global = inject(GlobalService);
     #statsService = inject(StatsService);
+    #palette = injectChartPalette();
 
     readonly #scatter = modelResource(() => this.#statsService.getCustomerRevenueScatter());
     readonly customerScatterData = this.#scatter.value;
@@ -72,6 +74,7 @@ export class CustomersStatisticsComponent {
             ...(rest.length ? [{ id: '0', name: $localize`:@@i18n.common.rest:rest`, value: rest.reduce((a, b) => a + b.revenue_last_1_year, 0) }] : []),
         ];
         const total = reduced.reduce((s, c) => s + (c.value ?? 0), 0);
+        const palette = this.#palette();
 
         return {
             chart: { height: 300 },
@@ -85,7 +88,7 @@ export class CustomersStatisticsComponent {
                     return `${params.name}: ${this.#eur(params.value)}`;
                 },
             },
-            graphic: [{ type: 'text', left: 'center', top: 'center', style: { ...ECHARTS_DONUT_CENTER_TEXT, text: this.#eur(total), fontSize: 12 } }],
+            graphic: [{ type: 'text', left: 'center', top: 'center', style: { ...donutCenterText(palette), text: this.#eur(total), fontSize: 12 } }],
             series: [
                 {
                     type: 'pie',
@@ -93,12 +96,12 @@ export class CustomersStatisticsComponent {
                     data: reduced.map((_) => ({
                         value: _.value,
                         name: _.name,
-                        itemStyle: { color: _.id !== '0' ? Color.uniqueColorFromString('' + _.id) : ECHARTS_DONUT_TRACK_COLOR, ...ECHARTS_DONUT_ITEM_STYLE },
+                        itemStyle: { color: _.id !== '0' ? Color.uniqueColorFromString('' + _.id) : palette.track, ...ECHARTS_DONUT_ITEM_STYLE },
                     })),
                     label: { show: true, formatter: (rawP: unknown) => {
                         const p = rawP as { name: string; percent?: number };
                         return `${p.name}\n${p.percent?.toFixed(1)}%`;
-                    }, color: '#ffffff', fontSize: 11 },
+                    }, color: palette.text, fontSize: 11 },
                 },
             ],
         };

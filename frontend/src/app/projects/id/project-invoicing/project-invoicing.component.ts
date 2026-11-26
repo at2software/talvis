@@ -11,6 +11,7 @@ import { CompanyContact } from '@models/company/company-contact.model';
 import { BillingConsiderationDto } from '@models/_core/api-response';
 import { GlobalService } from '@models/global.service';
 import { InvoiceItem } from '@models/invoice/invoice-item.model';
+import { InvoiceItemStage } from '@enums/invoice-item.stage';
 import { ProjectService } from '@models/project/project.service';
 import { NgbDropdownModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { InputModalService } from '@app/_modals/modal-input/modal-input.service';
@@ -37,11 +38,12 @@ import { TInvoicing } from '@models/project/invoicing-type';
 import { AvatarComponent } from '@shards/avatar/avatar.component';
 import { SpinnerComponent } from '@shards/spinner/spinner.component';
 import { BusyService } from '@app/busy.service';
+import { ProjectSubscriptionsCardComponent } from './project-subscriptions-card/project-subscriptions-card.component';
 
 @Component({
     changeDetection: ChangeDetectionStrategy.OnPush,
     selector: 'project-detail-quote',
-    imports: [AvatarComponent, FormsModule, DatePipe, DecimalPipe, PercentPipe, NgTemplateOutlet, ToolbarComponent, InvoicePrepareWrapper, NComponent, NgbTooltipModule, NgbDropdownModule, SafePipe, MoneyPipe, MlReliabilityDirective, SpinnerComponent],
+    imports: [AvatarComponent, FormsModule, DatePipe, DecimalPipe, PercentPipe, NgTemplateOutlet, ToolbarComponent, InvoicePrepareWrapper, NComponent, NgbTooltipModule, NgbDropdownModule, SafePipe, MoneyPipe, MlReliabilityDirective, SpinnerComponent, ProjectSubscriptionsCardComponent],
     templateUrl: './project-invoicing.component.html',
 })
 export class ProjectInvoicingComponent {
@@ -79,11 +81,11 @@ export class ProjectInvoicingComponent {
         if (warnings > 0) parts.push($localize`:@@i18n.invoice.billingWarnings:${warnings} warning(s)`);
         return parts.join(', ');
     });
-    hasDownpaymentItems = computed((): boolean => this.#parent.object().invoice_items.some((x: InvoiceItem) => x.stage === 2 && !x.invoice_id) ?? false);
-    hasSupportItems = computed((): boolean => this.#parent.object().invoice_items.some((x: InvoiceItem) => x.stage === 1 && !x.invoice_id) ?? false);
-    finalItems = computed((): InvoiceItem[] => this.#parent.object().invoice_items.filter((x: InvoiceItem) => x.stage === 0 && !x.invoice_id) ?? []);
+    hasDownpaymentItems = computed((): boolean => this.#parent.object().invoice_items.some((x: InvoiceItem) => x.isOpenInStage(InvoiceItemStage.Downpayment)) ?? false);
+    hasSupportItems = computed((): boolean => this.#parent.object().invoice_items.some((x: InvoiceItem) => x.isOpenInStage(InvoiceItemStage.Support)) ?? false);
+    finalItems = computed((): InvoiceItem[] => this.#parent.object().invoice_items.filter((x: InvoiceItem) => x.isOpenInStage(InvoiceItemStage.Final)) ?? []);
     invoicedDownpayments = computed((): number => this.#parent.object().invoiced_downpayments ?? 0);
-    pendingDownpayments = computed((): number => this.#parent.object().invoice_items?.filter((x: InvoiceItem) => x.stage === 2 && !x.invoice_id)?.reduce((sum: number, x: InvoiceItem) => sum + (x.net || 0), 0) ?? 0);
+    pendingDownpayments = computed((): number => InvoiceItem.openNet(this.#parent.object().invoice_items ?? [], InvoiceItemStage.Downpayment));
     downpaymentRemaining = computed((): number => (this.#parent.object().net ?? 0) - this.invoicedDownpayments() - this.pendingDownpayments());
     invoicedTotal = computed((): number => Math.max(0, (this.#parent.object().net ?? 0) - (this.#parent.object().net_remaining ?? 0)));
     invoicingProgress = computed((): number => {
@@ -287,7 +289,7 @@ export class ProjectInvoicingComponent {
         }
     }
 
-    warningMissingContact = () => !this.#parent.object()?.personalized?.firstName;
+    warningMissingContact = () => !this.#parent.object()?.personalized?.familyName;
     quoteTooltip = computed(() =>
         this.warningMissingContact()
             ? $localize`:@@i18n.projects.quoteRequiresContact:select a contact person under payment information first`
@@ -295,8 +297,8 @@ export class ProjectInvoicingComponent {
     );
     adresseeName = () => {
         const p = this.#parent.object()?.personalized;
-        return p?.firstName ? `${p.salutation || ''} ${p.firstName} ${p.familyName || ''}`.trim()
-                            : $localize`:@@i18n.project.selectCompanyContact:select company contact`;
+        return p?.familyName ? [p.salutation, p.firstName, p.middleName, p.familyName].filter(Boolean).join(' ')
+                             : $localize`:@@i18n.project.selectCompanyContact:select company contact`;
     };
 
     toggleQuoteDescription(key: string) {
@@ -367,7 +369,7 @@ export class ProjectInvoicingComponent {
 
     #getNextPositionForStage(stage: number): number {
         const project = this.#parent.object();
-        const items = project.invoice_items?.filter((x: InvoiceItem) => x.stage === stage && !x.invoice_id) ?? [];
+        const items = project.invoice_items?.filter((x: InvoiceItem) => x.isOpenInStage(stage)) ?? [];
         if (!items.length) return 0;
         return Math.max(...items.map((x: InvoiceItem) => x.position ?? 0)) + 1;
     }
@@ -390,7 +392,6 @@ export class ProjectInvoicingComponent {
             .then((result) => {
                 if (result?.item) {
                     const item = InvoiceItem.fromJson(result.item);
-                    item.type = type;
                     this.#storeProjectItem(item, stage);
                 }
             });

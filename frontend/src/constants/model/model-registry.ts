@@ -7,7 +7,7 @@
  * This file maps model class names to their class constructors for dynamic instantiation.
  */
 
-import { Approval } from '@models/flow/approval.model';
+import { EXTENSIONS } from '@app/extensions';
 import { Assignee } from '@models/assignee/assignee.model';
 import { CalendarEntry } from '@models/vcalendar/calendar-entry.model';
 import { Cash } from '@models/cash/cash.model';
@@ -28,7 +28,6 @@ import { Encryption } from '@models/encryption/encryption.model';
 import { Expense } from '@models/expense/expense.model';
 import { ExpenseCategory } from '@models/expense/expense-category.model';
 import { File } from '@models/file/file.model';
-import { FlowJob } from '@models/flow/job.model';
 import { Focus } from '@models/focus/focus.model';
 import { Framework } from '@models/project/framework.model';
 import { FrameworkLatest } from '@models/project/framework-latest.model';
@@ -69,7 +68,7 @@ import { WebhookDelivery } from '@models/webhook/webhook-delivery.model';
 import { WebhookEndpoint } from '@models/webhook/webhook-endpoint.model';
 
 export const MODEL_REGISTRY: Record<string, any> = {
-    'Approval': Approval,
+    ...Object.assign({}, ...EXTENSIONS.map((_) => _.models ?? {})),
     'Assignee': Assignee,
     'CalendarEntry': CalendarEntry,
     'Cash': Cash,
@@ -90,7 +89,6 @@ export const MODEL_REGISTRY: Record<string, any> = {
     'Expense': Expense,
     'ExpenseCategory': ExpenseCategory,
     'File': File,
-    'FlowJob': FlowJob,
     'Focus': Focus,
     'Framework': Framework,
     'FrameworkLatest': FrameworkLatest,

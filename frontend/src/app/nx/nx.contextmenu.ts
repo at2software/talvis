@@ -12,9 +12,11 @@ import { Nx } from './nx.directive';
 type NxHost = HTMLElement & { nx?: Nx };
 
 const TRIGGER_SIZE = 22;
+const TAB_WIDTH = 14;
 const TRIGGER_MIN_HOST_WIDTH = 160;
 const TRIGGER_MIN_HOST_HEIGHT = 18;
-const TRIGGER_ANCHOR_HEIGHT = 40;const INTERACTIVE = 'button, a[href], input, select, textarea, label, [role="button"], .btn, .form-check, .form-switch';
+const TRIGGER_ANCHOR_HEIGHT = 40;
+const INTERACTIVE = 'button, a[href], input, select, textarea, label, [role="button"], .btn, .form-check, .form-switch';
 
 @Component({
     selector: 'nx-contextmenu',
@@ -40,6 +42,15 @@ const TRIGGER_ANCHOR_HEIGHT = 40;const INTERACTIVE = 'button, a[href], input, se
             }
             .nx-row-trigger:hover {
                 color: var(--bs-primary);
+            }
+            .nx-row-trigger.tab {
+                width: ${TAB_WIDTH}px;
+                height: ${TRIGGER_ANCHOR_HEIGHT}px;
+                background: rgba(var(--bs-primary-rgb), 0.15);
+                border-radius: 0 var(--bs-border-radius) var(--bs-border-radius) 0;
+            }
+            .nx-row-trigger.tab:hover {
+                background: rgba(var(--bs-primary-rgb), 0.3);
             }
             .nx-row-trigger.visible {
                 display: flex;
@@ -135,17 +146,23 @@ export class NxContextMenu {
 
     #showTrigger(host: NxHost, button: HTMLButtonElement) {
         const rect = host.getBoundingClientRect();
-        const left = rect.right - TRIGGER_SIZE - 4;
-        const top = rect.top + (Math.min(rect.height, TRIGGER_ANCHOR_HEIGHT) - TRIGGER_SIZE) / 2;
-        const covered = document
-            .elementsFromPoint(left + TRIGGER_SIZE / 2, top + TRIGGER_SIZE / 2)
-            .find(_ => _ !== button && !button.contains(_));
-        const interactive = covered?.closest(INTERACTIVE);
-        if (interactive && interactive !== host && host.contains(interactive)) return this.#hideTrigger();
+        const asTab = rect.right + TAB_WIDTH <= document.documentElement.clientWidth;
+        const height = Math.min(rect.height, TRIGGER_ANCHOR_HEIGHT);
+        const left = asTab ? rect.right : rect.right - TRIGGER_SIZE - 4;
+        const top = rect.top + (height - (asTab ? height : TRIGGER_SIZE)) / 2;
+        if (!asTab) {
+            const covered = document
+                .elementsFromPoint(left + TRIGGER_SIZE / 2, top + TRIGGER_SIZE / 2)
+                .find(_ => _ !== button && !button.contains(_));
+            const interactive = covered?.closest(INTERACTIVE);
+            if (interactive && interactive !== host && host.contains(interactive)) return this.#hideTrigger();
+        }
 
         this.#triggerHost = host;
+        button.classList.toggle('tab', asTab);
         button.style.left = left + 'px';
         button.style.top = top + 'px';
+        button.style.height = asTab ? height + 'px' : '';
         button.classList.add('visible');
     }
 

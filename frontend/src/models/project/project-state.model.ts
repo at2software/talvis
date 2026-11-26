@@ -5,7 +5,7 @@ import { deepMerge } from '@constants/object/deepMerge';
 import { Model } from '@constants/model/type-discriminators';
 import { Dictionary } from '@constants/constants';
 import { computed } from '@angular/core';
-import type { FlowTransitionDto } from '@models/_core/api-response';
+import type { ProjectStateTransitionDto } from '@models/_core/api-response';
 
 const mkState = (id: number) => ({ state: ProjectState.stateFor(id) });
 
@@ -30,6 +30,9 @@ export class ProjectState extends Serializable {
     static ProgressRunning = 1;
     static ProgressFinished = 2;
 
+    /** project_states.id of "hyper care" (backend ProjectState::HyperCare, seeded master data) */
+    static HyperCare = 9;
+
     static StateChangeWorkflow: Dictionary<string[]> = {
         '1': ["2", "5", "6", "7"],
         '2': ["1", "3", "4", "5", "8", "9"],
@@ -41,7 +44,7 @@ export class ProjectState extends Serializable {
         '8': ["1", "3", "4", "5", "9"],
         '9': ["1", "3", "4", "5"],
     };
-    static transitions: FlowTransitionDto[] | undefined;
+    static transitions: ProjectStateTransitionDto[] | undefined;
 
     static allowedTargetIds = (fromId: string | number, user?: { hasAnyRole: (roles: string[]) => boolean }): string[] =>
         ProjectState.transitions

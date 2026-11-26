@@ -12,31 +12,28 @@ export class AffixInputDirective {
 
     constructor() {
         afterNextRender(() => {
-            const el = this.#el.nativeElement;
+            const el: HTMLElement = this.#el.nativeElement;
             this.#re.addClass(el, 'form-control');
-            const parent = el.parentNode;
-            const wrapper = this.#re.createElement('div');
-            this.#re.addClass(wrapper, 'input-group');
+            const parent = el.parentNode as HTMLElement;
+            const group = parent.classList.contains('input-group') ? parent : this.#wrap(el, parent);
 
-            this.#re.removeChild(parent, el);
-
-            if (this.prefix()) {
-                const span = this.#re.createElement('span');
-                this.#re.addClass(span, 'input-group-text');
-                this.#re.appendChild(span, this.#re.createText(this.prefix()!));
-                this.#re.appendChild(wrapper, span);
-            }
-
-            this.#re.appendChild(wrapper, el);
-
-            if (this.suffix()) {
-                const span = this.#re.createElement('span');
-                this.#re.addClass(span, 'input-group-text');
-                this.#re.appendChild(span, this.#re.createText(this.suffix()!));
-                this.#re.appendChild(wrapper, span);
-            }
-
-            this.#re.appendChild(parent, wrapper);
+            if (this.prefix()) this.#re.insertBefore(group, this.#addon(this.prefix()!), el);
+            if (this.suffix()) this.#re.insertBefore(group, this.#addon(this.suffix()!), el.nextSibling);
         });
+    }
+
+    #wrap(el: HTMLElement, parent: HTMLElement): HTMLElement {
+        const wrapper = this.#re.createElement('div');
+        this.#re.addClass(wrapper, 'input-group');
+        this.#re.insertBefore(parent, wrapper, el);
+        this.#re.appendChild(wrapper, el);
+        return wrapper;
+    }
+
+    #addon(text: string): HTMLElement {
+        const span = this.#re.createElement('span');
+        this.#re.addClass(span, 'input-group-text');
+        this.#re.appendChild(span, this.#re.createText(text));
+        return span;
     }
 }

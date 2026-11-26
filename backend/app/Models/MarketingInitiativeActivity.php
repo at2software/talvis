@@ -4,15 +4,21 @@ namespace App\Models;
 
 use App\Casts\I18n;
 use App\Traits\HasI18nTrait;
+use App\Traits\HasSharedActivityFlag;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\DB;
 
 class MarketingInitiativeActivity extends BaseModel {
     use HasI18nTrait;
+    use HasSharedActivityFlag;
 
     protected $table    = 'marketing_initiative_activities';
+    protected $appends  = ['icon', 'class', 'is_shared'];
     protected $fillable = [
+        'is_shared',
         'marketing_initiative_id',
         'marketing_workflow_id',
         'name',
@@ -84,6 +90,32 @@ class MarketingInitiativeActivity extends BaseModel {
             ->where('status', 'pending')
             ->where('scheduled_at', '<', now())
             ->exists();
+    }
+    public function dueProspectActivities(?int $userId = null): HasMany {
+        return $this->marketingProspectActivities()
+            ->where('status', 'pending')
+            ->where('scheduled_at', '<=', today()->endOfDay())
+            ->whereHas('marketingProspect', fn ($q) => $q
+                ->whereNotIn('status', MarketingProspect::INACTIVE_STATUSES)
+                ->when($userId, fn ($q) => $q->where('user_id', $userId)));
+    }
+    public function completeDueForAll(int $userId): int {
+        $due = $this->dueProspectActivities($userId)->with('marketingProspect')->get();
+
+        DB::transaction(fn () => $due->each(function (MarketingProspectActivity $activity) {
+            $activity->marketingProspect->markActivityCompleted($activity->id);
+            $activity->refresh()->shiftSucceedingActivities();
+        }));
+        return $due->count();
+    }
+    public static function sharedWithDueCounts(int $userId): Collection {
+        return static::query()
+            ->whereRaw('flags & ? != 0', [self::FLAG_SHARED])
+            ->with(['marketingInitiative:id,name', 'i18n'])
+            ->get()
+            ->each(fn (self $activity) => $activity->setAttribute('due_count', $activity->dueProspectActivities($userId)->count()))
+            ->filter(fn (self $activity) => $activity->due_count > 0)
+            ->values();
     }
     public function updateWithRelations(array $validated): static {
         $this->update($validated);

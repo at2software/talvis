@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\MilestoneState;
 use App\Traits\HasTasksTrait;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
@@ -70,22 +71,35 @@ class Milestone extends BaseModel {
     public function invoiceItems() {
         return $this->belongsToMany(InvoiceItem::class, 'invoice_item_milestone')->withTimestamps();
     }
-    public function getComputedWorkloadPercentAttribute(): ?float {
-        $totalHours = null;
-
-        if ($this->workload_hours !== null && $this->workload_hours > 0) {
-            $totalHours = $this->workload_hours;
-        } else {
-            if (! $this->relationLoaded('invoiceItems')) {
-                $this->load('invoiceItems');
-            }
-
-            if ($this->invoiceItems->isNotEmpty()) {
-                $totalHours = $this->invoiceItems->sum(fn ($item) => $item->assumedWorkload());
-            }
+    public function scopeOpen($query) {
+        return $query->where('state', '!=', MilestoneState::DONE);
+    }
+    public function scopeOverdue($query) {
+        return $query->open()->whereDate('due_at', '<', today());
+    }
+    public function scopeNeedsStart($query) {
+        return $query->where('state', MilestoneState::TODO)->where('started_at', '<', today());
+    }
+    public function scopeUnconfigured($query) {
+        return $query->open()
+            ->where(fn ($q) => $q->whereNull('workload_hours')->orWhere('workload_hours', 0))
+            ->whereDoesntHave('invoiceItems');
+    }
+    public function plannedHours(): float {
+        if ($this->workload_hours > 0) {
+            return (float)$this->workload_hours;
         }
+        return (float)$this->invoiceItems->sum(fn (InvoiceItem $item) => $item->assumedWorkload());
+    }
+    public function detachAll(): void {
+        $this->dependees()->detach();
+        $this->dependants()->detach();
+        $this->invoiceItems()->detach();
+    }
+    public function getComputedWorkloadPercentAttribute(): ?float {
+        $totalHours = $this->plannedHours();
 
-        if ($totalHours === null || $totalHours <= 0) {
+        if ($totalHours <= 0) {
             return 0;
         }
 

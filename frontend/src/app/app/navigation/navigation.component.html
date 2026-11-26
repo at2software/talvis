@@ -14,7 +14,7 @@
 
 <div class="nav-container h-100" [class.mobile-open]="_isMobile && _isMenuOpen" [class.mobile-closed]="_isMobile && !_isMenuOpen" [class.is-mobile]="_isMobile">
     <ul class="nav flex-column">
-        <li class="nav-item mod-icon" (click)="onSearchExpand()" (keyup.enter)="onSearchExpand()">
+        <li class="nav-item mod-icon" tabindex="-1" (click)="onSearchExpand()" (keyup.enter)="onSearchExpand()">
             <a hotkey="CTRL+ALT+F" class="nav-search" [class.search-expanded]="searchExpanded()" role="button" tabindex="0" i18n-aria-label="@@i18n.common.search" aria-label="search">
                 <img src="./assets/modules/search.svg" alt="" />
                 <div class="label" style="width: 200px">
@@ -27,7 +27,7 @@
         @for (item of _navItems; track item.link) {
             <li class="nav-item mod-icon" [hidden]="!item.visible" [attr.data-nav-tour]="item.logo">
                 <a [routerLink]="item.link" routerLinkActive="active" [attr.aria-label]="item.tooltip" (click)="_isMobile && closeMobileMenu()">
-                    <img src="./assets/modules/{{ item.logo }}.svg" alt="" />
+                    <img [src]="iconSrc(item.logo)" [class.themed-logo]="item.logo === 'logo'" alt="" />
                     <div class="label">{{ item.tooltip }}</div>
                 </a>
             </li>
@@ -45,7 +45,7 @@
         @for (item of _bottomNavItems; track item.link) {
             <li class="nav-item mod-icon" [hidden]="!item.visible" [attr.data-nav-tour]="item.logo">
                 <a [routerLink]="item.link" routerLinkActive="active" [attr.aria-label]="item.tooltip" (click)="_isMobile && closeMobileMenu()">
-                    <img src="./assets/modules/{{ item.logo }}.svg" alt="" />
+                    <img [src]="iconSrc(item.logo)" [class.themed-logo]="item.logo === 'logo'" alt="" />
                     <div class="label">{{ item.tooltip }}</div>
                 </a>
             </li>

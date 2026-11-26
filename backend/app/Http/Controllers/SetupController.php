@@ -24,7 +24,6 @@ class SetupController extends Controller {
 
     public function showStatus() {
         $user = Auth::user();
-        $meId = Param::get('ME_ID')->value;
 
         return [
             $this->item('owner', true, [
@@ -39,7 +38,7 @@ class SetupController extends Controller {
             ]),
             $this->item('vacation', true, ['vacation_grant' => $user->hasValidVacationGrant()]),
             $this->item('products', false, ['product' => Product::exists()]),
-            $this->item('first_customer', false, ['customer' => Company::when($meId, fn ($_) => $_->whereKeyNot($meId))->exists()]),
+            $this->item('first_customer', false, ['customer' => Company::whereNotMe()->exists()]),
             $this->item('first_project', false, ['project' => Project::exists()]),
             $this->item('first_invoice', false, ['invoice' => Invoice::exists()]),
         ];
@@ -83,7 +82,7 @@ class SetupController extends Controller {
         $user       = Auth::user();
         $employment = $user->activeEmployment;
         $hpd        = $employment?->averageHoursPerWorkday() ?: 8;
-        $grant      = $user->vacation_grants()->where('expires_at', '>', now())->latest()->first();
+        $grant      = $user->currentVacationGrant();
         return [
             'hours'         => array_combine(UserEmployment::DAYS, array_map(fn ($_) => $employment ? (float)$employment->$_ : (in_array($_, ['sa', 'su']) ? 0 : 8), UserEmployment::DAYS)),
             'work_zip'      => (string)$user->work_zip,

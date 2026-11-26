@@ -3,6 +3,7 @@
 namespace App\Actions\Project;
 
 use App\Enums\InvoiceItemType;
+use App\Enums\MilestoneState;
 use App\Models\Param;
 use App\Models\Project;
 
@@ -24,12 +25,11 @@ class ConvertInvoiceItemsToMilestonesAction {
         }
 
         $conversionFactor  = Param::get('MILESTONE_CONVERSION_FACTOR')->value;
-        $hoursPerDay       = Param::get('INVOICE_HPD')->value;
         $createdMilestones = [];
-        $maxPosition       = $project->milestones()->max('position') ?? -1;
+        $nextPosition      = $project->nextMilestonePosition();
 
         foreach ($unlinkedInvoiceItems as $index => $invoiceItem) {
-            $estimatedDays = $invoiceItem->assumedWorkload() / $hoursPerDay ?? 1;
+            $estimatedDays = $invoiceItem->estimatedDays();
             $dueDelta      = max(1, ceil($estimatedDays * $conversionFactor));
             $dueAt         = now()->addDays($dueDelta);
 
@@ -39,8 +39,8 @@ class ConvertInvoiceItemsToMilestonesAction {
                 'due_at'     => $dueAt,
                 'duration'   => $estimatedDays,
                 'progress'   => $invoiceItem->progress * 100 ?? 0,
-                'state'      => 0,
-                'position'   => $maxPosition + $index + 1,
+                'state'      => MilestoneState::TODO->value,
+                'position'   => $nextPosition + $index,
             ]);
 
             $milestone->invoiceItems()->attach($invoiceItem->id);

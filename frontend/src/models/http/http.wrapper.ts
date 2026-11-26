@@ -121,7 +121,10 @@ export abstract class HttpWrapper {
     getBlob = (url: string, params?: Dictionary) => this.http().get(this.#getApiUrl(url, params), { responseType: 'blob' });
     postBlobResponse = (url: string, data?: unknown) => this.http().post(this.#getApiUrl(url), data, { responseType: 'blob', observe: 'response' });
     postBlob(url: string, data?: unknown, success?: () => void) {
-        return this.postBlobResponse(url, data).subscribe((r) => saveBlobResponse(r, success));
+        return this.postBlobResponse(url, data).subscribe({
+            next: (r) => saveBlobResponse(r, success),
+            error: notifyHttpError,
+        });
     }
     getFile(url: string, params?: Dictionary, success?: () => unknown, done?: () => unknown): void {
         this.http()

@@ -71,6 +71,7 @@ export class ProjectService extends TalvisHttpService<Project> {
     indexLatestFrameworks = (): Observable<FrameworkLatest[]> => this.aget('projects/frameworks/latest', {}, FrameworkLatest);
     indexReporting = (params: Dictionary) => this.aget('projects/reporting', params, Project);
     indexFeatures = (projectId: string): Observable<InvoiceItem[]> => this.aget(`projects/${projectId}/features`, {}, InvoiceItem);
+    indexRepeatingItems = (projectId: string): Observable<InvoiceItem[]> => this.aget(`projects/${projectId}/repeating-items`, {}, InvoiceItem);
 
     makeInvoice(project: Project, type: TInvoicing, success?: () => unknown, draft = false) {
         const stageMap: Partial<Record<TInvoicing, number>> = {

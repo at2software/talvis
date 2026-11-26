@@ -30,9 +30,9 @@ class InsertBasicRoles extends Command {
             Role::firstOrCreate(['name' => $roleData['name']], $roleData);
         }
 
-        AssignmentRole::firstOrCreate(['name' => 'project manager']);
-        AssignmentRole::firstOrCreate(['name' => 'developer']);
-        AssignmentRole::firstOrCreate(['name' => 'customer']);
+        foreach ([AssignmentRole::PROJECT_MANAGER, AssignmentRole::DEVELOPER, AssignmentRole::CUSTOMER, ...AssignmentRole::RESPONSIBLE, AssignmentRole::EXTERNAL_CONTRIBUTOR] as $name) {
+            AssignmentRole::firstOrCreate(['name' => $name]);
+        }
 
         if (Param::get('SYS_SEED_ADMIN_RETIRED')->value) {
             $this->info('Roles seeded successfully, seed admin is retired.');

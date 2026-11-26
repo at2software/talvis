@@ -4,11 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Models\Project;
 use App\Models\User;
+use App\Support\ChatProps;
 use App\Traits\HasVaultCredentials;
 use Illuminate\Support\Facades\Cache;
 
 class PluginMattermostController extends PluginChatController {
     use HasVaultCredentials;
+
+    public const HEADER_MAX = 1024;
 
     public static function getKey(): string {
         return 'mattermost';
@@ -159,6 +162,28 @@ class PluginMattermostController extends PluginChatController {
         }
         return $this->put('posts/'.$id, $payload);
     }
+    public function syncChannelHeader(string $channelId, array $projects): bool {
+        $links   = collect($projects)->sortBy('id')->flatMap(fn (Project $project) => $project->chatHeaderLinks())->unique('url')->values()->all();
+        $header  = self::headerMarkdown($links);
+        $current = (string)($this->get("channels/{$channelId}")['header'] ?? '');
+        if ($header === $current) {
+            return false;
+        }
+        $this->put("channels/{$channelId}/patch", ['header' => $header]);
+        return true;
+    }
+    public static function headerMarkdown(array $links): string {
+        $text   = fn (string $text) => trim(preg_replace('/\s+/', ' ', str_replace(['[', ']', '|', '(', ')', '"'], '', $text))) ?: 'link';
+        $header = '';
+        foreach ($links as $link) {
+            $next = trim($header.' [!['.$text($link['title']).']('.ChatProps::icon($link['icon']).' =16x16 "'.$text($link['hint'] ?? $link['title']).'")]('.$link['url'].')');
+            if (mb_strlen($next) > self::HEADER_MAX) {
+                break;
+            }
+            $header = $next;
+        }
+        return $header;
+    }
     public function updateChannel(string $id, $displayName, $purpose, $header) {
         $payload                                 = ['id' => $id];
         $displayName && $payload['display_name'] = $displayName;
@@ -181,6 +206,10 @@ class PluginMattermostController extends PluginChatController {
     }
     public function getIdFor(User $user): ?string {
         return $this->getUserId($user);
+    }
+    public function getUsernameFor(User $user): ?string {
+        $id = $this->getUserId($user);
+        return $id ? Cache::remember('mattermost_username_'.$id, now()->addDay(), fn () => $this->get('users/'.$id)['username'] ?? null) : null;
     }
     public function sendDirectMessageToUserId(string $userId, string $message): void {
         $channelId = $this->getDirectChannelIdFor($userId);

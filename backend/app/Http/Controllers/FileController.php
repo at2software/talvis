@@ -8,15 +8,16 @@ use App\Http\Requests\File\UploadMediaRequest;
 use App\Models\Company;
 use App\Models\Document;
 use App\Models\File;
-use App\Models\Param;
 use App\Models\Project;
 use App\Models\User;
 use App\Traits\VcardTrait;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Storage;
 
 class FileController extends Controller {
     public function show(int $id) {
         $file = File::findOrFail($id);
+        abort_unless($file->isVisibleTo(request()->user()), 403);
         if (! Storage::exists($file->dir)) {
             return response()->json(['error' => 'File not found'], 404);
         }
@@ -31,7 +32,12 @@ class FileController extends Controller {
     public function uploadTravelExpenses() {
         $request = request();
         $request->validate(['data' => 'required|json']);
-        $me    = Company::find(Param::get('ME_ID')->value);
+        $uploadedFiles = array_filter(Arr::wrap($request->file('file', [])));
+        foreach ($uploadedFiles as $uploadedFile) {
+            if ($uploadedFile->getMimeType() !== 'application/pdf') {
+                return response()->json(['error' => 'Only PDF files are allowed for travel expense attachments.'], 422);
+            }
+        }
         $total = 0;
         $data  = json_decode($request->data);
         foreach ($data->days ?? [] as $_) {
@@ -63,23 +69,10 @@ class FileController extends Controller {
         $f->type  = FileType::TypeTravelExpenses;
         $f->save();
 
-        $uploadedFiles = $request->file('file', []);
-
-        foreach ($uploadedFiles as $uploadedFile) {
-            if ($uploadedFile && $uploadedFile->getMimeType() !== 'application/pdf') {
-                return response()->json(['error' => 'Only PDF files are allowed for travel expense attachments.'], 422);
-            }
+        if ($uploadedFiles) {
+            Document::mergePdfs($filepath, $uploadedFiles);
         }
-
-        $changed = Document::mergePdfs($filepath, $uploadedFiles);
-        if ($changed) {
-            $content = \Illuminate\Support\Facades\File::get(storage_path('app/'.$filepath));
-            return response($content, 200)
-                ->header('Access-Control-Expose-Headers', 'Content-Type, Content-Disposition')
-                ->header('Content-Type', 'application/pdf')
-                ->header('Content-Disposition', 'attachment; filename="'.$filename.'"');
-        }
-        return response($pdf->stream()->getContent())->withHeaders(File::headers($filename, 'application/pdf'));
+        return File::streamPdf(Storage::get($filepath), $filename);
     }
     public function storeCompanyAvatar(UploadAvatarRequest $request, Company $_) {
         return $this->uploadAvatar($_);

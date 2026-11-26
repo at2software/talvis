@@ -27,20 +27,26 @@ trait GitWebhookTrait {
             ['job' => 'vuln_scan',      'artifact' => 'grype-report.json',    'type' => 'grype'],
         ];
     }
-    private function dispatchSecurityReport(string $jobName, int $jobId, array $props): void {
-        $jobMap    = collect($this->pipelineJobs())->keyBy('job');
-        $jobConfig = $jobMap->get($jobName);
+
+    /**
+     * @return array{type: string, data: array}|null
+     */
+    private function securityReport(string $jobName, int $jobId): ?array {
+        $jobConfig = collect($this->pipelineJobs())->keyBy('job')->get($jobName);
         if (! $jobConfig) {
-            return;
+            return null;
         }
+        $data = (new PluginGitController($this->credentials))->getJobArtifact($this->project['id'], $jobId, $jobConfig['artifact']);
+        return $data ? ['type' => $jobConfig['type'], 'data' => $data] : null;
+    }
 
-        $controller = new PluginGitController($this->credentials);
-        $data       = $controller->getJobArtifact($this->project['id'], $jobId, $jobConfig['artifact']);
-        if (! $data) {
-            return;
-        }
+    /**
+     * @param array{type: string, data: array} $report
+     */
+    private function dispatchSecurityReport(string $jobName, int $jobId, array $report): void {
+        $data = $report['data'];
 
-        [$securityMessage, $securityProps] = match ($jobConfig['type']) {
+        [$securityMessage, $securityProps] = match ($report['type']) {
             'sast'     => [$this->formatSast($data),          $this->securityProps($this->project['name'], 'SAST', 'job-sast.png')],
             'npm'      => [$this->formatNpmAudit($data),      $this->securityProps($this->project['name'], 'NPM', 'job-npm-audit.png')],
             'composer' => [$this->formatComposerAudit($data), $this->securityProps($this->project['name'], 'Composer', 'job-composer-audit.png')],
@@ -59,6 +65,7 @@ trait GitWebhookTrait {
             ChatSendMessageJob::dispatch($securityMessage, $securityProps, channelId: $chatInfo['channelId'], cacheId: $cacheId, chatKey: $chatInfo['controller']::getKey());
         }
     }
+
     private function notifyProjectManager(string $message, ?string $cacheId = null): void {
         foreach ($this->links as $link) {
             $project = $link->parent;

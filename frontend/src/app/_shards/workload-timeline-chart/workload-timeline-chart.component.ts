@@ -6,6 +6,7 @@ import { Color } from '@constants/Color';
 import { AvatarComponent } from '@shards/avatar/avatar.component';
 import { NgxEchartsDirective } from 'ngx-echarts';
 import { ECHARTS_DEFAULT_TOOLTIP_OPTIONS } from '@charts/echarts-presets';
+import { injectChartPalette } from '@charts/echarts-theme';
 
 interface TimelineRow {
     user: User;
@@ -27,6 +28,7 @@ const MS_PER_DAY = 86_400_000;
     imports: [NgxEchartsDirective, AvatarComponent],
 })
 export class WorkloadTimelineChartComponent {
+    #palette = injectChartPalette();
     timeline = input<ProjectTimelineEntryDto[] | undefined>();
 
     chart = computed<WorkloadChart | null>(() => this.#buildWorkloadChart(this.timeline()));
@@ -122,7 +124,7 @@ export class WorkloadTimelineChartComponent {
             ],
             yAxis: [
                 { type: 'value', gridIndex: 0, min: 0, axisLabel: { show: false }, axisLine: { show: false }, axisTick: { show: false }, splitLine: { show: false } },
-                { type: 'category', data: developers, gridIndex: 1, axisLabel: { show: false }, axisTick: { show: false }, axisLine: { show: false }, splitLine: { show: true, lineStyle: { color: '#333' } } },
+                { type: 'category', data: developers, gridIndex: 1, axisLabel: { show: false }, axisTick: { show: false }, axisLine: { show: false }, splitLine: { show: true, lineStyle: { color: this.#palette().splitLine } } },
             ],
             series: [
                 ...timelineSeries,

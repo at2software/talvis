@@ -135,6 +135,54 @@ class MarketingTouchpointTest extends TestCase {
         $this->assertCount(0, $queue('call'));
         $this->assertCount(1, $queue('email'));
     }
+    public function test_queue_ignores_on_hold_and_disqualified_prospects(): void {
+        $held         = $this->prospect('FN:Held');
+        $disqualified = $this->prospect('FN:Disqualified');
+        foreach ([$held, $disqualified] as $prospect) {
+            $this->callActivity($prospect)->update(['scheduled_at' => today()->subDay()]);
+        }
+        $held->update(['status' => 'on_hold']);
+        $disqualified->update(['status' => 'disqualified']);
+
+        $queued = collect($this->getJson('/api/marketing/touchpoints/queue?channel=call')->assertOk()->json())->pluck('marketing_prospect_id');
+
+        $this->assertNotContains($held->id, $queued);
+        $this->assertNotContains($disqualified->id, $queued);
+    }
+    public function test_postpone_counts_from_the_chosen_date_and_keeps_the_gaps(): void {
+        $prospect = $this->prospect('FN:Erika Muster');
+        $call     = $this->callActivity($prospect);
+        $mail     = $prospect->activities()->whereKeyNot($call->id)->firstOrFail();
+        $call->update(['scheduled_at' => today()->addWeeks(6)]);
+        $mail->update(['scheduled_at' => today()->addWeeks(6)->addDays(2)]);
+
+        $this->postJson("/api/marketing/prospects/{$prospect->id}/postpone-activities", ['until' => today()->addWeeks(2)->toDateString()])->assertOk();
+
+        $this->assertTrue($call->fresh()->scheduled_at->isSameDay(today()->addWeeks(2)));
+        $this->assertTrue($mail->fresh()->scheduled_at->isSameDay(today()->addWeeks(2)->addDays(2)));
+        $this->assertSame(-28, $prospect->fresh()->days_skipped);
+    }
+    public function test_shared_activity_is_completed_for_all_due_prospects_of_the_user(): void {
+        $shared = MarketingInitiativeActivity::create([
+            'marketing_initiative_id' => $this->initiative->id,
+            'name'                    => 'LinkedIn post',
+            'day_offset'              => 1,
+            'description'             => '',
+            'is_shared'               => true,
+        ]);
+        $waiting = $this->prospect('FN:Waiting');
+        $held    = $this->prospect('FN:Held');
+        $held->update(['status' => 'on_hold']);
+        MarketingProspectActivity::whereIn('marketing_prospect_id', [$waiting->id, $held->id])
+            ->where('marketing_initiative_activity_id', $shared->id)
+            ->update(['scheduled_at' => today()->subDay()]);
+
+        $this->assertSame(1, $this->getJson('/api/marketing/shared-activities')->assertOk()->json('0.due_count'));
+        $this->postJson("/api/marketing/shared-activities/{$shared->id}/complete")->assertOk()->assertJson(['completed' => 1]);
+
+        $this->assertSame('completed', $waiting->activities()->where('marketing_initiative_activity_id', $shared->id)->firstOrFail()->status);
+        $this->assertSame('pending', $held->activities()->where('marketing_initiative_activity_id', $shared->id)->firstOrFail()->status);
+    }
     public function test_identity_matches_phone_formats_email_case_and_linkedin_slug(): void {
         $a = $this->prospect("FN:A\nTEL:+49 (0)541 98 77 12\nEMAIL:Erika@Example.com\nURL:https://www.linkedin.com/in/erika-muster/");
         $b = $this->prospect("FN:B\nTEL:0541-987712");

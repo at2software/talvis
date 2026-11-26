@@ -22,7 +22,7 @@ export class GitHubSubPlugin extends GitHubPlugin {
                     this._name = repo.full_name;
                     this._users = users.map(this.toUser);
                     this._labels = labels.map(this.toLabel);
-                    if (pluginLink && pluginLink.name != this._name) {
+                    if (pluginLink?.id && pluginLink.name != this._name) {
                         pluginLink.update({ name: this._name }).subscribe();
                     }
                     resolve();

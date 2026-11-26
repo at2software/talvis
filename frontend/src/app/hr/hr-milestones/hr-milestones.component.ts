@@ -16,6 +16,9 @@ import { ModalBaseService } from '@app/_modals/modal-base-service';
 import { ModalEditMilestoneComponent } from '@app/_modals/modal-edit-milestone/modal-edit-milestone.component';
 import { CapacityCalendarComponent, MilestoneReschedule } from '@app/profile/profile-milestones/capacity-calendar/capacity-calendar.component';
 import { ModalAddMilestoneComponent } from '@app/profile/profile-milestones/capacity-calendar/modal-add-milestone/modal-add-milestone.component';
+import { CustomGanttComponent } from '@app/projects/_shards/custom-gantt/custom-gantt.component';
+import { plannerView, toGanttRows } from '@app/profile/profile-milestones/planner-view';
+import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 
 const HORIZON_MONTHS = 3;
 
@@ -23,7 +26,7 @@ const HORIZON_MONTHS = 3;
     selector: 'hr-milestones',
     templateUrl: './hr-milestones.component.html',
     styleUrls: ['./hr-milestones.component.scss'],
-    imports: [ToolbarComponent, SpinnerComponent, CapacityCalendarComponent],
+    imports: [ToolbarComponent, SpinnerComponent, CapacityCalendarComponent, CustomGanttComponent, NgbTooltipModule],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HrMilestonesComponent {
@@ -36,6 +39,12 @@ export class HrMilestonesComponent {
 
     rangeStart = signal(dayjs().startOf('day'));
     rangeEnd = signal(dayjs().startOf('day').add(HORIZON_MONTHS, 'months'));
+    readonly timelineLabel = $localize`:@@i18n.planner.viewTimeline:timeline view`;
+    readonly calendarLabel = $localize`:@@i18n.planner.viewCalendar:calendar view`;
+    readonly #view = plannerView();
+    readonly view = this.#view.view;
+    readonly toggleView = this.#view.toggle;
+    readonly user = computed(() => this.#hrTeamService.user());
 
     readonly #userId = computed(() => this.#hrTeamService.userId());
     readonly #workloadParams = computed(() => {
@@ -58,6 +67,7 @@ export class HrMilestonesComponent {
 
     readonly #allMilestones = computed(() => this.projectGroups().flatMap((g) => g.milestones));
     readonly scheduledMilestones = computed(() => this.#allMilestones().filter((m) => m.started_at && m.due_at));
+    readonly ganttRows = computed(() => toGanttRows(this.projectGroups()));
 
     onRangeShift(months: number): void {
         this.rangeStart.update((d) => d.add(months, 'months'));

@@ -7,6 +7,7 @@ use App\Support\Letterhead;
 use Barryvdh\DomPDF\Facade\Pdf;
 use horstoeko\zugferd\codelists\ZugferdInvoiceType;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Facades\Storage;
 use setasign\Fpdi\Fpdi;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
@@ -195,7 +196,7 @@ class Document extends BaseModel {
     }
     public static function mergePdfs($relativePath, $uploadedFiles) {
         $finalPdf    = new Fpdi;
-        $mainPdfPath = storage_path('app/'.$relativePath);
+        $mainPdfPath = Storage::path($relativePath);
 
         self::importPdfIntoFpdi($finalPdf, $mainPdfPath);
 
@@ -220,8 +221,7 @@ class Document extends BaseModel {
                 self::importPdfIntoFpdi($finalPdf, $path);
             }
         }
-        $mergedPath = storage_path('app/'.$relativePath);
-        $finalPdf->Output($mergedPath, 'F');
+        $finalPdf->Output($mainPdfPath, 'F');
         return $changed;
     }
     private static function importPdfIntoFpdi(Fpdi $pdf, string $path): void {

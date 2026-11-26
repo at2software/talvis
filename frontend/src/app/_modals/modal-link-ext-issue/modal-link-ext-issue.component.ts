@@ -48,7 +48,7 @@ export class ModalLinkExtIssueComponent extends ModalBaseComponent<ExtIssueLinkR
 
     canConnect = (): boolean => {
         const tracker = this.activeTracker();
-        return !tracker || (tracker.instance.state !== 'no token' && tracker.instance.state !== 'connection fail');
+        return !tracker || tracker.instance.canConnect();
     };
 
     onIssueSelected(task: Task): void {

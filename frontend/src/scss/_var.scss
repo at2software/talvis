@@ -21,8 +21,10 @@ $header-total-text-height: $header-logo-size - (3 * $header-py);
 $header-font-size        : $header-nav-ratio * $header-total-text-height;
 $nav-font-size           : (1 - $header-nav-ratio) * $header-total-text-height;
 
-$shadow-light: #fff1;
-$shadow-dark : #0009;
+// Theme-aware: the raw per-theme values live in $theme-tokens in _colors.scss and are
+// emitted as CSS variables per [data-bs-theme] in _bootstrap-setup.scss.
+$shadow-light: var(--tv-shadow-light);
+$shadow-dark : var(--tv-shadow-dark);
 
 @function light-top($size: .125rem) { @return 0 (-$size) ($size) $shadow-light; }
 @function dark-top($size: .125rem) { @return 0 (-$size) ($size) $shadow-dark; }
@@ -32,10 +34,7 @@ $shadow-dark : #0009;
 @function shadow-down($size, $blur) { @return (-$size) (-$size) $blur $shadow-dark, $size $size $blur $shadow-light; }
 
 @function liquid-glass() {
-    @return
-        inset 0 1px 0 0 #fff2,
-        inset 0 8px 16px -6px #fff1,
-        inset 0 -6px 12px -4px #0004;
+    @return var(--tv-liquid-glass);
 }
 
 @function gradient($color) {

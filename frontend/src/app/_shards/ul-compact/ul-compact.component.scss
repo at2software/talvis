@@ -4,7 +4,7 @@
     .compact-list-row {
         list-style-type: none;
         height: 15px;
-        //background-color: #ffffff11;
+        //background-color: rgba(var(--tv-ink-rgb), 0.0667);
         position: relative;
         cursor: pointer;
         user-select: none;
@@ -16,7 +16,7 @@
     .compact-list-toggle-button {
         position: absolute;
         margin-top: -6px;
-        color: #999;
+        color: var(--tv-text-dim);
     }
 
     .compact-list-toggle-badge {

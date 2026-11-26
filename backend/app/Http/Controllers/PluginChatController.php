@@ -46,16 +46,18 @@ abstract class PluginChatController extends PluginController {
     public function _createOrUpdatePost(string $cacheId, string $channelId, string $message, $props, string $dataKey) {
         $props  = [...($props ?? []), 'cache_id' => $cacheId];
         $key    = static::getKey().'_'.$cacheId;
-        $postId = Cache::get($key) ?? $this->findExistingPost($cacheId, $channelId);
-        if (! $postId) {
-            $data   = $this->createPost($channelId, $message, $props);
-            $postId = $data[$dataKey] ?? null;
-        } else {
-            $this->updatePost($postId, $message, $props, $channelId);
-        }
-        if ($postId) {
-            Cache::put($key, $postId, now()->addHours(24));
-        }
+        Cache::lock("{$key}_lock", 30)->block(15, function () use ($key, $cacheId, $channelId, $message, $props, $dataKey) {
+            $postId = Cache::get($key) ?? $this->findExistingPost($cacheId, $channelId);
+            if (! $postId) {
+                $data   = $this->createPost($channelId, $message, $props);
+                $postId = $data[$dataKey] ?? null;
+            } else {
+                $this->updatePost($postId, $message, $props, $channelId);
+            }
+            if ($postId) {
+                Cache::put($key, $postId, now()->addHours(24));
+            }
+        });
     }
     protected function findExistingPost(string $cacheId, string $channelId): ?string {
         return null;

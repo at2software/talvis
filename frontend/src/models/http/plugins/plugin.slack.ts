@@ -43,6 +43,7 @@ export class SlackPlugin extends ChatPluginInstance {
     icon = () => 'slack';
     link = () => (this.enc ? this._baseUrl : '');
     getRootInstance = (): SlackPlugin => (this.baseInstance as SlackPlugin) ?? this;
+    override mention = (chatUserId: string): string => `<@${chatUserId}>`;
 
     getVcardAttributeName = () => 'X-NEXUS-SLACK';
     isUserInInstance = (userId: string): boolean => (this.baseInstance ? this.channelMembers.includes(userId) : userId in this.users);

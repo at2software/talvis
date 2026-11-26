@@ -9,6 +9,7 @@ import { tracked } from '@constants/tracked';
 import { EChartsSimpleOptions, ECHARTS_DEFAULT_TOOLTIP_OPTIONS } from '@charts/echarts-presets';
 import { dayjs } from '@constants/date/dates';
 import type { EChartsOption } from 'echarts';
+import { injectChartPalette } from '@charts/echarts-theme';
 
 @Component({
     selector: 'customer-prediction-bias-chart',
@@ -31,6 +32,7 @@ export class CustomerPredictionBiasChartComponent {
     readonly company = input.required<Company>();
     readonly trackedCompany = tracked(this.company);
     readonly #companyService = inject(CompanyService);
+    #palette = injectChartPalette();
 
     readonly #accuracy = modelListResource(
         () => this.company()?.id || undefined,
@@ -42,7 +44,8 @@ export class CustomerPredictionBiasChartComponent {
     #buildChart(data: MonthlyBiasDataDto[]): EChartsOption {
         const successColor = Color.fromVar('success').toHexString();
         const dangerColor = Color.fromVar('danger').toHexString();
-        const mutedColor = 'rgba(255,255,255,0.15)';
+        const palette = this.#palette();
+        const mutedColor = palette.ink(0.15);
 
         const dataMap = new Map(data.map((d) => [d.period, d]));
         const months: string[] = [];
@@ -87,7 +90,7 @@ export class CustomerPredictionBiasChartComponent {
                 markLine: {
                     silent: true,
                     symbol: 'none',
-                    lineStyle: { color: 'rgba(255,255,255,0.2)', type: 'solid', width: 1 },
+                    lineStyle: { color: palette.ink(0.2), type: 'solid', width: 1 },
                     data: [{ yAxis: 0 }],
                     label: { show: false },
                 },

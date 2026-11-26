@@ -151,7 +151,7 @@ $lane-height: 24px;
     z-index: 2;
     font-weight: 700;
     line-height: 1.1;
-    color: #fff6;
+    color: rgba(var(--tv-ink-rgb), 0.4);
     text-shadow: liquid-glass();
 }
 
@@ -227,8 +227,8 @@ $lane-height: 24px;
     }
 
     &.bg-not-started {
-        background-color: #666 !important;
-        border-color: #666 !important;
+        background-color: var(--tv-text-faint) !important;
+        border-color: var(--tv-text-faint) !important;
     }
 
     .bar-label {

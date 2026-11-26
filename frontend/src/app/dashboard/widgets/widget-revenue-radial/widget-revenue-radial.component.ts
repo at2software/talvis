@@ -166,7 +166,7 @@ export class WidgetRevenueRadialComponent {
         g.append('path')
             .datum(medianPoints)
             .attr('d', line<RadialPoint>().x((d) => d.x).y((d) => d.y).curve(curveCardinalClosed.tension(0.5)) as unknown as string)
-            .attr('fill', 'none').attr('stroke', '#ffffff').attr('stroke-width', 2);
+            .attr('fill', 'none').style('stroke', 'var(--tv-text-strong)').attr('stroke-width', 2);
 
         svg.append('g').attr('text-anchor', 'middle').call((g) =>
             g.selectAll('g').data(monthNames).join('g')
@@ -180,7 +180,7 @@ export class WidgetRevenueRadialComponent {
                             const angle = ((x(i.toString())! + x.bandwidth() / 2) * 180) / Math.PI - 90;
                             return angle > 0 && angle < 180 ? 'rotate(90)translate(0,3)' : 'rotate(-90)translate(0,3)';
                         })
-                        .style('font-size', '11px').style('font-weight', '500').style('fill', '#adb5bd')
+                        .style('font-size', '11px').style('font-weight', '500').style('fill', 'var(--bs-secondary-color)')
                         .text((d: string) => d)
                 )
         );

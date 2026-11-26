@@ -47,9 +47,6 @@ export class WidgetProjectManagerComponent extends BaseWidgetComponent {
     });
     override value = this.headline(this.#cashflow, () => this.#acquisitions().reduce((a, b) => a + (b.net ?? 0), 0) + this.#projects().reduce((a, b) => a + (b.net_remaining ?? 0), 0));
 
-    getProbabilityTooltip = (project: Project) =>
-        $localize`:@@i18n.common.probability:probability` + ': ' + ((project.lead_probability || 0) * 100).toFixed(1) + '%';
-
     isCompact = (project: Project) => !project.getBadge();
     getDisplayValue = (project: Project) => project.var.projectType === 'acquisition' ? project.net : project.net_remaining;
 }

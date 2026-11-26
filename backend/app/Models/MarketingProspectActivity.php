@@ -167,7 +167,7 @@ class MarketingProspectActivity extends BaseModel {
             ->current()
             ->whereHas('marketingInitiativeActivity', fn ($q) => $q->whereIn('quick_action', $channel->quickActions()))
             ->whereHas('marketingProspect', fn ($q) => $q
-                ->whereNotIn('status', ['unresponsive', 'disqualified', 'converted'])
+                ->whereNotIn('status', MarketingProspect::INACTIVE_STATUSES)
                 ->when($userId, fn ($q) => $q->where('user_id', $userId))
                 ->when($initiativeId, fn ($q) => $q->where('marketing_initiative_id', $initiativeId)))
             ->orderBy('scheduled_at')
@@ -179,6 +179,7 @@ class MarketingProspectActivity extends BaseModel {
             'marketingProspect.companyContact.contact',
             'marketingProspect.companyContact.company',
             'marketingProspect.touchpoints' => fn ($q) => $q->with('user')->latest('occurred_at'),
+            'marketingProspect.activities'  => fn ($q) => $q->where('status', 'pending')->orderBy('scheduled_at')->with('marketingInitiativeActivity.i18n'),
         ])
             ->whereIn('id', $due->unique('marketing_prospect_id')->pluck('id'))
             ->orderBy('scheduled_at')

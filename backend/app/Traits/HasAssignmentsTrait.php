@@ -4,6 +4,7 @@ namespace App\Traits;
 
 use App\Jobs\ChatAddUsersJob;
 use App\Models\Assignment;
+use App\Models\AssignmentRole;
 use App\Models\CompanyContact;
 use App\Models\Project;
 use App\Models\User;
@@ -27,7 +28,7 @@ trait HasAssignmentsTrait {
         return $this->morphedByMany(CompanyContact::class, 'assignee', 'assignments', 'parent_id');
     }
     public function clearAssignedTimeBudgets(): int {
-        return $this->assignees()->where('assignee_type', User::class)->update(['hours_planned' => 0, 'hours_weekly' => 0]);
+        return $this->assignees()->whereUserAssignee()->update(['hours_planned' => 0, 'hours_weekly' => 0]);
     }
     public function addAssigneeFromRequest(?Request $request = null) {
         $request = $request ?? request();
@@ -52,7 +53,7 @@ trait HasAssignmentsTrait {
         }
         return $newAssignment;
     }
-    public function addAssignee(User|CompanyContact $obj, $role = null) {
+    public function addAssignee(User|CompanyContact $obj, string ...$roles) {
         if (Assignment::whereParentAndAssignee($this, $obj)->exists()) {
             return null;
         }
@@ -60,10 +61,10 @@ trait HasAssignmentsTrait {
         $a = new Assignment;
         $a->parent()->associate($this);
         $a->assignee()->associate($obj);
-        $a->flags   = 0;
-        $a->role_id = $role ?: ($obj instanceof CompanyContact ? 3 : 1);
+        $a->flags = 0;
         $a->save();
-        $a->load('assignee', 'parent');
+        $a->assignRoles(...($roles ?: [$obj instanceof CompanyContact ? AssignmentRole::CUSTOMER : AssignmentRole::PROJECT_MANAGER]));
+        $a->load('assignee', 'parent', 'roles');
         return $a;
     }
     public function setMainContactByAssignment(Assignment $assignment) {

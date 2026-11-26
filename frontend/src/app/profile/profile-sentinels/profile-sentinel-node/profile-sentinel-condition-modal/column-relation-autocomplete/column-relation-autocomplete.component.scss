@@ -12,7 +12,7 @@
   right: 0;
   z-index: 1000;
   background: gradient($bg-darker);
-  border: 1px solid #ddd;
+  border: 1px solid var(--bs-border-color);
   max-height: 200px;
   overflow-y: auto;
   list-style: none;
@@ -27,5 +27,5 @@
 
 .autocomplete-dropdown li.active,
 .autocomplete-dropdown li:hover {
-  background-color: #f0f0f0;
+  background-color: var(--tv-surface-hover);
 }

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, effect, inject, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, effect, inject, input, untracked } from '@angular/core';
 import { EchartsCardComponent } from './echarts-card.component';
 import { ParamService } from '@models/param/param.service';
 import { dayjs } from '@constants/date/dates';
@@ -19,6 +19,7 @@ export abstract class EchartsParamCardComponent extends EchartsCardComponent {
     offset = input<'none' | 'month' | 'year'>('none');
 
     #paramService = inject(ParamService);
+    #lastResult: ParamChartSeriesDto[] | undefined;
 
     constructor() {
         super();
@@ -28,6 +29,16 @@ export abstract class EchartsParamCardComponent extends EchartsCardComponent {
             this.roles();
             this.reload();
         });
+        // Series colors are resolved from CSS variables when the series are built; rebuild them on a theme switch.
+        effect(() => {
+            this.theme();
+            untracked(() => this.#lastResult && this.#applySeries(this.#lastResult));
+        });
+    }
+
+    #applySeries(result: ParamChartSeriesDto[]) {
+        this.#lastResult = result;
+        this.updateSeries(result);
     }
 
     seriesLength = () => this.keyPath()?.split(',').length ?? 0;
@@ -41,13 +52,13 @@ export abstract class EchartsParamCardComponent extends EchartsCardComponent {
         }
         if (this.chartData()) {
             const dataArray = this.chartData() ?? [];
-            return this.updateSeries(dataArray);
+            return this.#applySeries(dataArray);
         }
         if (this.keyPath()) {
             this.chartOptions.update((o) => ({ ...o, series: [] }));
             this.echartsInstance()?.clear();
             const start = dayjs().startOf('month').subtract(36, 'month');
-            this.#paramService.history(this.keyPath()!, start.unix(), 'month').subscribe((_) => this.updateSeries(_));
+            this.#paramService.history(this.keyPath()!, start.unix(), 'month').subscribe((_) => this.#applySeries(_));
         }
     }
 }

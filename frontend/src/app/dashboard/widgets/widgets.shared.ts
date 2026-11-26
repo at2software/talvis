@@ -18,4 +18,6 @@ import { NgxEchartsDirective } from 'ngx-echarts';
 import { CompactItemDirective } from '@shards/ul-compact/CompactItemDirective';
 import { UlCompactComponent } from '@shards/ul-compact/ul-compact.component';
 
+export { injectChartPalette, themedChartOptions, type ChartPalette } from '@charts/echarts-theme';
+
 export const WIDGET_SHARED = [Nx, NComponent, AvatarComponent, ProjectComponent, MoneyShortPipe, ProgressBarComponent, DatePipe, DecimalPipe, NgStyle, PercentPipe, WidgetOptionsComponent, MoneyPipe, NgbTooltipModule, EchartsComponent, EchartsCardComponent, EchartsRangeCardComponent, UlCompactComponent, CompactItemDirective, RouterModule, LoadingPipe, EmptyStateComponent, NgxEchartsDirective];

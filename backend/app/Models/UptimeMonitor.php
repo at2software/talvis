@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Traits\CustomModelTrait;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class UptimeMonitor extends BaseModel {
@@ -65,19 +66,24 @@ class UptimeMonitor extends BaseModel {
             ->withPivot(['notify_via_email', 'notify_via_chat', 'notify_on_recovery'])
             ->withTimestamps();
     }
-    public function getUptimePercentageAttribute(): float {
-        $totalChecks = $this->checks()->count();
+    public function uptimePercentageSince(?Carbon $since = null): float {
+        $checks      = fn () => $this->checks()->when($since, fn ($q) => $q->where('checked_at', '>=', $since));
+        $totalChecks = $checks()->count();
         if ($totalChecks === 0) {
             return 100.0;
         }
 
-        $successfulChecks = $this->checks()->where('status', 'up')->count();
+        $successfulChecks = $checks()->where('status', 'up')->count();
         return round(($successfulChecks / $totalChecks) * 100, 2);
     }
-    public function getAverageResponseTimeAttribute(): ?int {
-        return $this->checks()
+    public function getUptimePercentageAttribute(): float {
+        return $this->uptimePercentageSince();
+    }
+    public function getAverageResponseTimeAttribute(): ?float {
+        $average = $this->checks()
             ->where('status', 'up')
             ->whereNotNull('response_time')
             ->avg('response_time');
+        return $average ? round($average) : null;
     }
 }

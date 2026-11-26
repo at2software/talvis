@@ -33,6 +33,17 @@ export abstract class VcardClass extends Serializable {
     };
 
 
+    /**
+     * Takes over the result of an avatar upload (`POST {path}/avatar`) without reloading the page: the
+     * new `icon` (versioned with `updated_at`) changes the avatar url, so the browser fetches the new image.
+     * Falls back to a refresh if the response carries no icon.
+     */
+    applyAvatarUpload(responses: unknown[] = []): void {
+        const body = responses.find((r): r is Dictionary => !!r && typeof r === 'object' && typeof (r as Dictionary)['icon'] === 'string');
+        if (body) this.patch({ icon: body['icon'], ...(body['updated_at'] ? { updated_at: body['updated_at'] } : {}) });
+        else this.refresh().subscribe();
+    }
+
     static readonly #descAdr = ['post office box', 'apartment or suite number', 'street address', 'locality (e.g., city)', 'region (e.g., state or province)', 'postal code', 'country name'];
     static readonly #descN = ['Family Names', 'Given Names', 'Additional Names', 'Honorific Prefixes', 'Honorific Suffixes'];
     static readonly #SALUTATIONS: Dictionary<Dictionary<string>> = {
@@ -67,7 +78,6 @@ export abstract class VcardClass extends Serializable {
     getFormality      = computed(() => this.#getFirstValue('X-FORMALITY', 0, 'formal'));
     getLang           = computed(() => this.#getFirstValue('X-LANG', 0, 'de'));
     css               = computed(() => Color.posToHex(parseInt(this.snapshot().id)));
-    isEuropeanCountry = computed(() => nx().global.euCountries?.contains(this.countryCode() ?? '-x-'));
 
     salutation = computed(() => {
         const lang = this.#getFirstValue('X-LANG', 0, 'de');

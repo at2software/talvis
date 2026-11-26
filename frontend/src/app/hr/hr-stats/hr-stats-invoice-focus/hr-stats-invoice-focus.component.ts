@@ -5,11 +5,12 @@ import { StatsService } from '@models/stats.service';
 import { GlobalService } from '@models/global.service';
 import { NgxEchartsModule } from 'ngx-echarts';
 import { Color } from '@constants/Color';
-import { EChartsSimpleOptions, ECHARTS_DONUT_ITEM_STYLE, ECHARTS_DONUT_SERIES, ECHARTS_DONUT_TRACK_COLOR } from '@charts/echarts-presets';
+import { EChartsSimpleOptions, ECHARTS_DONUT_ITEM_STYLE, ECHARTS_DONUT_SERIES } from '@charts/echarts-presets';
 import { EmptyStateComponent } from '@shards/empty-state/empty-state.component';
 import type { EChartsOption } from 'echarts';
 import { ChartAxisTooltipParamDto } from '@models/_core/api-response';
 import { SpinnerComponent } from '@shards/spinner/spinner.component';
+import { injectChartPalette } from '@charts/echarts-theme';
 
 interface FocusAccuracyData {
     id: number;
@@ -35,6 +36,7 @@ interface FocusAccuracyData {
 export class HrStatsInvoiceFocusComponent {
     #statsService = inject(StatsService);
     #global = inject(GlobalService);
+    #palette = injectChartPalette();
 
     readonly #focusAccuracy = modelListResource<FocusAccuracyData>(() => this.#statsService.showFocusAccuracy());
     readonly loaded = this.#focusAccuracy.hasValue;
@@ -151,7 +153,7 @@ export class HrStatsInvoiceFocusComponent {
                         {
                             value: remaining,
                             name: $localize`:@@i18n.hr.unfocused:Unfocused`,
-                            itemStyle: { color: ECHARTS_DONUT_TRACK_COLOR, ...ECHARTS_DONUT_ITEM_STYLE },
+                            itemStyle: { color: this.#palette().track, ...ECHARTS_DONUT_ITEM_STYLE },
                         },
                     ],
                     label: {
@@ -160,7 +162,7 @@ export class HrStatsInvoiceFocusComponent {
                         formatter: `${overallCountAccuracy.toFixed(0)}%`,
                         fontSize: 16,
                         fontWeight: 300,
-                        color: '#ccc',
+                        color: this.#palette().textSoft,
                     },
                     labelLine: {
                         show: false,

@@ -43,7 +43,13 @@
 
 <div class="hstack">
     <ng-content></ng-content>
-    <button type="button" class="btn btn-primary ms-auto hstack gap-1" [disabled]="!canSubmit()" (click)="submit()">
+    @if (hasNextTask()) {
+        <button type="button" class="btn btn-plain text-primary ms-auto hstack gap-1" [disabled]="!canSubmit()" (click)="submit(true)">
+            <i>playlist_add_check</i>
+            <span i18n="@@i18n.marketing.touchpoint_save_next_task">save and next task</span>
+        </button>
+    }
+    <button type="button" class="btn btn-primary hstack gap-1" [class.ms-auto]="!hasNextTask()" [class.ms-2]="hasNextTask()" [disabled]="!canSubmit()" (click)="submit()">
         <i>check</i>
         <span i18n="@@i18n.marketing.touchpoint_save">save</span>
     </button>

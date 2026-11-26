@@ -40,15 +40,13 @@ class ZugferdInvoiceBuilder {
             throw new InvoiceDataException('Neither Param ME_EMAIL nor mail.from.address is set; XRechnung requires the seller electronic address (BT-58).');
         }
 
-        $sellerName    = Company::myName();
-        $sellerCountry = trim((string)$me->vcard?->getCountryCode());
-
-        $isReverseCharge = self::isReverseCharge(
-            $sellerCountry,
-            trim((string)$company->vcard?->getCountryCode()),
-            (bool)$company->needs_vat_handling,
-            $company->vat_id
-        );
+        $sellerName   = Company::myName();
+        $vatCategory  = $company->vatCategory($me);
+        $vatExemption = match ($vatCategory) {
+            'AE'    => [__('pdf.vat_reverse_charge', [], 'de'), 'VATEX-EU-AE'],
+            'O'     => [__('pdf.vat_not_taxable', [], 'de'), 'VATEX-EU-O'],
+            default => null,
+        };
 
         $billable   = self::billableItems($items);
         $totalGross = round($billable->sum('gross'), 2);
@@ -68,7 +66,7 @@ class ZugferdInvoiceBuilder {
             ->addDocumentSellerGlobalId(Param::get('ME_SWIFT')->value, '0021')
             ->addDocumentSellerTaxRegistration('FC', Param::get('ME_TAX_ID')->value);
 
-        if (! $isReverseCharge) {
+        if ($vatCategory !== 'O') {
             $document->addDocumentSellerTaxRegistration('VA', Param::get('ME_VAT_ID')->value);
         }
 
@@ -90,7 +88,7 @@ class ZugferdInvoiceBuilder {
             ->setDocumentBuyerContact('', '', '', '', $buyerEmail)
             ->setDocumentBuyerCommunication('EM', $buyerEmail);
 
-        if ($isReverseCharge) {
+        if ($vatCategory === 'AE') {
             $document->addDocumentBuyerTaxRegistration('VA', $company->vat_id);
         }
 
@@ -103,17 +101,6 @@ class ZugferdInvoiceBuilder {
 
             $netPrice = $grossPrice > $discountedPrice ? $discountedPrice : $grossPrice;
 
-            $vatRate     = floatval($item['vat_rate']);
-            $vatCategory = 'S';
-
-            if (! $company->needs_vat_handling) {
-                $vatCategory = 'G';
-                $vatRate     = 0.0;
-            } elseif ($isReverseCharge) {
-                $vatCategory = 'O';
-                $vatRate     = 0.0;
-            }
-
             $document->addNewPosition($k)
                 ->setDocumentPositionProductDetails(strip_tags($item['text']), '', $item['product_id'])
                 ->setDocumentPositionGrossPrice($grossPrice)
@@ -125,25 +112,15 @@ class ZugferdInvoiceBuilder {
                 $document->addDocumentPositionGrossPriceAllowanceCharge($priceAllowance, false);
             }
 
-            if ($vatCategory === 'O') {
-                $document->addDocumentPositionTax($vatCategory, 'VAT', null, null, 'Steuerfrei nach §4 Nummer 1b in Verbindung mit §6a UStG');
-            } elseif ($vatCategory === 'G') {
-                $document->addDocumentPositionTax($vatCategory, 'VAT', $vatRate, null, 'Steuerfreie Ausfuhrlieferung gemäß §4 Nr. 1a UStG i.V.m. §6 UStG');
-            } else {
-                $document->addDocumentPositionTax($vatCategory, 'VAT', $vatRate);
-            }
+            $document->addDocumentPositionTax($vatCategory, 'VAT', self::lineVatRate($vatCategory, floatval($item['vat_rate'])));
 
             $document->setDocumentPositionLineSummation(floatval($item['net']));
         }
 
         $calculatedVatTotal = 0.0;
 
-        if (! $company->needs_vat_handling) {
-            $document->addDocumentTax('G', 'VAT', $totalNet, 0.0, 0.0,
-                'Steuerfreie Ausfuhrlieferung gemäß §4 Nr. 1a UStG i.V.m. §6 UStG', null);
-        } elseif ($isReverseCharge) {
-            $document->addDocumentTax('O', 'VAT', $totalNet, 0.0, 0.0,
-                'Steuerfrei nach §4 Nummer 1b in Verbindung mit §6a UStG');
+        if ($vatExemption) {
+            $document->addDocumentTax($vatCategory, 'VAT', $totalNet, 0.0, 0.0, ...$vatExemption);
         } else {
             foreach (self::vatBreakdownFromItems($billable) as $breakdown) {
                 $calculatedVatTotal += $breakdown['tax_amount'];
@@ -182,16 +159,12 @@ class ZugferdInvoiceBuilder {
 
         return (new ZugferdDocumentPdfMerger($document->getContent(), $pdf))->generateDocument()->downloadString('');
     }
-    private static function isReverseCharge(string $sellerCountry, string $buyerCountry, bool $buyerInEu, ?string $buyerVatId): bool {
-        if (! $buyerInEu || trim((string)$buyerVatId) === '') {
-            return false;
-        }
-
-        if ($buyerCountry === '' || $buyerCountry === $sellerCountry) {
-            return false;
-        }
-
-        return true;
+    private static function lineVatRate(string $vatCategory, float $rate): ?float {
+        return match ($vatCategory) {
+            'O'     => null,
+            'AE'    => 0.0,
+            default => $rate,
+        };
     }
     private static function billableItems($items): Collection {
         return collect($items)

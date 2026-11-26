@@ -46,7 +46,7 @@ export class ModalReviewVacationComponent extends ModalBaseComponent<ReviewDecis
         }
     }
 
-    isOpen = () => this.vacation.state === Vacation.STATE_REQUESTED;
+    isOpen = () => this.vacation.isRequested();
     canWithdraw = () => this.isOpen() && this.isOwner();
     canDecide = () => this.isOpen() && this.isHR();
 

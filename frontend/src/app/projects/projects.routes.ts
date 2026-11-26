@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { Project } from '@models/project/project.model';
 import { ProjectDetailGuard } from './project-details.guard';
+import { EXTENSIONS } from '@app/extensions';
 
 export const PROJECTS_ROUTES: Routes = [
     {
@@ -75,6 +76,7 @@ export const PROJECTS_ROUTES: Routes = [
                         data: {
                             nav: {
                                 title: $localize`:@@i18n.invoicing.downPayment:down payment`,
+                                visibleWhen: (project: Project) => !project || project.showsDownpaymentInvoicing(),
                             },
                         },
                     },
@@ -83,7 +85,8 @@ export const PROJECTS_ROUTES: Routes = [
                         loadComponent: () => import('./id/project-invoicing/project-invoicing.component').then((m) => m.ProjectInvoicingComponent),
                         data: {
                             nav: {
-                                title: $localize`:@@i18n.invoicing.support:support`,
+                                title: $localize`:@@i18n.invoicing.recurring:recurring`,
+                                visibleWhen: (project: Project) => !!project?.showsRecurringInvoicing(),
                             },
                         },
                     },
@@ -93,6 +96,7 @@ export const PROJECTS_ROUTES: Routes = [
                         data: {
                             nav: {
                                 title: $localize`:@@i18n.invoicing.final:final invoice`,
+                                visibleWhen: (project: Project) => !project || project.showsFinalInvoicing(),
                             },
                         },
                     },
@@ -136,15 +140,7 @@ export const PROJECTS_ROUTES: Routes = [
                     },
                 },
             },
-            {
-                path: 'flow',
-                loadComponent: () => import('./id/project-flow/project-flow.component').then((m) => m.ProjectFlowComponent),
-                data: {
-                    nav: {
-                        title: $localize`:@@i18n.flow.tab:flow`,
-                    },
-                },
-            },
+            ...EXTENSIONS.flatMap((_) => _.projectRoutes ?? []),
             {
                 path: 'debriefing',
                 loadComponent: () => import('./id/project-debriefing/project-debriefing.component').then((m) => m.ProjectDebriefingComponent),

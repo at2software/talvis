@@ -4,6 +4,7 @@ namespace Tests\Unit\Services;
 
 use App\Enums\InvoiceItemType;
 use App\Exceptions\InvoiceDataException;
+use App\Models\Company;
 use App\Services\ZugferdInvoiceBuilder;
 use ReflectionClass;
 use Tests\TestCase;
@@ -15,25 +16,31 @@ class ZugferdInvoiceBuilderTest extends TestCase {
 
         return $m->invokeArgs(null, $args);
     }
-    public function test_a_domestic_sale_is_not_reverse_charge_even_with_a_vat_id(): void {
-        self::assertFalse($this->invokePrivate('isReverseCharge', 'DE', 'DE', true, 'DE123456789'));
+    public function test_a_domestic_sale_is_taxed_normally_even_with_a_vat_id(): void {
+        self::assertSame('S', Company::vatCategoryBetween('DE', 'DE', true, 'DE123456789'));
     }
     public function test_the_same_holds_for_an_installation_in_another_member_state(): void {
-        self::assertFalse($this->invokePrivate('isReverseCharge', 'AT', 'AT', true, 'ATU12345678'));
-        self::assertTrue($this->invokePrivate('isReverseCharge', 'AT', 'DE', true, 'DE123456789'));
+        self::assertSame('S', Company::vatCategoryBetween('AT', 'AT', true, 'ATU12345678'));
+        self::assertSame('AE', Company::vatCategoryBetween('AT', 'DE', true, 'DE123456789'));
     }
     public function test_a_cross_border_eu_sale_with_a_vat_id_is_reverse_charge(): void {
-        self::assertTrue($this->invokePrivate('isReverseCharge', 'DE', 'FR', true, 'FR12345678901'));
+        self::assertSame('AE', Company::vatCategoryBetween('DE', 'FR', true, 'FR12345678901'));
     }
     public function test_a_cross_border_eu_sale_without_a_vat_id_is_taxed_normally(): void {
-        self::assertFalse($this->invokePrivate('isReverseCharge', 'DE', 'FR', true, null));
-        self::assertFalse($this->invokePrivate('isReverseCharge', 'DE', 'FR', true, '   '));
+        self::assertSame('S', Company::vatCategoryBetween('DE', 'FR', true, null));
+        self::assertSame('S', Company::vatCategoryBetween('DE', 'FR', true, '   '));
     }
-    public function test_a_buyer_outside_the_eu_is_never_reverse_charge(): void {
-        self::assertFalse($this->invokePrivate('isReverseCharge', 'DE', 'CH', false, 'CHE123456789'));
+    public function test_a_buyer_outside_the_eu_vat_territory_is_not_taxable(): void {
+        self::assertSame('O', Company::vatCategoryBetween('DE', 'CH', false, 'CHE123456789'));
+        self::assertSame('O', Company::vatCategoryBetween('DE', 'DE', false, null));
     }
     public function test_an_unknown_buyer_country_falls_back_to_charging_vat(): void {
-        self::assertFalse($this->invokePrivate('isReverseCharge', 'DE', '', true, 'DE123456789'));
+        self::assertSame('S', Company::vatCategoryBetween('DE', '', true, 'DE123456789'));
+    }
+    public function test_lines_outside_the_tax_scope_carry_no_rate_and_reverse_charge_lines_carry_zero(): void {
+        self::assertNull($this->invokePrivate('lineVatRate', 'O', 19.0));
+        self::assertSame(0.0, $this->invokePrivate('lineVatRate', 'AE', 19.0));
+        self::assertSame(19.0, $this->invokePrivate('lineVatRate', 'S', 19.0));
     }
     public function test_billable_items_keeps_only_types_that_add_to_the_invoice(): void {
         $items = [

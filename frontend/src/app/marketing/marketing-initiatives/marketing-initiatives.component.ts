@@ -60,9 +60,7 @@ export class MarketingInitiativesComponent {
         const all = this.allInitiatives();
         return {
             total: all.length,
-            active: all.filter((i) => i.status === 'active').length,
-            paused: all.filter((i) => i.status === 'paused').length,
-            completed: all.filter((i) => i.status === 'completed').length,
+            ...MarketingInitiative.countByStatus(all),
             subscribed: all.filter((i) => this.#isSubscribed(i)).length,
         };
     });
@@ -96,7 +94,7 @@ export class MarketingInitiativesComponent {
 
     filterByStatus = (status: string) => this.statusFilter.set(status);
     toggleSubscribed = () => this.onlySubscribed.update((v) => !v);
-    #isSubscribed = (initiative: MarketingInitiative) => initiative.users?.some((u) => u.id === this.#global.user?.id) ?? false;
+    #isSubscribed = (initiative: MarketingInitiative) => initiative.hasUser(this.#global.user?.id);
 
     resetCreateForm() {
         this.newInitiative = { name: '', description: '', status: 'active' };

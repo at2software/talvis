@@ -1,5 +1,6 @@
 import { Dictionary } from '@constants/constants';
-import { catchError, forkJoin, map, Observable, of } from 'rxjs';
+import { HttpErrorResponse } from '@angular/common/http';
+import { catchError, forkJoin, map, Observable, of, switchMap, throwError } from 'rxjs';
 import { PluginInstance } from './plugin.instance';
 import { ITaskPlugin } from '@models/task/task.plugin.interface';
 import { Task } from '@models/task/task.model';
@@ -9,8 +10,30 @@ import { PluginLink } from '@models/plugin-link/plugin-link.model';
 
 interface GitLabUser { id: number; name: string; username?: string; avatar_url?: string; email?: string; is_admin?: boolean; }
 interface GitLabIssue { iid: number; project_id: number; title: string; description?: string; assignee?: { id: number; name: string }; author?: { name?: string; email?: string; username?: string }; state: string; web_url: string; labels: string[]; references: { full: string }; _links: { project: string }; created_at?: string; }
+export interface GitLabBranch { name: string; default: boolean; protected: boolean; }
+export interface GitLabMergeRequest { iid: number; state: string; sha?: string; detailed_merge_status?: string; has_conflicts?: boolean; diff_refs?: { base_sha: string; start_sha: string; head_sha: string } | null; web_url: string; source_branch: string; target_branch: string; }
+export interface GitLabCompare { diffs: GitLabDiffFile[]; }
+export interface GitLabDiffFile { old_path: string; new_path: string; new_file: boolean; deleted_file: boolean; renamed_file: boolean; diff: string; too_large?: boolean; collapsed?: boolean; }
+export interface GitLabPipeline { id: number; ref: string; web_url: string; }
 interface GitLabEvent { action_name?: string; author?: { name?: string; email?: string; username?: string }; push_data?: { ref?: string; commit_count?: number }; created_at?: string; }
 interface GitLabLabel { id: number; name: string; color: string; }
+interface GitLabProject { id: number; }
+
+/** Why a link input could not be resolved into GitLab project ids. */
+export type GitLabLinkErrorReason = 'empty' | 'foreign-host' | 'not-found' | 'empty-group';
+
+export class GitLabLinkError extends Error {
+    constructor(
+        readonly reason: GitLabLinkErrorReason,
+        readonly input: string,
+    ) {
+        super(`GitLab link input "${input}" could not be resolved: ${reason}`);
+        this.name = 'GitLabLinkError';
+    }
+}
+
+const GROUP_PAGE_SIZE = 100;
+const GROUP_MAX_PAGES = 50;
 
 export interface IRepositoryPlugin {
     IRepositoryPluginProperty: boolean;
@@ -61,7 +84,64 @@ export class GitLabPlugin extends PluginInstance implements ITaskPlugin, IReposi
     searchIssues = (query: string): Observable<Task[]> =>
         this.aget(`issues?assignee_id=${this.myUser().id}&search=${encodeURIComponent(query)}&per_page=30`, {}, this.toTask);
     showProject = () => this.get('');
+    hasToken = (): boolean => !!this.enc?.value?.token && this.state !== 'no token';
+    branches = (): Observable<GitLabBranch[]> => this.aget<GitLabBranch>('repository/branches', { per_page: 100 });
+    fileExists = (filePath: string, ref: string): Observable<boolean> =>
+        this.http().get(`${this.baseUrl()}repository/files/${encodeURIComponent(filePath)}`, { params: { ref } }).pipe(map(() => true), catchError(() => of(false)));
+    commitFile = (filePath: string, content: string, branch: string, message: string): Observable<string> =>
+        this.fileExists(filePath, branch).pipe(
+            switchMap((exists) => this.post('repository/commits', { branch, commit_message: message, actions: [{ action: exists ? 'update' : 'create', file_path: filePath, content }] })),
+            map(() => branch),
+        );
+    override newPluginText: string = 'ID or URL (project/group):';
+
+    /**
+     * Turns what a user pastes into the link dialog into GitLab project ids: a numeric id, a project URL
+     * or a group URL (resolved into all non-archived repos, subgroups included). Errors with a
+     * {@link GitLabLinkError}. GitLab answers 404 both for "does not exist" and for "no access".
+     */
+    resolveLinkInput = (input: string): Observable<string[]> => {
+        const text = (input ?? '').trim();
+        if (!text) return throwError(() => new GitLabLinkError('empty', text));
+        if (/^\d+$/.test(text)) return of([text]);
+
+        const base = this.#gitLabBase();
+        let path = text;
+        if (/^[a-z][a-z0-9+.-]*:\/\//i.test(text)) {
+            if (!text.toLowerCase().startsWith(base.toLowerCase() + '/')) return throwError(() => new GitLabLinkError('foreign-host', text));
+            path = text.substring(base.length);
+        }
+        path = path
+            .replace(/[?#].*$/, '')
+            .replace(/\/-(\/.*)?$/, '')
+            .replace(/\/+$/, '')
+            .replace(/\.git$/i, '')
+            .replace(/^\/+|\/+$/g, '');
+        if (!path) return throwError(() => new GitLabLinkError('not-found', text));
+
+        const projectId = /^projects\/(\d+)$/.exec(path);
+        if (projectId) return of([projectId[1]]);
+        if (path.startsWith('groups/')) return this.#resolveGroup(path.substring('groups/'.length), text);
+
+        return this.#http()
+            .get<GitLabProject>(`${base}/api/v4/projects/${encodeURIComponent(path)}`)
+            .pipe(
+                map((project) => {
+                    if (project?.id === undefined || project.id === null) throw new GitLabLinkError('not-found', text);
+                    return [String(project.id)];
+                }),
+                catchError((err: unknown) => (err instanceof HttpErrorResponse && err.status === 404 ? this.#resolveGroup(path, text) : throwError(() => err))),
+            );
+    };
+
     toPluginLink = (id: string) => PluginLink.fromJson({ type: 'git', url: this.enc.value.url + 'projects/' + id });
+    mergeRequest = (iid: number): Observable<GitLabMergeRequest> => this.get<GitLabMergeRequest>(`merge_requests/${iid}`);
+    mergeRequestDiffs = (iid: number): Observable<GitLabDiffFile[]> => this.aget<GitLabDiffFile>(`merge_requests/${iid}/diffs`, { per_page: 100 });
+    compare = (from: string, to: string): Observable<GitLabCompare> => this.get<GitLabCompare>('repository/compare', { from, to });
+    acceptMergeRequest = (iid: number, sha?: string | null): Observable<GitLabMergeRequest> => this.put<GitLabMergeRequest>(`merge_requests/${iid}/merge`, sha ? { sha } : {});
+    createMergeRequest = (source: string, target: string, title: string): Observable<GitLabMergeRequest> =>
+        this.post<GitLabMergeRequest>('merge_requests', { source_branch: source, target_branch: target, title, remove_source_branch: false });
+    createPipeline = (ref: string): Observable<GitLabPipeline> => this.post<GitLabPipeline>('pipeline', { ref });
 
     create = (_: Task) => this.post(_.project_url + 'issues', this.toGitIssue(_));
     close = (_: Task) => this.put(_.project_url + 'issues/' + _.id, { state_event: 'close' });
@@ -149,6 +229,22 @@ export class GitLabPlugin extends PluginInstance implements ITaskPlugin, IReposi
         return u;
     };
 
+    #gitLabBase = (): string => (this.getRootInstance().enc ?? this.enc).value.url.replace(/\/+$/, '');
+    #http = () => this.getRootInstance().http() ?? this.http();
+    #resolveGroup = (groupPath: string, input: string): Observable<string[]> => {
+        if (!groupPath) return throwError(() => new GitLabLinkError('not-found', input));
+        const url = `${this.#gitLabBase()}/api/v4/groups/${encodeURIComponent(groupPath)}/projects`;
+        const requestPage = (page: number) =>
+            this.#http().get<GitLabProject[]>(url, { params: { include_subgroups: 'true', archived: 'false', per_page: GROUP_PAGE_SIZE, page } }).pipe(map((_) => (Array.isArray(_) ? _ : [])));
+        return this.fetchAllPages(requestPage, GROUP_PAGE_SIZE, GROUP_MAX_PAGES).pipe(
+            map((projects) => [...new Set(projects.map((_) => String(_.id)))]),
+            map((ids) => {
+                if (!ids.length) throw new GitLabLinkError('empty-group', input);
+                return ids;
+            }),
+            catchError((err: unknown) => throwError(() => (err instanceof HttpErrorResponse && err.status === 404 ? new GitLabLinkError('not-found', input) : err))),
+        );
+    };
     #getRepositoryName = () => this._baseUrl.replace(/(https?:\/\/)?([^/]*).*/, '$2');
     #getActivityCommentsPage(_projectId: string, page: number, resolveUser?: (email?: string, username?: string, name?: string, pluginAttribute?: string) => unknown): Observable<Dictionary[]> {
         const events$ = this.aget<GitLabEvent>(`events`, { per_page: 50, page }).pipe(

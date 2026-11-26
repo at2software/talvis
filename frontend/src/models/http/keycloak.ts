@@ -1,5 +1,6 @@
 import { AutoRefreshTokenService, createInterceptorCondition, INCLUDE_BEARER_TOKEN_INTERCEPTOR_CONFIG, IncludeBearerTokenCondition, KeycloakService, provideKeycloak, UserActivityService, withAutoRefreshToken } from 'keycloak-angular';
 import { environment } from '@environments/environment';
+import { EXTENSIONS } from '@app/extensions';
 
 function createSafeUrlPattern(url: string): RegExp {
     if (!url || typeof url !== 'string' || url.length > 500) {
@@ -62,6 +63,8 @@ export class KeycloakHandler {
         const keycloakCondition = createInterceptorCondition<IncludeBearerTokenCondition>({
             urlPattern: createSafeUrlPattern(keycloakUrl),
         });
+
+        const extensionConditions = EXTENSIONS.flatMap((_) => _.bearerUrls?.() ?? []).map((url) => createInterceptorCondition<IncludeBearerTokenCondition>({ urlPattern: createSafeUrlPattern(url) }));
         return [
             KeycloakService,
             provideKeycloak({
@@ -83,7 +86,7 @@ export class KeycloakHandler {
                     }),
                 ],
             }),
-            { provide: INCLUDE_BEARER_TOKEN_INTERCEPTOR_CONFIG, useValue: [apiConditionAbsolute, apiConditionRelative, keycloakCondition] as IncludeBearerTokenCondition[] },
+            { provide: INCLUDE_BEARER_TOKEN_INTERCEPTOR_CONFIG, useValue: [apiConditionAbsolute, apiConditionRelative, keycloakCondition, ...extensionConditions] as IncludeBearerTokenCondition[] },
         ];
     }
 }

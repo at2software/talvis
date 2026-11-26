@@ -42,5 +42,5 @@ export class WidgetPreparedInvoicesComponent extends BaseWidgetComponent {
     getAppliedNet = (_: Company | Project) => this.#getAppliedNet(_);
     asProject = (_: Company | Project) => _ as Project;
 
-    exceedsMaxItems = (i: number): boolean => i >= ((this.options()['max-items']?.value as number) ?? 0);
+    exceedsMaxItems = (i: number): boolean => this.indexExceedsSettings(i);
 }

@@ -1,6 +1,5 @@
 <?php
 
-use App\Flow\Models\Machine;
 use App\Models\User;
 
 return [
@@ -51,10 +50,6 @@ return [
             'driver'   => 'sanctum',
             'provider' => 'users',
         ],
-        'machine' => [
-            'driver'   => 'sanctum',
-            'provider' => 'machines',
-        ],
     ],
 
     /*
@@ -78,10 +73,6 @@ return [
         'users' => [
             'driver' => 'eloquent',
             'model'  => User::class,
-        ],
-        'machines' => [
-            'driver' => 'eloquent',
-            'model'  => Machine::class,
         ],
     ],
 

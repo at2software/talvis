@@ -94,7 +94,7 @@ export class ProjectBillingComponent {
         const selected = [_].flat();
         const sel = selected.length && selected[0] instanceof Focus ? (selected as Focus[]) : [];
         this.selection.set(sel);
-        this.selectionSum.set(sel.reduce((b: number, a: Focus) => a.duration + b, 0));
+        this.selectionSum.set(Focus.totalDuration(sel));
         sel.forEach((s: Focus) => {
             if (s.comment?.length) {
                 this.selectionDescription.set(s.comment);

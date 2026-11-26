@@ -2,7 +2,8 @@ import { Dictionary } from '@constants/constants';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { NgbDateAdapter, NgbDropdownModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { dayjs, Dayjs } from '@constants/date/dates';
-import { ECHARTS_DEFAULT_TOOLTIP_OPTIONS, ECHARTS_DONUT_CENTER_TEXT, ECHARTS_DONUT_ITEM_STYLE, ECHARTS_DONUT_SERIES, eAnnotateY } from '@charts/echarts-presets';
+import { ECHARTS_DEFAULT_TOOLTIP_OPTIONS, donutCenterText, ECHARTS_DONUT_ITEM_STYLE, ECHARTS_DONUT_SERIES, eAnnotateY } from '@charts/echarts-presets';
+import { injectChartPalette } from '@charts/echarts-theme';
 import { GlobalService } from '@models/global.service';
 import { Color } from '@constants/Color';
 import { NgbDateCarbonAdapter } from '@directives/ngb-date.adapter';
@@ -50,6 +51,7 @@ export class ProjectsStatsComponent {
 
     stats = inject(StatsService);
     #global = inject(GlobalService);
+    #palette = injectChartPalette();
     shortPipe = new ShortPipe();
     moneyPipe = new MoneyPipe();
 
@@ -168,7 +170,7 @@ export class ProjectsStatsComponent {
                 itemStyle: { color: colors[i].toHexString() },
                 areaStyle: stacked ? { color: colors[i].darken(30).toHexString(), opacity: 1 } : undefined,
                 data: s.data.map((p) => [(p as XYPointDto).x, (p as XYPointDto).y]),
-                ...(i === 0 ? { markLine: { silent: true, symbol: 'none', data: [eAnnotateY(maxVal, this.shortPipe)] } } : {}),
+                ...(i === 0 ? { markLine: { silent: true, symbol: 'none', data: [eAnnotateY(maxVal, this.shortPipe, this.#palette())] } } : {}),
             })),
         };
     }
@@ -277,7 +279,7 @@ export class ProjectsStatsComponent {
                         silent: true,
                         symbol: 'none',
                         data: [
-                            { yAxis: 100, lineStyle: { color: '#ffffff80', type: 'dashed', width: 1 }, label: { show: false } },
+                            { yAxis: 100, lineStyle: { color: this.#palette().annotationStrong, type: 'dashed', width: 1 }, label: { show: false } },
                             { yAxis: 200, lineStyle: { color: warnColor, type: 'dashed', width: 1 }, label: { show: false } },
                             { yAxis: 300, lineStyle: { color: dangerColor, type: 'dashed', width: 1 }, label: { show: false } },
                         ],
@@ -294,7 +296,7 @@ export class ProjectsStatsComponent {
         const groupMeta = new Map<string, { name: string; color: string }>();
         mix.groups.forEach((g) => groupMeta.set('' + g.id, { name: g.name, color: g.color || Color.uniqueColorFromString('' + g.id) }));
         if (mix.unassigned.count > 0) {
-            groupMeta.set('unassigned', { name: $localize`:@@i18n.common.unassigned:unassigned`, color: '#333333' });
+            groupMeta.set('unassigned', { name: $localize`:@@i18n.common.unassigned:unassigned`, color: this.#palette().neutral });
         }
 
         const countSegments = [...mix.groups.map((g) => ({ id: '' + g.id, value: g.count })), ...(mix.unassigned.count > 0 ? [{ id: 'unassigned', value: mix.unassigned.count }] : [])];
@@ -307,7 +309,7 @@ export class ProjectsStatsComponent {
                 backgroundColor: 'transparent',
                 animation: false,
                 tooltip: { trigger: 'item', ...ECHARTS_DEFAULT_TOOLTIP_OPTIONS, formatter: (rawParams: unknown) => { const p = rawParams as { name: string; value: number }; return `${p.name}: ${p.value}`; } },
-                graphic: [{ type: 'text', left: 'center', top: 'center', style: { ...ECHARTS_DONUT_CENTER_TEXT, text: '' + mix.total } }],
+                graphic: [{ type: 'text', left: 'center', top: 'center', style: { ...donutCenterText(this.#palette()), text: '' + mix.total } }],
                 series: [
                     {
                         type: 'pie',
@@ -322,7 +324,7 @@ export class ProjectsStatsComponent {
                 backgroundColor: 'transparent',
                 animation: false,
                 tooltip: { trigger: 'item', ...ECHARTS_DEFAULT_TOOLTIP_OPTIONS, formatter: (rawParams: unknown) => { const p = rawParams as { name: string; value: number }; return `${p.name}: ${this.moneyPipe.transform(p.value)}`; } },
-                graphic: [{ type: 'text', left: 'center', top: 'center', style: { ...ECHARTS_DONUT_CENTER_TEXT, text: this.moneyPipe.transform(totalNet) } }],
+                graphic: [{ type: 'text', left: 'center', top: 'center', style: { ...donutCenterText(this.#palette()), text: this.moneyPipe.transform(totalNet) } }],
                 series: [
                     {
                         type: 'pie',
@@ -377,7 +379,7 @@ export class ProjectsStatsComponent {
             backgroundColor: 'transparent',
             animation: false,
             tooltip: { trigger: 'item', ...ECHARTS_DEFAULT_TOOLTIP_OPTIONS, formatter: (rawParams: unknown) => { const p = rawParams as { name: string; value: number }; return `${p.name}: ${this.#hours(p.value)}`; } },
-            graphic: [{ type: 'text', left: 'center', top: 'center', style: { ...ECHARTS_DONUT_CENTER_TEXT, text: `${pct.toFixed(1)}%` } }],
+            graphic: [{ type: 'text', left: 'center', top: 'center', style: { ...donutCenterText(this.#palette()), text: `${pct.toFixed(1)}%` } }],
             series: [
                 {
                     type: 'pie',
@@ -435,7 +437,7 @@ export class ProjectsStatsComponent {
             backgroundColor: 'transparent',
             animation: false,
             tooltip: { trigger: 'item', ...ECHARTS_DEFAULT_TOOLTIP_OPTIONS },
-            graphic: [{ type: 'text', left: 'center', top: 'center', style: { ...ECHARTS_DONUT_CENTER_TEXT, text: `${pct.toFixed(1)}%` } }],
+            graphic: [{ type: 'text', left: 'center', top: 'center', style: { ...donutCenterText(this.#palette()), text: `${pct.toFixed(1)}%` } }],
             series: [
                 {
                     type: 'pie',

@@ -36,7 +36,7 @@ export class CustomerInitiativesComponent {
         const rows: MarketingProspectActivity[] = [];
         for (const prospect of this.#prospects.value()) {
             for (const activity of prospect.activities ?? []) {
-                if (activity.status === 'pending' || activity.status === 'overdue') {
+                if (activity.isOpen()) {
                     activity.marketing_prospect = prospect;
                     rows.push(activity);
                 }
@@ -48,7 +48,7 @@ export class CustomerInitiativesComponent {
     statusIcon = (status: string) => status === 'overdue' ? 'warning' : 'schedule';
     statusClass = (status: string) => status === 'overdue' ? 'text-danger' : 'text-muted';
 
-    onActionResolved = () => this.activityRows.update((rows) => rows.filter((a) => a.status === 'pending' || a.status === 'overdue'));
+    onActionResolved = () => this.activityRows.update((rows) => rows.filter((a) => a.isOpen()));
 
     openAddModal() {
         this.#modalService

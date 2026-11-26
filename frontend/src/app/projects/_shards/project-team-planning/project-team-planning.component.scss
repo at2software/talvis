@@ -2,6 +2,19 @@
     position: relative;
 }
 
+.assignee-main {
+    min-width: 0;
+}
+
+.assignee-meta {
+    font-size: 0.85rem;
+    line-height: 1;
+
+    i, n {
+        font-size: 0.95rem;
+    }
+}
+
 .pm-badge {
     position: absolute;
     bottom: -3px;

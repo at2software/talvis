@@ -8,6 +8,7 @@ import { User } from '@models/user/user.model';
 import { tracked } from '@constants/tracked';
 import { ECHARTS_DONUT_ITEM_STYLE, ECHARTS_DONUT_SERIES } from '@charts/echarts-presets';
 import { TFocusDay } from '../hr-focus-table.component';
+import { injectChartPalette } from '@charts/echarts-theme';
 
 @Component({
     selector: 'hr-focus-summary-tab',
@@ -16,6 +17,7 @@ import { TFocusDay } from '../hr-focus-table.component';
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class HrFocusSummaryTabComponent {
+    #palette = injectChartPalette();
     days = input<TFocusDay[]>();
     readonly user = input.required<User>();
     readonly trackedUser = tracked(this.user);
@@ -57,7 +59,7 @@ export class HrFocusSummaryTabComponent {
                 avoidLabelOverlap: false,
                 selectedMode: 'multiple',
                 selectedOffset: 6,
-                label: { show: true, position: 'center', color: '#ccc', fontSize: 13, formatter: () => `${totalActual.toFixed(1)}h\n/ ${expected.toFixed(1)}h` },
+                label: { show: true, position: 'center', color: this.#palette().textSoft, fontSize: 13, formatter: () => `${totalActual.toFixed(1)}h\n/ ${expected.toFixed(1)}h` },
                 emphasis: { label: { fontSize: 14 } },
                 data: [
                     { value: parseFloat(paid.toFixed(2)), name: $localize`:@@i18n.hr.paid:Paid`, itemStyle: { color: '#20c997', ...ECHARTS_DONUT_ITEM_STYLE } },

@@ -3,6 +3,7 @@
 namespace App\Traits;
 
 use App\Models\Vcard;
+use Illuminate\Support\Carbon;
 
 trait VcardTrait {
     private ?Vcard $_cached_vcard = null;
@@ -29,6 +30,23 @@ trait VcardTrait {
 
         return $this->_cached_vcard = new Vcard($this->attributes['vcard'] ?? '');
     }
+    public function birthday(): ?Carbon {
+        $value = $this->vcard->getFirstValue('BDAY');
+        if (! $value) {
+            return null;
+        }
+        return rescue(fn () => Carbon::parse($value)->startOfDay(), null, false);
+    }
+    public function nextBirthday(Carbon $from): ?Carbon {
+        if (! $birthday = $this->birthday()) {
+            return null;
+        }
+        $next = Carbon::create($from->year, $birthday->month, $birthday->day);
+        if ($next < $from) {
+            $next->addYear();
+        }
+        return $next->startOfDay();
+    }
     public function getNameAttribute() {
         return $this->vcard->getFirstValue('FN', 'unknown name');
     }
@@ -41,6 +59,13 @@ trait VcardTrait {
         if (! $file) {
             abort(422, 'error creating image');
         }
+        $mime = $size['mime'] ?? null;
+
+        // WebP is not supported by many CardDAV, mail and chat clients - store it as PNG
+        if ($mime === 'image/webp') {
+            $file = self::convertWebpToPng($filePath);
+            $mime = 'image/png';
+        }
 
         $vcard = $this->vcard;
 
@@ -48,12 +73,33 @@ trait VcardTrait {
 
         $vcard->setProperty('PHOTO', base64_encode($file), [
             'ENCODING' => 'b',
-            'TYPE'     => $size['mime'],
+            'TYPE'     => $mime,
         ]);
 
         $this->setVcardAttribute($vcard, false);
         $this->save();
         return $this;
+    }
+
+    private static function convertWebpToPng(string $filePath): string {
+        $image = function_exists('imagecreatefromwebp') ? @imagecreatefromwebp($filePath) : false;
+        if (! $image) {
+            abort(422, 'error creating image');
+        }
+        if (! imageistruecolor($image)) {
+            imagepalettetotruecolor($image);
+        }
+        imagealphablending($image, false);
+        imagesavealpha($image, true);
+
+        ob_start();
+        $ok  = imagepng($image);
+        $png = ob_get_clean();
+
+        if (! $ok || ! $png) {
+            abort(422, 'error creating image');
+        }
+        return $png;
     }
 
     // Deprecated - use $model->vcard->getAddressBookOnly() instead

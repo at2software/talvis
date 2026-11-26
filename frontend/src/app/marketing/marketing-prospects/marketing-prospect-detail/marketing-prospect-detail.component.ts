@@ -19,7 +19,7 @@ import { RteComponent } from '@app/_shards/rte/rte.component';
 import { personalized } from '@constants/personalized';
 import { SpinnerComponent } from '@shards/spinner/spinner.component';
 import { GlobalService } from '@models/global.service';
-import { Dictionary } from '@constants/constants';
+import { MarketingActivity } from '@models/marketing/marketing-activity.model';
 import { StackedTableDirective } from '@directives/stacked-table.directive';
 import { MarketingTouchpoint } from '@models/marketing/marketing-touchpoint.model';
 import { CompanyContact } from '@models/company/company-contact.model';
@@ -48,8 +48,8 @@ export class MarketingProspectDetailComponent {
     selectedActivity = signal<MarketingProspectActivity | undefined>(undefined);
     activities      = linkedSignal(() => this.prospect()?.activities ?? []);
 
-    pendingActivities   = computed(() => this.activities().filter(a => a.status === 'pending'));
-    completedActivities = computed(() => this.activities().filter(a => ['completed', 'skipped'].includes(a.status)));
+    pendingActivities   = computed(() => this.activities().filter(a => a.isPending()));
+    completedActivities = computed(() => this.activities().filter(a => a.isFinished()));
     touchpoints = computed(() => this.prospect()?.touchpoints ?? []);
     duplicateProspects = computed(() => this.#duplicatesRes.value()?.prospects ?? []);
     duplicateContacts = computed(() => this.#duplicatesRes.value()?.company_contacts ?? []);
@@ -62,9 +62,6 @@ export class MarketingProspectDetailComponent {
     }
 
     onActivityActionsResolved = () => this.activities.update(a => [...a]);
-
-    isActivityOverdue = (activity: MarketingProspectActivity) =>
-        new Date(activity.scheduled_at) < new Date() && activity.status === 'pending';
 
     canExecuteQuickAction(activity: MarketingProspectActivity): boolean {
         switch (activity.marketing_activity?.quick_action) {
@@ -147,9 +144,7 @@ export class MarketingProspectDetailComponent {
         });
     }
 
-    getQuickActionIcon(qa: string): string {
-        return ({ EMAIL: 'email', LINKEDIN: 'open_in_new', LINKEDIN_SEARCH: 'search', CALL: 'phone' } as Dictionary<string>)[qa] || '';
-    }
+    getQuickActionIcon = MarketingActivity.quickActionIcon;
 
     getLocalizedDescription = (activity: MarketingProspectActivity): string =>
         activity.localizedDescription(this.prospect()?.getLang() || 'de', this.prospect()?.getFormality() || 'formal');

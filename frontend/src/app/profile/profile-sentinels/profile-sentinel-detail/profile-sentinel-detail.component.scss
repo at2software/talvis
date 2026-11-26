@@ -26,7 +26,7 @@
     text-transform: uppercase;
     font-size: 0.75rem;
     letter-spacing: 0.5px;
-    color: white;
+    color: var(--tv-text-strong);
   }
 
   .btn {
@@ -110,34 +110,34 @@
   font-size: 0.85rem;
 
   .detail-key {
-    color: #9cdcfe;
+    color: var(--tv-syntax-variable);
   }
 
   .detail-value {
-    color: #ce9178;
+    color: var(--tv-syntax-string);
   }
 }
 
 .sentinel-table,
 .sentinel-field {
-  color: #9cdcfe; // VS Code variable blue
+  color: var(--tv-syntax-variable); // VS Code variable blue
   font-weight: 500;
 }
 
 .sentinel-operator {
-  color: #c586c0; // VS Code keyword purple
+  color: var(--tv-syntax-keyword); // VS Code keyword purple
 }
 
 .sentinel-value,
 .sentinel-summary {
-  color: #ce9178; // VS Code string orange
+  color: var(--tv-syntax-string); // VS Code string orange
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .sentinel-command {
-  color: #dcdcaa; // VS Code function yellow
+  color: var(--tv-syntax-function); // VS Code function yellow
   font-weight: 500;
 }
 
@@ -212,7 +212,7 @@ code {
   background: var(--bs-card-cap-bg);
   padding: 0.125rem 0.375rem;
   border-radius: var(--bs-border-radius);
-  color: #ce9178;
+  color: var(--tv-syntax-string);
 }
 
 .for-each-block {
@@ -265,6 +265,6 @@ code {
 }
 
 ::ng-deep .var-highlight {
-  color: #9cdcfe; // VS Code variable blue
+  color: var(--tv-syntax-variable); // VS Code variable blue
   font-weight: 500;
 }

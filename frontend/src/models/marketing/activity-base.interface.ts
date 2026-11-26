@@ -11,6 +11,7 @@ export interface IActivityBase {
     has_external_dependency?: boolean;
     parent_activity_id?: string;
     quick_action?: QuickActionType;
+    is_shared?: boolean;
     performance_metrics?: MarketingPerformanceMetric[];
     stats?: ActivityStatsDto;
 }

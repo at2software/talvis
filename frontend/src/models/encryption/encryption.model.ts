@@ -14,20 +14,32 @@ export class Encryption extends Serializable {
     my_id?: string;
 
     #encryptedValue: string | Dictionary<unknown> | undefined;
-     
+    #decrypted?: { from: unknown; key: forge.pki.rsa.PrivateKey; json: string | null };
+
     // TODO(#614): the decrypted shape is EncryptionValueDto, but this getter also returns
     // undefined and ~89 call sites assume it never does. Typing it honestly is its own change.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     get value(): any {
         const user = nx().global.user;
         if (!this.#encryptedValue || !user?.keyPair) return undefined;
+        const key = user.keyPair.privateKey;
+        if (this.#decrypted?.from !== this.#encryptedValue || this.#decrypted.key !== key) {
+            this.#decrypted = { from: this.#encryptedValue, key, json: this.#decrypt(key) };
+        }
         try {
-            return JSON.parse(user.keyPair.privateKey.decrypt(this.#encryptedValue as string));
+            return this.#decrypted.json === null ? undefined : JSON.parse(this.#decrypted.json);
         } catch {
             return undefined;
         }
     }
     set value(v: string | Dictionary<unknown>) { this.#encryptedValue = v; }
+    #decrypt(key: forge.pki.rsa.PrivateKey): string | null {
+        try {
+            return key.decrypt(this.#encryptedValue as string);
+        } catch {
+            return null;
+        }
+    }
 
     protected override buildActions(): NxAction[] { return getEncryptisingleActionResolveds(this) }
 

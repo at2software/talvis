@@ -24,6 +24,15 @@ import * as Ui from '@models/_core/ui-bridge';
 const BACKEND_MODEL_NAMESPACE = 'App\\Models\\';
 const ABSOLUTE_URL = /^(https?:|data:|\/)/;
 
+/**
+ * Resolves a payload `icon` against the api url. Absolute urls (http(s), data, root-relative) are kept
+ * as they are; an empty icon falls back to the given api-relative path.
+ */
+export const resolveIconUrl = (icon: unknown, fallback: string): string => {
+    const path = typeof icon === 'string' ? icon : '';
+    return ABSOLUTE_URL.test(path) ? path : environment.envApi + (path || fallback);
+};
+
 export type Badge = [string, string];
 
 export abstract class Serializable implements INxContextMenu {
@@ -70,10 +79,7 @@ export abstract class Serializable implements INxContextMenu {
 
     readonly getName: Signal<string> = computed(() => { this.snapshot(); return (this as { name?: string }).name ?? '' });
     readonly getBadge: Signal<Badge|undefined> = signal<Badge|undefined>(undefined);
-    readonly getAvatar: Signal<string> = computed(() => {
-        const icon = (this.snapshot().icon as string) ?? '';
-        return ABSOLUTE_URL.test(icon) ? icon : environment.envApi + (icon || 'nexus/icon');
-    });
+    readonly getAvatar: Signal<string> = computed(() => resolveIconUrl(this.snapshot().icon, 'nexus/icon'));
     readonly getTooltip: Signal<string> = computed(() => this.getName());
 
     #baseline: string | undefined;

@@ -115,7 +115,7 @@ export class HrFocusTableComponent {
             earliest = earliest.add(1, 'day');
         }
         days = days.sort(callback_reorder);
-        days.forEach((_) => (_.total = _.foci.reduce((a, b) => a + b.duration, 0)));
+        days.forEach((_) => (_.total = Focus.totalDuration(_.foci)));
         this.days = [...days];
         this.#cdr.markForCheck();
     }

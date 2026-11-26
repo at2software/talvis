@@ -2,6 +2,8 @@
 
 namespace App\Console\Commands;
 
+use Database\Seeders\DemoExtrasSeeder;
+use Database\Seeders\DemoPolishSeeder;
 use Database\Seeders\DemoSeeder;
 use Database\Seeders\DemoSeederData;
 use Illuminate\Console\Command;
@@ -37,6 +39,16 @@ class SeedDemoData extends Command {
         $seeder->setContainer(app());
         $seeder->setCommand($this);
         $seeder->__invoke();
+
+        $extras = new DemoExtrasSeeder;
+        $extras->setContainer(app());
+        $extras->setCommand($this);
+        $extras->__invoke();
+
+        $polish = new DemoPolishSeeder;
+        $polish->setContainer(app());
+        $polish->setCommand($this);
+        $polish->__invoke();
 
         $this->info(sprintf('Done in %ds.', microtime(true) - $start));
         $this->info('Login: '.DemoSeederData::users()['owner']['email'].' / '.DemoSeederData::PASSWORD.' (all demo users share this password)');

@@ -9,7 +9,7 @@
                 }
             </div>
         </div>
-        <div class="stat-icon align-self-start text-{{ color() }}"><i>{{ icon() }}</i></div>
+        <div class="stat-icon text-{{ color() }}"><i>{{ icon() }}</i></div>
     </div>
     @if (progress() !== undefined) {
         <progress-bar [progress]="progress()!" [style]="color()"></progress-bar>

@@ -11,8 +11,8 @@ import { MoneyPipe } from '@pipes/money.pipe';
 import { MILESTONE_STATES } from '@models/milestone/milestone-state.enum';
 import { EchartsComponent } from '@charts/echarts-wrapper/echarts-wrapper.component';
 import { Color } from '@constants/Color';
-import { ECHARTS_DEFAULT_TOOLTIP_OPTIONS, ECHARTS_DONUT_CENTER_TEXT, ECHARTS_DONUT_ITEM_STYLE, ECHARTS_DONUT_SERIES, ECHARTS_DONUT_TRACK_COLOR } from '@charts/echarts-presets';
-import { ProjectState } from '@models/project/project-state.model';
+import { ECHARTS_DEFAULT_TOOLTIP_OPTIONS, donutCenterText, ECHARTS_DONUT_ITEM_STYLE, ECHARTS_DONUT_SERIES } from '@charts/echarts-presets';
+import { injectChartPalette } from '@charts/echarts-theme';
 import { NComponent } from '@shards/n/n.component';
 import { MlReliabilityDirective } from '@directives/ml-reliability.directive';
 
@@ -34,14 +34,13 @@ export class ProjectInfoComponent {
 
     global = inject(GlobalService);
     inputModalService = inject(InputModalService);
+    #palette = injectChartPalette();
 
-    shouldShowBudgetChart = computed(() => {
-        const p = this.project();
-        return !p.is_time_based && !p.is_internal && (p.state.progress === ProjectState.ProgressRunning || p.state.progress === ProjectState.ProgressFinished) && p.var?.workshares?.length > 0 && p.worksharesTotal() > 0 && (p.work_estimated ?? 0) > 0;
-    });
+    shouldShowBudgetChart = computed(() => this.project().hasBudgetChart());
 
     budgetChart = computed(() => {
         if (!this.shouldShowBudgetChart()) return { options: null, wrapperStyle: {} };
+        const palette = this.#palette();
 
         const p = this.project();
         const timePercentage = p.timePercentage();
@@ -54,10 +53,10 @@ export class ProjectInfoComponent {
             itemStyle: { color: u.color, ...ECHARTS_DONUT_ITEM_STYLE },
         }));
 
-        const pieData = timePercentage < 1 ? [...baseData, { value: (p.work_estimated ?? 0) - p.hours_invested, name: 'remaining', itemStyle: { color: ECHARTS_DONUT_TRACK_COLOR, ...ECHARTS_DONUT_ITEM_STYLE } }] : baseData;
+        const pieData = timePercentage < 1 ? [...baseData, { value: (p.work_estimated ?? 0) - p.hours_invested, name: 'remaining', itemStyle: { color: palette.track, ...ECHARTS_DONUT_ITEM_STYLE } }] : baseData;
 
         const centerText = `${(timePercentage * 100).toFixed(0)}%`;
-        const centerColor = timePercentage >= 1 ? dangerColor : '#ffffff';
+        const centerColor = timePercentage >= 1 ? dangerColor : palette.text;
 
         return {
             options: {
@@ -69,7 +68,7 @@ export class ProjectInfoComponent {
                     ...ECHARTS_DEFAULT_TOOLTIP_OPTIONS,
                     formatter: (params: { name: string; value: number }) => `${params.name}: ${params.value.toFixed(1)}h`,
                 },
-                graphic: [{ type: 'text', left: 'center', top: 'center', style: { ...ECHARTS_DONUT_CENTER_TEXT, text: centerText, fill: centerColor, fontFamily: 'BrunoAce' } }],
+                graphic: [{ type: 'text', left: 'center', top: 'center', style: { ...donutCenterText(palette), text: centerText, fill: centerColor, fontFamily: 'BrunoAce' } }],
                 series: [
                     { ...ECHARTS_DONUT_SERIES, data: pieData },
                 ],

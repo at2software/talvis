@@ -129,6 +129,9 @@ class Invoice extends BaseModel {
         $this->paid_at      = now();
         $this->resetPrecomputedAttributes();
     }
+    public function isSettled(): bool {
+        return $this->paid_at || $this->is_cancelled;
+    }
     public function hasPdf(): bool {
         return $this->file_dir && Storage::exists($this->file_dir);
     }
@@ -236,7 +239,7 @@ class Invoice extends BaseModel {
 
         [$invoice, $zugferdPdf, $filename] = app(CreateInvoiceAction::class)->execute(
             $items,
-            'Rechnung',
+            __('pdf.invoice', [], $company->getLanguage()),
             $prefix,
             $suffix,
             $company,
@@ -255,7 +258,7 @@ class Invoice extends BaseModel {
         app(UpdateInvoiceStatisticsAction::class)->execute($company);
         app(UpdateInvoiceStatisticsAction::class)->execute();
 
-        self::activateRepeatingItems($company);
+        $company->activateRepeatingItems();
 
         Invoice::enablePropagation();
         $company->propagateDirty();
@@ -264,7 +267,7 @@ class Invoice extends BaseModel {
     private static function makeDraftInvoiceFor($items, string $prefix, string $suffix, Company $company, string $documentType, ?Project $project) {
         [$pdf, $filename] = app(InvoicePdfService::class)->generateInvoicePdf(
             $items,
-            'Rechnung',
+            __('pdf.invoice', [], $company->getLanguage()),
             $prefix,
             $suffix,
             $company,
@@ -299,8 +302,5 @@ class Invoice extends BaseModel {
         Artisan::call('vat_id:check', ['company' => $company]);
         $output = json_decode(Artisan::output());
         return $output->is_valid ? null : response()->json(['message' => $output->error_description], 400);
-    }
-    private static function activateRepeatingItems(Company $company): void {
-        $company->repeatingItems->each(fn ($item) => $item->next_recurrence_at ?: $item->update(['next_recurrence_at' => now()]));
     }
 }

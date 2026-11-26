@@ -8,4 +8,6 @@ enum VacationState: int {
     case NotApproved = 2;
     case Sick        = 3;
     case Cancelled   = 4;
+
+    public const array Absences = [self::Approved, self::Sick];
 }

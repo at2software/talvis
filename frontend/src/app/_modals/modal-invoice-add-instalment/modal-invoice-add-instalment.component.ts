@@ -5,6 +5,7 @@ import { ModalBaseComponent } from '@app/_modals/modal-base.component';
 import { InvoiceItemType } from '@enums/invoice-item.type';
 import { ExpenseCategory } from '@models/expense/expense-category.model';
 import { InvoiceItem } from '@models/invoice/invoice-item.model';
+import { InvoiceItemStage } from '@enums/invoice-item.stage';
 import { Invoice } from '@models/invoice/invoice.model';
 import { HotkeyDirective } from '@directives/hotkey.directive';
 import { Project } from '@models/project/project.model';
@@ -82,8 +83,7 @@ export class ModalInvoiceAddInstalmentComponent extends ModalBaseComponent<Invoi
 
     #calculateStage0Sum(): number {
         if (this.parent instanceof Project) {
-            const items = (this.parent.invoice_items ?? []).filter((item) => item.stage === 0 && !item.invoice_id);
-            return items.reduce((sum, item) => sum + (item.net ?? 0), 0);
+            return InvoiceItem.openNet(this.parent.invoice_items ?? [], InvoiceItemStage.Final);
         }
 
         return this.parent.net ?? 0;

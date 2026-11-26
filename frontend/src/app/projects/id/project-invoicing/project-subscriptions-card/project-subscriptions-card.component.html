@@ -1,0 +1,29 @@
+@let _items = items();
+<div class="card mb-3">
+    <div class="card-header" i18n="@@i18n.invoices.subscriptions">subscriptions</div>
+    <ul class="list-group">
+        @for (item of _items; track item.id) {
+            <li class="list-group-item d-flex flex-column gap-1 py-1" [nx]="item" (singleActionResolved)="reload()">
+                <div class="hstack gap-2">
+                    <div class="flex-fill text-truncate small" [innerHTML]="item.text | safe: 'html'"></div>
+                    <div class="small text-nowrap">{{ item.net | money }}</div>
+                </div>
+                <div class="hstack gap-2 small">
+                    <span class="flex-fill" [class]="item.getRepeatColor()">{{ intervalLabel(item) }}</span>
+                    @if (item.next_recurrence_at) {
+                        <span class="text-muted"><span i18n="@@i18n.invoices.subscriptionNext">next:</span> {{ item.next_recurrence_at | date: 'dd.MM.yyyy' }}</span>
+                    } @else {
+                        <span class="text-muted" i18n="@@i18n.common.inactive">inactive</span>
+                    }
+                </div>
+            </li>
+        } @empty {
+            @if (isLoaded()) {
+                <li class="list-group-item small text-muted">
+                    <span i18n="@@i18n.invoices.noSubscriptionsHint">Subscriptions are added as repeating items in the quote tab.</span>
+                    <a class="text-primary ms-1" [routerLink]="quoteLink()" i18n="@@i18n.invoices.toQuote">to the quote</a>
+                </li>
+            }
+        }
+    </ul>
+</div>

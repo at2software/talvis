@@ -4,16 +4,14 @@ namespace App\Services\User;
 
 use App\Models\Assignment;
 use App\Models\Company;
-use App\Models\Param;
 use App\Models\User;
 use App\Services\UserTimelineService;
 
 class UserProjectLoadService {
     public function build(User $user): array {
-        $meId      = Param::get('ME_ID')->value;
-        $meCompany = Company::find($meId);
+        $meCompany = Company::me();
 
-        if ($meCompany && ! $user->assigned_companies()->where('companies.id', $meId)->exists()) {
+        if ($meCompany && ! $user->assigned_companies()->where('companies.id', $meCompany->id)->exists()) {
             $meCompany->addAssignee($user);
         }
 

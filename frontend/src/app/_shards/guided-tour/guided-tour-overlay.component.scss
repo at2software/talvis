@@ -35,7 +35,7 @@
     width: 380px;
     max-width: calc(100vw - 3rem);
     background: #1a1d23;
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(var(--tv-ink-rgb), 0.12);
     border-radius: var(--bs-border-radius);
     box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6);
     animation: gt-fade-in 0.2s ease;
@@ -74,14 +74,14 @@
     font-size: 1rem;
     font-weight: 600;
     color: var(--bs-primary);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    border-bottom: 1px solid rgba(var(--tv-ink-rgb), 0.08);
     padding-bottom: 0.75rem;
 }
 
 .gt-card-body {
     padding: 0.875rem 1.25rem;
     font-size: 0.875rem;
-    color: rgba(255, 255, 255, 0.85);
+    color: rgba(var(--tv-ink-rgb), 0.85);
     line-height: 1.6;
 }
 
@@ -90,7 +90,7 @@
     align-items: center;
     justify-content: space-between;
     padding: 0.75rem 1.25rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    border-top: 1px solid rgba(var(--tv-ink-rgb), 0.08);
     gap: 0.5rem;
 }
 
@@ -99,7 +99,7 @@
     align-items: center;
     gap: 0.4rem;
     font-size: 0.75rem;
-    color: rgba(255, 255, 255, 0.4);
+    color: rgba(var(--tv-ink-rgb), 0.4);
     cursor: pointer;
     margin: 0;
     user-select: none;
@@ -110,7 +110,7 @@
     }
 
     &:hover {
-        color: rgba(255, 255, 255, 0.65);
+        color: rgba(var(--tv-ink-rgb), 0.65);
     }
 }
 
@@ -132,11 +132,17 @@
     width: 7px;
     height: 7px;
     border-radius: 50%;
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(var(--tv-ink-rgb), 0.2);
     transition: background 0.2s, transform 0.2s;
 
     &.gt-dot-current {
         background: var(--bs-primary);
         transform: scale(1.25);
     }
+}
+
+// Light mode: white card with a softer shadow. Text, borders and dots follow --tv-ink-rgb.
+:host-context([data-bs-theme=light]) .gt-card {
+    background: var(--tv-popup-bg);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.18);
 }

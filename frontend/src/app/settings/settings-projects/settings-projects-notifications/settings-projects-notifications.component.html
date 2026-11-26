@@ -46,3 +46,31 @@
         </div>
     </div>
 </div>
+
+<div class="card mb-3">
+    <div class="card-header" i18n="@@i18n.settings.itemThresholds">feature email thresholds</div>
+    <div class="card-body">
+        <p class="text-muted small mb-3" i18n="@@i18n.settings.itemThresholdsDesc">Send an email to the project manager and to everyone who booked time on a feature when its booked hours divided by its estimated work reach a threshold. Notifications reset automatically if the ratio drops below the threshold again.</p>
+        <div class="d-flex flex-wrap gap-2 mb-3">
+            @for (threshold of itemThresholds(); track threshold) {
+                <span class="badge d-inline-flex align-items-center gap-1 fs-6 bg-dark">
+                    {{ threshold }}%
+                    <button type="button" class="btn-close btn-close-white ms-1" aria-label="remove" (click)="removeItemThreshold(threshold)" style="font-size: 0.6em"></button>
+                </span>
+            }
+            @if (itemThresholdsLoading()) {
+                <spinner [size]="20" [inline]="true"></spinner>
+            } @else if (!itemThresholds().length) {
+                <span class="text-muted small fst-italic" i18n="@@i18n.settings.noThresholds">no thresholds configured</span>
+            }
+        </div>
+        <div class="input-group mb-4" style="max-width: 260px">
+            <input type="number" class="form-control" [ngModel]="newItemThreshold()" (ngModelChange)="newItemThreshold.set($event)" placeholder="80" min="1" max="9999" (keydown.enter)="addItemThreshold()" />
+            <span class="input-group-text">%</span>
+            <button class="btn btn-outline-primary" type="button" (click)="addItemThreshold()" i18n="@@i18n.common.add">add</button>
+        </div>
+        <p class="text-muted small mb-3" i18n="@@i18n.settings.itemAlertRuleDesc">To avoid mail spam, only features that are at least this large OR make up at least this share of the project's estimated work trigger an email. Set both to 0 to include every feature.</p>
+        <input-settings-group id="INVOICE_ITEM_ALERT_MIN_HOURS" [suffix]="hours" placeholder="8" i18n="@@i18n.settings.itemAlertMinHours">minimum feature size</input-settings-group>
+        <input-settings-group id="INVOICE_ITEM_ALERT_MIN_SHARE" suffix="%" placeholder="10" i18n="@@i18n.settings.itemAlertMinShare">minimum share of project work</input-settings-group>
+    </div>
+</div>

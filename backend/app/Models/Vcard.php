@@ -209,8 +209,12 @@ class Vcard implements Arrayable, JsonSerializable {
         if (! $countryCode) {
             return true;
         }
-        $euCountries = collect(config('eu.countries'));
-        return $euCountries->contains($countryCode);
+        $vatTerritory = [...config('eu.countries'), ...config('eu.vat_included_non_members')];
+        return in_array($countryCode, $vatTerritory, true) && ! $this->isInVatExcludedTerritory($countryCode);
+    }
+    private function isInVatExcludedTerritory(string $countryCode): bool {
+        $postalCode = preg_replace('/\D/', '', (string)($this->getFirstAttr('ADR')[5] ?? ''));
+        return collect(config("eu.vat_excluded_territories.$countryCode", []))->contains(fn ($prefix) => str_starts_with($postalCode, $prefix));
     }
     public function toVCardString(bool $includeEnvelope = true): string {
         $content = implode("\n", array_map('strval', $this->rows));

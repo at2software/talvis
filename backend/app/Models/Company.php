@@ -55,7 +55,7 @@ class Company extends BaseModel {
         'ME_COMPANY_OWNERS' => 'owners',
     ];
 
-    protected $fillable = ['vcard', 'created_at', 'updated_at', 'customer_number', 'company_id', 'contact_id', 'net', 'flags', 'vat_id', 'commercial_register', 'managing_director', 'invoice_email', 'is_deprecated', 'requires_po', 'has_nda', 'accepts_support', 'remarketing_interval', 'default_product_id', 'source_id', 'source_type'];
+    protected $fillable = ['vcard', 'created_at', 'updated_at', 'customer_number', 'company_id', 'contact_id', 'net', 'flags', 'vat_id', 'commercial_register', 'managing_director', 'invoice_email', 'is_deprecated', 'is_key_account', 'requires_po', 'has_nda', 'accepts_support', 'remarketing_interval', 'default_product_id', 'source_id', 'source_type'];
     protected $appends  = ['icon', 'class', 'path', 'name', 'needs_vat_handling', 'is_domestic', 'address', 'has_time_budget'];
     protected $hidden   = ['deleted_at'];
 
@@ -69,6 +69,7 @@ class Company extends BaseModel {
             'requires_po'          => 'boolean',
             'has_nda'              => 'boolean',
             'is_deprecated'        => 'boolean',
+            'is_key_account'       => 'boolean',
             'accepts_support'      => 'boolean',
             'needs_vat_handling'   => 'boolean',
             'is_domestic'          => 'boolean',
@@ -237,6 +238,23 @@ class Company extends BaseModel {
     public function getNeedsVatHandlingAttribute(): bool {
         return $this->vcard->needsVatHandling();
     }
+    public function vatCategory(?self $seller = null): string {
+        return self::vatCategoryBetween(
+            trim((string)($seller ?? self::me())?->vcard?->getCountryCode()),
+            trim((string)$this->vcard?->getCountryCode()),
+            $this->needs_vat_handling,
+            $this->vat_id
+        );
+    }
+    public static function vatCategoryBetween(string $sellerCountry, string $buyerCountry, bool $buyerInVatTerritory, ?string $buyerVatId): string {
+        if (! $buyerInVatTerritory) {
+            return 'O';
+        }
+        if (trim((string)$buyerVatId) === '' || $buyerCountry === '' || $buyerCountry === $sellerCountry) {
+            return 'S';
+        }
+        return 'AE';
+    }
     public function getIsDomesticAttribute(): bool {
         $countryCode = $this->vcard->getCountryCode();
         return ! $countryCode || $countryCode === strtoupper((string)Param::get('SYS_COUNTRY')->value);
@@ -372,7 +390,7 @@ class Company extends BaseModel {
         return $this->hasMany(Invoice::class);
     }
     public function invoicesUnpaid() {
-        return $this->hasMany(Invoice::class)->where('paid_at', null);
+        return $this->hasMany(Invoice::class)->whereUnpaid();
     }
     public function invoicesLast12m() {
         return $this->invoices()->whereAfter(now()->subYear());
@@ -425,6 +443,41 @@ class Company extends BaseModel {
         }
         $this->delete();
     }
+
+    /**
+     * @param int[] $companyIds
+     * @return array<int, array{id: int, name: string, color: string}>
+     */
+    public static function primaryProductGroups(array $companyIds): array {
+        $rows = DB::table('invoice_items')
+            ->join('invoices', 'invoices.id', '=', 'invoice_items.invoice_id')
+            ->join('products', 'products.id', '=', 'invoice_items.product_source_id')
+            ->whereNull('invoice_items.deleted_at')
+            ->whereNull('invoices.deleted_at')
+            ->whereIn('invoices.company_id', $companyIds)
+            ->whereIn('invoice_items.type', array_map(fn ($_) => $_->value, InvoiceItemType::ProjectTotal))
+            ->groupBy('invoices.company_id', 'products.product_group_id')
+            ->selectRaw('invoices.company_id, products.product_group_id, SUM(invoice_items.net) AS net')
+            ->get();
+
+        $rootGroupMap = ProductGroup::buildRootGroupMap();
+        $netByRoot    = [];
+        foreach ($rows as $row) {
+            $root = $rootGroupMap[(int)$row->product_group_id] ?? null;
+            if ($root) {
+                $netByRoot[$row->company_id][$root->id] = ($netByRoot[$row->company_id][$root->id] ?? 0.0) + (float)$row->net;
+            }
+        }
+
+        $result = [];
+        foreach ($netByRoot as $companyId => $nets) {
+            arsort($nets);
+            $root                 = $rootGroupMap[array_key_first($nets)];
+            $result[$companyId]   = ['id' => $root->id, 'name' => $root->name, 'color' => $root->color];
+        }
+        return $result;
+    }
+
     public static function assignMissingCustomerNumbers(): void {
         $counter = Param::get('CUSTOMER_NUMBER_CURRENT');
         $prefix  = Param::get('CUSTOMER_NUMBER_PREFIX')->value;
@@ -462,7 +515,7 @@ class Company extends BaseModel {
         $payload['project_manager_id'] = $userId ?? Auth::id();
 
         $p          = Project::create($payload);
-        $assignment = $p->addAssignee(Auth::user(), 2);
+        $assignment = $p->addAssignee(Auth::user(), AssignmentRole::PROJECT_MANAGER);
 
         if ($assignment) {
             $autoBudget = Param::get('PROJECT_CREATE_AUTO_BUDGET')->value;
@@ -479,12 +532,17 @@ class Company extends BaseModel {
         $this->update(['is_deprecated' => false]);
         return $p;
     }
+    public function activateRepeatingItems(): int {
+        $items = $this->invoiceItems()->whereInactiveStandingOrder()->get();
+        $items->each(fn (InvoiceItem $item) => $item->update(['next_recurrence_at' => now()]));
+        return $items->count();
+    }
     public function indexedItems() {
         return $this->invoiceItems()
             ->where(function ($query) {
                 $query
                     ->whereNotIn('type', InvoiceItemType::Repeating)
-                    ->orWhere(fn ($_) => $_->whereIn('type', InvoiceItemType::Repeating)->whereNull('next_recurrence_at'));
+                    ->orWhere(fn ($_) => $_->whereInactiveStandingOrder());
             })
             ->with('productSource');
     }

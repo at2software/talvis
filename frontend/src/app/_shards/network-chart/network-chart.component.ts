@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, ElementRef, afterNextRender, effect, inject, input, output } from '@angular/core';
 import { Company } from '@models/company/company.model';
-import { Connection } from '@models/company/connection.model';
-import { select, forceSimulation, forceManyBody, forceCenter, forceLink, drag, zoom, zoomIdentity, Simulation, Selection, ZoomBehavior, D3DragEvent, D3ZoomEvent, ForceLink } from 'd3';
+import { Connection, ConnectionType, ConnectionTypeOption } from '@models/company/connection.model';
+import { select, forceSimulation, forceManyBody, forceCenter, forceLink, forceCollide, forceRadial, drag, zoom, zoomIdentity, Simulation, Selection, ZoomBehavior, D3DragEvent, D3ZoomEvent, ForceLink } from 'd3';
 import { GlobalService } from '@models/global.service';
 
 interface NetworkNode {
@@ -9,6 +9,10 @@ interface NetworkNode {
     name: string;
     group: number;
     net: number;
+    keyAccount: boolean;
+    color: string | null;
+    depth: number;
+    radius?: number;
     x?: number;
     y?: number;
     fx?: number | null;
@@ -20,7 +24,23 @@ interface NetworkLink {
     target: string | NetworkNode;
     strength: number;
     projects_count: number;
+    type: ConnectionTypeOption | undefined;
+    onPath: boolean;
 }
+
+const LINK_LAYOUT: Record<ConnectionType | 'none', { distance: number; pull: number }> = {
+    group: { distance: 25, pull: 2 },
+    customer: { distance: 60, pull: 1 },
+    partner: { distance: 90, pull: 1 },
+    referral: { distance: 90, pull: 1 },
+    none: { distance: 100, pull: 1 },
+    competitor: { distance: 180, pull: 0.3 },
+};
+export const UNCLASSIFIED_COLOR = 'dark-grey';
+const RING_RADII =[0, 170, 330, 450];
+const SECOND_DEGREE_OPACITY = 0.5;
+const MAX_RADIUS = 30;
+const LABEL_RADIUS = 10;
 
 @Component({
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -32,8 +52,11 @@ export class NetworkChart {
     root = input<Company | undefined>();
     data = input.required<Connection[]>();
     focus = input<string | Company | null>();
+    depth = input<Record<string, number> | null>(null);
+    path = input<string[]>([]);
 
     nodeSelected = output<string | null>();
+    nodeOpened = output<string>();
 
     #nodes: NetworkNode[] = [];
     #links: NetworkLink[] = [];
@@ -44,6 +67,7 @@ export class NetworkChart {
     #chartElement!: HTMLElement;
     #container!: Selection<SVGGElement, unknown, null, undefined>;
     #zoomBehavior!: ZoomBehavior<SVGSVGElement, unknown>;
+    #lastFocusId: string | null = null;
     #isPanning = false;
     #panStart = { x: 0, y: 0 };
 
@@ -62,23 +86,44 @@ export class NetworkChart {
             this.data();
             this.root();
             this.focus();
+            this.depth();
+            this.path();
             if (this.#simulation) {
                 this.updateData();
             }
         });
     }
 
-    #getNodeRadius(net: number): number {
-        return net === 0 ? 5 : 5 + net;
+    #radiusFor(net: number, maxNet: number): number {
+        return net > 0 ? 4 + (MAX_RADIUS - 4) * Math.sqrt(10 ** (net - maxNet)) : 3;
+    }
+
+    #showsLabel(n: NetworkNode): boolean {
+        return n.keyAccount || n.id === this.#meId() || n.radius! >= LABEL_RADIUS;
+    }
+
+    #baseOpacity(n: NetworkNode): number {
+        return n.depth >= 2 ? SECOND_DEGREE_OPACITY : 1;
+    }
+
+    #nodeFill(n: NetworkNode, meId: string | null): string {
+        if (meId && n.id === meId) return '#28a745';
+        if (n.net === 0) return '#666';
+        if (n.color) return n.color;
+        return n.group === 0 ? 'var(--color-primary-0)' : 'var(--tv-text-strong)';
+    }
+
+    #meId(): string | null {
+        return this.#global.me_id ? String(this.#global.me_id) : null;
     }
 
     #getLinkColor(link: NetworkLink): string {
-        const sourceNode = typeof link.source === 'object' ? link.source : this.#nodes.find((n) => n.id === link.source);
-        const targetNode = typeof link.target === 'object' ? link.target : this.#nodes.find((n) => n.id === link.target);
-        return sourceNode && targetNode && (sourceNode.net === 0 || targetNode.net === 0) ? '#333' : '#999';
+        if (link.onPath) return 'var(--color-primary-0)';
+        return `var(--tv-accent-${link.type?.color ?? UNCLASSIFIED_COLOR})`;
     }
 
     #getLinkWidth(link: NetworkLink): number {
+        if (link.onPath) return 4;
         if (link.projects_count === 0) return 1;
         return Math.min(Math.max(1 + Math.log(link.projects_count), 1), 5);
     }
@@ -167,40 +212,30 @@ export class NetworkChart {
         const focusId = this.#getFocusId();
         const normalizeId = (id: unknown): string => String(id);
 
-        if (root) {
-            const rootId = normalizeId(root.id);
-            let rootNet = 0;
-            if (data.length > 0) {
-                const firstConn = data[0];
-                if (String(firstConn.company1_id) === rootId) rootNet = firstConn.company1?.net || 0;
-                else if (String(firstConn.company2_id) === rootId) rootNet = firstConn.company2?.net || 0;
+        const depth = this.depth();
+        const nodeFor = (company: Company, id: string): NetworkNode =>
+            oldNodesById.get(id) || { id, name: company.getName(), group: 1, net: company.net || 0, keyAccount: company.is_key_account, color: company.primary_group?.color ?? null, depth: 1 };
+        const companyMap = new Map<string, NetworkNode>();
+        for (const conn of data) {
+            for (const [company, id] of [[conn.company1, normalizeId(conn.company1_id)], [conn.company2, normalizeId(conn.company2_id)]] as const) {
+                if (company && !companyMap.has(id)) companyMap.set(id, nodeFor(company, id));
             }
-            newNodes.push(oldNodesById.get(rootId) || { id: rootId, name: root.getName(), group: 0, net: rootNet });
-
-            for (const conn of data) {
-                const other = conn.otherCompany(root);
-                if (!other) continue;
-                const otherId = normalizeId(other.id);
-                newNodes.push(oldNodesById.get(otherId) || { id: otherId, name: other.getName(), group: 1, net: other.net || 0 });
-            }
-        } else {
-            const companyMap = new Map<string, NetworkNode>();
-            for (const conn of data) {
-                const id1 = normalizeId(conn.company1_id);
-                const id2 = normalizeId(conn.company2_id);
-                if (!companyMap.has(id1) && conn.company1) {
-                    companyMap.set(id1, oldNodesById.get(id1) || { id: id1, name: conn.company1.getName(), group: 1, net: conn.company1.net || 0 });
-                }
-                if (!companyMap.has(id2) && conn.company2) {
-                    companyMap.set(id2, oldNodesById.get(id2) || { id: id2, name: conn.company2.getName(), group: 1, net: conn.company2.net || 0 });
-                }
-            }
-            newNodes.push(...companyMap.values());
         }
+        const rootId = root ? normalizeId(root.id) : null;
+        if (root && rootId && !companyMap.has(rootId)) companyMap.set(rootId, nodeFor(root, rootId));
+        for (const n of companyMap.values()) {
+            n.depth = depth?.[n.id] ?? 1;
+            n.group = n.id === rootId ? 0 : 1;
+            if (n.id === this.#lastFocusId && n.id !== focusId) n.fx = n.fy = null;
+        }
+        this.#lastFocusId = focusId;
+        newNodes.push(...companyMap.values());
 
         const nodeIdSet = new Set(newNodes.map((n) => n.id));
         const newLinks: NetworkLink[] = [];
         const meId = this.#global.me_id ? String(this.#global.me_id) : null;
+        const path = this.path();
+        const pathEdges = new Set(path.slice(1).map((id, i) => [path[i], id].sort().join('-')));
 
         for (const conn of data) {
             if (!conn.company1 || !conn.company2) continue;
@@ -216,9 +251,12 @@ export class NetworkChart {
             }
 
             if (nodeIdSet.has(id1) && nodeIdSet.has(id2)) {
-                newLinks.push({ source: id1, target: id2, strength, projects_count: projectsCount });
+                newLinks.push({ source: id1, target: id2, strength, projects_count: projectsCount, type: conn.typeOption(), onPath: pathEdges.has([id1, id2].sort().join('-')) });
             }
         }
+
+        const maxNet = Math.max(0, ...newNodes.map((n) => n.net));
+        for (const n of newNodes) n.radius = this.#radiusFor(n.net, maxNet);
 
         const centerX = this.#chartElement.clientWidth / 2;
         const centerY = this.#chartElement.clientHeight / 2;
@@ -241,9 +279,14 @@ export class NetworkChart {
         this.#links = newLinks;
 
         this.#simulation.nodes(this.#nodes);
+        this.#simulation.force('collide', forceCollide<NetworkNode>((d) => d.radius! + 3));
+        this.#simulation.force('radial', depth ? forceRadial<NetworkNode>((d) => RING_RADII[Math.min(d.depth, RING_RADII.length - 1)], centerX, centerY).strength(0.6) : null);
         const linkForce = this.#simulation.force('link') as ForceLink<NetworkNode, NetworkLink> | undefined;
         if (linkForce) {
-            linkForce.links(this.#links).strength((d: NetworkLink) => d.strength);
+            linkForce
+                .links(this.#links)
+                .distance((d: NetworkLink) => LINK_LAYOUT[d.type?.key ?? 'none'].distance)
+                .strength((d: NetworkLink) => d.strength * LINK_LAYOUT[d.type?.key ?? 'none'].pull);
         }
 
         const linkKey = (d: NetworkLink) => {
@@ -260,9 +303,10 @@ export class NetworkChart {
 
         this.#linkSelection = linkEnter.merge(this.#linkSelection);
         this.#linkSelection
-            .attr('stroke', (d: NetworkLink) => this.#getLinkColor(d))
-            .attr('stroke-opacity', 1)
-            .attr('stroke-width', (d: NetworkLink) => this.#getLinkWidth(d));
+            .style('stroke', (d: NetworkLink) => this.#getLinkColor(d))
+            .attr('stroke-opacity', (d: NetworkLink) => (d.onPath || Math.max((d.source as NetworkNode).depth ?? 1, (d.target as NetworkNode).depth ?? 1) < 2 ? 1 : SECOND_DEGREE_OPACITY))
+            .attr('stroke-width', (d: NetworkLink) => this.#getLinkWidth(d))
+            .attr('stroke-dasharray', (d: NetworkLink) => (d.type?.key === 'competitor' ? '4 3' : null));
 
         this.#nodeSelection = this.#container
             .select<SVGGElement>('g.nodes')
@@ -280,23 +324,31 @@ export class NetworkChart {
                     .on('drag', (event, d) => this.#dragged(event, d))
                     .on('end', (event, d) => this.#dragended(event, d)),
             )
-            .on('click', (event: MouseEvent, d: NetworkNode) => this.#togglePin(event, d));
+            .on('click', (event: MouseEvent, d: NetworkNode) => this.#togglePin(event, d))
+            .on('dblclick', (event: MouseEvent, d: NetworkNode) => {
+                event.stopPropagation();
+                this.nodeOpened.emit(d.id);
+            });
 
-        nodeEnter.append('circle').style('filter', 'url(#neumorphism-shadow)').style('cursor', 'pointer');
+        nodeEnter.append('circle').attr('class', 'key-account-ring').style('fill', 'none').style('stroke', 'var(--tv-accent-yellow)').style('stroke-width', 2);
+        nodeEnter.append('circle').attr('class', 'node-circle').style('filter', 'url(#neumorphism-shadow)').style('cursor', 'pointer');
 
         nodeEnter.append('title');
-        nodeEnter.append('text').attr('y', 5).attr('fill', 'white').style('font-size', '10px').style('cursor', 'pointer');
+        nodeEnter.append('text').style('fill', 'var(--tv-text-strong)').style('cursor', 'pointer');
 
         this.#nodeSelection = nodeEnter.merge(this.#nodeSelection);
+        this.#nodeSelection.style('opacity', (n: NetworkNode) => this.#baseOpacity(n));
 
         this.#nodeSelection
-            .select('circle')
-            .attr('r', (n: NetworkNode) => this.#getNodeRadius(n.net))
-            .style('fill', (n: NetworkNode) => {
-                if (meId && n.id === meId) return '#28a745';
-                if (n.net === 0) return '#666';
-                return n.group === 0 ? 'var(--color-primary-0)' : 'white';
-            })
+            .select('circle.key-account-ring')
+            .attr('r', (n: NetworkNode) => n.radius! + 4)
+            .style('display', (n: NetworkNode) => (n.keyAccount ? 'block' : 'none'));
+
+        this.#nodeSelection
+            .select('circle.node-circle')
+            .attr('r', (n: NetworkNode) => n.radius!)
+            .style('fill', (n: NetworkNode) => this.#nodeFill(n, meId))
+            .style('fill-opacity', (n: NetworkNode) => (n.net === 0 ? 0.6 : 1))
             .style('stroke', (d: NetworkNode) => {
                 if (focusId && d.id === focusId) return 'var(--color-primary-0)';
                 return d.fx != null ? 'var(--color-primary-0)' : 'none';
@@ -310,16 +362,28 @@ export class NetworkChart {
 
         this.#nodeSelection
             .select('text')
-            .attr('x', (d: NetworkNode) => this.#getNodeRadius(d.net) + 10)
-            .style('display', (d: NetworkNode) => (d.net === 0 ? 'none' : 'block'))
+            .attr('x', (d: NetworkNode) => d.radius! + 6)
+            .attr('y', 4)
+            .style('font-size', (d: NetworkNode) => `${Math.min(14, Math.max(9, 7 + d.radius! * 0.25))}px`)
+            .style('font-weight', (d: NetworkNode) => (d.keyAccount ? '600' : null))
+            .style('display', (d: NetworkNode) => (this.#showsLabel(d) ? 'block' : 'none'))
             .text((d: NetworkNode) => d.name);
 
         this.#simulation.alpha(1).restart();
     }
 
     #highlightConnectedLinks(nodeId: string) {
+        const neighbours = new Set([nodeId]);
+        for (const l of this.#links) {
+            const s = typeof l.source === 'object' ? l.source.id : l.source;
+            const t = typeof l.target === 'object' ? l.target.id : l.target;
+            if (s === nodeId) neighbours.add(t);
+            if (t === nodeId) neighbours.add(s);
+        }
+        this.#nodeSelection.style('opacity', (n: NetworkNode) => (neighbours.has(n.id) ? 1 : 0.15));
+        this.#nodeSelection.select('text').style('display', (n: NetworkNode) => (neighbours.has(n.id) || this.#showsLabel(n) ? 'block' : 'none'));
         this.#linkSelection
-            .attr('stroke', (d: NetworkLink) => {
+            .style('stroke', (d: NetworkLink) => {
                 const sourceId = typeof d.source === 'object' ? d.source.id : d.source;
                 const targetId = typeof d.target === 'object' ? d.target.id : d.target;
                 return sourceId === nodeId || targetId === nodeId ? 'var(--color-primary-0)' : this.#getLinkColor(d);
@@ -333,7 +397,9 @@ export class NetworkChart {
     }
 
     #resetLinkHighlight() {
-        this.#linkSelection.attr('stroke', (d: NetworkLink) => this.#getLinkColor(d)).attr('stroke-width', (d: NetworkLink) => this.#getLinkWidth(d));
+        this.#nodeSelection.style('opacity', (n: NetworkNode) => this.#baseOpacity(n));
+        this.#nodeSelection.select('text').style('display', (n: NetworkNode) => (this.#showsLabel(n) ? 'block' : 'none'));
+        this.#linkSelection.style('stroke', (d: NetworkLink) => this.#getLinkColor(d)).attr('stroke-width', (d: NetworkLink) => this.#getLinkWidth(d));
     }
 
     #dragstarted(event: D3DragEvent<SVGGElement, NetworkNode, NetworkNode>, d: NetworkNode) {
@@ -360,7 +426,7 @@ export class NetworkChart {
         }
 
         this.#nodeSelection
-            .select('circle')
+            .select('circle.node-circle')
             .style('stroke', (n: NetworkNode) => {
                 if (focusId && n.id === focusId) return 'var(--color-primary-0)';
                 return n.fx != null ? 'var(--color-primary-0)' : 'none';
@@ -387,7 +453,7 @@ export class NetworkChart {
         }
 
         this.#nodeSelection
-            .select('circle')
+            .select('circle.node-circle')
             .style('stroke', (n: NetworkNode) => (n.fx != null ? 'var(--color-primary-0)' : 'none'))
             .style('stroke-width', (n: NetworkNode) => (n.fx != null ? 2 : 0));
 

@@ -2,7 +2,10 @@
 
 namespace App\Services\Project;
 
+use App\Enums\InvoiceItemType;
+use App\Enums\MilestoneState;
 use App\Models\Connection;
+use App\Models\Invoice;
 use App\Models\InvoiceItem;
 use App\Models\Project;
 use App\Models\ProjectState;
@@ -33,9 +36,7 @@ class ProjectDetailsService {
                 'milestones' => fn ($q) => $q->select('milestones.id', 'invoice_item_id', 'name', 'progress', 'state', 'flags', 'user_id')->without('invoiceItem'),
                 'milestones.user:id,name,color',
             ])
-            ->withCount('billedFoci')
-            ->withSum('billedFoci', 'duration')
-            ->withSum('foci', 'duration')
+            ->withFociStats()
             ->get()
         );
 
@@ -71,15 +72,23 @@ class ProjectDetailsService {
 
         $project->setAttribute('no_invoice_focus', $project->foci()->whereNull('invoice_item_id')->sum('duration'));
         $project->setAttribute('milestone_state_counts', [
-            'todo'        => $milestoneStateCounts[0] ?? 0,
-            'in_progress' => $milestoneStateCounts[1] ?? 0,
-            'done'        => $milestoneStateCounts[2] ?? 0,
+            'todo'        => $milestoneStateCounts[MilestoneState::TODO->value] ?? 0,
+            'in_progress' => $milestoneStateCounts[MilestoneState::IN_PROGRESS->value] ?? 0,
+            'done'        => $milestoneStateCounts[MilestoneState::DONE->value] ?? 0,
             'total'       => array_sum($milestoneStateCounts),
         ]);
         $project->setAttribute('quote_descriptions', $project->getQuoteDescriptions());
 
         $project->append(['net', 'hours_invested', 'personalized', 'params', 'uninvoiced_hours', 'started_at', 'finished_at', 'warranty_until', 'timeline_chart']);
         $project->setAttribute('oldest_unbilled_focus_at', $project->foci_unbilled()->oldest('started_at')->value('started_at'));
+        $project->setAttribute('repeating_items_count', $project->invoiceItems()->whereIn('type', InvoiceItemType::Repeating)->whereNull('invoice_id')->count());
+        $openByStage = $project->invoiceItems()
+            ->whereNull('invoice_id')->whereNull('company_id')
+            ->whereIn('type', Invoice::ITEMS_ADDING_TO_INVOICE)
+            ->selectRaw('stage, COUNT(*) as count')
+            ->groupBy('stage')
+            ->pluck('count', 'stage');
+        $project->setAttribute('open_items_by_stage', collect([0, 1, 2])->mapWithKeys(fn (int $stage) => [$stage => (int)($openByStage[$stage] ?? 0)])->all());
         $project->setAttribute('invoiced_downpayments', (float)$project->invoiceItems()->where('stage', 2)->whereNotNull('invoice_id')->sum('net'));
 
         $appends = ['foci_by_user', 'my_prediction', 'progress'];

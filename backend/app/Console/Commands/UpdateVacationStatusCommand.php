@@ -29,7 +29,7 @@ class UpdateVacationStatusCommand extends Command {
         $affectedUsers = collect();
 
         $startingVacations = Vacation::whereDate('started_at', $today)
-            ->whereIn('state', [VacationState::Approved, VacationState::Sick])
+            ->absences()
             ->with('user')
             ->get();
 
@@ -41,7 +41,7 @@ class UpdateVacationStatusCommand extends Command {
         }
 
         $endingVacations = Vacation::whereDate('ended_at', $today)
-            ->whereIn('state', [VacationState::Approved, VacationState::Sick])
+            ->absences()
             ->with('user')
             ->get();
 

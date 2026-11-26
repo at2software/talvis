@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { NgbDropdown, NgbDropdownModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { Milestone } from '@models/milestone/milestone.model';
+import { MilestoneState } from '@models/milestone/milestone-state.enum';
 import { Project } from '@models/project/project.model';
 import { Task } from '@models/task/task.model';
 import { User } from '@models/user/user.model';
@@ -102,7 +103,7 @@ export class CustomGanttComponent implements AfterViewInit {
     readonly MILESTONE_ROW_HEIGHT = 48;
     readonly TASK_HEIGHT = 20;
     readonly TIMELINE_HEADER_HEIGHT = 60;
-    readonly GRID_COLOR = '#333';
+    readonly GRID_COLOR = 'var(--tv-grid-line)';
     readonly UNIT_WIDTH = computed(() => ({ Day: 40, Week: 80, Month: 120, Year: 200 })[this.viewMode()] ?? 40);
 
     #timelineUnits: TimelineUnit[] = [];
@@ -140,21 +141,21 @@ export class CustomGanttComponent implements AfterViewInit {
     #injector = inject(Injector);
 
     visibleRows = computed(() => {
-        const filtered = this.rows().filter((row) => !(row.type === 'task' && row.data.state === 1));
+        const filtered = this.rows().filter((row) => !(row.type === 'task' && row.data.isClosed()));
 
         if (!this.hideCompleted()) return filtered;
 
         const projectsWithVisibleMilestones = new Set<string>();
         filtered.forEach((row) => {
-            if (row.type === 'milestone' && (row.data as Milestone).state !== 2) {
+            if (row.type === 'milestone' && !row.data.isDone()) {
                 projectsWithVisibleMilestones.add(String((row.data as Milestone).project_id));
             }
         });
 
         return filtered.filter((row) => {
-            if (row.type === 'milestone') return (row.data as Milestone).state !== 2;
+            if (row.type === 'milestone') return !row.data.isDone();
             if (row.type === 'header') return row.project && projectsWithVisibleMilestones.has(String(row.project.id));
-            if (row.type === 'task' && row.milestone) return row.milestone.state !== 2;
+            if (row.type === 'task' && row.milestone) return !row.milestone.isDone();
             return true;
         });
     });
@@ -977,9 +978,9 @@ export class CustomGanttComponent implements AfterViewInit {
         });
     }
 
-    getMilestoneColor = (milestone: Milestone) => milestone.state === 2 ? Color.fromVar('success').toHexString() : '#333';
-    getMilestoneProgressColor = (milestone: Milestone) => milestone.state === 2 ? 'rgba(255, 255, 255, 0.3)' : Color.fromVar('primary').toHexString();
-    getMilestoneLabelColor = (milestone: Milestone) => milestone.state === 2 || milestone.state === 1 ? '#ffffff' : '#cccccc';
+    getMilestoneColor = (milestone: Milestone) => milestone.isDone() ? Color.fromVar('success').toHexString() : '#333';
+    getMilestoneProgressColor = (milestone: Milestone) => milestone.isDone() ? 'rgba(255, 255, 255, 0.3)' : Color.fromVar('primary').toHexString();
+    getMilestoneLabelColor = (milestone: Milestone) => milestone.state !== MilestoneState.TODO ? '#ffffff' : '#cccccc';
 
     decodeHtmlEntities(text: string): string {
         const textarea = document.createElement('textarea');
@@ -1211,21 +1212,10 @@ export class CustomGanttComponent implements AfterViewInit {
                 const hasRight = rowMilestone.x > vr;
                 if (!hasLeft && !hasRight) return null;
 
-                return { rowIndex, hasLeft, hasRight, y: this.getRowY(rowIndex) + this.MILESTONE_ROW_HEIGHT / 2, isOverdue: this.#isMilestoneOverdue(rowMilestone.milestone) };
+                return { rowIndex, hasLeft, hasRight, y: this.getRowY(rowIndex) + this.MILESTONE_ROW_HEIGHT / 2, isOverdue: rowMilestone.milestone.isOverdue() };
             })
             .filter((x): x is NonNullable<typeof x> => x !== null);
     }
-
-    #isMilestoneOverdue(milestone: Milestone): boolean {
-        if (!milestone.due_at || milestone.state === 2) return false;
-        const dueDate = new Date(milestone.due_at);
-        const now = new Date();
-        now.setHours(0, 0, 0, 0);
-        dueDate.setHours(0, 0, 0, 0);
-        return dueDate < now;
-    }
-
-    isMilestoneOverdue = (milestone: Milestone) => this.#isMilestoneOverdue(milestone);
 
     onTaskCheckboxChange(task: Task, event: Event) {
         const checked = (event.target as HTMLInputElement).checked;

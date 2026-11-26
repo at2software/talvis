@@ -65,23 +65,23 @@
 }
 
 ::ng-deep .leaflet-popup-content-wrapper {
-    background: #212529 !important;
+    background: var(--tv-popup-bg) !important;
     border-radius: var(--bs-border-radius) !important;
     box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.5) !important;
 }
 
 ::ng-deep .leaflet-popup-tip {
-    background: #212529 !important;
+    background: var(--tv-popup-bg) !important;
 }
 
 ::ng-deep .customer-popup {
     text-align: center;
-    color: #fff;
+    color: var(--tv-text-strong);
     
     h6 {
         margin-bottom: 0.5rem;
         font-weight: 600;
-        color: #fff;
+        color: var(--tv-text-strong);
     }
     
     .btn {

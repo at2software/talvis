@@ -17,7 +17,11 @@ export class MarketingActivity extends Serializable implements IActivityBase {
         pending: 'bg-dark-grey',
         skipped: 'bg-purple',
     };
-
+    static QUICK_ACTIONS: NonNullable<QuickActionType>[] = ['EMAIL', 'LINKEDIN', 'LINKEDIN_SEARCH', 'CALL'];
+    static #QUICK_ACTION_ICONS: Record<string, string> = { EMAIL: 'email', LINKEDIN: 'open_in_new', LINKEDIN_SEARCH: 'search', CALL: 'phone' };
+    static #QUICK_ACTION_LABELS: Record<string, string> = { EMAIL: 'Email', LINKEDIN: 'LinkedIn', LINKEDIN_SEARCH: 'LinkedIn Search', CALL: 'Phone Call' };
+    static quickActionIcon = (qa: string): string => MarketingActivity.#QUICK_ACTION_ICONS[qa] || '';
+    static quickActionLabel = (qa: string): string => MarketingActivity.#QUICK_ACTION_LABELS[qa] || qa.replace(/_/g, ' ');
 
     marketing_workflow_id!: string;
     name!: string;
@@ -27,6 +31,7 @@ export class MarketingActivity extends Serializable implements IActivityBase {
     has_external_dependency!: boolean;
     parent_activity_id?: string;
     quick_action?: QuickActionType;
+    is_shared?: boolean;
 
     stats?: ActivityStatsDto;
 

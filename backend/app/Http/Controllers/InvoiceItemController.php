@@ -3,13 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Actions\CombineInvoiceItemsAction;
-use App\Enums\InvoiceItemType;
 use App\Models\InvoiceItem;
 use Illuminate\Http\Request;
 
 class InvoiceItemController extends Controller {
     public function indexStandingOrders() {
-        $q = InvoiceItem::whereIn('type', InvoiceItemType::Repeating)->whereNot('next_recurrence_at', null)->with('company', 'productSource')->oldest('next_recurrence_at');
+        $q = InvoiceItem::whereActiveStandingOrder()->with('company', 'productSource')->oldest('next_recurrence_at');
         if (request()->has('company_id')) {
             $q->whereCompanyId(request('company_id'));
         }

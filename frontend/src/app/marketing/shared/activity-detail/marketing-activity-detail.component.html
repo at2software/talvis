@@ -112,6 +112,10 @@
                         <input class="form-check-input" type="checkbox" [(ngModel)]="editHasExternalDependency" name="hasExternalDep" id="actDetailHasExternalDep" />
                         <label class="form-check-label small" for="actDetailHasExternalDep" i18n="@@i18n.marketing.external_dependency">external dependency</label>
                     </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" [(ngModel)]="editIsShared" name="isShared" id="actDetailIsShared" />
+                        <label class="form-check-label small" for="actDetailIsShared" i18n="@@i18n.marketing.shared_activity">shared (can be completed for all prospects at once)</label>
+                    </div>
                 </div>
 
                 <button type="button" class="btn btn-primary btn-sm w-100" (click)="saveActivity()" [disabled]="_isSaving || !editName">

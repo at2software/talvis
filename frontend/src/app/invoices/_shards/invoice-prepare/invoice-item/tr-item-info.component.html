@@ -8,7 +8,7 @@
                 <span class="text-muted" ngbTooltip="{{ _item.predictions.length }} predictions">&#8960; {{ avg() }} {{ _item.unit_name }}</span>
                 <span [style.color]="col()">{{ diff() | percent }}</span>
             }
-            @if (_mode === 'support') {
+            @if (_mode === 'support' && (_item.billed_foci_count || _item.pt > 0)) {
                 <span class="text-muted" [ngbTooltip]="(_item.billed_foci_count ?? 0) + ' foci entries'"><i>schedule</i> {{ _item.billed_foci_count ?? 0 }}</span>
                 <span class="text-muted" [ngbTooltip]="'invoiced: ' + _item.qty + 'h / tracked: ' + (_item.billed_foci_sum_duration ?? 0) + 'h'">{{ _item.qty | number: '1.2-2' }}h / {{ _item.billed_foci_sum_duration ?? 0 | number: '1.2-2' }}h</span>
                 <span style="font-weight: bold" [style.color]="fociColor()">{{ fociPercentage() | percent }}</span>

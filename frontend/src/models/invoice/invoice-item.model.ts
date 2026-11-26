@@ -2,6 +2,7 @@ import type { NxAction } from '@models/_core/nx.actions';
 import { getInvoiceItemTypeRepeatColor, InvoiceItemType, InvoiceItemTypeRepeating } from '@enums/invoice-item.type';
 import { Dictionary } from '@constants/constants';
 import { InvoiceVatHandling } from '@enums/invoice.vat-handling';
+import { InvoiceItemStage } from '@enums/invoice-item.stage';
 import { Product } from '../product/product.model';
 import { Serializable } from '@models/_core/serializable';
 import { getInvoiceItemActions } from './invoice-item.actions';
@@ -24,10 +25,12 @@ import { computed } from '@angular/core';
 import { IHasExtIssue, effectiveExtIssueOf } from '../ext-issue/ext-issue.interface';
 
 export const HOURS_PER_PERSON_DAY = 8;
+const MS_PER_DAY = 1000 * 60 * 60 * 24;
 
 @Model('InvoiceItem')
 export class InvoiceItem extends Serializable implements IHasMarker, IHasExtIssue {
     static API_PATH = (): string => 'invoice_items';
+    static openNet = (items: InvoiceItem[], stage: InvoiceItemStage): number => items.filter((_) => _.isOpenInStage(stage)).reduce((sum, _) => sum + (_.net || 0), 0);
 
     override readonly getName = computed(() => { this.snapshot(); return this.text; });
 
@@ -49,6 +52,8 @@ export class InvoiceItem extends Serializable implements IHasMarker, IHasExtIssu
     unit_factor: number = 0;
     recurrence: string = '';
     next_recurrence_at?: string;
+    /** set by cron:standing-orders on items spawned from a subscription item */
+    recurrence_source_id?: string | number | null;
     active: string = '';
     total: number = 0;
     net: number = 0;
@@ -107,6 +112,9 @@ export class InvoiceItem extends Serializable implements IHasMarker, IHasExtIssu
         console.error('setting parent class ' + _.class + ' is not implemented yet for model InvoiceItem');
     };
 
+    isOpenInStage = (stage: InvoiceItemStage): boolean => this.stage === stage && !this.invoice_id;
+    isRepeating = (): boolean => this.type in REPEATING_MULT;
+    isRecurrenceSpawn = (): boolean => !!this.recurrence_source_id;
     isRegularItem = () => [InvoiceItemType.Default, InvoiceItemType.Optional, InvoiceItemType.Inactive].includes(this.type);
     willAddToSum = () => [InvoiceItemType.Default, InvoiceItemType.Discount, InvoiceItemType.Paydown, InvoiceItemType.Instalment].includes(this.type);
     hasNumbering = () => this.willAddToSum() || this.type === InvoiceItemType.Optional;
@@ -123,6 +131,9 @@ export class InvoiceItem extends Serializable implements IHasMarker, IHasExtIssu
 
     effectiveExtIssue = () => effectiveExtIssueOf(this);
 
+    predictionMean = (): number | null => (this.predictions?.length ? this.predictions.reduce((sum, _) => sum + _.qty, 0) / this.predictions.length : null);
+
+    daysUntilNext = (): number => (this.next_recurrence_at ? Math.ceil((new Date(this.next_recurrence_at).getTime() - Date.now()) / MS_PER_DAY) : 0);
     getRepeatString = () => InvoiceItemType[this.type];
     getYearlyPrice = (): number => {
         const type = this.type as InvoiceItemTypeRepeating;
@@ -226,6 +237,12 @@ export class InvoiceItem extends Serializable implements IHasMarker, IHasExtIssu
         this.vat_calculation = template.vat_calculation;
         if (!this.text) this.text = template.text || product.name;
         this.product_source = Product.fromJson(product.snapshot());
+        if (template.isRepeating() && (this.isRegularItem() || this.isRepeating())) this.setRecurrence(template.type);
+    }
+
+    setRecurrence(type?: InvoiceItemType): void {
+        if (type !== undefined) this.patch({ type });
+        else if (this.isRepeating()) this.patch({ type: InvoiceItemType.Default, next_recurrence_at: null });
     }
 
     static parentField(_: Serializable): string | undefined {

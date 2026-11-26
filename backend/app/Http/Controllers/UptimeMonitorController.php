@@ -103,28 +103,14 @@ class UptimeMonitorController extends Controller {
         $downChecks     = $_->checks()->where('status', 'down')->count();
         $degradedChecks = $_->checks()->where('status', 'degraded')->count();
 
-        $uptimePercentage = $totalChecks > 0 ? round(($upChecks / $totalChecks) * 100, 2) : 100.0;
-
-        $avgResponseTime = $_->checks()
-            ->where('status', 'up')
-            ->whereNotNull('response_time')
-            ->avg('response_time');
-
-        $last24Hours = $_->checks()
-            ->where('checked_at', '>=', Carbon::now()->subHours(24))
-            ->get();
-
-        $uptime24h = $last24Hours->isNotEmpty()
-            ? round(($last24Hours->where('status', 'up')->count() / $last24Hours->count()) * 100, 2)
-            : 100.0;
         return response()->json([
             'total_checks'      => $totalChecks,
             'up_checks'         => $upChecks,
             'down_checks'       => $downChecks,
             'degraded_checks'   => $degradedChecks,
-            'uptime_percentage' => $uptimePercentage,
-            'uptime_24h'        => $uptime24h,
-            'avg_response_time' => $avgResponseTime ? round($avgResponseTime) : null,
+            'uptime_percentage' => $_->uptime_percentage,
+            'uptime_24h'        => $_->uptimePercentageSince(now()->subHours(24)),
+            'avg_response_time' => $_->average_response_time,
         ]);
     }
 }

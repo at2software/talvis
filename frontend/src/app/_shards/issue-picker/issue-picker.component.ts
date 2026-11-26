@@ -59,7 +59,7 @@ export class IssuePickerComponent {
     readonly filteredIssues = computed(() => {
         const term = this.searchTerm().toLowerCase().trim();
         const hideCompleted = this.hideCompleted();
-        const passesState = (_: Task) => !hideCompleted || _.state !== 1;
+        const passesState = (_: Task) => !hideCompleted || !_.isClosed();
         const passesTerm = (_: Task) => !term || _.name.toLowerCase().includes(term) || _.id.includes(term);
 
         const searchMatches = (this.searchResults() ?? []).filter(passesState);
@@ -141,7 +141,6 @@ export class IssuePickerComponent {
     }
     isSelected = (task: Task): boolean => this.activeLinkId() === this.selectedLinkId() && task.id === this.selectedIssueId();
 
-    canConnect = (tracker: IssuePickerTracker): boolean => tracker.instance.state !== 'no token' && tracker.instance.state !== 'connection fail';
 
     #reload(): void {
         this.entries.set([]);
@@ -153,7 +152,7 @@ export class IssuePickerComponent {
 
     #loadMore(isFirstLoad = false): void {
         const tracker = this.activeTracker();
-        if (!tracker || !this.canConnect(tracker) || !this.hasMore() || this.loadingMore()) {
+        if (!tracker || !tracker.instance.canConnect() || !this.hasMore() || this.loadingMore()) {
             if (isFirstLoad) this.loading.set(false);
             return;
         }

@@ -5,6 +5,24 @@
         <title>TALVIS</title>
         <base href="/" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="color-scheme" content="light dark" />
+        <script>
+            // Sets the theme before the first paint so neither app nor splash screen flashes the wrong one.
+            // Dark stays the default without JS or without a preference. A manual choice (key in sync with
+            // THEME_STORAGE_KEY in theme.service.ts) wins over the system. ThemeService takes over at runtime.
+            try {
+                var mode = localStorage.getItem('talvis.theme');
+                var light = mode ? mode === 'light' : window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
+                if (light) document.documentElement.setAttribute('data-bs-theme', 'light');
+            } catch (e) {}
+        </script>
+        <style>
+            /* The full stylesheet may load after the first paint (critical CSS inlining), so the splash screen
+               gets its light surface here. Keep in sync with --tv-surface-card in src/scss/_colors.scss. */
+            html[data-bs-theme='light'] #splash-screen {
+                background: #ffffff;
+            }
+        </style>
         <link rel="icon" type="image/x-icon" href="favicon.ico" />
         <link rel="icon" href="favicon-light.ico" type="image/x-icon" media="(prefers-color-scheme: light)" />
         <link rel="icon" href="favicon.ico" type="image/x-icon" media="(prefers-color-scheme: dark)" />
@@ -14,7 +32,7 @@
         <meta http-equiv="Expires" content="0" />
     </head>
 
-    <body data-bs-theme="dark">
+    <body>
         <div id="splash-screen">
             <img src="assets/nexus-loading/nexus_loading.webp" class="icon" id="nx-icon" alt="Loading..." width="100" />
         </div>

@@ -1,6 +1,6 @@
 @use 'sass:math';
 
-.weekend  { background-color: #00000033; }
+.weekend  { background-color: var(--tv-scrim-1); }
 .vacation { background-color: rgba(0, 180, 220, 0.12); }
 .sick     { background-color: rgba(0, 210, 180, 0.14); }
 
@@ -9,7 +9,7 @@
     height: 1.25rem;
     >* { position: absolute;}
     .bar { 
-        border: 1px #0009 solid;
+        border: 1px var(--tv-scrim-3) solid;
         //box-shadow: shadow();
         top:1px; bottom: 1px;
     }
@@ -26,7 +26,7 @@
 .workday {
     &::before {
         content: '';
-        background-color: #ffffff11;
+        background-color: rgba(var(--tv-ink-rgb), 0.0667);
         position: absolute;
         top:0; left: math.div(9, 24) * 100%; right: math.div(24 - 17, 24) * 100%; bottom: 0;
     }
@@ -38,8 +38,8 @@
     top: 0; left: 0; right: 0; bottom: 0;
     background: repeating-linear-gradient(
         45deg,
-        #0009,
-        #0009 5px,
+        var(--tv-scrim-3),
+        var(--tv-scrim-3) 5px,
         transparent 5px,
         transparent 10px
       ) !important;

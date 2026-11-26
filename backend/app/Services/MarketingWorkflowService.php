@@ -189,6 +189,7 @@ class MarketingWorkflowService {
             'is_required'             => $validated['is_required'] ?? true,
             'has_external_dependency' => $validated['has_external_dependency'] ?? false,
             'parent_activity_id'      => $validated['parent_activity_id'] ?? null,
+            'is_shared'               => $validated['is_shared'] ?? false,
         ]);
 
         if (isset($validated['metric_ids'])) {

@@ -1,4 +1,4 @@
-import { computed, ResourceRef, ResourceStatus } from '@angular/core';
+import { computed, ResourceRef, ResourceStatus, Signal } from '@angular/core';
 import { rxResource } from '@angular/core/rxjs-interop';
 import { Observable } from 'rxjs';
 
@@ -18,6 +18,10 @@ export function modelListResource<T, P>(first: () => P | Observable<T[]>, second
         ? rxResource<T[], P>({ params: first as () => P, stream: ({ params }) => second(params), defaultValue: [] })
         : rxResource<T[], void>({ stream: () => (first as () => Observable<T[]>)(), defaultValue: [] });
     return withLoadedHasValue(ref);
+}
+
+export function resourceValueOr<T, D>(ref: ResourceRef<T>, fallback: D): Signal<NonNullable<T> | D> {
+    return computed(() => (ref.hasValue() ? (ref.value() ?? fallback) : fallback));
 }
 
 function withLoadedHasValue<T>(ref: ResourceRef<T[]>): ResourceRef<T[]> {

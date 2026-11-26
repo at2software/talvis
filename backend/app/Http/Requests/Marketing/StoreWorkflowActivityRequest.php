@@ -19,6 +19,7 @@ class StoreWorkflowActivityRequest extends FormRequest {
             'metric_ids'              => 'array',
             'metric_ids.*'            => 'exists:marketing_performance_metrics,id',
             'quick_action'            => 'nullable|in:EMAIL,LINKEDIN,LINKEDIN_SEARCH,CALL',
+            'is_shared'               => 'boolean',
         ];
     }
 }

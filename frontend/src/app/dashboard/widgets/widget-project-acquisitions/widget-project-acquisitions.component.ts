@@ -30,7 +30,4 @@ export class WidgetProjectAcquisitionsComponent extends BaseWidgetComponent {
     readonly data = computed<Project[]>(() => [...(this.#cashflow.value()?.objects ?? [])].sort((a, b) => (b.net ?? 0) - (a.net ?? 0)));
     readonly chartData = computed<ParamChartSeriesDto[] | undefined>(() => this.#cashflow.value()?.history);
     override value = this.headline(this.#cashflow, () => this.data().reduce((a, b) => a + (b.net ?? 0), 0));
-
-    getProbabilityTooltip = (project: Project) =>
-        $localize`:@@i18n.common.probability:probability` + ': ' + ((project.lead_probability || 0) * 100).toFixed(1) + '%';
 }

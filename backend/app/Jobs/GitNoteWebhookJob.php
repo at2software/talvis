@@ -47,7 +47,7 @@ class GitNoteWebhookJob implements ShouldQueue {
             'attachments' => [ChatProps::attachment($this->objectAttributes['note'], $this->user['name'], '#0A8BC9')],
         ];
 
-        $siblings = $this->links->siblingsOfType(PluginChatController::class)->unique('channelId')->values();
+        $siblings = $this->links->withoutOrchestratedProjects()->siblingsOfType(PluginChatController::class)->unique('channelId')->values();
         foreach ($siblings as $chatInfo) {
             ChatSendMessageJob::dispatch($message, $props, channelId: $chatInfo['channelId'], chatKey: $chatInfo['controller']::getKey());
         }

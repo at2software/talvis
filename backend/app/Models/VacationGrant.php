@@ -22,4 +22,7 @@ class VacationGrant extends BaseModel {
     public function vacations() {
         return $this->hasMany(Vacation::class);
     }
+    public function scopeUnexpired($query) {
+        return $query->where('vacation_grants.expires_at', '>', now());
+    }
 }

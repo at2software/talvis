@@ -3,11 +3,14 @@
 @let _workloadData = workloadData();
 
 <toolbar>
-    <div class="btn-group">
-        <button type="button" class="btn btn-plain text-primary" (click)="onRangeShift(-1)"><i>chevron_left</i></button>
-        <button type="button" class="btn btn-plain text-primary" (click)="onRangeToday()" i18n="@@i18n.common.today">today</button>
-        <button type="button" class="btn btn-plain text-primary" (click)="onRangeShift(1)"><i>chevron_right</i></button>
-    </div>
+    <i class="text-primary pointer" role="button" tabindex="0" (click)="toggleView()" (keydown.enter)="toggleView()" [ngbTooltip]="view() === 'calendar' ? timelineLabel : calendarLabel">{{ view() === 'calendar' ? 'view_timeline' : 'calendar_view_month' }}</i>
+    @if (view() === 'calendar') {
+        <div class="btn-group">
+            <button type="button" class="btn btn-plain text-primary" (click)="onRangeShift(-1)"><i>chevron_left</i></button>
+            <button type="button" class="btn btn-plain text-primary" (click)="onRangeToday()" i18n="@@i18n.common.today">today</button>
+            <button type="button" class="btn btn-plain text-primary" (click)="onRangeShift(1)"><i>chevron_right</i></button>
+        </div>
+    }
 </toolbar>
 
 @if (_loading) {
@@ -23,13 +26,17 @@
 @if (!_loading && !_error && _workloadData) {
     <div class="card">
         <div class="card-body">
-            <capacity-calendar
-                [workloadData]="_workloadData"
-                [milestones]="scheduledMilestones()"
-                (editMilestone)="onEditMilestone($event)"
-                (milestoneRescheduled)="onMilestoneRescheduled($event)"
-                (addMilestoneForDay)="onAddMilestoneForDay($event)"
-            ></capacity-calendar>
+            @if (view() === 'gantt') {
+                <custom-gantt [rows]="ganttRows()" [viewMode]="'Week'" [workloadUser]="user()"></custom-gantt>
+            } @else {
+                <capacity-calendar
+                    [workloadData]="_workloadData"
+                    [milestones]="scheduledMilestones()"
+                    (editMilestone)="onEditMilestone($event)"
+                    (milestoneRescheduled)="onMilestoneRescheduled($event)"
+                    (addMilestoneForDay)="onAddMilestoneForDay($event)"
+                ></capacity-calendar>
+            }
         </div>
     </div>
 }

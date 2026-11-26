@@ -1,17 +1,25 @@
 @let _connections = connections();
+@let _direct = directConnections();
 @let _connectionsLoaded = connectionsLoaded();
 @let _selectedCompany = selectedCompany();
 @let _myCompany = myCompany();
+@let _secondDegree = secondDegree();
 <scrollbar>
     <div class="row">
         <div class="col-md-3">
-            <div class="card info-box-card" [class.sticky-side]="_connections.length">
+            <div class="card info-box-card" [class.sticky-side]="_direct.length">
                 <div class="card-header">
                     <span i18n="@@i18n.common.connections">connections</span>
                     <div class="card-header-actions">
                         <i class="text-primary cursor-pointer" [ngbPopover]="popContent" placement="end" container="body" [autoClose]="'outside'" (shown)="onPopoverShown()" popoverTitle="add connection" i18n-popoverTitle="@@i18n.customers.addConnection" ngbTooltip="add connection" i18n-ngbTooltip="@@i18n.customers.addConnection">add</i>
 
                         <ng-template #popContent>
+                            <select class="form-select form-select-sm mb-2" [value]="newRole()" (change)="newRole.set($any($event.target).value)" aria-label="relationship" i18n-aria-label="@@i18n.connections.relationship">
+                                <option value="" i18n="@@i18n.connections.unclassified">unclassified</option>
+                                @for (_ of roles; track _.value) {
+                                <option [value]="_.value">{{_.label}}</option>
+                                }
+                            </select>
                             <search-input #popSearch only="Company" (itemSelected)="onCompanySelect($event)">
                                 <div class="dropdown-divider"></div>
                                 <div class="dropdown-item hstack gap-2 pointer text-primary" (click)="createNewCompany(popSearch)" (keyup.enter)="createNewCompany(popSearch)" tabindex="0">
@@ -28,14 +36,36 @@
                     </div>
                 </div>
                 <ul class="list-group">
-                    @for (con of _connections; track con.id) {
-                    <li class="list-group-item d-flex text-nowrap" [nx]="con" [tables]="_connections" (singleActionResolved)="singleActionResolved()">
-                        <div class="me-3"><avatar [object]="con.otherCompany(_myCompany)"></avatar></div>
-                        <div class="text-truncate">{{con.otherCompany(_myCompany)?.getName()}}</div>
+                    @for (_group of roleGroups(); track _group.label) {
+                    <li class="list-group-item small role-heading d-flex align-items-center" [style.color]="'var(--tv-accent-' + _group.color + ')'"><span class="flex-fill">{{_group.label}}</span><span class="badge text-bg-dark">{{_group.connections.length}}</span></li>
+                    @for (con of _group.connections; track con.id) {
+                    @let _other = con.otherCompany(_myCompany);
+                    <li class="list-group-item d-flex text-nowrap align-items-center" [nx]="con" [tables]="_connections" (singleActionResolved)="singleActionResolved()">
+                        <div class="me-3"><avatar [object]="_other"></avatar></div>
+                        <div class="text-truncate flex-fill">{{_other?.getName()}}</div>
+                        @if (con.source === 'research') {
+                        <i class="small text-muted ms-1" ngbTooltip="researched" i18n-ngbTooltip="@@i18n.connections.researched">travel_explore</i>
+                        }
                     </li>
+                    }
                     } @empty {
                     @if (_connectionsLoaded) {
                     <li class="list-group-item small text-muted" i18n="@@i18n.customers.noConnectionsYet">no connections yet</li>
+                    }
+                    }
+                    @if (_secondDegree.length) {
+                    <li class="list-group-item small text-muted role-heading cursor-pointer d-flex align-items-center" (click)="secondDegreeCollapsed.set(!secondDegreeCollapsed())" (keydown.enter)="secondDegreeCollapsed.set(!secondDegreeCollapsed())" tabindex="0">
+                        <span class="flex-fill" i18n="@@i18n.connections.secondDegree">via two hops</span>
+                        <span class="badge text-bg-dark me-2">{{_secondDegree.length}}</span>
+                        <i class="text-primary">{{secondDegreeCollapsed() ? 'expand_more' : 'expand_less'}}</i>
+                    </li>
+                    @if (!secondDegreeCollapsed()) {
+                    @for (company of _secondDegree; track company.id) {
+                    <li class="list-group-item d-flex text-nowrap align-items-center" [nx]="company">
+                        <div class="me-3"><avatar [object]="company"></avatar></div>
+                        <div class="text-truncate flex-fill text-muted">{{company.getName()}}</div>
+                    </li>
+                    }
                     }
                     }
                 </ul>
@@ -50,7 +80,7 @@
             </empty-state>
             }
             @if (_connections.length) {
-            <network-chart class="card chart" [root]="_myCompany" [data]="_connections" [focus]="_myCompany" (nodeSelected)="onNodeSelected($event)"></network-chart>
+            <network-chart class="card chart" [root]="_myCompany" [data]="_connections" [focus]="_myCompany" [depth]="depth()" [path]="path()" (nodeSelected)="onNodeSelected($event)" (nodeOpened)="openNetwork($event)"></network-chart>
             } @if (_selectedCompany) {
             <div class="card mt-3 cursor-pointer" (click)="navigateToCompany()" tabindex="0" (keydown.enter)="navigateToCompany()">
                 <div class="card-body d-flex align-items-center gap-3">

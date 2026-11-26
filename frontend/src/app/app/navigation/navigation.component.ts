@@ -8,6 +8,7 @@ import { NComponent } from '@shards/n/n.component';
 import { HotkeyDirective } from '@directives/hotkey.directive';
 import { GuidedTourComponent } from '@shards/guided-tour/guided-tour.component';
 import { Serializable } from '@models/_core/serializable';
+import { ThemeService } from '@services/theme.service';
 
 @Component({
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -28,9 +29,14 @@ export class NavigationComponent {
     readonly global = inject(GlobalService);
     #router = inject(Router);
     #destroyRef = inject(DestroyRef);
+    #theme = inject(ThemeService).theme;
 
     readonly navigationItems = computed(() => this.global.navigationItems());
     readonly bottomNavigationItems = computed(() => this.global.bottomNavigationItems());
+
+    /** The module icons are white and get inverted in light mode via CSS; the logo has its own dark variant. */
+    readonly logoIcon = computed(() => (this.#theme() === 'light' ? 'logo_black' : 'logo'));
+    iconSrc = (logo: string) => `./assets/modules/${logo === 'logo' ? this.logoIcon() : logo}.svg`;
 
     navVisible = (logo: string) => this.navigationItems().some((i) => i.logo === logo && i.visible);
     bottomNavVisible = (logo: string) => this.bottomNavigationItems().some((i) => i.logo === logo && i.visible);

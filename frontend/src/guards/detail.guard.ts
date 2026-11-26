@@ -101,11 +101,10 @@ export abstract class DetailGuard<T extends Serializable> {
     }
 
     static routeActivators() {
-        const self = this;
         return {
             canActivate: [this],
             canActivateChild: [this],
-            title: (): string => inject(self).object()?.getName() ?? '',
+            title: (): string => inject(this).object()?.getName() ?? '',
         };
     }
 }

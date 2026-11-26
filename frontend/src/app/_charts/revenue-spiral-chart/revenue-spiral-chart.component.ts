@@ -129,7 +129,7 @@ export class RevenueSpiralChartComponent {
                 .attr('y', Math.sin(angleInRadians) * labelRadius)
                 .attr('text-anchor', 'middle')
                 .attr('dy', '0.35em')
-                .attr('fill', '#999')
+                .style('fill', 'var(--tv-text-dim)')
                 .attr('font-size', '9px')
                 .text(monthName);
         });

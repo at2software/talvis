@@ -63,6 +63,8 @@ export class CustomerDashboard {
 
     readonly globalUserHasInvoicingRole = this.#global.user?.hasRole('invoicing') ?? false;
     readonly recurrences = RECURRENCES;
+    readonly keyAccountOn = $localize`:@@i18n.customers.keyAccountOn:key account`;
+    readonly keyAccountOff = $localize`:@@i18n.customers.keyAccountOff:not a key account`;
 
     readonly #invoices = modelResource(
         () => (this.globalUserHasInvoicingRole ? this.#parent.object()?.id || undefined : undefined),

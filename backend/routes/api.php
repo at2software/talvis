@@ -61,6 +61,7 @@ use App\Http\Controllers\VaultController;
 use App\Http\Controllers\WebhookEndpointController;
 use App\Http\Controllers\WidgetController;
 use App\Http\Middleware\WebDAVAuthMiddleware;
+use App\Http\Requests\Focus\LinkFociToInvoiceItemRequest;
 use App\Models\Company;
 use App\Models\Connection;
 use App\Models\ExpenseCategory;
@@ -149,10 +150,11 @@ Route::middleware('auth', 'release.session', 'cache.headers:no_cache;must_revali
             Route::get('assignees', 'indexAssignees');
             Route::get('comments', 'indexComments');
             Route::get('connections', 'indexConnections');
+            Route::get('network', 'indexNetwork');
             Route::get('employees', 'indexEmployees');
             Route::get('foci', 'indexFoci');
             Route::get('import_imprint', 'importImprint');
-            Route::get('invoice', 'makeInvoice');
+            Route::get('invoice', 'makeInvoice')->middleware('role:invoicing');
             Route::get('prediction-accuracy', 'showPredictionAccuracy');
             Route::middleware('role:project_manager|marketing')->group(function () {
                 Route::post('assignees', 'storeAssignee');
@@ -180,6 +182,7 @@ Route::middleware('auth', 'release.session', 'cache.headers:no_cache;must_revali
     Route::prefix('connections')->group(function () {
         Route::get('/', [CompanyController::class, 'indexAllConnections']);
         Route::post('/', [CompanyController::class, 'storeConnection'])->middleware('role:project_manager|marketing');
+        Route::put('/{_}', [CompanyController::class, 'updateConnection'])->middleware('role:project_manager|marketing');
         Route::delete('/{_}', fn (Connection $_) => response()->json($_->delete()))->middleware('role:project_manager|marketing');
     });
 
@@ -202,6 +205,11 @@ Route::middleware('auth', 'release.session', 'cache.headers:no_cache;must_revali
     Route::prefix('foci')->middleware('role:hr|project_manager')->group(function () {
         Route::get('/uninvoiced/{path}/{id}', fn (string $path, string $id) => (Focus::fromPath($path.'/'.$id) ?? abort(404))->foci_unbilled()->get());
         Route::post('/create-items/{path}/{id}', fn (string $path, string $id) => (Focus::fromPath($path.'/'.$id) ?? abort(404))->createInvoiceItemsFromFoci(request()));
+        Route::post('/link-item/{path}/{id}', function (LinkFociToInvoiceItemRequest $request, string $path, string $id) {
+            $parent = Focus::fromPath($path.'/'.$id);
+            abort_unless($parent instanceof Project || $parent instanceof Company, 404);
+            return $parent->linkFociToInvoiceItem($request);
+        });
     });
 
     Route::prefix('live-sharing')->controller(LiveSharingController::class)->group(function () {
@@ -302,6 +310,11 @@ Route::middleware('auth', 'release.session', 'cache.headers:no_cache;must_revali
                     Route::delete('metrics/{marketingPerformanceMetric}', 'detachInitiativeActivityMetric');
                 });
             });
+        });
+
+        Route::prefix('shared-activities')->controller(MarketingInitiativeController::class)->group(function () {
+            Route::get('', 'indexSharedActivities');
+            Route::post('{marketingInitiativeActivity}/complete', 'completeSharedActivity');
         });
 
         Route::prefix('workflows')->controller(MarketingWorkflowController::class)->group(function () {
@@ -447,12 +460,13 @@ Route::middleware('auth', 'release.session', 'cache.headers:no_cache;must_revali
             Route::put('set-main-contact', 'updateSetMainContact');
             Route::get('comments', 'indexComments');
             Route::get('foci', 'indexFoci');
-            Route::get('invoice', 'makeInvoice');
+            Route::get('invoice', 'makeInvoice')->middleware('role:invoicing|project_manager|financial');
             Route::get('quote-descriptions', 'indexQuoteDescriptions');
             Route::get('invoice-items/estimation', 'indexInvoiceItemsForEstimation');
             Route::get('features', 'indexFeatures');
             Route::middleware('role:invoicing|project_manager')->group(function () {
                 Route::get('invoice-items', 'indexInvoiceItems');
+                Route::get('repeating-items', 'indexRepeatingItems');
                 Route::get('payment-plan', 'showPaymentPlan');
             });
             Route::get('milestones', 'indexMilestones');
@@ -463,7 +477,7 @@ Route::middleware('auth', 'release.session', 'cache.headers:no_cache;must_revali
             Route::put('convert-support-to-regular', 'convertSupportItemsToRegular');
             Route::put('postpone', 'postpone');
             Route::post('duplicate', 'duplicate')->middleware('role:project_manager');
-            Route::get('pdf', 'makeQuote');
+            Route::get('pdf', 'makeQuote')->middleware('role:invoicing|project_manager|financial');
             Route::get('quote-acceptance-prediction', 'showQuoteAcceptancePrediction')->middleware('role:project_manager');
             Route::get('connection-projects', 'indexConnectionProjects');
             Route::post('connection-projects', 'storeConnectionProject');
@@ -776,5 +790,3 @@ Route::prefix('gitlab')->controller(PluginGitController::class)->group(function 
     Route::post('', 'onWebhook');
     Route::put('', 'onWebhook');
 });
-
-require __DIR__.'/flow.php';

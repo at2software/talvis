@@ -2,7 +2,7 @@
 @use 'colors' as *;
 @use 'var';
 
-.bg-default { background-color: #0009; color: #999;}
+.bg-default { background-color: var(--tv-scrim-3); color: var(--tv-text-dim);}
 .badge { white-space:wrap !important; text-align: left; }
 .callout-avatar {
     width: 28px;
@@ -28,10 +28,10 @@
     }
 
     &.callout-myself {
-        background-color: $primary-4;
+        background-color: var(--tv-primary-subtle);
 
         &::before {
-            border-right-color: $primary-4;
+            border-right-color: var(--tv-primary-subtle);
         }
     }
 }

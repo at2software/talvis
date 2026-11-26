@@ -207,6 +207,7 @@ class MarketingInitiative extends BaseModel {
                 'is_required'             => $activity->is_required,
                 'has_external_dependency' => $activity->has_external_dependency ?? false,
                 'quick_action'            => $activity->quick_action,
+                'is_shared'               => $activity->is_shared,
                 'parent_activity_id'      => null,
             ]);
             $activityIdMap[$activity->id] = $newActivity->id;
@@ -229,6 +230,7 @@ class MarketingInitiative extends BaseModel {
             'has_external_dependency' => $validated['has_external_dependency'] ?? false,
             'parent_activity_id'      => $validated['parent_activity_id'] ?? null,
             'quick_action'            => $validated['quick_action'] ?? null,
+            'is_shared'               => $validated['is_shared'] ?? false,
         ]);
 
         if (isset($validated['metric_ids'])) {

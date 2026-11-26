@@ -11,38 +11,38 @@
                 </li>
                 <li class="list-group-item d-flex justify-content-between align-items-center cursor-pointer" [class.active]="typeFilter() === 'counter'" (click)="filterByType('counter')" tabindex="0" (keydown.enter)="filterByType('counter')">
                     <span class="d-flex align-items-center gap-1">
-                        <i style="font-size: 1rem; color: #6366f1">tag</i>
+                        <i class="metric-counter" style="font-size: 1rem">tag</i>
                         <span i18n="@@i18n.marketing.counters">counters</span>
                     </span>
-                    <span class="badge bg-dark rounded-pill" style="color: #6366f1">{{ stats().byType.counter }}</span>
+                    <span class="badge bg-dark rounded-pill metric-counter">{{ stats().byType.counter }}</span>
                 </li>
                 <li class="list-group-item d-flex justify-content-between align-items-center cursor-pointer" [class.active]="typeFilter() === 'percentage'" (click)="filterByType('percentage')" tabindex="0" (keydown.enter)="filterByType('percentage')">
                     <span class="d-flex align-items-center gap-1">
-                        <i style="font-size: 1rem; color: #10b981">percent</i>
+                        <i class="metric-percentage" style="font-size: 1rem">percent</i>
                         <span i18n="@@i18n.marketing.percentages">percentages</span>
                     </span>
-                    <span class="badge bg-dark rounded-pill" style="color: #10b981">{{ stats().byType.percentage }}</span>
+                    <span class="badge bg-dark rounded-pill metric-percentage">{{ stats().byType.percentage }}</span>
                 </li>
                 <li class="list-group-item d-flex justify-content-between align-items-center cursor-pointer" [class.active]="typeFilter() === 'conversion'" (click)="filterByType('conversion')" tabindex="0" (keydown.enter)="filterByType('conversion')">
                     <span class="d-flex align-items-center gap-1">
-                        <i style="font-size: 1rem; color: #f59e0b">trending_up</i>
+                        <i class="metric-conversion" style="font-size: 1rem">trending_up</i>
                         <span i18n="@@i18n.marketing.conversions">conversions</span>
                     </span>
-                    <span class="badge bg-dark rounded-pill" style="color: #f59e0b">{{ stats().byType.conversion }}</span>
+                    <span class="badge bg-dark rounded-pill metric-conversion">{{ stats().byType.conversion }}</span>
                 </li>
                 <li class="list-group-item d-flex justify-content-between align-items-center cursor-pointer" [class.active]="typeFilter() === 'currency'" (click)="filterByType('currency')" tabindex="0" (keydown.enter)="filterByType('currency')">
                     <span class="d-flex align-items-center gap-1">
-                        <i style="font-size: 1rem; color: #06b6d4">attach_money</i>
+                        <i class="metric-currency" style="font-size: 1rem">attach_money</i>
                         <span i18n="@@i18n.common.currency">currency</span>
                     </span>
-                    <span class="badge bg-dark rounded-pill" style="color: #06b6d4">{{ stats().byType.currency }}</span>
+                    <span class="badge bg-dark rounded-pill metric-currency">{{ stats().byType.currency }}</span>
                 </li>
                 <li class="list-group-item d-flex justify-content-between align-items-center cursor-pointer" [class.active]="typeFilter() === 'duration'" (click)="filterByType('duration')" tabindex="0" (keydown.enter)="filterByType('duration')">
                     <span class="d-flex align-items-center gap-1">
-                        <i style="font-size: 1rem; color: #8b5cf6">schedule</i>
+                        <i class="metric-duration" style="font-size: 1rem">schedule</i>
                         <span i18n="@@i18n.common.duration">duration</span>
                     </span>
-                    <span class="badge bg-dark rounded-pill" style="color: #8b5cf6">{{ stats().byType.duration }}</span>
+                    <span class="badge bg-dark rounded-pill metric-duration">{{ stats().byType.duration }}</span>
                 </li>
             </ul>
         </div>

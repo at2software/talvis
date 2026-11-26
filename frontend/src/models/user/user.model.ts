@@ -7,6 +7,7 @@ import * as forge from 'node-forge';
 import { NxAction } from '@models/_core/nx.actions';
 import { ReplaySubject, tap } from 'rxjs';
 import { Type } from '@models/_core/hydrate';
+import { resolveIconUrl } from '@models/_core/serializable';
 import { Company } from '@models/company/company.model';
 import { Project } from '@models/project/project.model';
 import { getUserActions } from './user.actions';
@@ -23,7 +24,8 @@ export class User extends VcardClass {
     static iconPathFor = (user_id: string) => environment.envApi + `users/${user_id}/icon`;
     static COOKIE_ENC_KEY = 'ENC_PEM';
     
-    override readonly getAvatar = computed(() => { this.snapshot(); return environment.envApi + `users/${this.id}/icon`; });
+    // Versioned via the payload icon (`users/{id}/icon?{updated_at}`), see Company.getAvatar.
+    override readonly getAvatar = computed(() => resolveIconUrl(this.snapshot().icon, `users/${this.id}/icon`));
     override frontendUrl = (): string | undefined => (nx().global.user?.hasAnyRole(['hr', 'project_manager']) ? `/hr/${this.id}` : undefined);
 
     readonly #encryptionInitialized = new ReplaySubject<boolean>(1);

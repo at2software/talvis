@@ -2,7 +2,7 @@
 
 input {
   width: 100%;
-  color: white;
+  color: var(--tv-text-strong);
   background-color: transparent;
   border: none;
   overflow: hidden;
@@ -10,7 +10,7 @@ input {
 }
 
 input::placeholder {
-  color: white;
+  color: var(--tv-text-strong);
 }
 
 .header-container {

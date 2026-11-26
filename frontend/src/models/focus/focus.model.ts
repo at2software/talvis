@@ -20,6 +20,8 @@ import { IHasExtIssue, effectiveExtIssueOf } from '../ext-issue/ext-issue.interf
 export class Focus extends Serializable implements IHasMarker, IHasExtIssue {
     static API_PATH = (): string => 'foci';
 
+    static totalDuration = (foci: Focus[], userId?: string): number => foci.filter((_) => userId === undefined || _.user_id === userId).reduce((sum, _) => sum + _.duration, 0);
+
     static filterByDateRange(foci: Focus[], startDate: Dayjs, endDate: Dayjs): Focus[] {
         return foci.filter((f) => startDate.diff(f.momentStarted(), 'seconds') < 0 && endDate.diff(f.momentStarted(), 'seconds') >= 0);
     }

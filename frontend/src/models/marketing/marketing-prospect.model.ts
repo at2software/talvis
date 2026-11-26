@@ -84,6 +84,8 @@ export class MarketingProspect extends VcardClass implements IHasMarker {
 
     readonly #inactiveStatuses = ['unresponsive', 'disqualified', 'on_hold'];
 
+    leavesOutreachQueue = (): boolean => [...this.#inactiveStatuses, 'converted'].includes(this.status);
+
     override markerClass = computed((): string => {
         this.snapshot();
         if (this.#inactiveStatuses.includes(this.status)) return '';

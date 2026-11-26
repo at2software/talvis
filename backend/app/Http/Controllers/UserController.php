@@ -6,11 +6,11 @@ use App\Actions\User\CalculateDailyWorkload;
 use App\Enums\CommentType;
 use App\Enums\InvoiceItemType;
 use App\Enums\InvoiceVatHandling;
-use App\Enums\MilestoneState;
 use App\Helpers\ModelRelationship;
 use App\Http\Requests\User\CreateTbeRequest;
 use App\Http\Requests\User\StoreEmploymentRequest;
 use App\Http\Requests\User\StoreUserRequest;
+use App\Models\AssignmentRole;
 use App\Models\LeadSource;
 use App\Models\Milestone;
 use App\Models\Param;
@@ -26,6 +26,7 @@ use App\Services\PersonalCalendar;
 use App\Services\User\UserProjectLoadService;
 use App\Services\UserTimelineService;
 use App\Support\Calendar\CalendarOccurrence;
+use App\Support\ProjectOrchestrator;
 use App\Traits\HasParams;
 use Carbon\Carbon;
 use Exception;
@@ -61,12 +62,8 @@ class UserController extends Controller {
     public function indexPmMilestones(Request $request, User $_) {
         $result = $this->indexMilestones($request, $_, true);
 
-        $meId = Param::get('ME_ID')->value;
-
-        $projectsNoCoverage = Project::whereRunning()
+        $projectsNoCoverage = Project::whereNeedsMilestoneCoverage()
             ->where('project_manager_id', $_->id)
-            ->where('is_time_based', false)
-            ->where('company_id', '!=', $meId)
             ->with([
                 'company',
                 'milestones' => function ($q) {
@@ -75,15 +72,7 @@ class UserController extends Controller {
                 },
             ])
             ->get()
-            ->filter(function ($project) {
-                $milestoneHours = $project->milestones->sum(function ($milestone) {
-                    if ($milestone->workload_hours !== null && $milestone->workload_hours > 0) {
-                        return $milestone->workload_hours;
-                    }
-                    return $milestone->invoiceItems->sum(fn ($item) => $item->assumedWorkload());
-                });
-                return $milestoneHours <= 0;
-            })
+            ->filter(fn (Project $project) => $project->milestoneHours() <= 0)
             ->map(function ($project) {
                 return [
                     'id'              => $project->id,
@@ -105,7 +94,7 @@ class UserController extends Controller {
         if ($pm) {
             $milestonesGrouped = Milestone::whereHas('project', fn ($query) => $query->where('project_manager_id', $_->id)->whereRunning());
         } else {
-            $milestonesGrouped = $_->milestones()->where(fn ($q) => $q->whereHas('project', fn ($p) => $p->whereRunning())->orWhereNot('state', MilestoneState::DONE));
+            $milestonesGrouped = $_->milestones()->where(fn ($q) => $q->whereHas('project', fn ($p) => $p->whereRunning())->orWhere(fn ($m) => $m->open()));
         }
 
         $milestonesGrouped = $milestonesGrouped
@@ -181,11 +170,7 @@ class UserController extends Controller {
         }
 
         if ($request->has('is_retired') && Auth::user()->hasAnyRole(['admin', 'hr'])) {
-            $user->employments->each(function ($_) {
-                $_->is_active = false;
-                $_->save();
-            });
-            $user->syncRoles([]);
+            $user->retire();
             return $user;
         }
         if ($request->has('hpw') && Auth::user()->hasAnyRole(['admin', 'hr'])) {
@@ -272,22 +257,23 @@ class UserController extends Controller {
         }
 
         $object = collect([
-            'version'        => 1,
-            'user'           => $user,
-            'dashboards'     => $user->getDashboards(),
-            'encryptions'    => $user->encryptions,
-            'eu_countries'   => $this->getCachedEuCountries(),
-            'lead_sources'   => $leadSources,
-            'team'           => $team,
-            'settings'       => Param::index(),
-            'tables'         => $this->getCachedTables(),
-            'relations'      => ModelRelationship::RELATIONSHIPS,
-            'accessors'      => ModelRelationship::ACCESSORS,
-            'project_states' => $projectStates,
-            'plugins'        => $plugins,
-            'enums'          => $this->getCachedEnums(),
-            'roles'          => $roles,
-            'is_seed_admin'  => $user->isSeedAdmin(),
+            'version'                => 1,
+            'user'                   => $user,
+            'dashboards'             => $user->getDashboards(),
+            'encryptions'            => $user->encryptions,
+            'lead_sources'           => $leadSources,
+            'team'                   => $team,
+            'settings'               => Param::index(),
+            'tables'                 => $this->getCachedTables(),
+            'relations'              => ModelRelationship::RELATIONSHIPS,
+            'accessors'              => ModelRelationship::ACCESSORS,
+            'project_states'         => $projectStates,
+            'assignment_roles'       => AssignmentRole::orderBy('id')->get(['id', 'name'])->map->only(['id', 'name'])->values(),
+            'orchestrated_state_ids' => app(ProjectOrchestrator::class)->orchestratedStateIds(),
+            'plugins'                => $plugins,
+            'enums'                  => $this->getCachedEnums(),
+            'roles'                  => $roles,
+            'is_seed_admin'          => $user->isSeedAdmin(),
         ]);
         if ($apiToken !== null) {
             $object['user'] = [...$user->jsonSerialize(), 'api_token' => $apiToken];
@@ -299,9 +285,6 @@ class UserController extends Controller {
     }
     private function getCachedTables() {
         return Cache::remember(DatabaseSchemaService::CACHE_KEY, now()->addDay(), fn () => $this->getTables());
-    }
-    private function getCachedEuCountries() {
-        return collect(config('eu.countries'));
     }
     private function getCachedEnums() {
         return collect([

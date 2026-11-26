@@ -5,6 +5,7 @@ import { CustomerRevenueScatterAxesDto, CustomerRevenueScatterDto } from '@model
 import { MoneyPipe } from '@pipes/money.pipe';
 import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import type { EChartsOption } from 'echarts';
+import { injectChartPalette } from '@charts/echarts-theme';
 
 const MIN_SIZE = 6;
 const MAX_SIZE = 40;
@@ -37,9 +38,11 @@ export class CustomerRevenueBubbleChartComponent {
     chartOptions = signal<EChartsOption | undefined>(undefined);
 
     readonly #money = new MoneyPipe();
+    #palette = injectChartPalette();
 
     constructor() {
         effect(() => {
+            const palette = this.#palette();
             const response = this.data();
             const key = this.xAxisKey();
             const label = this.label();
@@ -82,17 +85,17 @@ export class CustomerRevenueBubbleChartComponent {
                     name: 'Follow-up %',
                     nameLocation: 'middle',
                     nameGap: 14,
-                    nameTextStyle: { color: '#aaa', fontSize: 10 },
-                    axisLabel: { color: '#aaa', fontSize: 9, formatter: '{value}%' },
-                    axisLine: { lineStyle: { color: '#444' } },
-                    splitLine: { lineStyle: { color: '#333' } },
+                    nameTextStyle: { color: palette.textMuted, fontSize: 10 },
+                    axisLabel: { color: palette.textMuted, fontSize: 9, formatter: '{value}%' },
+                    axisLine: { lineStyle: { color: palette.axisLine } },
+                    splitLine: { lineStyle: { color: palette.splitLine } },
                 },
                 yAxis: {
                     type: isLogAxis ? 'log' : 'value',
                     inverse: isLogAxis,
-                    axisLabel: { color: '#aaa', fontSize: 9 },
-                    axisLine: { lineStyle: { color: '#444' } },
-                    splitLine: { lineStyle: { color: '#333' } },
+                    axisLabel: { color: palette.textMuted, fontSize: 9 },
+                    axisLine: { lineStyle: { color: palette.axisLine } },
+                    splitLine: { lineStyle: { color: palette.splitLine } },
                 },
                 tooltip: {
                     trigger: 'item',

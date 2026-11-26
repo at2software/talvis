@@ -11,7 +11,7 @@
 
 .list-group-item {
     background-color: transparent;
-    border-color: rgba(255, 255, 255, 0.1);
+    border-color: rgba(var(--tv-ink-rgb), 0.1);
     transition: background-color 0.2s;
 
     &.active {
@@ -23,5 +23,5 @@
 .alert-success {
     background-color: rgba(48, 232, 0, 0.15);
     border-color: rgba(48, 232, 0, 0.3);
-    color: #30E800;
+    color: var(--tv-accent-green);
 }

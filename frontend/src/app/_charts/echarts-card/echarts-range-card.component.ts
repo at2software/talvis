@@ -1,5 +1,5 @@
 import { Dictionary } from '@constants/constants';
-import { ChangeDetectionStrategy, Component, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, untracked } from '@angular/core';
 import { EchartsParamCardComponent } from './echarts-param-card.component';
 
 import { Color } from '@constants/Color';
@@ -23,6 +23,9 @@ export class EchartsRangeCardComponent extends EchartsParamCardComponent {
     seriesCount = input<number>(1);
 
     #formatNumber = (value: number) => Intl.NumberFormat(this.global.locale, { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value);
+
+    /** Area under a line: darker than the line on dark surfaces, lighter on light ones. */
+    #areaColor = (lineColor: string) => (untracked(this.theme) === 'light' ? new Color(lineColor).lighten(25) : new Color(lineColor).darken(25)).toHexString();
 
     get primaryColorVar(): string {
         return `var(--bs-${this.getColor(0)})`;
@@ -96,7 +99,7 @@ export class EchartsRangeCardComponent extends EchartsParamCardComponent {
                     },
                     symbol: 'none',
                     areaStyle: {
-                        color: new Color(areaColor).darken(25).toHexString(),
+                        color: this.#areaColor(areaColor),
                         ...EChartsDualShadowAreaStyle,
                     },
                     stack: sharedStackName,
@@ -127,7 +130,7 @@ export class EchartsRangeCardComponent extends EchartsParamCardComponent {
                     lineStyle: { opacity: 0 },
                     symbol: 'none',
                     areaStyle: {
-                        color: new Color(areaColor).darken(25).toHexString(),
+                        color: this.#areaColor(areaColor),
                         ...EChartsDualShadowAreaStyle,
                     },
                     stack: `range_${i}`,

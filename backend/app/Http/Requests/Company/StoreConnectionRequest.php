@@ -10,8 +10,9 @@ class StoreConnectionRequest extends FormRequest {
     }
     public function rules(): array {
         return [
-            'company1_id' => 'required|integer|exists:App\Models\Company,id,deleted_at,NULL',
+            'company1_id' => 'required|integer|different:company2_id|exists:App\Models\Company,id,deleted_at,NULL',
             'company2_id' => 'required|integer|exists:App\Models\Company,id,deleted_at,NULL',
+            ...UpdateConnectionRequest::attributeRules(),
         ];
     }
 }

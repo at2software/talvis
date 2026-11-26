@@ -4,15 +4,19 @@ namespace App\Models;
 
 use App\Casts\I18n;
 use App\Traits\HasI18nTrait;
+use App\Traits\HasSharedActivityFlag;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class MarketingActivity extends BaseModel {
     use HasI18nTrait;
+    use HasSharedActivityFlag;
 
     protected $table    = 'marketing_activities';
+    protected $appends  = ['icon', 'class', 'is_shared'];
     protected $fillable = [
+        'is_shared',
         'marketing_workflow_id',
         'name',
         'day_offset',

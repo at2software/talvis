@@ -10,6 +10,7 @@ import { Company } from '../company/company.model';
 import { ProjectService } from '../project/project.service';
 import { MilestoneService } from '../milestone/milestone.service';
 import { switchMap, tap } from 'rxjs';
+import { dayjs } from '@constants/date/dates';
 
 export function getInvoiceItemActions(self: InvoiceItem): NxAction[] {
     return [
@@ -24,6 +25,7 @@ export function getInvoiceItemActions(self: InvoiceItem): NxAction[] {
                 { title: $localize`:@@i18n.common.discount:discount`, hotkey: 'CTRL+ALT+4', group: true, on: () => self.type < 3 && self.qty < 0, action: () => self.update({ type: InvoiceItemType.Discount }) },
             ],
         },
+        ...getSubscriptionActions(self),
         ...nx().clipboardActions(self, '!clipboard'),
         {
             title: $localize`:@@i18n.common.selectAll:select all...`,
@@ -85,6 +87,26 @@ export function getInvoiceItemActions(self: InvoiceItem): NxAction[] {
             },
         },
         nx().deleteAction(self, () => deleteMessageFor(self), { roles: 'invoicing|project_manager', on: () => !self.delete_blockers.length }),
+    ];
+}
+
+/** Repeating items (subscriptions, standing orders) run while next_recurrence_at is set. */
+export function getSubscriptionActions(self: InvoiceItem): NxAction[] {
+    return [
+        {
+            title: $localize`:@@i18n.invoices.activateSubscription:activate subscription`,
+            group: true,
+            roles: 'invoicing|project_manager',
+            on: () => self.isRepeating() && !self.next_recurrence_at,
+            action: () => self.update({ next_recurrence_at: dayjs().format('YYYY-MM-DD') }),
+        },
+        {
+            title: $localize`:@@i18n.invoices.pauseSubscription:pause subscription`,
+            group: true,
+            roles: 'invoicing|project_manager',
+            on: () => self.isRepeating() && !!self.next_recurrence_at,
+            action: () => self.update({ next_recurrence_at: null }),
+        },
     ];
 }
 

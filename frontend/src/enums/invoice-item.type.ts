@@ -13,6 +13,14 @@ export enum InvoiceItemType {
     Yearly = 34,
 }
 
+export const INVOICE_ITEM_REPEAT_LABELS: Record<number, string> = {
+    [InvoiceItemType.Daily]: 'daily',
+    [InvoiceItemType.Weekly]: 'weekly',
+    [InvoiceItemType.Monthly]: 'monthly',
+    [InvoiceItemType.Quarterly]: 'quarterly',
+    [InvoiceItemType.Yearly]: 'yearly',
+};
+
 export function getInvoiceItemTypeRepeatColor(type: InvoiceItemType): string {
     switch (type) {
         case InvoiceItemType.Daily:

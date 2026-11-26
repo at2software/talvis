@@ -54,7 +54,7 @@ export class MarketingInitiativeDetailComponent {
     chartOptions = computed(() => this.#charts()?.line ?? null);
     donutChartOptions = computed(() => this.#charts()?.donut ?? null);
 
-    readonly isSubscribed = computed(() => this.initiative()?.users?.some((u) => u.id === this.#global.user?.id) ?? false);
+    readonly isSubscribed = computed(() => this.initiative()?.hasUser(this.#global.user?.id) ?? false);
 
     showChannelModal = signal(false);
     selectedChannelId: string = '';

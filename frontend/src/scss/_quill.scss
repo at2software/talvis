@@ -79,11 +79,11 @@
 
 .ql-snow .ql-stroke,
 .ql-snow .ql-stroke-miter {
-    stroke: #eee !important;
+    stroke: var(--tv-icon-stroke) !important;
 }
 
 .ql-snow .ql-fill {
-    fill: #eee !important;
+    fill: var(--tv-icon-stroke) !important;
 }
 
 .ql-snow.ql-toolbar button:hover .ql-stroke,

@@ -4,20 +4,10 @@
         <div class="me-2 d-flex gap-1 align-items-center">
             @for (m of item.milestones; track m.id) {
             <div class="d-flex align-items-center gap-1">
+                @let _state = m.getStateInfo();
                 <i class="cursor-default"
                     [ngbTooltip]="'Milestone: ' + m.name + (m.progress ? ' (' + (m.progress | number: '1.0-0') + '%)' : '')"
-                    [class.text-muted]="m.state === 0" [class.text-primary]="m.state === 1"
-                    [class.text-success]="m.state === 2">
-                    @if (m.state === 0) {
-                    radio_button_unchecked
-                    }
-                    @if (m.state === 1) {
-                    schedule
-                    }
-                    @if (m.state === 2) {
-                    check_circle
-                    }
-                </i>
+                    [class]="_state.textClass">{{ _state.icon }}</i>
                 @if (m.user) {
                 <avatar [object]="m.user" [size]="'xs'"></avatar>
                 }

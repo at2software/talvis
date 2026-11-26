@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { NgxEchartsDirective } from 'ngx-echarts';
+import { injectChartPalette } from '@charts/echarts-theme';
 
 export interface ProbabilityCurvePoint {
     x: number;
@@ -13,6 +14,7 @@ export interface ProbabilityCurvePoint {
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ProjectInvoicingGaugeComponent {
+    #palette = injectChartPalette();
     net = input<number>(0);
     budgetCurve = input<ProbabilityCurvePoint[]>([]);
     timeMult = input<number>(1);
@@ -22,6 +24,7 @@ export class ProjectInvoicingGaugeComponent {
         const { prob, budgetProb, timeMult } = this.#computeProbability();
         const rate = this.customerRate();
         const net = this.net();
+        const palette = this.#palette();
 
         const rejectionRate = rate != null ? Math.max(0.001, 1 - rate) : null;
         const colorStops: [number, string][] =
@@ -30,7 +33,7 @@ export class ProjectInvoicingGaugeComponent {
                       [rejectionRate, 'rgba(60,65,80,0.7)'],
                       [1, '#28c76f'],
                   ]
-                : [[1, 'rgba(255,255,255,0.2)']];
+                : [[1, palette.ink(0.2)]];
 
         const rateLabel = rate != null ? `${Math.round(rate * 100)}%` : 'no data';
         const rejLabel = rejectionRate != null ? `${Math.round(rejectionRate * 100)}%` : 'no data';
@@ -73,12 +76,12 @@ export class ProjectInvoicingGaugeComponent {
                         show: true,
                         length: '78%',
                         width: 3,
-                        itemStyle: { color: '#ffffff' },
+                        itemStyle: { color: palette.text },
                     },
                     anchor: {
                         show: true,
                         size: 8,
-                        itemStyle: { color: '#ffffff', borderWidth: 0 },
+                        itemStyle: { color: palette.text, borderWidth: 0 },
                     },
                     axisTick: { show: false },
                     splitLine: { show: false },
@@ -86,7 +89,7 @@ export class ProjectInvoicingGaugeComponent {
                     detail: {
                         valueAnimation: false,
                         formatter: (v: number) => `${Math.round(v * 100)}%`,
-                        color: '#dee2e6',
+                        color: palette.dark ? '#dee2e6' : palette.text,
                         fontSize: 13,
                         offsetCenter: [0, '-18%'],
                     },

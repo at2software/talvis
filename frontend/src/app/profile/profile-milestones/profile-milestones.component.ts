@@ -18,8 +18,8 @@ import { CdkDropListGroup } from '@angular/cdk/drag-drop';
 import { NgbDropdownModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { Color } from '@constants/Color';
 import { Dictionary } from '@constants/constants';
-import { storageGet, storageSet } from '@constants/storage';
-import { CustomGanttComponent, GanttRow } from '@app/projects/_shards/custom-gantt/custom-gantt.component';
+import { CustomGanttComponent } from '@app/projects/_shards/custom-gantt/custom-gantt.component';
+import { plannerView, toGanttRows } from './planner-view';
 import { CapacityCalendarComponent, CapacityCalendarDrop, MilestoneReschedule, PlannerEvent } from './capacity-calendar/capacity-calendar.component';
 import { PlannerBacklogComponent, BacklogDragItem } from './planner-backlog/planner-backlog.component';
 import { ExtIssueBacklogItem, ExtIssueBacklogService } from './external-issues/ext-issue-backlog.service';
@@ -37,7 +37,6 @@ import { CALENDAR_CONNECTOR, ConnectorService } from '@app/profile/profile-plugi
 import { CalendarEventDto } from '@models/_core/api-response';
 
 const HORIZON_MONTHS = 3;
-const VIEW_STORAGE_KEY = 'profileMilestonesView';
 const CALENDARS_PARAM = 'PLANNER_CALENDARS';
 const CALENDAR_REFRESH_MINUTES = 15;
 const CALENDAR_FAILED = $localize`:@@i18n.planner.calendarFailed:could not be loaded`;
@@ -81,7 +80,9 @@ export class ProfileMilestonesComponent {
     readonly timelineLabel = $localize`:@@i18n.planner.viewTimeline:timeline view`;
     readonly calendarLabel = $localize`:@@i18n.planner.viewCalendar:calendar view`;
     showWeekend = signal(false);
-    view = signal<'calendar' | 'gantt'>(storageGet<string>(VIEW_STORAGE_KEY, 'calendar') === 'gantt' ? 'gantt' : 'calendar');
+    readonly #view = plannerView();
+    readonly view = this.#view.view;
+    readonly toggleView = this.#view.toggle;
     draggingMilestone = signal(false);
     calendarSettings = signal<Dictionary<CalendarSetting>>(this.#readCalendarSettings());
 
@@ -160,11 +161,7 @@ export class ProfileMilestonesComponent {
         return this.#allMilestones().filter((m) => !m.started_at && !m.due_at && !unconfiguredIds.has(m.id));
     });
     readonly scheduledMilestones = computed(() => this.#allMilestones().filter((m) => m.plannedRange()));
-    readonly ganttRows = computed<GanttRow[]>(() =>
-        this.projectGroups()
-            .filter((g) => g.milestones.length)
-            .flatMap((g) => [{ type: 'header' as const, data: g.project, project: g.project }, ...g.milestones.map((m) => ({ type: 'milestone' as const, data: m, project: g.project }))]),
-    );
+    readonly ganttRows = computed(() => toGanttRows(this.projectGroups()));
 
     constructor() {
         NxStatic.broadcast$
@@ -189,12 +186,6 @@ export class ProfileMilestonesComponent {
     }
 
     toggleWeekend = () => this.showWeekend.update((v) => !v);
-
-    toggleView(): void {
-        const next = this.view() === 'calendar' ? 'gantt' : 'calendar';
-        this.view.set(next);
-        storageSet(VIEW_STORAGE_KEY, next);
-    }
 
     updateCalendar(source: string, change: Partial<CalendarSetting>): void {
         this.calendarSettings.update((settings) => ({ ...settings, [source]: { ...this.#calendarSetting(source), ...change } }));

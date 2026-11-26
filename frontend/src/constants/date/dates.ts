@@ -22,5 +22,6 @@ dayjs.locale('de');
 export { dayjs };
 export type { Dayjs } from 'dayjs/esm';
 
+export const shortMonth = (date: dayjs.Dayjs): string => date.locale(($localize.locale ?? 'en').startsWith('de') ? 'de' : 'en').format('MMM');
 export const dayjsMin = (...dates: dayjs.Dayjs[]): dayjs.Dayjs => dates.reduce((a, b) => (b.isBefore(a) ? b : a));
 export const dayjsMax = (...dates: dayjs.Dayjs[]): dayjs.Dayjs => dates.reduce((a, b) => (b.isAfter(a) ? b : a));

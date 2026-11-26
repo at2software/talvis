@@ -31,7 +31,7 @@ export class TableRowItemInfoComponent {
 
     readonly avg = computed(() => {
         const item = this.trackedItem();
-        return Math.round(10 * (item.predictions?.length ? item.predictions.reduce((a, b) => a + b.qty, 0) / item.predictions.length : item.qty)) / 10;
+        return Math.round(10 * (item.predictionMean() ?? item.qty)) / 10;
     });
 
     readonly diff = computed(() => (this.avg() - this.trackedItem().qty) / this.trackedItem().qty);

@@ -20,8 +20,7 @@ class StandingOrders extends Command {
     public function handle() {
         $this->logToFile('=== StandingOrders Cronjob Started ===');
 
-        $query = InvoiceItem::whereIn('type', InvoiceItemType::Repeating)
-            ->whereNotNull('next_recurrence_at')
+        $query = InvoiceItem::whereActiveStandingOrder()
             ->where('next_recurrence_at', '<', now());
 
         $this->logToFile('Executing query: '.$query->toSql());
@@ -71,16 +70,20 @@ class StandingOrders extends Command {
             $i->next_recurrence_at = null;
             $i->type               = InvoiceItemType::Default;
 
+            // not fillable on purpose: set explicitly so only real spawns carry the reference
+            $i->recurrence_source_id = $item->id;
+
             if ($i->qty == 0) {
                 $i->qty       = 1;
                 $i->unit_name = 'Stk';
             }
 
             if ($item->project) {
-                $i->project_id = null;
-                $i->company_id = $item->project->company_id;
-                $i->text       = $item->project->name.'<br>'.$i->text;
-                $i->position   = $item->project->indexedItems()->max('position') + 1;
+                // project subscriptions bill in the project's recurring tab (stage 1, like support items)
+                $i->project_id = $item->project_id;
+                $i->company_id = null;
+                $i->stage      = 1;
+                $i->position   = ($item->project->supportInvoiceItems()->max('position') ?? -1) + 1;
             } elseif ($item->company) {
                 $i->position = $item->company->indexedItems()->max('position') + 1;
             }

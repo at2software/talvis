@@ -7,6 +7,7 @@ import { Color } from '@constants/Color';
 import type { EChartsOption } from 'echarts';
 import type { EChartsType, TopLevelFormatterParams } from 'echarts/types/dist/shared';
 import { Dictionary } from '@constants/constants';
+import { ThemeService } from '@services/theme.service';
 
 @Component({
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -17,6 +18,7 @@ import { Dictionary } from '@constants/constants';
 })
 export class EchartsCardComponent {
     readonly global = inject(GlobalService);
+    protected readonly theme = inject(ThemeService).theme;
     
     value = signal<number>(0);
     cardTitle = input<string>('');
@@ -88,6 +90,9 @@ export class EchartsCardComponent {
     protected colorArray = () => [this.color()].flat() as string[];
     protected getColor = (index: number) => {
         const c = this.colorArray();
-        return c[index % c.length];
+        return themedColorName(c[index % c.length]);
     };
 }
+
+/** `white` series are meant as "foreground"; map them to Bootstrap's emphasis color, which is black in light mode. */
+export const themedColorName = (name: string) => (name === 'white' ? 'emphasis-color' : name);

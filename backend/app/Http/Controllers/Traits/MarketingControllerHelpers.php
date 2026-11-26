@@ -27,6 +27,7 @@ trait MarketingControllerHelpers {
             'has_external_dependency' => 'boolean',
             'parent_activity_id'      => "nullable|exists:{$parentTable},id",
             'quick_action'            => 'nullable|in:EMAIL,LINKEDIN,LINKEDIN_SEARCH,CALL',
+            'is_shared'               => 'boolean',
         ];
     }
     protected function metricAttachRules(): array {

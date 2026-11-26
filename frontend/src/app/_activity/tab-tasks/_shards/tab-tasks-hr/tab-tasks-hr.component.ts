@@ -35,7 +35,7 @@ export class TabTasksHrComponent extends TabTasksBaseComponent {
     }
 
     actionsResolved(e: ActionEmitterType) {
-        if (e.object.nx instanceof Vacation) this.reload();
+        if (e.object.nx() instanceof Vacation) this.reload();
     }
 
     getPrepopulatedSickNoteMail(_: Vacation) {

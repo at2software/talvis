@@ -15,6 +15,15 @@ class InvoiceBuilder extends BaseBuilder {
     public function revenue_12(Carbon $date) {
         return $this->last12($date)->sum(fn ($_) => $_->unmaskedNet());
     }
+    public function whereUnpaid() {
+        return $this->whereNull('paid_at');
+    }
+    public function whereOpen() {
+        return $this->whereUnpaid()->where('is_cancelled', false);
+    }
+    public function whereOverdue() {
+        return $this->whereOpen()->where('due_at', '<', now());
+    }
     public function withItems() {
         return $this->join('invoice_items', 'invoice_items.invoice_id', '=', 'invoices.id');
     }

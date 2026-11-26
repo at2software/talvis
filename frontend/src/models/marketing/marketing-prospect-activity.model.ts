@@ -1,6 +1,8 @@
 import { Serializable } from '@models/_core/serializable';
 import { Type } from '@models/_core/hydrate';
 import { tap } from 'rxjs';
+import { dayjs } from '@constants/date/dates';
+import type { ManipulateType } from 'dayjs';
 import { MarketingProspect } from './marketing-prospect.model';
 import { MarketingInitiativeActivity } from './marketing-initiative-activity.model';
 import { Model } from '@constants/model/type-discriminators';
@@ -30,7 +32,10 @@ export class MarketingProspectActivity extends Serializable {
         return this.marketing_initiative_activity;
     }
 
-    isOverdue = () => new Date(this.scheduled_at) < new Date();
+    isPending = (): boolean => this.status === 'pending';
+    isOpen = (): boolean => this.status === 'pending' || this.status === 'overdue';
+    isFinished = (): boolean => this.status === 'completed' || this.status === 'skipped';
+    isOverdue = (): boolean => this.isOpen() && dayjs(this.scheduled_at).isBefore(dayjs(), 'day');
 
     localizedDescription = (lang = 'de', formality = 'formal'): string => {
         const desc = this.marketing_activity?.description;
@@ -41,14 +46,15 @@ export class MarketingProspectActivity extends Serializable {
             ?? desc[0]?.text ?? '';
     };
 
-    #postpone(days: number) {
-        this.httpService.post(`marketing/prospects/${this.marketing_prospect_id}/postpone-activities`, { days }).subscribe();
+    #postpone(amount: number, unit: ManipulateType) {
+        const until = dayjs().add(amount, unit).format('YYYY-MM-DD');
+        this.httpService.post(`marketing/prospects/${this.marketing_prospect_id}/postpone-activities`, { until }).subscribe();
     }
     #postponeDays(days: number) {
-        this.#postpone(days);
+        this.#postpone(days, 'day');
     }
     #postponeMonths(months: number) {
-        this.#postpone(months * 30);
+        this.#postpone(months, 'month');
     }
 
     protected override buildActions(): NxAction[] {

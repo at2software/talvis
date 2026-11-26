@@ -12,14 +12,14 @@ $barOffset: -5px;
     &.bar-container-paid { text-align: right; top:$barOffset; }
     &.bar-container-adds { text-align: left; top: $barHeight + $barSpacing + $barOffset; }
 }
-.bar { display: inline-block; position: relative; height: 100%; box-sizing: border-box; border: 1px #fff6 solid, 1px #0006 solid, 1px #0006 solid, 1px #fff6 solid; }
+.bar { display: inline-block; position: relative; height: 100%; box-sizing: border-box; border: 1px rgba(var(--tv-ink-rgb), 0.4) solid, 1px var(--tv-scrim-2) solid, 1px var(--tv-scrim-2) solid, 1px rgba(var(--tv-ink-rgb), 0.4) solid; }
 .bar-paid { background-color: var(--color-orange);}
 .bar-vacation { background-color: var(--color-cyan);}
 .bar-worked { background-color: var(--color-teal);}
 .bar-excluded { background-color: var(--color-yellow);}
 .bar-delta {
     position: absolute;
-    border-left: 1px solid #999;
+    border-left: 1px solid var(--tv-text-dim);
     top:21px;
     bottom: -18px;
     padding-left: 3px;

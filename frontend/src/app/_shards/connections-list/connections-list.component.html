@@ -28,6 +28,7 @@
             <li class="list-group-item d-flex text-nowrap align-items-center" [nx]="con" [tables]="connections()" (singleActionResolved)="singleActionResolved()">
                 <div class="me-3"><avatar [object]="otherCompany"></avatar></div>
                 <div class="text-truncate flex-fill">{{ otherCompany?.getName() }}</div>
+                <connection-role class="ms-2" [type]="con.type" [isCompany1]="con.company1_id == otherCompany?.id" [source]="con.source"></connection-role>
                 @if (showAddButton()) {
                     <button class="btn btn-sm btn-plain text-primary ms-2" (click)="addConnection(con)">
                         <i>add</i>

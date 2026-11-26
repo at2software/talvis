@@ -35,7 +35,7 @@
                         @if (i === 0) {
                             <widget-getting-started [is_editing]="_is_editing"></widget-getting-started>
                         }
-                        @for (_ of board.cols[i]; track _.widget; let j = $index) {
+                        @for (_ of board.cols[i]; track _; let j = $index) {
                             @if (hasAccess(_.widget)) {
                                 <div cdkDrag>
                                     <ng-container *ngComponentOutlet="componentFor(_.widget); inputs: { options: _.options, widget: _, is_editing: _is_editing, i: i, j: j }"> </ng-container>

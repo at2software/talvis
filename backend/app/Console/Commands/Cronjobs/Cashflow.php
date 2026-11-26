@@ -31,7 +31,7 @@ class Cashflow extends Command {
 
             $CASHFLOW_CUSTOMER_UNPAID = Company::whereHas('foci_unpaid_last_month')
                 ->withSum('foci_unpaid_last_month', 'duration')
-                ->whereNot('id', Param::get('ME_ID')->value)
+                ->whereNotMe()
                 ->get()
                 ->sum('foci_unpaid_last_month_sum_duration');
 

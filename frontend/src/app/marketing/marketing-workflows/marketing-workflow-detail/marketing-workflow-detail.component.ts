@@ -14,7 +14,6 @@ import { Nx } from '@app/nx/nx.directive';
 import { I18nTextareaComponent } from '@app/_shards/i18n-textarea/i18n-textarea.component';
 import { ScrollbarComponent } from '@app/app/scrollbar/scrollbar.component';
 import { ActivityTableComponent } from '@app/marketing/shared/activity-table/activity-table.component';
-import { Dictionary } from '@constants/constants';
 import { Toast } from '@shards/toast/toast';
 import { ConfirmationService } from '@app/_modals/modal-confirm/confirmation.service';
 
@@ -179,8 +178,5 @@ export class MarketingWorkflowDetailComponent {
         });
     }
 
-    getQuickActionIcon(qa: string): string {
-        const icons: Dictionary<string> = { EMAIL: 'email', LINKEDIN: 'open_in_new', LINKEDIN_SEARCH: 'search', CALL: 'phone' };
-        return icons[qa] || '';
-    }
+    getQuickActionIcon = MarketingActivity.quickActionIcon;
 }

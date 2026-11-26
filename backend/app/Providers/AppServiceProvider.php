@@ -8,6 +8,8 @@ use App\Models\User;
 use App\Observers\MarketingProspectObserver;
 use App\Services\DatabaseSchemaService;
 use App\Support\LiveSyncBroadcaster;
+use App\Support\NullProjectOrchestrator;
+use App\Support\ProjectOrchestrator;
 use App\Support\SeededIdExamples;
 use Dedoc\Scramble\Scramble;
 use Dedoc\Scramble\Support\Generator\OpenApi;
@@ -28,6 +30,7 @@ use Illuminate\Support\Str;
 class AppServiceProvider extends ServiceProvider {
     public function register(): void {
         $this->app->singleton(LiveSyncBroadcaster::class);
+        $this->app->singleton(ProjectOrchestrator::class, NullProjectOrchestrator::class);
         $this->app->bind(PluginMattermostController::class, fn () => PluginMattermostController::createInstance());
     }
     public function boot(): void {

@@ -1,3 +1,5 @@
+import { computed } from '@angular/core';
+import { activeTheme } from '@constants/active-theme';
 import { Color } from '@constants/Color';
 
 describe('Color', () => {
@@ -31,5 +33,21 @@ describe('Color', () => {
     it('fromVar reads CSS custom property using prefix', () => {
         document.body.style.setProperty('--bs-test-color', '#112233');
         expect(Color.fromVar('test-color').toHexString()).toBe('#112233');
+    });
+    it('fromVar makes a computed re-run on a theme switch', () => {
+        document.body.style.setProperty('--bs-test-themed', '#112233');
+        const color = computed(() => Color.fromVar('test-themed').toHexString());
+        expect(color()).toBe('#112233');
+
+        document.body.style.setProperty('--bs-test-themed', '#445566');
+        expect(color()).toBe('#112233');
+
+        const before = activeTheme();
+        activeTheme.set(before === 'dark' ? 'light' : 'dark');
+        try {
+            expect(color()).toBe('#445566');
+        } finally {
+            activeTheme.set(before);
+        }
     });
 });

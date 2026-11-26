@@ -39,6 +39,7 @@ export class Task extends Serializable {
 
     protected override buildActions(): NxAction[] { return getTaskActions(this) }
 
+    isClosed = (): boolean => this.state === 1;
     getUser = () => this.httpService.getUserFor(this.user_id);
     web_url = () => `projects/${this.project_id}/tasks`;
     linkedObject = (): Project | Company | undefined => this.linked_project ?? this.linked_company;

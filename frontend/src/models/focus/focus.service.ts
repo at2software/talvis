@@ -59,4 +59,14 @@ export class FocusService extends TalvisHttpService<Focus> {
             },
             InvoiceItem,
         );
+
+    linkToInvoiceItem = (_: Serializable, focusIds: string[], invoiceItemId: string) =>
+        this.post(
+            `foci/link-item/${_.apiPathWithId()}`,
+            {
+                itemIds: focusIds,
+                invoiceItemId: invoiceItemId,
+            },
+            InvoiceItem,
+        );
 }

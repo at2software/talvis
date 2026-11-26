@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, effect, inject, linkedSignal, signal, untracked } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, linkedSignal, resource, signal, untracked } from '@angular/core';
 import { AssignmentService } from '@models/assignee/assignment.service';
 import { Project } from '@models/project/project.model';
 import { Assignee } from '@models/assignee/assignee.model';
@@ -11,7 +11,7 @@ import { PluginInstanceFactory } from '@models/http/plugins/plugin.instance.fact
 import { PluginInstance } from '@models/http/plugins/plugin.instance';
 import { Encryption } from '@models/encryption/encryption.model';
 import { Toast } from '@shards/toast/toast';
-import { DatePipe, NgTemplateOutlet } from '@angular/common';
+import { DatePipe, NgComponentOutlet, NgTemplateOutlet } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { PermissionsDirective } from '@directives/permissions.directive';
 import { CollapsibleDirective } from '@directives/collapsible.directive';
@@ -23,6 +23,7 @@ import { RteComponent } from '@shards/rte/rte.component';
 import { ProjectInfoComponent } from '@app/projects/_shards/project-info/project-info.component';
 import { ProjectFeaturesListComponent } from '@app/projects/_shards/project-features-list/project-features-list.component';
 import { ParentProjectSelectorComponent } from '@app/projects/_shards/parent-project-selector/parent-project-selector.component';
+import { EXTENSIONS } from '@app/extensions';
 import { ProjectTeamPlanningComponent } from '@app/projects/_shards/project-team-planning/project-team-planning.component';
 import { FormsModule } from '@angular/forms';
 import { AutosaveDirective } from '@directives/autosave.directive';
@@ -42,9 +43,10 @@ import { AvatarComponent } from '@shards/avatar/avatar.component';
     templateUrl: './project-dashboard.component.html',
     styleUrls: ['./project-dashboard.component.scss'],
     providers: [{ provide: NgbDateAdapter, useClass: NgbDateCarbonAdapter }],
-    imports: [AvatarComponent, DatePipe, NgTemplateOutlet, PermissionsDirective, CollapsibleDirective, ListGroupItemContactComponent, Nx, NComponent, NgbTooltipModule, ProjectDefaultProductComponent, ProjectQuoteValidityComponent, ParentProjectSelectorComponent, ProjectPlanningComponent, RteComponent, WorkloadTimelineChartComponent, MediaPreviewComponent, ProjectInfoComponent, ProjectFeaturesListComponent, ProjectTeamPlanningComponent, NgbDatepickerModule, FormsModule, AutosaveDirective, NgbDropdownModule, RouterLink],
+    imports: [AvatarComponent, DatePipe, NgTemplateOutlet, NgComponentOutlet, PermissionsDirective, CollapsibleDirective, ListGroupItemContactComponent, Nx, NComponent, NgbTooltipModule, ProjectDefaultProductComponent, ProjectQuoteValidityComponent, ParentProjectSelectorComponent, ProjectPlanningComponent, RteComponent, WorkloadTimelineChartComponent, MediaPreviewComponent, ProjectInfoComponent, ProjectFeaturesListComponent, ProjectTeamPlanningComponent, NgbDatepickerModule, FormsModule, AutosaveDirective, NgbDropdownModule, RouterLink],
 })
 export class ProjectDashboardComponent {
+    readonly extensionCards = resource({ loader: () => Promise.all(EXTENSIONS.flatMap((_) => _.projectDashboardCards ?? []).map((load) => load())) });
     #assignmentService  = inject(AssignmentService);
     #uptimeService      = inject(UptimeMonitorService);
     #uptimeModalService = inject(UptimeMonitorModalService);
@@ -74,7 +76,7 @@ export class ProjectDashboardComponent {
             if (!project) return;
             untracked(() => {
                 this.#linkMilestoneProjects(project);
-                this.#syncWorkshares(project);
+                project.syncWorkshares();
             });
         });
     }
@@ -110,14 +112,6 @@ export class ProjectDashboardComponent {
     clearDate = (field: string) => {
         this.parent.object().update({ [field]: null }).subscribe();
     };
-
-    #syncWorkshares(project: Project) {
-        project.var.workshares = (project.timeline_chart ?? []).map((entry) => {
-            const val = entry.data.reduce((sum, point) => sum + (Number(point.value) || 0), 0);
-            if (entry.user) entry.user.hours_invested = val;
-            return { name: entry.user?.name || 'Unknown', color: entry.user?.color || '#cccccc', val };
-        });
-    }
 
     toggleTimeBased() {
         const object = this.parent.object();
@@ -157,11 +151,12 @@ export class ProjectDashboardComponent {
 
     onNewPluginLink(pluginInstance: PluginInstance) {
         PluginInstanceFactory.promptLinkId(pluginInstance)
-            .then((id) => {
-                if (!id) return;
+            .then((ids) => {
+                if (!ids?.length) return;
                 const object = this.parent.object();
-                pluginInstance.toPluginLink(id).storeUnder(object, true).subscribe((_) => {
-                    object.plugin_links.push(_);
+                return PluginInstanceFactory.addLinks(pluginInstance, object, ids).then((created) => {
+                    if (!created.length) return;
+                    object.plugin_links.push(...created);
                     this.parent.touch();
                 });
             })

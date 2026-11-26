@@ -13,6 +13,7 @@ import { LiquidityEventDto } from '@models/_core/api-response';
 import { modelResource } from '@models/http/model-resource';
 import { StackedTableDirective } from '@directives/stacked-table.directive';
 import { SpinnerComponent } from '@shards/spinner/spinner.component';
+import { injectChartPalette } from '@charts/echarts-theme';
 
 interface DayGroup {
     date: string;
@@ -41,6 +42,7 @@ const TYPE_CONFIG: Dictionary<{ label: string; badge: string }> = {
 })
 export class FinancialLiquidityComponent {
     readonly #invoiceService = inject(InvoiceService);
+    #palette = injectChartPalette();
 
     readonly #liquidity = modelResource(() => this.#invoiceService.getLiquidity());
 
@@ -114,6 +116,7 @@ export class FinancialLiquidityComponent {
     };
 
     #buildChartOptions(startBalance: number, events: LiquidityEventDto[]): EChartsOption {
+        const palette = this.#palette();
         const primaryColor = Color.fromVar('primary').toHexString();
         const dangerColor  = Color.fromVar('danger').toHexString();
 
@@ -174,10 +177,10 @@ export class FinancialLiquidityComponent {
             xAxis: {
                 type: 'category',
                 data: days,
-                axisLine: { lineStyle: { color: '#ffffff22' } },
+                axisLine: { lineStyle: { color: palette.ink(0.133) } },
                 axisTick: { show: false },
                 axisLabel: {
-                    color: '#ffffff99',
+                    color: palette.ink(0.6),
                     formatter: (value: string) => {
                         const d = new Date(value);
                         return d.getDate() === 1
@@ -188,10 +191,10 @@ export class FinancialLiquidityComponent {
             },
             yAxis: {
                 type: 'value',
-                splitLine: { lineStyle: { color: '#ffffff11' } },
+                splitLine: { lineStyle: { color: palette.ink(0.067) } },
                 axisLine: { show: false },
                 axisTick: { show: false },
-                axisLabel: { color: '#ffffff99', formatter: (v: number) => fmt(v) },
+                axisLabel: { color: palette.ink(0.6), formatter: (v: number) => fmt(v) },
             },
             series: [{
                 type: 'candlestick',

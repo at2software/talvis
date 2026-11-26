@@ -6061,7 +6061,7 @@
         <note category="location">src/app/hr/hr-nav.component.html:3,5</note>
       </notes>
       <segment>
-        <source>human ressources</source>
+        <source>human resources</source>
       </segment>
     </unit>
     <unit id="i18n.common.workingTime">
@@ -12167,14 +12167,6 @@
         <source>invoiced</source>
       </segment>
     </unit>
-    <unit id="i18n.invoices.support-invoice">
-      <notes>
-        <note category="location">src/app/projects/id/project-invoicing/project-invoicing.component.html:125,126</note>
-      </notes>
-      <segment>
-        <source>support invoice</source>
-      </segment>
-    </unit>
     <unit id="i18n.invoices.oldestUnbilledFocus">
       <notes>
         <note category="location">src/app/projects/id/project-invoicing/project-invoicing.component.html:142,143</note>
@@ -12579,6 +12571,62 @@
         <source>create quote</source>
       </segment>
     </unit>
+    <unit id="i18n.projects.delegates">
+      <notes>
+        <note category="location">src/app/projects/_shards/project-delegates/project-delegates.component.html:4</note>
+      </notes>
+      <segment>
+        <source>delegates</source>
+      </segment>
+    </unit>
+    <unit id="i18n.projects.delegateAllGates">
+      <notes>
+        <note category="location">src/app/projects/_shards/project-delegates/project-delegates.component.html:41</note>
+      </notes>
+      <segment>
+        <source>all gates</source>
+      </segment>
+    </unit>
+    <unit id="i18n.projects.delegateUser">
+      <notes>
+        <note category="location">src/app/projects/_shards/project-delegates/project-delegates.component.html:18</note>
+      </notes>
+      <segment>
+        <source>select person</source>
+      </segment>
+    </unit>
+    <unit id="i18n.projects.delegateExpires">
+      <notes>
+        <note category="location">src/app/projects/_shards/project-delegates/project-delegates.component.html:45</note>
+      </notes>
+      <segment>
+        <source>valid until</source>
+      </segment>
+    </unit>
+    <unit id="i18n.projects.noDelegates">
+      <notes>
+        <note category="location">src/app/projects/_shards/project-delegates/project-delegates.component.html:29</note>
+      </notes>
+      <segment>
+        <source>no delegates</source>
+      </segment>
+    </unit>
+    <unit id="i18n.assignee.noRole">
+      <notes>
+        <note category="location">src/app/projects/_shards/project-team-planning/project-team-planning.component.html:65</note>
+      </notes>
+      <segment>
+        <source>no role</source>
+      </segment>
+    </unit>
+    <unit id="i18n.projects.gateRoleMissing">
+      <notes>
+        <note category="location">src/app/projects/_shards/project-team-planning/project-team-planning.component.html:102</note>
+      </notes>
+      <segment>
+        <source>not named yet</source>
+      </segment>
+    </unit>
     <unit id="i18n.projects.noAssigneesYet">
       <notes>
         <note category="location">src/app/projects/_shards/project-team-planning/project-team-planning.component.html:44</note>
@@ -12597,15 +12645,39 @@
     </unit>
     <unit id="i18n.projects.selectFociHint">
       <notes>
-        <note category="location">src/app/projects/id/project-support/project-support.component.html:75</note>
+        <note category="location">src/app/projects/id/project-support/project-support.component.html:72</note>
       </notes>
       <segment>
-        <source>select unbilled entries to turn them into a support item</source>
+        <source>select unbilled entries to turn them into a support item or link them to an open one</source>
+      </segment>
+    </unit>
+    <unit id="i18n.projects.supportTarget">
+      <notes>
+        <note category="location">src/app/projects/id/project-support/project-support.component.html:89</note>
+      </notes>
+      <segment>
+        <source>target</source>
+      </segment>
+    </unit>
+    <unit id="i18n.projects.newSupportItem">
+      <notes>
+        <note category="location">src/app/projects/id/project-support/project-support.component.html:92</note>
+      </notes>
+      <segment>
+        <source>new item</source>
+      </segment>
+    </unit>
+    <unit id="i18n.projects.linkToSupportItem">
+      <notes>
+        <note category="location">src/app/projects/id/project-support/project-support.component.html:116</note>
+      </notes>
+      <segment>
+        <source>link</source>
       </segment>
     </unit>
     <unit id="i18n.projects.noOpenSupportItems">
       <notes>
-        <note category="location">src/app/projects/id/project-support/project-support.component.html:125</note>
+        <note category="location">src/app/projects/id/project-support/project-support.component.html:143</note>
       </notes>
       <segment>
         <source>no open support items</source>
@@ -13124,13 +13196,12 @@
         <source>down payment</source>
       </segment>
     </unit>
-    <unit id="i18n.invoicing.support">
+    <unit id="i18n.invoicing.recurring">
       <notes>
-        <note category="location">src/app/projects/projects.module.ts:114</note>
-        <note category="location">src/app/projects/projects.module.ts:114</note>
+        <note category="location">src/app/projects/projects.routes.ts:87</note>
       </notes>
       <segment>
-        <source>support</source>
+        <source>recurring</source>
       </segment>
     </unit>
     <unit id="i18n.invoicing.final">
@@ -14012,6 +14083,46 @@
         <source>no thresholds configured</source>
       </segment>
     </unit>
+    <unit id="i18n.settings.itemThresholds">
+      <notes>
+        <note category="location">src/app/settings/settings-projects/settings-projects-notifications/settings-projects-notifications.component.html:52</note>
+      </notes>
+      <segment>
+        <source>feature email thresholds</source>
+      </segment>
+    </unit>
+    <unit id="i18n.settings.itemThresholdsDesc">
+      <notes>
+        <note category="location">src/app/settings/settings-projects/settings-projects-notifications/settings-projects-notifications.component.html:54</note>
+      </notes>
+      <segment>
+        <source>Send an email to the project manager and to everyone who booked time on a feature when its booked hours divided by its estimated work reach a threshold. Notifications reset automatically if the ratio drops below the threshold again.</source>
+      </segment>
+    </unit>
+    <unit id="i18n.settings.itemAlertRuleDesc">
+      <notes>
+        <note category="location">src/app/settings/settings-projects/settings-projects-notifications/settings-projects-notifications.component.html:73</note>
+      </notes>
+      <segment>
+        <source>To avoid mail spam, only features that are at least this large OR make up at least this share of the project's estimated work trigger an email. Set both to 0 to include every feature.</source>
+      </segment>
+    </unit>
+    <unit id="i18n.settings.itemAlertMinHours">
+      <notes>
+        <note category="location">src/app/settings/settings-projects/settings-projects-notifications/settings-projects-notifications.component.html:74</note>
+      </notes>
+      <segment>
+        <source>minimum feature size</source>
+      </segment>
+    </unit>
+    <unit id="i18n.settings.itemAlertMinShare">
+      <notes>
+        <note category="location">src/app/settings/settings-projects/settings-projects-notifications/settings-projects-notifications.component.html:75</note>
+      </notes>
+      <segment>
+        <source>minimum share of project work</source>
+      </segment>
+    </unit>
     <unit id="i18n.payment.defaultPlansTitle">
       <notes>
         <note category="location">src/app/settings/settings-projects/settings-projects-payment-plans/settings-projects-payment-plans.component.html:4,5</note>
@@ -14178,12 +14289,20 @@
         <source>link to Mattermost user</source>
       </segment>
     </unit>
-    <unit id="i18n.companies.changeRoleTo">
+    <unit id="i18n.assignee.addRole">
       <notes>
-        <note category="location">src/models/assignee/assignee.actions.ts:60</note>
+        <note category="location">src/models/assignee/assignee.actions.ts:54</note>
       </notes>
       <segment>
-        <source>change role to...</source>
+        <source>add role...</source>
+      </segment>
+    </unit>
+    <unit id="i18n.assignee.removeRole">
+      <notes>
+        <note category="location">src/models/assignee/assignee.actions.ts:61</note>
+      </notes>
+      <segment>
+        <source>remove role...</source>
       </segment>
     </unit>
     <unit id="i18n.common.developer">
@@ -16376,286 +16495,6 @@
         <source>repeat password</source>
       </segment>
     </unit>
-    <unit id="i18n.flow.openApprovals">
-      <notes>
-        <note category="location">src/app/flow/approvals/flow-approvals.component.html:3</note>
-      </notes>
-      <segment>
-        <source>open approvals</source>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.noOpenApprovals">
-      <notes>
-        <note category="location">src/app/flow/approvals/flow-approvals.component.html:11</note>
-      </notes>
-      <segment>
-        <source>nothing is waiting for your approval</source>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.recommendation">
-      <notes>
-        <note category="location">src/app/flow/approvals/flow-approvals.component.html:39</note>
-      </notes>
-      <segment>
-        <source>recommendation</source>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.sourceAgent">
-      <notes>
-        <note category="location">src/app/flow/approvals/flow-approvals.component.html:25</note>
-      </notes>
-      <segment>
-        <source>agent</source>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.sourceRuleCheck">
-      <notes>
-        <note category="location">src/app/flow/approvals/flow-approvals.component.html:28</note>
-      </notes>
-      <segment>
-        <source>rule check</source>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.sourceReview">
-      <notes>
-        <note category="location">src/app/flow/approvals/flow-approvals.component.html:31</note>
-      </notes>
-      <segment>
-        <source>review</source>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.diff">
-      <notes>
-        <note category="location">src/app/flow/approvals/flow-approvals.component.html:49</note>
-      </notes>
-      <segment>
-        <source>diff</source>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.requestChanges">
-      <notes>
-        <note category="location">src/app/flow/approvals/flow-approvals.component.html:67</note>
-      </notes>
-      <segment>
-        <source>request changes</source>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.requestChangesReason">
-      <notes>
-        <note category="location">src/app/flow/approvals/flow-approvals.component.ts:39</note>
-      </notes>
-      <segment>
-        <source>what has to change?</source>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.system">
-      <notes>
-        <note category="location">src/app/settings/settings-projects/settings-projects-flow/flow-audit-section.component.ts:23</note>
-      </notes>
-      <segment>
-        <source>system</source>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.approveReason">
-      <notes>
-        <note category="location">src/app/flow/approvals/flow-approvals.component.ts:32</note>
-      </notes>
-      <segment>
-        <source>reason for the approval (optional)</source>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.rejectReason">
-      <notes>
-        <note category="location">src/app/flow/approvals/flow-approvals.component.ts:38</note>
-      </notes>
-      <segment>
-        <source>why is this rejected?</source>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.tab">
-      <notes>
-        <note category="location">src/app/projects/projects.routes.ts:144</note>
-      </notes>
-      <segment>
-        <source>flow</source>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.phase">
-      <notes>
-        <note category="location">src/app/projects/id/project-flow/project-flow.component.html:8</note>
-      </notes>
-      <segment>
-        <source>phase</source>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.noPhase">
-      <notes>
-        <note category="location">src/app/projects/id/project-flow/project-flow.component.html:12</note>
-      </notes>
-      <segment>
-        <source>This project state is not mapped to a phase.</source>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.nextPhase">
-      <notes>
-        <note category="location">src/app/projects/id/project-flow/project-flow.component.html:17</note>
-      </notes>
-      <segment>
-        <source>next phase</source>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.riskClass">
-      <notes>
-        <note category="location">src/app/projects/id/project-flow/project-flow.component.html:20</note>
-      </notes>
-      <segment>
-        <source>risk class</source>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.gateNotRequired">
-      <notes>
-        <note category="location">src/app/projects/id/project-flow/project-flow.component.html:39</note>
-      </notes>
-      <segment>
-        <source>not required for this risk class</source>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.requestApproval">
-      <notes>
-        <note category="location">src/app/projects/id/project-flow/project-flow.component.html:44</note>
-      </notes>
-      <segment>
-        <source>request approval</source>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.jobs">
-      <notes>
-        <note category="location">src/app/projects/id/project-flow/project-flow.component.html:56</note>
-      </notes>
-      <segment>
-        <source>development jobs</source>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.newJob">
-      <notes>
-        <note category="location">src/app/projects/id/project-flow/project-flow.component.html:58</note>
-      </notes>
-      <segment>
-        <source>new job</source>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.jsonPreview">
-      <notes>
-        <note category="location">src/app/projects/id/project-flow/project-flow.component.html:93</note>
-      </notes>
-      <segment>
-        <source>JSON preview</source>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.createJob">
-      <notes>
-        <note category="location">src/app/projects/id/project-flow/project-flow.component.html:97</note>
-      </notes>
-      <segment>
-        <source>create job</source>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.noJobs">
-      <notes>
-        <note category="location">src/app/projects/id/project-flow/project-flow.component.html:105</note>
-      </notes>
-      <segment>
-        <source>no development jobs yet</source>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.mergeRequest">
-      <notes>
-        <note category="location">src/app/projects/id/project-flow/project-flow.component.html:123</note>
-      </notes>
-      <segment>
-        <source>merge request</source>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.viewTable">
-      <notes>
-        <note category="location">src/app/settings/settings-projects/settings-projects-states/settings-projects-states.component.html:5</note>
-      </notes>
-      <segment>
-        <source>table</source>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.viewDiagram">
-      <notes>
-        <note category="location">src/app/settings/settings-projects/settings-projects-states/settings-projects-states.component.html:6</note>
-      </notes>
-      <segment>
-        <source>flow diagram</source>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.legendFree">
-      <notes>
-        <note category="location">src/app/settings/settings-projects/settings-projects-states/state-flow-diagram/state-flow-diagram.component.ts:30</note>
-      </notes>
-      <segment>
-        <source>transition without requirements</source>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.legendRequirements">
-      <notes>
-        <note category="location">src/app/settings/settings-projects/settings-projects-states/state-flow-diagram/state-flow-diagram.component.ts:31</note>
-      </notes>
-      <segment>
-        <source>transition with requirements (role or gates)</source>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.legendColumns">
-      <notes>
-        <note category="location">src/app/settings/settings-projects/settings-projects-states/state-flow-diagram/state-flow-diagram.component.ts:32</note>
-      </notes>
-      <segment>
-        <source>columns follow the phases; finished states on the right</source>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.approvalsFromRiskClass">
-      <notes>
-        <note category="location">src/app/settings/settings-projects/settings-projects-states/state-flow-diagram/state-flow-diagram.component.ts:136</note>
-      </notes>
-      <segment>
-        <source>per risk class</source>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.riskAtLeast">
-      <notes>
-        <note category="location">src/app/settings/settings-projects/settings-projects-states/state-flow-diagram/state-flow-diagram.component.ts:137</note>
-      </notes>
-      <segment>
-        <source>risk ≥</source>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.requiresRole">
-      <notes>
-        <note category="location">src/app/settings/settings-projects/settings-projects-states/state-flow-diagram/state-flow-diagram.component.ts:143</note>
-      </notes>
-      <segment>
-        <source>role</source>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.requiresGates">
-      <notes>
-        <note category="location">src/app/settings/settings-projects/settings-projects-states/state-flow-diagram/state-flow-diagram.component.ts:144</note>
-      </notes>
-      <segment>
-        <source>gates</source>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.leavesPhase">
-      <notes>
-        <note category="location">src/app/settings/settings-projects/settings-projects-states/state-flow-diagram/state-flow-diagram.component.ts:153</note>
-      </notes>
-      <segment>
-        <source>leaves phase</source>
-      </segment>
-    </unit>
     <unit id="i18n.settings.contactDetails">
       <notes>
         <note category="location">src/app/settings/general/settings-general.component.html:102</note>
@@ -16686,414 +16525,6 @@
       </notes>
       <segment>
         <source>These details appear as the sender on invoices, quotes and PDF templates.</source>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.action">
-      <notes>
-        <note category="location">src/app/settings/settings-projects/settings-projects-flow/flow-audit-section.component.ts:38</note>
-      </notes>
-      <segment>
-        <source>action</source>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.actionApproval">
-      <notes>
-        <note category="location">src/app/settings/settings-projects/settings-projects-flow/flow-audit-section.component.ts:26</note>
-      </notes>
-      <segment>
-        <source>approvals</source>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.actionConfig">
-      <notes>
-        <note category="location">src/app/settings/settings-projects/settings-projects-flow/flow-audit-section.component.ts:28</note>
-      </notes>
-      <segment>
-        <source>configuration</source>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.actionJob">
-      <notes>
-        <note category="location">src/app/settings/settings-projects/settings-projects-flow/flow-audit-section.component.ts:27</note>
-      </notes>
-      <segment>
-        <source>jobs</source>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.actionProject">
-      <notes>
-        <note category="location">src/app/settings/settings-projects/settings-projects-flow/flow-audit-section.component.ts:25</note>
-      </notes>
-      <segment>
-        <source>project state changes</source>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.active">
-      <notes>
-        <note category="location">src/app/settings/settings-projects/settings-projects-flow/flow-transitions-section.component.ts:15</note>
-      </notes>
-      <segment>
-        <source>active</source>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.actor">
-      <notes>
-        <note category="location">src/app/settings/settings-projects/settings-projects-flow/flow-audit-section.component.ts:40</note>
-      </notes>
-      <segment>
-        <source>actor</source>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.addGate">
-      <notes>
-        <note category="location">src/app/settings/settings-projects/settings-projects-flow/flow-phases-section.component.ts:93</note>
-      </notes>
-      <segment>
-        <source>add gate</source>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.addJobType">
-      <notes>
-        <note category="location">src/app/settings/settings-projects/settings-projects-flow/flow-job-types-section.component.ts:43</note>
-      </notes>
-      <segment>
-        <source>add job type</source>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.addPhase">
-      <notes>
-        <note category="location">src/app/settings/settings-projects/settings-projects-flow/flow-phases-section.component.ts:113</note>
-      </notes>
-      <segment>
-        <source>add phase</source>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.addRiskClass">
-      <notes>
-        <note category="location">src/app/settings/settings-projects/settings-projects-flow/flow-risk-classes-section.component.ts:36</note>
-      </notes>
-      <segment>
-        <source>add risk class</source>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.addTransition">
-      <notes>
-        <note category="location">src/app/settings/settings-projects/settings-projects-flow/flow-transitions-section.component.ts:64</note>
-      </notes>
-      <segment>
-        <source>add transition</source>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.allActions">
-      <notes>
-        <note category="location">src/app/settings/settings-projects/settings-projects-flow/flow-audit-section.component.ts:24</note>
-      </notes>
-      <segment>
-        <source>all actions</source>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.allActors">
-      <notes>
-        <note category="location">src/app/settings/settings-projects/settings-projects-flow/flow-audit-section.component.ts:19</note>
-      </notes>
-      <segment>
-        <source>users and machines</source>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.allSubjects">
-      <notes>
-        <note category="location">src/app/settings/settings-projects/settings-projects-flow/flow-audit-section.component.ts:13</note>
-      </notes>
-      <segment>
-        <source>all subjects</source>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.approvals">
-      <notes>
-        <note category="location">src/app/settings/settings-projects/settings-projects-flow/flow-phases-section.component.ts:43</note>
-      </notes>
-      <segment>
-        <source>approvals</source>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.auditEmpty">
-      <notes>
-        <note category="location">src/app/settings/settings-projects/settings-projects-flow/flow-audit-section.component.ts:68</note>
-      </notes>
-      <segment>
-        <source>nothing recorded yet</source>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.condition">
-      <notes>
-        <note category="location">src/app/settings/settings-projects/settings-projects-flow/flow-phases-section.component.ts:44</note>
-      </notes>
-      <segment>
-        <source>condition</source>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.conditionAlways">
-      <notes>
-        <note category="location">src/app/settings/settings-projects/settings-projects-flow/flow-phases-section.component.ts:67</note>
-      </notes>
-      <segment>
-        <source>always</source>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.conditionRisk">
-      <notes>
-        <note category="location">src/app/settings/settings-projects/settings-projects-flow/flow-phases-section.component.ts:68</note>
-      </notes>
-      <segment>
-        <source>risk level ≥</source>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.deleteMessage">
-      <notes>
-        <note category="location">src/app/settings/settings-projects/settings-projects-flow/flow-section.base.ts:28</note>
-      </notes>
-      <segment>
-        <source>delete this entry? The change is recorded in the protocol.</source>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.deleteTitle">
-      <notes>
-        <note category="location">src/app/settings/settings-projects/settings-projects-flow/flow-section.base.ts:28</note>
-      </notes>
-      <segment>
-        <source>delete</source>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.details">
-      <notes>
-        <note category="location">src/app/settings/settings-projects/settings-projects-flow/flow-audit-section.component.ts:41</note>
-      </notes>
-      <segment>
-        <source>details</source>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.from">
-      <notes>
-        <note category="location">src/app/settings/settings-projects/settings-projects-flow/flow-transitions-section.component.ts:12</note>
-      </notes>
-      <segment>
-        <source>from</source>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.gate">
-      <notes>
-        <note category="location">src/app/settings/settings-projects/settings-projects-flow/flow-phases-section.component.ts:40</note>
-      </notes>
-      <segment>
-        <source>gate</source>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.inputSchema">
-      <notes>
-        <note category="location">src/app/settings/settings-projects/settings-projects-flow/flow-job-types-section.component.ts:31</note>
-      </notes>
-      <segment>
-        <source>input schema (JSON)</source>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.invalidJson">
-      <notes>
-        <note category="location">src/app/settings/settings-projects/settings-projects-flow/flow-job-types-section.component.ts:34</note>
-      </notes>
-      <segment>
-        <source>This is not valid JSON.</source>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.jobTypes">
-      <notes>
-        <note category="location">src/app/settings/settings-projects/settings-projects-flow/settings-projects-flow.component.ts:37</note>
-      </notes>
-      <segment>
-        <source>job types</source>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.jobsShort">
-      <notes>
-        <note category="location">src/app/settings/settings-projects/settings-projects-flow/flow-job-types-section.component.ts:24</note>
-      </notes>
-      <segment>
-        <source>jobs</source>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.key">
-      <notes>
-        <note category="location">src/app/settings/settings-projects/settings-projects-flow/flow-phases-section.component.ts:15</note>
-      </notes>
-      <segment>
-        <source>key</source>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.level">
-      <notes>
-        <note category="location">src/app/settings/settings-projects/settings-projects-flow/flow-risk-classes-section.component.ts:13</note>
-      </notes>
-      <segment>
-        <source>level</source>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.machines">
-      <notes>
-        <note category="location">src/app/settings/settings-projects/settings-projects-flow/flow-audit-section.component.ts:21</note>
-      </notes>
-      <segment>
-        <source>machines</source>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.newGateKey">
-      <notes>
-        <note category="location">src/app/settings/settings-projects/settings-projects-flow/flow-phases-section.component.ts:82</note>
-      </notes>
-      <segment>
-        <source>new gate key</source>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.newJobTypeKey">
-      <notes>
-        <note category="location">src/app/settings/settings-projects/settings-projects-flow/flow-job-types-section.component.ts:40</note>
-      </notes>
-      <segment>
-        <source>new job type key</source>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.newPhaseKey">
-      <notes>
-        <note category="location">src/app/settings/settings-projects/settings-projects-flow/flow-phases-section.component.ts:102</note>
-      </notes>
-      <segment>
-        <source>new phase key</source>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.phasesAndGates">
-      <notes>
-        <note category="location">src/app/settings/settings-projects/settings-projects-flow/settings-projects-flow.component.ts:35</note>
-      </notes>
-      <segment>
-        <source>phases &amp; gates</source>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.protocol">
-      <notes>
-        <note category="location">src/app/settings/settings-projects/settings-projects-flow/settings-projects-flow.component.ts:38</note>
-      </notes>
-      <segment>
-        <source>protocol</source>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.releaseApprovals">
-      <notes>
-        <note category="location">src/app/settings/settings-projects/settings-projects-flow/flow-risk-classes-section.component.ts:14</note>
-      </notes>
-      <segment>
-        <source>release approvals</source>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.reviewGates">
-      <notes>
-        <note category="location">src/app/settings/settings-projects/settings-projects-flow/flow-job-types-section.component.ts:19</note>
-      </notes>
-      <segment>
-        <source>review gates</source>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.requiredRole">
-      <notes>
-        <note category="location">src/app/settings/settings-projects/settings-projects-flow/flow-phases-section.component.ts:42</note>
-      </notes>
-      <segment>
-        <source>required role</source>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.riskClassHint">
-      <notes>
-        <note category="location">src/app/settings/settings-projects/settings-projects-flow/flow-risk-classes-section.component.ts:41</note>
-      </notes>
-      <segment>
-        <source>Projects without a risk class count as level 0. Gates whose approval count is empty take it from the release approvals of the project's risk class.</source>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.riskClasses">
-      <notes>
-        <note category="location">src/app/settings/settings-projects/settings-projects-flow/settings-projects-flow.component.ts:36</note>
-      </notes>
-      <segment>
-        <source>risk classes</source>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.schemaHint">
-      <notes>
-        <note category="location">src/app/settings/settings-projects/settings-projects-flow/flow-job-types-section.component.ts:46</note>
-      </notes>
-      <segment>
-        <source>Field types: string, text, url (http/https), list (one entry per line; with "fields" a JSON list of objects), object (JSON). "required_without" names a field that makes this one optional. Review gates: gate keys of the current phase, comma-separated, opened as approvals when a job reports its result. New types start with an example field.</source>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.showDetails">
-      <notes>
-        <note category="location">src/app/settings/settings-projects/settings-projects-flow/flow-audit-section.component.ts:60</note>
-      </notes>
-      <segment>
-        <source>show</source>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.sort">
-      <notes>
-        <note category="location">src/app/settings/settings-projects/settings-projects-flow/flow-phases-section.component.ts:29</note>
-      </notes>
-      <segment>
-        <source>sort</source>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.stateMachine">
-      <notes>
-        <note category="location">src/app/settings/settings-projects/settings-projects-flow/settings-projects-flow.component.html:6</note>
-      </notes>
-      <segment>
-        <source>project state machine</source>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.subject">
-      <notes>
-        <note category="location">src/app/settings/settings-projects/settings-projects-flow/flow-audit-section.component.ts:39</note>
-      </notes>
-      <segment>
-        <source>subject</source>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.to">
-      <notes>
-        <note category="location">src/app/settings/settings-projects/settings-projects-flow/flow-transitions-section.component.ts:13</note>
-      </notes>
-      <segment>
-        <source>to</source>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.transitionExists">
-      <notes>
-        <note category="location">src/app/settings/settings-projects/settings-projects-flow/flow-transitions-section.component.ts:59</note>
-      </notes>
-      <segment>
-        <source>this transition already exists</source>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.transitions">
-      <notes>
-        <note category="location">src/app/settings/settings-projects/settings-projects-flow/settings-projects-flow.component.ts:34</note>
-      </notes>
-      <segment>
-        <source>transitions</source>
-      </segment>
-    </unit>
-    <unit id="i18n.flow.users">
-      <notes>
-        <note category="location">src/app/settings/settings-projects/settings-projects-flow/flow-audit-section.component.ts:20</note>
-      </notes>
-      <segment>
-        <source>users</source>
       </segment>
     </unit>
     <unit id="i18n.invoice.collectedViaSepa">
@@ -18246,6 +17677,62 @@
         <source><ph id="0" equiv="count" disp="moved"/> prospects moved</source>
       </segment>
     </unit>
+    <unit id="i18n.marketing.edit_contact_details">
+      <notes>
+        <note category="location">src/app/marketing/marketing-outreach/marketing-outreach.component.html:99</note>
+      </notes>
+      <segment>
+        <source>edit contact details</source>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.status_change_failed">
+      <notes>
+        <note category="location">src/app/marketing/marketing-outreach/marketing-outreach.component.ts:169</note>
+      </notes>
+      <segment>
+        <source>changing the status failed – please try again</source>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.shared_activity">
+      <notes>
+        <note category="location">src/app/marketing/shared/activity-detail/marketing-activity-detail.component.html:118</note>
+      </notes>
+      <segment>
+        <source>shared (can be completed for all prospects at once)</source>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.shared_activities">
+      <notes>
+        <note category="location">src/app/marketing/marketing-outreach/marketing-outreach.component.html:59</note>
+      </notes>
+      <segment>
+        <source>shared activities</source>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.complete_for_all">
+      <notes>
+        <note category="location">src/app/marketing/marketing-outreach/marketing-outreach.component.html:69</note>
+      </notes>
+      <segment>
+        <source>complete for all</source>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.complete_shared_confirm">
+      <notes>
+        <note category="location">src/app/marketing/marketing-outreach/marketing-outreach.component.ts:171</note>
+      </notes>
+      <segment>
+        <source>Complete this activity for all <ph id="0" equiv="count" disp="activity.due_count"/> waiting prospects?</source>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.shared_completed">
+      <notes>
+        <note category="location">src/app/marketing/marketing-outreach/marketing-outreach.component.ts:176</note>
+      </notes>
+      <segment>
+        <source><ph id="0" equiv="count" disp="completed"/> activities completed</source>
+      </segment>
+    </unit>
     <unit id="i18n.marketing.possible_duplicates">
       <notes>
         <note category="location">src/app/marketing/marketing-prospects/marketing-prospect-detail/marketing-prospect-detail.component.html:85</note>
@@ -18372,6 +17859,14 @@
       </notes>
       <segment>
         <source>save</source>
+      </segment>
+    </unit>
+    <unit id="i18n.marketing.touchpoint_save_next_task">
+      <notes>
+        <note category="location">src/app/marketing/shared/touchpoint-form/touchpoint-form.component.html:46</note>
+      </notes>
+      <segment>
+        <source>save and next task</source>
       </segment>
     </unit>
     <unit id="i18n.marketing.touchpoint_save_failed">
@@ -18502,6 +17997,350 @@
       </notes>
       <segment>
         <source>saving the contact data failed</source>
+      </segment>
+    </unit>
+    <unit id="i18n.plugins.gitlab_link_foreign_host">
+      <notes>
+        <note category="location">src/models/http/plugins/plugin.instance.factory.ts:125</note>
+      </notes>
+      <segment>
+        <source>The URL does not belong to the GitLab instance of this token.</source>
+      </segment>
+    </unit>
+    <unit id="i18n.plugins.gitlab_link_empty_group">
+      <notes>
+        <note category="location">src/models/http/plugins/plugin.instance.factory.ts:127</note>
+      </notes>
+      <segment>
+        <source>The group contains no repositories you have access to.</source>
+      </segment>
+    </unit>
+    <unit id="i18n.plugins.gitlab_link_not_found">
+      <notes>
+        <note category="location">src/models/http/plugins/plugin.instance.factory.ts:130</note>
+      </notes>
+      <segment>
+        <source>No GitLab project or group found for this input, or your token has no access to it.</source>
+      </segment>
+    </unit>
+    <unit id="i18n.plugins.gitlab_link_failed">
+      <notes>
+        <note category="location">src/models/http/plugins/plugin.instance.factory.ts:132</note>
+      </notes>
+      <segment>
+        <source>The GitLab project or group could not be resolved.</source>
+      </segment>
+    </unit>
+    <unit id="i18n.plugins.links_confirm_title">
+      <notes>
+        <note category="location">src/models/http/plugins/plugin.instance.factory.ts:171</note>
+      </notes>
+      <segment>
+        <source>Add plugin links</source>
+      </segment>
+    </unit>
+    <unit id="i18n.plugins.links_confirm_message">
+      <notes>
+        <note category="location">src/models/http/plugins/plugin.instance.factory.ts:172</note>
+      </notes>
+      <segment>
+        <source><ph id="0" equiv="count" disp="count"/> repositories will be linked. Continue?</source>
+      </segment>
+    </unit>
+    <unit id="i18n.plugins.links_created_skipped">
+      <notes>
+        <note category="location">src/models/http/plugins/plugin.instance.factory.ts:182</note>
+      </notes>
+      <segment>
+        <source><ph id="0" equiv="created" disp="created.length"/> link(s) added, <ph id="1" equiv="skipped" disp="skipped"/> already linked.</source>
+      </segment>
+    </unit>
+    <unit id="i18n.plugins.links_failed">
+      <notes>
+        <note category="location">src/models/http/plugins/plugin.instance.factory.ts:183</note>
+      </notes>
+      <segment>
+        <source><ph id="0" equiv="failed" disp="failed"/> could not be saved.</source>
+      </segment>
+    </unit>
+    <unit id="i18n.invoices.activateSubscription">
+      <notes>
+        <note category="location">src/models/invoice/invoice-item.actions.ts</note>
+      </notes>
+      <segment>
+        <source>activate subscription</source>
+      </segment>
+    </unit>
+    <unit id="i18n.invoices.pauseSubscription">
+      <notes>
+        <note category="location">src/models/invoice/invoice-item.actions.ts</note>
+      </notes>
+      <segment>
+        <source>pause subscription</source>
+      </segment>
+    </unit>
+    <unit id="i18n.invoices.subscriptions">
+      <notes>
+        <note category="location">src/app/projects/id/project-invoicing/project-subscriptions-card/project-subscriptions-card.component.html</note>
+      </notes>
+      <segment>
+        <source>subscriptions</source>
+      </segment>
+    </unit>
+    <unit id="i18n.invoices.subscriptionNext">
+      <notes>
+        <note category="location">src/app/projects/id/project-invoicing/project-subscriptions-card/project-subscriptions-card.component.html</note>
+      </notes>
+      <segment>
+        <source>next:</source>
+      </segment>
+    </unit>
+    <unit id="i18n.invoices.noSubscriptionsHint">
+      <notes>
+        <note category="location">src/app/projects/id/project-invoicing/project-subscriptions-card/project-subscriptions-card.component.html</note>
+      </notes>
+      <segment>
+        <source>Subscriptions are added as repeating items in the quote tab.</source>
+      </segment>
+    </unit>
+    <unit id="i18n.invoices.toQuote">
+      <notes>
+        <note category="location">src/app/projects/id/project-invoicing/project-subscriptions-card/project-subscriptions-card.component.html</note>
+      </notes>
+      <segment>
+        <source>to the quote</source>
+      </segment>
+    </unit>
+    <unit id="i18n.connections.type_customer">
+      <notes>
+        <note category="location">src/models/company/connection.model.ts:33</note>
+      </notes>
+      <segment>
+        <source>customer relationship</source>
+      </segment>
+    </unit>
+    <unit id="i18n.connections.role_customer">
+      <notes>
+        <note category="location">src/models/company/connection.model.ts:37</note>
+      </notes>
+      <segment>
+        <source>customer</source>
+      </segment>
+    </unit>
+    <unit id="i18n.connections.role_contractor">
+      <notes>
+        <note category="location">src/models/company/connection.model.ts:38</note>
+      </notes>
+      <segment>
+        <source>contractor</source>
+      </segment>
+    </unit>
+    <unit id="i18n.connections.type_partner">
+      <notes>
+        <note category="location">src/models/company/connection.model.ts:42</note>
+      </notes>
+      <segment>
+        <source>partnership</source>
+      </segment>
+    </unit>
+    <unit id="i18n.connections.role_partner">
+      <notes>
+        <note category="location">src/models/company/connection.model.ts:46</note>
+      </notes>
+      <segment>
+        <source>partner</source>
+      </segment>
+    </unit>
+    <unit id="i18n.connections.type_group">
+      <notes>
+        <note category="location">src/models/company/connection.model.ts:51</note>
+      </notes>
+      <segment>
+        <source>group of companies</source>
+      </segment>
+    </unit>
+    <unit id="i18n.connections.role_subsidiary">
+      <notes>
+        <note category="location">src/models/company/connection.model.ts:55</note>
+      </notes>
+      <segment>
+        <source>subsidiary</source>
+      </segment>
+    </unit>
+    <unit id="i18n.connections.role_parent">
+      <notes>
+        <note category="location">src/models/company/connection.model.ts:56</note>
+      </notes>
+      <segment>
+        <source>parent company</source>
+      </segment>
+    </unit>
+    <unit id="i18n.connections.type_competitor">
+      <notes>
+        <note category="location">src/models/company/connection.model.ts:60</note>
+      </notes>
+      <segment>
+        <source>competition</source>
+      </segment>
+    </unit>
+    <unit id="i18n.connections.role_competitor">
+      <notes>
+        <note category="location">src/models/company/connection.model.ts:64</note>
+      </notes>
+      <segment>
+        <source>competitor</source>
+      </segment>
+    </unit>
+    <unit id="i18n.connections.type_referral">
+      <notes>
+        <note category="location">src/models/company/connection.model.ts:69</note>
+      </notes>
+      <segment>
+        <source>referral</source>
+      </segment>
+    </unit>
+    <unit id="i18n.connections.role_referrer">
+      <notes>
+        <note category="location">src/models/company/connection.model.ts:73</note>
+      </notes>
+      <segment>
+        <source>referrer</source>
+      </segment>
+    </unit>
+    <unit id="i18n.connections.role_referred">
+      <notes>
+        <note category="location">src/models/company/connection.model.ts:74</note>
+      </notes>
+      <segment>
+        <source>referred</source>
+      </segment>
+    </unit>
+    <unit id="i18n.connections.setType">
+      <notes>
+        <note category="location">src/models/company/connection.actions.ts:10</note>
+      </notes>
+      <segment>
+        <source>set relationship...</source>
+      </segment>
+    </unit>
+    <unit id="i18n.connections.unclassified">
+      <notes>
+        <note category="location">src/models/company/connection.actions.ts:14</note>
+      </notes>
+      <segment>
+        <source>unclassified</source>
+      </segment>
+    </unit>
+    <unit id="i18n.connections.reverse">
+      <notes>
+        <note category="location">src/models/company/connection.actions.ts:18</note>
+      </notes>
+      <segment>
+        <source>reverse direction</source>
+      </segment>
+    </unit>
+    <unit id="i18n.connections.openSource">
+      <notes>
+        <note category="location">src/models/company/connection.actions.ts:24</note>
+      </notes>
+      <segment>
+        <source>open source</source>
+      </segment>
+    </unit>
+    <unit id="i18n.connections.relationship">
+      <notes>
+        <note category="location">src/app/customers/details/customer-connections/customer-connections.html:15</note>
+      </notes>
+      <segment>
+        <source>relationship</source>
+      </segment>
+    </unit>
+    <unit id="i18n.connections.researched">
+      <notes>
+        <note category="location">src/app/_shards/connection-role/connection-role.ts:12</note>
+      </notes>
+      <segment>
+        <source>researched</source>
+      </segment>
+    </unit>
+    <unit id="i18n.customers.keyAccountOn">
+      <notes>
+        <note category="location">src/app/customers/details/customer-dashboard/customer-dashboard.ts:66</note>
+      </notes>
+      <segment>
+        <source>key account</source>
+      </segment>
+    </unit>
+    <unit id="i18n.customers.keyAccountOff">
+      <notes>
+        <note category="location">src/app/customers/details/customer-dashboard/customer-dashboard.ts:67</note>
+      </notes>
+      <segment>
+        <source>not a key account</source>
+      </segment>
+    </unit>
+    <unit id="i18n.customers.networkSizeByRevenue">
+      <notes>
+        <note category="location">src/app/customers/-/customers-network/customers-network.component.html:31</note>
+      </notes>
+      <segment>
+        <source>size = total revenue</source>
+      </segment>
+    </unit>
+    <unit id="i18n.customers.networkLegend">
+      <notes>
+        <note category="location">src/app/customers/-/customers-network/customers-network.component.html:17</note>
+      </notes>
+      <segment>
+        <source>legend</source>
+      </segment>
+    </unit>
+    <unit id="i18n.connections.secondDegree">
+      <notes>
+        <note category="location">src/app/customers/details/customer-connections/customer-connections.html:56</note>
+      </notes>
+      <segment>
+        <source>via two hops</source>
+      </segment>
+    </unit>
+    <unit id="i18n.settings.appearance">
+      <notes>
+        <note category="location">src/app/profile/profile-settings/profile-settings.component.html:8,9</note>
+      </notes>
+      <segment>
+        <source>appearance</source>
+      </segment>
+    </unit>
+    <unit id="i18n.settings.colorScheme">
+      <notes>
+        <note category="location">src/app/profile/profile-settings/profile-settings.component.html:43,44</note>
+      </notes>
+      <segment>
+        <source>color scheme</source>
+      </segment>
+    </unit>
+    <unit id="i18n.settings.themeAuto">
+      <notes>
+        <note category="location">src/app/profile/profile-settings/profile-settings.component.ts:17</note>
+      </notes>
+      <segment>
+        <source>automatic</source>
+      </segment>
+    </unit>
+    <unit id="i18n.settings.themeLight">
+      <notes>
+        <note category="location">src/app/profile/profile-settings/profile-settings.component.ts:18</note>
+      </notes>
+      <segment>
+        <source>light</source>
+      </segment>
+    </unit>
+    <unit id="i18n.settings.themeDark">
+      <notes>
+        <note category="location">src/app/profile/profile-settings/profile-settings.component.ts:19</note>
+      </notes>
+      <segment>
+        <source>dark</source>
       </segment>
     </unit>
   </file>

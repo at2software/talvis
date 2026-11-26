@@ -77,6 +77,34 @@
                     </div>
                 }
 
+                @if (_item.isRegularItem() || _item.isRepeating()) {
+                    <div class="d-flex mb-3 align-items-center gap-2">
+                        <span class="flex-fill"></span>
+                        <span class="input-group-text bg-transparent" i18n="@@i18n.common.recurrence">recurrence</span>
+                        <div ngbDropdown>
+                            <span class="dropdown-toggle cursor-pointer" [class]="_item.getRepeatColor()" ngbDropdownToggle>
+                                @if (_item.isRepeating()) {
+                                    {{ _item.getRepeatString() }}
+                                } @else {
+                                    <ng-container i18n="@@i18n.common.none">none</ng-container>
+                                }
+                            </span>
+                            <div ngbDropdownMenu>
+                                <button ngbDropdownItem (click)="_item.setRecurrence()" i18n="@@i18n.common.none">none</button>
+                                <button ngbDropdownItem class="text-pink" (click)="_item.setRecurrence(InvoiceItemType.Daily)" i18n="@@i18n.common.daily">daily</button>
+                                <button ngbDropdownItem class="text-purple" (click)="_item.setRecurrence(InvoiceItemType.Weekly)" i18n="@@i18n.common.weekly">weekly</button>
+                                <button ngbDropdownItem class="text-indigo" (click)="_item.setRecurrence(InvoiceItemType.Monthly)" i18n="@@i18n.common.monthly">monthly</button>
+                                <button ngbDropdownItem class="text-blue" (click)="_item.setRecurrence(InvoiceItemType.Quarterly)" i18n="@@i18n.recurrence.quarterly">quarterly</button>
+                                <button ngbDropdownItem class="text-cyan" (click)="_item.setRecurrence(InvoiceItemType.Yearly)" i18n="@@i18n.common.yearly">yearly</button>
+                            </div>
+                        </div>
+                        @if (_item.isRepeating()) {
+                            <span class="input-group-text bg-transparent" i18n="@@i18n.common.start">start:</span>
+                            <input class="form-control" style="width: 130px" placeholder="yyyy-mm-dd" ngbDatepicker #dp="ngbDatepicker" (click)="dp.toggle()" [(ngModel)]="_item.next_recurrence_at" />
+                        }
+                    </div>
+                }
+
                 <div class="d-flex mb-3 align-items-center">
                     <span class="flex-fill"></span>
                     <span class="input-group-text bg-transparent">

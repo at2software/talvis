@@ -22,12 +22,12 @@ return [
     'gross_value'               => 'Gross Total',
 
     // VAT handling
-    'vat_on_net'        => ':rate% VAT on net price items',
-    'vat_in_gross'      => ':rate% VAT in gross price items',
-    'vat_exempt_eu'     => 'VAT exempt pursuant to §4 No. 1b in conjunction with §6a UStG (German VAT Act)',
-    'our_vat_id'        => 'Our VAT ID:',
-    'your_vat_id'       => 'Your VAT ID:',
-    'vat_exempt_export' => 'Tax-free export delivery pursuant to §4 No. 1a UStG in conjunction with §6 UStG',
+    'vat_on_net'         => ':rate% VAT on net price items',
+    'vat_in_gross'       => ':rate% VAT in gross price items',
+    'vat_reverse_charge' => 'Reverse charge: VAT is payable by the recipient (Art. 196 VAT Directive 2006/112/EC)',
+    'our_vat_id'         => 'Our VAT ID:',
+    'your_vat_id'        => 'Your VAT ID:',
+    'vat_not_taxable'    => 'Not taxable in Germany: place of supply is with the recipient (§3a(2) UStG, German VAT Act)',
 
     // Discount
     'including_discount' => 'Including :percent% discount',
@@ -60,5 +60,6 @@ return [
     // Document titles
     'quote'         => 'Quote',
     'draft_invoice' => 'Draft Invoice',
+    'invoice'       => 'Invoice',
     'quote_preview' => 'Quote Preview',
 ];

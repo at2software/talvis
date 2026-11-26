@@ -1,6 +1,5 @@
 <?php
 
-use App\Flow\FlowServiceProvider;
 use App\Providers\AppServiceProvider;
 use App\Providers\BootHooksServiceProvider;
 use App\Providers\BroadcastServiceProvider;
@@ -180,7 +179,7 @@ return [
         BroadcastServiceProvider::class,
         BootHooksServiceProvider::class,
         PermissionServiceProvider::class,
-        FlowServiceProvider::class,
+        ...(is_file(__DIR__.'/../bootstrap/extensions.php') ? require __DIR__.'/../bootstrap/extensions.php' : []),
     ])->toArray(),
 
     /*

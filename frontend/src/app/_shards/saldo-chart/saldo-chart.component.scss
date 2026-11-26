@@ -13,10 +13,10 @@
     width: 0px;
     height: 100%;
     top: 0;
-    border-right: 1px #999 solid;
+    border-right: 1px var(--tv-text-dim) solid;
 }
 .null {
-    background-color: 1px #999 solid;
+    background-color: 1px var(--tv-text-dim) solid;
 }
 .offset-p {
     background-color: #00ff0033;

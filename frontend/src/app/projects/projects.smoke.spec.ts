@@ -9,7 +9,6 @@ import { ProjectsStatsComponent } from '@app/projects/-/projects-stats/projects-
 import { ProjectsUptimeComponent } from '@app/projects/-/projects-uptime/projects-uptime.component';
 import { ProjectDashboardComponent } from '@app/projects/id/project-dashboard/project-dashboard.component';
 import { ProjectDebriefingComponent } from '@app/projects/id/project-debriefing/project-debriefing.component';
-import { ProjectFlowComponent } from '@app/projects/id/project-flow/project-flow.component';
 import { ProjectDetailSettingsParticipantsComponent } from '@app/projects/id/settings/project-detail-settings-participants/project-detail-settings-participants.component';
 
 const components: [string, Type<unknown>][] = [
@@ -22,7 +21,6 @@ const components: [string, Type<unknown>][] = [
     ['ProjectsUptimeComponent', ProjectsUptimeComponent],
     ['ProjectDashboardComponent', ProjectDashboardComponent],
     ['ProjectDebriefingComponent', ProjectDebriefingComponent],
-    ['ProjectFlowComponent', ProjectFlowComponent],
     ['ProjectDetailSettingsParticipantsComponent', ProjectDetailSettingsParticipantsComponent],
 ];
 

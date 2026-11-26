@@ -2,13 +2,19 @@
     display: block;
 }
 
+.card-body {
+    position: relative;
+}
+
 .stat-value {
+    position: relative;
+    z-index: 1;
     font-family: 'BrunoAce', sans-serif;
     font-size: 2.25rem;
     line-height: 1;
 
     &.is-zero {
-        color: #666;
+        color: var(--tv-text-faint);
     }
 }
 
@@ -18,12 +24,13 @@
 }
 
 .stat-icon {
-    position: relative;
+    position: absolute;
+    top: var(--bs-card-spacer-y);
+    right: var(--bs-card-spacer-x);
     display: grid;
     place-items: center;
     width: 2.5rem;
     height: 2.5rem;
-    flex-shrink: 0;
 
     &::before {
         content: '';

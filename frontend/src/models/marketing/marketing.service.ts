@@ -73,7 +73,9 @@ export class MarketingService extends TalvisHttpService<MarketingInitiative> {
     mergeProspect = (targetId: string, sourceId: string) => this.post(`marketing/prospects/${targetId}/merge`, { source_id: sourceId }, MarketingProspect);
     rescheduleOverdueActivities = (data: Dictionary) => this.post<{ moved: number }>('marketing/prospects/activities/reschedule-overdue', data);
 
-    indexOutreachQueue = (channel: TouchpointChannel) => this.aget('marketing/touchpoints/queue', { channel }, MarketingProspectActivity);
+    indexSharedActivities = () => this.aget('marketing/shared-activities', {}, MarketingInitiativeActivity);
+    completeSharedActivity = (activityId: string) => this.post<{ completed: number }>(`marketing/shared-activities/${activityId}/complete`, {});
+    indexOutreachQueue =(channel: TouchpointChannel) => this.aget('marketing/touchpoints/queue', { channel }, MarketingProspectActivity);
     showTouchpointStats = (params?: Dictionary) => this.get<TouchpointStatsDto>('marketing/touchpoints/stats', params);
     indexProspectTouchpoints = (prospectId: string) => this.aget(`marketing/prospects/${prospectId}/touchpoints`, {}, MarketingTouchpoint);
     storeProspectTouchpoint = (prospectId: string, data: Dictionary) => this.post(`marketing/prospects/${prospectId}/touchpoints`, data, MarketingTouchpoint);

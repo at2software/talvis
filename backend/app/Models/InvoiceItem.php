@@ -52,20 +52,21 @@ class InvoiceItem extends BaseModel {
 
     protected function casts(): array {
         return [
-            'net'                => 'double',
-            'gross'              => 'double',
-            'qty'                => 'double',
-            'discount'           => 'double',
-            'price'              => 'double',
-            'price_discounted'   => 'double',
-            'vat_rate'           => 'double',
-            'vat_rate_dec'       => 'double',
-            'unit_factor'        => 'double',
-            'total'              => 'double',
-            'is_discountable'    => 'boolean',
-            'next_recurrence_at' => 'date',
-            'type'               => InvoiceItemType::class,
-            'vat_calculation'    => InvoiceVatHandling::class,
+            'net'                  => 'double',
+            'gross'                => 'double',
+            'qty'                  => 'double',
+            'discount'             => 'double',
+            'price'                => 'double',
+            'price_discounted'     => 'double',
+            'vat_rate'             => 'double',
+            'vat_rate_dec'         => 'double',
+            'unit_factor'          => 'double',
+            'total'                => 'double',
+            'is_discountable'      => 'boolean',
+            'next_recurrence_at'   => 'date',
+            'recurrence_source_id' => 'integer',
+            'type'                 => InvoiceItemType::class,
+            'vat_calculation'      => InvoiceVatHandling::class,
         ];
     }
     public function getDirty() { // Exclude virtual attributes from dirty tracking
@@ -92,6 +93,16 @@ class InvoiceItem extends BaseModel {
     }
     public function extIssuePluginLink() {
         return $this->belongsTo(PluginLink::class, 'ext_issue_plugin_link_id');
+    }
+    /**
+     * Subscription item this item was spawned from by cron:standing-orders.
+     * Deliberately not fillable, so copies (applyObject, duplicates) never inherit it.
+     */
+    public function recurrenceSource() {
+        return $this->belongsTo(InvoiceItem::class, 'recurrence_source_id');
+    }
+    public function recurrenceSpawns() {
+        return $this->hasMany(InvoiceItem::class, 'recurrence_source_id');
     }
     public function billedFoci() {
         return $this->hasMany(Focus::class, 'invoiced_in_item_id');
@@ -235,6 +246,24 @@ class InvoiceItem extends BaseModel {
         }
         return 0;
     }
+    public function isRepeating(): bool {
+        return in_array($this->type, InvoiceItemType::Repeating, true);
+    }
+    /**
+     * A subscription added to a project that is already running starts right away,
+     * just like the ones activated when the project switches to progress=Running.
+     */
+    public function activateSubscriptionOfRunningProject(): void {
+        if (! $this->isRepeating() || $this->next_recurrence_at || ! $this->project_id || $this->invoice_id) {
+            return;
+        }
+        if ($this->project?->state?->progress === ProjectState::Running) {
+            $this->next_recurrence_at = now();
+        }
+    }
+    public function estimatedDays(): float {
+        return $this->assumedWorkload() / Param::get('INVOICE_HPD')->value;
+    }
 
     // ########
     // DELETION
@@ -276,6 +305,12 @@ class InvoiceItem extends BaseModel {
     }
     protected static function booted(): void {
         parent::booted();
+        static::creating(fn (InvoiceItem $item) => $item->activateSubscriptionOfRunningProject());
+        static::updating(function (InvoiceItem $item) {
+            if ($item->isDirty('type') && ! in_array($item->getOriginal('type'), InvoiceItemType::Repeating, true)) {
+                $item->activateSubscriptionOfRunningProject();
+            }
+        });
         static::deleting(function (InvoiceItem $item) {
             $item->billedFoci()->update(['invoiced_in_item_id' => null]);
         });

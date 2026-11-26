@@ -18,12 +18,12 @@
                     }
                 }
                 @if (user.is_sick) {
-                    <div class="avatar avatar-sm bg-dark text-info" style="border: 1px black solid; padding: 13px">
+                    <div class="avatar avatar-sm bg-dark text-info" style="border: 1px var(--tv-edge) solid; padding: 13px">
                         <i ngbTooltip="sick until: {{ user.is_sick | date }}">health_and_safety</i>
                     </div>
                 }
                 @if (user.is_on_vacation && !user.is_sick) {
-                    <div class="avatar avatar-sm bg-dark text-cyan" style="border: 1px black solid; padding: 13px">
+                    <div class="avatar avatar-sm bg-dark text-cyan" style="border: 1px var(--tv-edge) solid; padding: 13px">
                         <i ngbTooltip="vacation until: {{ user.is_on_vacation | date }}">beach_access</i>
                     </div>
                 }

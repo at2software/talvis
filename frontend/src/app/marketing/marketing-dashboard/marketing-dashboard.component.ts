@@ -2,6 +2,7 @@ import { Dictionary } from '@constants/constants';
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { MarketingService } from '@models/marketing/marketing.service';
+import { MarketingInitiative } from '@models/marketing/marketing-initiative.model';
 import { modelResource } from '@models/http/model-resource';
 import { dayjs, Dayjs } from '@constants/date/dates';
 import { NgxDaterangepickerMd } from 'ngx-daterangepicker-material';
@@ -62,7 +63,7 @@ export class MarketingDashboardComponent {
         return {
             initiatives: {
                 total: initiatives.length,
-                active: initiatives.filter((i) => i.status === 'active').length,
+                active: MarketingInitiative.countByStatus(initiatives).active,
             },
             prospects: {
                 total: p.total || 0,

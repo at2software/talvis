@@ -16,7 +16,6 @@ import { InputModalService } from '@app/_modals/modal-input/modal-input.service'
 import { HttpHeaders } from '@angular/common/http';
 import { GlobalService } from '@models/global.service';
 import { TableSearchSortBase } from '@app/app/table-controls/table-base/table-search-sort-base.component';
-import { ProjectState } from '@models/project/project-state.model';
 import { ToolbarComponent } from '@app/app/toolbar/toolbar.component';
 import { CdkTableModule } from '@angular/cdk/table';
 import { Nx } from '@app/nx/nx.directive';
@@ -207,7 +206,7 @@ export class CustomersDashboardComponent extends TableSearchSortBase<Company> im
         return 'bubble-xl';
     };
     bubbleColorFor = (p: Project): string => {
-        if (p.state.progress == ProjectState.ProgressPrepared) return 'bubble-darker';
+        if (p.state.isPrepared()) return 'bubble-darker';
         if (p.is_time_based) return 'bubble-time';
         return 'bubble-active';
     };

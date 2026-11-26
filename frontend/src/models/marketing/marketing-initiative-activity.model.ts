@@ -22,6 +22,8 @@ export class MarketingInitiativeActivity extends Serializable implements IActivi
     has_external_dependency?: boolean;
     parent_activity_id?: string;
     quick_action?: QuickActionType;
+    is_shared?: boolean;
+    due_count?: number;
     stats?: ActivityStatsDto;
 
     @Type(()=>MarketingInitiative) marketing_initiative?: MarketingInitiative;

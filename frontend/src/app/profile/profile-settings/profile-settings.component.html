@@ -5,6 +5,7 @@
             <ul class="list-group">
                 <li class="list-group-item list-group-item-action pointer" [class.active]="tab() === 0" (click)="show(0)" tabindex="0" (keydown.enter)="show(0)" i18n="@@i18n.common.invoices">invoices</li>
                 <li class="list-group-item list-group-item-action pointer" [class.active]="tab() === 1" (click)="show(1)" tabindex="0" (keydown.enter)="show(1)" i18n="@@i18n.common.webdav">WebDAV</li>
+                <li class="list-group-item list-group-item-action pointer" [class.active]="tab() === 2" (click)="show(2)" tabindex="0" (keydown.enter)="show(2)" i18n="@@i18n.settings.appearance">appearance</li>
             </ul>
         </div>
     </div>
@@ -31,6 +32,21 @@
                             <input-settings-group [parent]="global.user" id="WEBDAV_TOKEN" i18n="@@i18n.settings.webdavToken">WebDAV token</input-settings-group>
                         </li>
                     }
+                </ul>
+            </div>
+        </div>
+        <div [class.d-none]="tab() !== 2" class="row">
+            <div class="card mb-3">
+                <div class="card-header" i18n="@@i18n.settings.appearance">appearance</div>
+                <ul class="list-group">
+                    <li class="list-group-item d-flex align-items-center justify-content-between">
+                        <span i18n="@@i18n.settings.colorScheme">color scheme</span>
+                        <div class="btn-group btn-group-sm" role="group">
+                            @for (option of themeModes; track option.mode) {
+                                <button type="button" class="btn btn-outline-primary" [class.active]="theme.mode() === option.mode" [attr.aria-pressed]="theme.mode() === option.mode" (click)="theme.setMode(option.mode)">{{ option.label }}</button>
+                            }
+                        </div>
+                    </li>
                 </ul>
             </div>
         </div>

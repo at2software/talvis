@@ -11,12 +11,13 @@ import { AvatarComponent } from '@shards/avatar/avatar.component';
 import { GlobalService } from '@models/global.service';
 import { tracked } from '@constants/tracked';
 import { modelListResource } from '@models/http/model-resource';
+import { ConnectionRole } from '@shards/connection-role/connection-role';
 
 @Component({
     selector: 'connections-list',
     templateUrl: './connections-list.component.html',
     styleUrls: ['./connections-list.component.scss'],
-    imports: [NgbPopoverModule, SearchInputComponent, Nx, AvatarComponent],
+    imports: [NgbPopoverModule, SearchInputComponent, Nx, AvatarComponent, ConnectionRole],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ConnectionsListComponent {

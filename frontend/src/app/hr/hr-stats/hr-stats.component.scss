@@ -57,7 +57,7 @@
 
 .cursor-pointer {
   &.active {
-    color: colors.$primary;
+    color: var(--bs-primary);
   }
 }
 ::ng-deep .stats-user-row {

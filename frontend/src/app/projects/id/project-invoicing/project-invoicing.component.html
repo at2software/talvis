@@ -190,8 +190,9 @@
     }
 
     @if (_invoicingType === 2 && project) {
+        <project-subscriptions-card [project]="project"></project-subscriptions-card>
         <div class="card mb-3">
-            <div class="card-header" i18n="@@i18n.invoices.support-invoice">support invoice</div>
+            <div class="card-header" i18n="@@i18n.common.support">support</div>
             <ul class="list-group">
                 <li class="list-group-item hstack gap-2 py-1 cursor-pointer" [class.text-warning]="project.uninvoiced_hours > 0" [class.text-muted]="project.uninvoiced_hours === 0" (click)="navigateToSupport($event)" (keyup.enter)="navigateToSupport($event)" tabindex="0">
                     @if (project.uninvoiced_hours > 0) {

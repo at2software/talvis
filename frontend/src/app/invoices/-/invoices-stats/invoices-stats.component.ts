@@ -18,6 +18,7 @@ import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { FormsModule } from '@angular/forms';
 import type { EChartsOption } from 'echarts';
 import { modelListResource, modelResource } from '@models/http/model-resource';
+import { injectChartPalette } from '@charts/echarts-theme';
 
 @Component({
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -32,6 +33,7 @@ export class InvoicesStatsComponent {
     #service = inject(StatsService);
     #invoiceService = inject(InvoiceService);
     #marketingService = inject(MarketingService);
+    #palette = injectChartPalette();
     readonly #shortPipe = new ShortPipe();
     readonly #moneyPipe = new MoneyPipe();
 
@@ -46,6 +48,7 @@ export class InvoicesStatsComponent {
         if (!response?.current?.length) return undefined;
         const maxVal = Math.max(...response.current.map((_) => _.sum));
         const primaryColor = Color.fromVar('primary').toHexString();
+        const palette = this.#palette();
         return {
             chart: { height: 150 },
             backgroundColor: 'transparent',
@@ -73,7 +76,7 @@ export class InvoicesStatsComponent {
                     markLine: {
                         silent: true,
                         symbol: 'none',
-                        data: [{ yAxis: maxVal, name: this.#shortPipe.transform(maxVal), lineStyle: { color: '#ffffff44', type: 'dashed', width: 1 }, label: { show: true, formatter: '{b}', position: 'insideEndTop', color: '#ffffff44', fontSize: 10 } }],
+                        data: [{ yAxis: maxVal, name: this.#shortPipe.transform(maxVal), lineStyle: { color: palette.annotation, type: 'dashed', width: 1 }, label: { show: true, formatter: '{b}', position: 'insideEndTop', color: palette.annotation, fontSize: 10 } }],
                     },
                 },
             ],

@@ -2,14 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\InvoiceItemType;
 use App\Helpers\NLog;
 use App\Http\Controllers\Traits\HasFociController;
 use App\Http\Requests\Company\StoreConnectionRequest;
+use App\Http\Requests\Company\UpdateConnectionRequest;
 use App\Http\Requests\PhoneLookupRequest;
 use App\Models\Company;
 use App\Models\Connection;
 use App\Models\Param;
+use App\Queries\CompanyNetworkQuery;
 use App\Services\FocusStatisticsService;
 use App\Traits\HasParams;
 use Illuminate\Http\JsonResponse;
@@ -22,10 +23,8 @@ class CompanyController extends Controller {
     use HasFociController;
 
     public function indexWithCoordinates(Request $request) {
-        $myCompany = Param::get('ME_ID')->value;
-
         $companies = Company::select('id', 'vcard', 'net')
-            ->whereNot('id', $myCompany)
+            ->whereNotMe()
             ->where('vcard', 'REGEXP', '(^|\n)GEO:')
             ->get()
             ->map(function ($company) {
@@ -76,8 +75,7 @@ class CompanyController extends Controller {
         return $this->_indexFoci($request, $_);
     }
     public function index(Request $request) {
-        $myCompany = Param::get('ME_ID')->value;
-        $query     = Company::select()->whereNot('id', $myCompany)->whereNotDraft();
+        $query     = Company::select()->whereNotMe()->whereNotDraft();
         $user      = Auth::user();
 
         if ($request->onlyWithActiveProjects == 'true') {
@@ -170,11 +168,10 @@ class CompanyController extends Controller {
         return $widgetController->GET_CASHFLOW_CUSTOMER_SUPPORT()->getAndAppend();
     }
     private function companiesWithChurnPredictions() {
-        $myCompany     = Param::get('ME_ID')->value;
         $churnParamIds = Param::whereIn('key', ['ML_PREDICTED_INTERVAL_DAYS', 'ML_CHURN_PROBABILITY_12M'])->pluck('id');
 
         return Company::whereActive()
-            ->whereNot('id', $myCompany)
+            ->whereNotMe()
             ->whereHas('floatParams', fn ($q) => $q->whereIn('param_id', $churnParamIds))
             ->whereHas('invoices', fn ($q) => $q->where('created_at', '>=', now()->subYears(2)))
             ->with(['latestInvoice', ...HasParams::$WITH])
@@ -207,7 +204,7 @@ class CompanyController extends Controller {
             ->values();
     }
     public function indexAssignees(Company $_) {
-        return $_->assignees()->latest('role_id')->get()->load('parent');
+        return $_->assignees()->oldest('id')->get()->load('parent');
     }
     public function indexComments(Company $_) {
         return $_->comments;
@@ -222,10 +219,13 @@ class CompanyController extends Controller {
             ->with(['company1', 'company2'])
             ->withCount('projects')
             ->get();
-        return Connection::obfuscateNet($connections1->merge($connections2));
+        return Connection::networkPayload($connections1->merge($connections2));
+    }
+    public function indexNetwork(Company $_) {
+        return (new CompanyNetworkQuery($_))->get();
     }
     public function indexAllConnections() {
-        return Connection::obfuscateNet(
+        return Connection::networkPayload(
             Connection::with(['company1', 'company2'])->withCount('projects')->get()
         );
     }
@@ -354,14 +354,16 @@ class CompanyController extends Controller {
         return $_->createEmployee((string)$request->input('name'));
     }
     public function storeConnection(StoreConnectionRequest $request) {
-        $q  = ['company1_id' => $request->validated('company1_id'), 'company2_id' => $request->validated('company2_id')];
-        $q2 = ['company1_id' => $request->validated('company2_id'), 'company2_id' => $request->validated('company1_id')];
-        abort_if(Connection::where($q)->orWhere(fn ($_) => $_->where($q2))->exists(), 405, 'connection already exists');
-        abort_if(request('company1_id') == request('company2_id'), 405, 'cannot connect to itself');
-        $con = Connection::create($q);
-        $con->company1;
-        $con->company2;
-        return $con;
+        abort_if(Connection::between($request->validated('company1_id'), $request->validated('company2_id')), 405, 'connection already exists');
+        return Connection::create($request->validated())->load(['company1', 'company2']);
+    }
+    public function updateConnection(UpdateConnectionRequest $request, Connection $_) {
+        $_->fill($request->safe()->except('reverse'));
+        if ($request->boolean('reverse')) {
+            $_->reverse();
+        }
+        $_->save();
+        return $_->load(['company1', 'company2']);
     }
     public function importImprint(Request $request, Company $_) {
         NLog::info('ImportImprint: Starting imprint import for company', ['company_id' => $_->id, 'company_name' => $_->name]);
@@ -412,10 +414,7 @@ class CompanyController extends Controller {
         return $_->makeInvoiceFor();
     }
     public function updateActivateRepeatingItems(Company $_) {
-        $updated = $_->invoiceItems()
-            ->whereIn('type', InvoiceItemType::Repeating)
-            ->whereNull('next_recurrence_at')
-            ->update(['next_recurrence_at' => now()]);
+        $updated = $_->activateRepeatingItems();
 
         Artisan::call('cron:standing-orders');
         return response()->json(['activated_count' => $updated]);

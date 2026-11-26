@@ -1,11 +1,11 @@
 .expense-row {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-    &:hover { background: rgba(255, 255, 255, 0.03); }
+    border-bottom: 1px solid rgba(var(--tv-ink-rgb), 0.05);
+    &:hover { background: rgba(var(--tv-ink-rgb), 0.03); }
 }
 
 .tx-sub-row {
     background: rgba(0, 0, 0, 0.15);
-    border-top: 1px solid rgba(255, 255, 255, 0.04);
+    border-top: 1px solid rgba(var(--tv-ink-rgb), 0.04);
 }
 
 .tx-row {

@@ -7,7 +7,6 @@ use App\Enums\CommentType;
 use App\Traits\HasParams;
 use App\Traits\HasTasksTrait;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Spatie\Permission\Models\Role;
 
 class Assignment extends BaseModel {
     use HasFactory;
@@ -17,10 +16,10 @@ class Assignment extends BaseModel {
     const FLAG_MAIN_CONTACT = 1 << 0; // Binary flag: 1 (for main contact used in quotes/invoices)
     const FLAG_CO_ASSIGNEE  = 1 << 1;
 
-    protected $fillable = ['role_id', 'parent_id', 'parent_type', 'assignee_id', 'assignee_type', 'hours_planned', 'hours_weekly', 'flags'];
-    protected $appends  = ['avg_hpd'];
-    protected $with     = ['avgHpdParam'];
-    protected $hidden   = ['avgHpdParam'];
+    protected $fillable = ['parent_id', 'parent_type', 'assignee_id', 'assignee_type', 'hours_planned', 'hours_weekly', 'flags'];
+    protected $appends  = ['avg_hpd', 'role_ids', 'role_names'];
+    protected $with     = ['avgHpdParam', 'roles'];
+    protected $hidden   = ['avgHpdParam', 'roles'];
 
     public function avgHpdParam() {
         return $this->latestParamFor('ASSIGNMENT_AVG_HPD');
@@ -28,11 +27,21 @@ class Assignment extends BaseModel {
     public function getAvgHpdAttribute() {
         return $this->avgHpdParam?->value;
     }
+    public function getRoleIdsAttribute(): array {
+        return $this->roles->pluck('id')->all();
+    }
+    public function getRoleNamesAttribute(): array {
+        return $this->roles->pluck('name')->all();
+    }
     public function getAssignedUserIdAttribute() {
         return $this->assignee_type === User::class ? $this->assignee_id : null;
     }
-    public function role() {
-        return $this->belongsTo(Role::class);
+    public function roles() {
+        return $this->belongsToMany(AssignmentRole::class)->orderBy('assignment_roles.id');
+    }
+    public function assignRoles(string ...$names): void {
+        $this->roles()->syncWithoutDetaching(array_map(fn ($name) => AssignmentRole::firstOrCreate(['name' => $name])->id, $names));
+        $this->unsetRelation('roles');
     }
     public function parent() {
         return $this->morphTo();

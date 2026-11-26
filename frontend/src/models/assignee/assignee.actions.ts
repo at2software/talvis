@@ -1,5 +1,5 @@
 import { NxAction, NxActionType } from '@models/_core/nx.actions';
-import { Assignee, I18N_REMOVE_FROM_TEAM } from './assignee.model';
+import { Assignee, CONTACT_ONLY_ROLES, I18N_REMOVE_FROM_TEAM } from './assignee.model';
 import { CompanyContact } from '../company/company-contact.model';
 import { nx } from '@models/_core/nx-bridge';
 import { Project } from '../project/project.model';
@@ -36,7 +36,7 @@ export function getAssigneeActions(self: Assignee): NxAction[] {
             title: $localize`:@@i18n.plugins.linkToPluginUser:link to plugin user`,
             group: true,
             on: () => self.getLinkablePlugins().length > 0,
-            children: () => self.getLinkablePlugins().map((inst: any) => ({
+            children: () => self.getLinkablePlugins().map((inst) => ({
                 title: `link to ${inst.icon()} user`,
                 action: () => self.linkToPlugin(inst),
             })),
@@ -51,13 +51,18 @@ export function getAssigneeActions(self: Assignee): NxAction[] {
             on: () => (self.isUser() && self.assignee_id === nx().global.user?.id) || (nx().global.user?.hasRole('project_manager') ?? false),
         },
         {
-            title: $localize`:@@i18n.companies.changeRoleTo:change role to...`,
-            on: () => (self.isUser() ? false : true),
-            children: [
-                { title: $localize`:@@i18n.common.projectManager:project manager`, label: 'CTRL+1', action: () => self.setRole(1), on: () => self.role_id != 1 },
-                { title: $localize`:@@i18n.common.developer:developer`, label: 'CTRL+2', action: () => self.setRole(2), on: () => self.role_id != 2 },
-                { title: $localize`:@@i18n.common.customer:customer`, label: 'CTRL+3', action: () => self.setRole(3), on: () => self.role_id != 3 },
-            ],
+            title: $localize`:@@i18n.assignee.addRole:add role...`,
+            on: () => nx().global.user?.hasRole('project_manager') ?? false,
+            children: () => nx().global.assignment_roles
+                .filter((role) => !self.hasRoleId(role.id) && (!self.isUser() || !CONTACT_ONLY_ROLES.includes(role.name)))
+                .map((role) => ({ title: role.name, action: () => self.addRole(role.id) })),
+        },
+        {
+            title: $localize`:@@i18n.assignee.removeRole:remove role...`,
+            on: () => (nx().global.user?.hasRole('project_manager') ?? false) && self.role_ids.length > 0,
+            children: () => nx().global.assignment_roles
+                .filter((role) => self.hasRoleId(role.id))
+                .map((role) => ({ title: role.name, action: () => self.removeRole(role.id) })),
         },
     ];
 }
